@@ -90,7 +90,7 @@
                     </div>
                     <nav class="hidden md:flex items-center gap-8 text-[14px] font-medium text-slate-600 dark:text-slate-300">
                         <a href="#features" data-i18n="nav_features" class="hover:text-slate-900 dark:hover:text-white transition">Funkcije</a>
-                        <a href="#how" data-i18n="nav_how" class="hover:text-slate-900 dark:hover:text-white transition">Kako radi</a>
+                        <a href="demo.html" data-i18n="nav_how" class="hover:text-slate-900 dark:hover:text-white transition">Kako radi</a>
                         <a href="#pricing" data-i18n="nav_pricing" class="hover:text-slate-900 dark:hover:text-white transition">Cene</a>
                     </nav>
                     <div class="flex items-center gap-2">
@@ -140,7 +140,7 @@
                                 </p>
                                 <div class="mt-8 flex flex-col sm:flex-row gap-3">
                                     <button onclick="showView('login'); setDemoClient()" class="h-12 px-7 rounded-full gradient-bg text-white font-semibold shadow-lg shadow-teal-500/20 hover:shadow-xl hover:shadow-teal-500/30 transition-all" data-i18n="hero_cta_demo">Isprobaj besplatno</button>
-                                    <button onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})" class="h-12 px-7 rounded-full border border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 transition" data-i18n="hero_cta_how">Pogledaj kako radi</button>
+                                    <a href="demo.html" class="h-12 px-7 rounded-full border border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 transition inline-flex items-center justify-center" data-i18n="hero_cta_how">Pogledaj kako radi</a>
                                 </div>
                                 <div class="mt-8 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                                     <span class="text-xs text-slate-500 mr-1" data-i18n="integrates_with">Integracije:</span>
@@ -311,10 +311,10 @@
                             <h2 class="font-display text-3xl sm:text-4xl font-bold" data-i18n="price_t">Jednostavne cene</h2>
                             <p class="mt-3 text-slate-600 dark:text-slate-400" data-i18n="price_s">Sve uključeno. Bez skrivenih troškova.</p>
                         </div>
-                        <div class="mt-12 grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                        <div class="mt-12 grid md:grid-cols-2 xl:grid-cols-4 gap-6 max-w-6xl mx-auto">
                             <div class="p-[1px] rounded-[28px] bg-slate-200 dark:bg-slate-800">
                                 <div class="h-full rounded-[27px] bg-white dark:bg-slate-950 p-8">
-                                    <h3 class="font-display font-bold text-xl">Starter</h3>
+                                    <h3 class="font-display font-bold text-xl">Basic</h3>
                                     <p class="mt-1 text-sm text-slate-500" data-i18n="p1_d">Za male timove</p>
                                     <div class="mt-6"><span class="text-4xl font-bold">€29</span><span class="text-slate-500">/mes</span></div>
                                     <ul class="mt-6 space-y-3 text-sm">
@@ -323,7 +323,7 @@
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> WhatsApp</li>
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p1_f2">Zakazivanje</span></li>
                                     </ul>
-                                    <button onclick="showView('login')" class="mt-8 w-full h-11 rounded-full border border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900" data-i18n="price_btn">Započni</button>
+                                    <a href="register-basic.html" class="mt-8 w-full h-11 rounded-full border border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 inline-flex items-center justify-center" data-i18n="trial_btn">Probaj 14 dana</a>
                                 </div>
                             </div>
                             <div class="p-[1px] rounded-[28px] gradient-bg shadow-xl shadow-teal-500/20 scale-[1.02]">
@@ -339,7 +339,7 @@
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> WhatsApp + Viber</li>
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p2_f3">Alarmi i obaveštenja</span></li>
                                     </ul>
-                                    <button onclick="showView('login')" class="mt-8 w-full h-11 rounded-full gradient-bg text-white font-semibold" data-i18n="price_btn2">Isprobaj 14 dana</button>
+                                    <a href="register-pro.html" class="mt-8 w-full h-11 rounded-full gradient-bg text-white font-semibold inline-flex items-center justify-center" data-i18n="trial_btn">Probaj 14 dana</a>
                                 </div>
                             </div>
                             <div class="p-[1px] rounded-[28px] bg-slate-200 dark:bg-slate-800">
@@ -354,7 +354,16 @@
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> Telefon + SMS + sve aplikacije</li>
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p3_f4">SLA podrška</span></li>
                                     </ul>
-                                    <button onclick="showView('login')" class="mt-8 w-full h-11 rounded-full border border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900" data-i18n="price_contact">Kontakt</button>
+                                    <a href="register-business.html" class="mt-8 w-full h-11 rounded-full border border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 inline-flex items-center justify-center" data-i18n="trial_btn">Probaj 14 dana</a>
+                                </div>
+                            </div>
+                            <div class="p-[1px] rounded-[28px] bg-slate-900 dark:bg-white">
+                                <div class="h-full rounded-[27px] bg-slate-950 dark:bg-slate-950 p-8 text-white">
+                                    <h3 class="font-display font-bold text-xl">GOD MODE</h3>
+                                    <p class="mt-1 text-sm text-slate-300" data-i18n="p4_d">Kompletan projekat</p>
+                                    <div class="mt-6"><span class="text-4xl font-bold" data-i18n="custom_price">Po dogovoru</span></div>
+                                    <p class="mt-6 text-sm text-slate-300" data-i18n="p4_note">Sve detalje prikazujemo na posebnoj Buy All strani.</p>
+                                    <a href="god-mode.html" class="mt-8 w-full h-11 rounded-full bg-white text-slate-950 font-semibold inline-flex items-center justify-center" data-i18n="price_contact">Kontakt</a>
                                 </div>
                             </div>
                         </div>
@@ -372,8 +381,8 @@
                             <span class="text-xs text-slate-500">© 2025 Kaleya AI</span>
                         </div>
                         <div class="flex items-center gap-6 text-sm text-slate-500">
-                            <a href="#" class="hover:text-slate-900 dark:hover:text-white">Privatnost</a>
-                            <a href="#" class="hover:text-slate-900 dark:hover:text-white">Uslovi</a>
+                            <a href="privacy.html" class="hover:text-slate-900 dark:hover:text-white" data-i18n="footer_privacy">Privatnost</a>
+                            <a href="terms.html" class="hover:text-slate-900 dark:hover:text-white" data-i18n="footer_terms">Uslovi</a>
                             <a href="mailto:hello@aikaleya.com" class="hover:text-slate-900 dark:hover:text-white">hello@aikaleya.com</a>
                         </div>
                     </div>
@@ -676,8 +685,6 @@
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="hidden sm:inline-flex items-center gap-1.5 px-2.5 h-7 rounded-full bg-green-50 dark:bg-green-950/50 text-green-700 dark:text-green-300 text-[12px] font-medium"><span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> Kaleya online</span>
-                            <button onclick="fireQueueAlarm('Marko Petrović')" class="hidden md:inline-flex h-8 px-3 items-center rounded-xl border border-slate-200 dark:border-slate-800 text-[12px] font-medium hover:bg-slate-50 dark:hover:bg-slate-900" data-i18n="demo_queue">Demo sledeći</button>
-                            <button onclick="fireEmergencyAlarm('Ana Jović')" class="hidden md:inline-flex h-8 px-3 items-center rounded-xl bg-red-600 text-white text-[12px] font-medium" data-i18n="demo_emergency">Demo hitno</button>
                             <button class="lg:hidden w-9 h-9 grid place-items-center rounded-xl border border-slate-200 dark:border-slate-800" onclick="document.getElementById('mobileAdminNav').classList.toggle('hidden')">☰</button>
                         </div>
                     </div>
@@ -811,43 +818,15 @@
                         <div id="admin-alarms" class="admin-pane hidden">
                             <div class="mb-5">
                                 <h2 class="font-display text-xl font-bold" data-i18n="ad_alarms">Alarmi</h2>
-                                <p class="text-sm text-slate-600 dark:text-slate-400" data-i18n="ad_alarms_sub">Podesi obaveštenja za red čekanja i hitan razgovor.</p>
+                                <p class="text-sm text-slate-600 dark:text-slate-400" data-i18n="ad_alarms_sub">Rezervisano za buduću human support eskalaciju.</p>
                             </div>
-                            <div class="grid lg:grid-cols-2 gap-4">
-                                <div class="p-6 rounded-[24px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-                                    <h3 class="font-semibold" data-i18n="queue_alarm">Alarm za sledećeg klijenta</h3>
-                                    <p class="mt-1 text-[13px] text-slate-600 dark:text-slate-400" data-i18n="alarm_queue_desc">Kaleya izgovara: klijent [ime] je sledeći na redu.</p>
-                                    <input id="queueCustomName" type="text" value="Marko Petrović" class="mt-4 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px]">
-                                    <select id="queueAlarmSound" class="mt-3 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
-                                        <option value="airport">Aerodromsko obaveštenje</option>
-                                        <option value="bell">Zvono</option>
-                                        <option value="soft">Tihi signal</option>
-                                    </select>
-                                    <div class="mt-4">
-                                        <div class="flex items-center justify-between text-[12px] text-slate-500"><span>Jačina</span><span id="queueAlarmVolLabel">70%</span></div>
-                                        <input id="queueAlarmVol" type="range" min="0" max="100" value="70" oninput="document.getElementById('queueAlarmVolLabel').textContent = this.value + '%'" class="mt-2 w-full accent-teal-500">
+                            <div class="min-h-[280px] rounded-[24px] border border-dashed border-slate-300 dark:border-slate-700 bg-white/60 dark:bg-slate-900/60 p-8 flex items-center justify-center text-center">
+                                <div>
+                                    <div class="mx-auto w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 grid place-items-center text-slate-500">
+                                        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8a6 6 0 00-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
                                     </div>
-                                    <button onclick="fireQueueAlarmCustom()" class="mt-4 w-full h-11 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium" data-i18n="test_queue">Test sledeći</button>
-                                </div>
-                                <div class="p-6 rounded-[24px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-                                    <h3 class="font-semibold" data-i18n="emergency_alarm">Hitni alarm</h3>
-                                    <p class="mt-1 text-[13px] text-slate-600 dark:text-slate-400" data-i18n="alarm_emerg_desc">Kaleya izgovara: klijent [ime] želi da razgovara sa vama.</p>
-                                    <select id="emergAlarmSound" class="mt-4 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
-                                        <option value="urgent">Hitno obaveštenje</option>
-                                        <option value="beep">Brzi signal</option>
-                                        <option value="voice">Samo glasovna najava</option>
-                                    </select>
-                                    <label class="mt-4 flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 text-[13px]">
-                                        <span data-i18n="voice_alarm">Uključi glasovnu najavu</span>
-                                        <input id="emergVoiceEnabled" type="checkbox" checked class="w-4 h-4 accent-teal-500">
-                                    </label>
-                                    <button onclick="fireEmergencyAlarm('Ana Jović')" class="mt-4 w-full h-11 rounded-xl bg-red-600 text-white font-medium" data-i18n="test_emergency">Test hitno</button>
-                                </div>
-                            </div>
-                            <div class="mt-5 p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-                                <h3 class="font-semibold" data-i18n="alarm_log_title">Dnevnik alarma</h3>
-                                <div id="alarmLog" class="mt-3 space-y-2 text-[13px]">
-                                    <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-slate-500" data-i18n="alarm_log_empty">Još nema aktiviranih alarma.</div>
+                                    <h3 class="mt-4 font-semibold" data-i18n="support_alarm_future">Human support alarm dolazi kasnije</h3>
+                                    <p class="mt-2 max-w-md text-sm text-slate-500" data-i18n="support_alarm_desc">Ovaj tab će služiti kada AI ne može da završi zahtev klijenta koji je kupio paket i treba povezivanje sa podrškom.</p>
                                 </div>
                             </div>
                         </div>
@@ -992,7 +971,9 @@ const T = {
         price_t: 'Jednostavne cene', price_s: 'Tri paketa za različite nivoe automatizacije.',
         p1_d: 'Za male timove', p1_f1: '2 jezika', p1_f2: 'Zakazivanje termina', p2_d: 'Za rastuće firme', p2_f1: '5 jezika', p2_f3: 'Alarmi i obaveštenja',
         p3_d: 'Za pozivne centre', p3_f1: 'Neograničeni jezici prema dogovoru', p3_f2: 'Napredni admin i SLA', p3_f4: 'Integracije po meri',
-        popular: 'NAJPOPULARNIJE', price_btn: 'Započni', price_btn2: 'Isprobaj 14 dana', price_contact: 'Kontakt',
+        p4_d: 'Kompletan projekat', p4_note: 'Sve detalje prikazujemo na posebnoj Buy All strani.', custom_price: 'Po dogovoru',
+        popular: 'NAJPOPULARNIJE', price_btn: 'Započni', price_btn2: 'Isprobaj 14 dana', trial_btn: 'Probaj 14 dana', price_contact: 'Kontakt',
+        footer_privacy: 'Privatnost', footer_terms: 'Uslovi',
         back_home: 'Nazad', login_title: 'Dobrodošli nazad', login_sub: 'Prijavite se na Kaleya',
         email: 'Email', password: 'Lozinka', login_btn: 'Prijavi se', login_err: 'Pogrešan email ili lozinka',
         client_active: 'aktivna', client_greet: 'Dobro jutro, Marko', client_how: 'Kako mogu pomoći danas?',
@@ -1004,7 +985,8 @@ const T = {
         cset_integrations: 'Zakazivanje putem kanala', cset_alarm: 'Alarmi za osoblje', active: 'Aktivno', pending: 'U pripremi',
         queue_alarm: 'Alarm za sledećeg klijenta', emergency_alarm: 'Hitni alarm', voice_alarm: 'Uključi glasovnu najavu', test_queue: 'Test sledeći', test_emergency: 'Test hitno',
         ad_dash: 'Kontrolna tabla', ad_clients: 'Klijenti', ad_clients_sub: 'API i model mogu biti globalni ili posebni po klijentu.',
-        ad_alarms: 'Alarmi', ad_alarms_sub: 'Podesi obaveštenja za red čekanja i hitan razgovor.',
+        ad_alarms: 'Alarmi', ad_alarms_sub: 'Rezervisano za buduću human support eskalaciju.',
+        support_alarm_future: 'Human support alarm dolazi kasnije', support_alarm_desc: 'Ovaj tab će služiti kada AI ne može da završi zahtev klijenta koji je kupio paket i treba povezivanje sa podrškom.',
         ad_integrations: 'Integracije', ad_integrations_sub: 'Kanali preko kojih Kaleya može da prima zahteve i zakazuje termine.',
         ad_set: 'Podešavanja', logout: 'Odjava', demo_queue: 'Demo sledeći', demo_emergency: 'Demo hitno',
         ad_s1: 'Aktivni pozivi', ad_s2: 'Zakazano danas', ad_s3: 'Propušteni', ad_s4: 'Zadovoljstvo', ad_recent: 'Poslednji pozivi Kaleye',
@@ -1033,7 +1015,9 @@ const T = {
         price_t: 'Simple pricing', price_s: 'Three packages for different automation levels.',
         p1_d: 'For small teams', p1_f1: '2 languages', p1_f2: 'Appointment scheduling', p2_d: 'For growing companies', p2_f1: '5 languages', p2_f3: 'Alarms and notifications',
         p3_d: 'For call centers', p3_f1: 'More languages by agreement', p3_f2: 'Advanced admin and SLA', p3_f4: 'Custom integrations',
-        popular: 'MOST POPULAR', price_btn: 'Start', price_btn2: 'Try 14 days', price_contact: 'Contact',
+        p4_d: 'Complete project', p4_note: 'All details are shown on the dedicated Buy All page.', custom_price: 'By agreement',
+        popular: 'MOST POPULAR', price_btn: 'Start', price_btn2: 'Try 14 days', trial_btn: 'Try 14 days', price_contact: 'Contact',
+        footer_privacy: 'Privacy', footer_terms: 'Terms',
         back_home: 'Back', login_title: 'Welcome back', login_sub: 'Sign in to Kaleya',
         email: 'Email', password: 'Password', login_btn: 'Sign in', login_err: 'Wrong email or password',
         client_active: 'active', client_greet: 'Good morning, Marko', client_how: 'How can I help today?',
@@ -1045,7 +1029,8 @@ const T = {
         cset_integrations: 'Scheduling channels', cset_alarm: 'Staff alarms', active: 'Active', pending: 'Pending',
         queue_alarm: 'Next-client alarm', emergency_alarm: 'Urgent alarm', voice_alarm: 'Enable voice announcement', test_queue: 'Test next', test_emergency: 'Test urgent',
         ad_dash: 'Dashboard', ad_clients: 'Clients', ad_clients_sub: 'API and model can be global or client-specific.',
-        ad_alarms: 'Alarms', ad_alarms_sub: 'Configure queue and urgent conversation alerts.',
+        ad_alarms: 'Alarms', ad_alarms_sub: 'Reserved for future human support escalation.',
+        support_alarm_future: 'Human support alarm comes later', support_alarm_desc: 'This tab will be used when AI cannot complete a package client request and needs to connect with support.',
         ad_integrations: 'Integrations', ad_integrations_sub: 'Channels Kaleya can use to receive requests and schedule appointments.',
         ad_set: 'Settings', logout: 'Logout', demo_queue: 'Demo next', demo_emergency: 'Demo urgent',
         ad_s1: 'Active calls', ad_s2: 'Scheduled today', ad_s3: 'Missed', ad_s4: 'Satisfaction', ad_recent: 'Recent Kaleya calls',
@@ -1074,7 +1059,9 @@ const T = {
         price_t: 'Precios simples', price_s: 'Tres paquetes para distintos niveles de automatización.',
         p1_d: 'Para equipos pequeños', p1_f1: '2 idiomas', p1_f2: 'Agenda de citas', p2_d: 'Para empresas en crecimiento', p2_f1: '5 idiomas', p2_f3: 'Alarmas y notificaciones',
         p3_d: 'Para centros de llamadas', p3_f1: 'Más idiomas bajo acuerdo', p3_f2: 'Admin avanzado y SLA', p3_f4: 'Integraciones a medida',
-        popular: 'MÁS POPULAR', price_btn: 'Empezar', price_btn2: 'Probar 14 días', price_contact: 'Contacto',
+        p4_d: 'Proyecto completo', p4_note: 'Todos los detalles están en la página Buy All.', custom_price: 'A convenir',
+        popular: 'MÁS POPULAR', price_btn: 'Empezar', price_btn2: 'Probar 14 días', trial_btn: 'Probar 14 días', price_contact: 'Contacto',
+        footer_privacy: 'Privacidad', footer_terms: 'Términos',
         back_home: 'Atrás', login_title: 'Bienvenido de nuevo', login_sub: 'Inicia sesión en Kaleya',
         email: 'Email', password: 'Contraseña', login_btn: 'Entrar', login_err: 'Email o contraseña incorrectos',
         client_active: 'activa', client_greet: 'Buenos días, Marko', client_how: '¿Cómo puedo ayudar hoy?',
@@ -1086,7 +1073,8 @@ const T = {
         cset_integrations: 'Canales de agenda', cset_alarm: 'Alarmas para el equipo', active: 'Activo', pending: 'Pendiente',
         queue_alarm: 'Alarma de siguiente cliente', emergency_alarm: 'Alarma urgente', voice_alarm: 'Activar anuncio de voz', test_queue: 'Probar siguiente', test_emergency: 'Probar urgente',
         ad_dash: 'Panel', ad_clients: 'Clientes', ad_clients_sub: 'La API y el modelo pueden ser globales o por cliente.',
-        ad_alarms: 'Alarmas', ad_alarms_sub: 'Configura avisos de cola y conversación urgente.',
+        ad_alarms: 'Alarmas', ad_alarms_sub: 'Reservado para futura escalación a soporte humano.',
+        support_alarm_future: 'La alarma de soporte humano llegará después', support_alarm_desc: 'Este tab se usará cuando la IA no pueda completar la solicitud de un cliente con paquete y necesite conectar con soporte.',
         ad_integrations: 'Integraciones', ad_integrations_sub: 'Canales que Kaleya usa para recibir solicitudes y agendar.',
         ad_set: 'Ajustes', logout: 'Salir', demo_queue: 'Demo siguiente', demo_emergency: 'Demo urgente',
         ad_s1: 'Llamadas activas', ad_s2: 'Agendado hoy', ad_s3: 'Perdidas', ad_s4: 'Satisfacción', ad_recent: 'Llamadas recientes de Kaleya',
@@ -1115,7 +1103,9 @@ const T = {
         price_t: 'Preços simples', price_s: 'Três pacotes para diferentes níveis de automação.',
         p1_d: 'Para equipes pequenas', p1_f1: '2 idiomas', p1_f2: 'Agendamento', p2_d: 'Para empresas em crescimento', p2_f1: '5 idiomas', p2_f3: 'Alarmes e notificações',
         p3_d: 'Para call centers', p3_f1: 'Mais idiomas sob acordo', p3_f2: 'Admin avançado e SLA', p3_f4: 'Integrações sob medida',
-        popular: 'MAIS POPULAR', price_btn: 'Começar', price_btn2: 'Testar 14 dias', price_contact: 'Contato',
+        p4_d: 'Projeto completo', p4_note: 'Todos os detalhes aparecem na página Buy All.', custom_price: 'Sob acordo',
+        popular: 'MAIS POPULAR', price_btn: 'Começar', price_btn2: 'Testar 14 dias', trial_btn: 'Testar 14 dias', price_contact: 'Contato',
+        footer_privacy: 'Privacidade', footer_terms: 'Termos',
         back_home: 'Voltar', login_title: 'Bem-vindo de volta', login_sub: 'Entrar na Kaleya',
         email: 'Email', password: 'Senha', login_btn: 'Entrar', login_err: 'Email ou senha incorretos',
         client_active: 'ativa', client_greet: 'Bom dia, Marko', client_how: 'Como posso ajudar hoje?',
@@ -1127,7 +1117,8 @@ const T = {
         cset_integrations: 'Canais de agendamento', cset_alarm: 'Alarmes para equipe', active: 'Ativo', pending: 'Pendente',
         queue_alarm: 'Alarme do próximo cliente', emergency_alarm: 'Alarme urgente', voice_alarm: 'Ativar anúncio por voz', test_queue: 'Testar próximo', test_emergency: 'Testar urgente',
         ad_dash: 'Painel', ad_clients: 'Clientes', ad_clients_sub: 'API e modelo podem ser globais ou por cliente.',
-        ad_alarms: 'Alarmes', ad_alarms_sub: 'Configure avisos de fila e conversa urgente.',
+        ad_alarms: 'Alarmes', ad_alarms_sub: 'Reservado para futura escalação ao suporte humano.',
+        support_alarm_future: 'O alarme de suporte humano vem depois', support_alarm_desc: 'Este tab será usado quando a IA não conseguir concluir a solicitação de um cliente com pacote e precisar conectar com o suporte.',
         ad_integrations: 'Integrações', ad_integrations_sub: 'Canais que Kaleya usa para receber pedidos e agendar.',
         ad_set: 'Ajustes', logout: 'Sair', demo_queue: 'Demo próximo', demo_emergency: 'Demo urgente',
         ad_s1: 'Chamadas ativas', ad_s2: 'Agendado hoje', ad_s3: 'Perdidas', ad_s4: 'Satisfação', ad_recent: 'Chamadas recentes da Kaleya',
@@ -1156,7 +1147,9 @@ const T = {
         price_t: 'Простые тарифы', price_s: 'Три пакета для разных уровней автоматизации.',
         p1_d: 'Для малых команд', p1_f1: '2 языка', p1_f2: 'Запись на прием', p2_d: 'Для растущих компаний', p2_f1: '5 языков', p2_f3: 'Оповещения и уведомления',
         p3_d: 'Для колл-центров', p3_f1: 'Больше языков по договоренности', p3_f2: 'Расширенный админ и SLA', p3_f4: 'Индивидуальные интеграции',
-        popular: 'ПОПУЛЯРНО', price_btn: 'Начать', price_btn2: '14 дней бесплатно', price_contact: 'Контакт',
+        p4_d: 'Полный проект', p4_note: 'Все детали находятся на отдельной странице Buy All.', custom_price: 'По договоренности',
+        popular: 'ПОПУЛЯРНО', price_btn: 'Начать', price_btn2: '14 дней бесплатно', trial_btn: '14 дней бесплатно', price_contact: 'Контакт',
+        footer_privacy: 'Конфиденциальность', footer_terms: 'Условия',
         back_home: 'Назад', login_title: 'С возвращением', login_sub: 'Войти в Kaleya',
         email: 'Email', password: 'Пароль', login_btn: 'Войти', login_err: 'Неверный email или пароль',
         client_active: 'активна', client_greet: 'Доброе утро, Marko', client_how: 'Чем помочь сегодня?',
@@ -1168,7 +1161,8 @@ const T = {
         cset_integrations: 'Каналы записи', cset_alarm: 'Оповещения персонала', active: 'Активно', pending: 'В подготовке',
         queue_alarm: 'Следующий клиент', emergency_alarm: 'Срочный сигнал', voice_alarm: 'Включить голосовое объявление', test_queue: 'Тест следующий', test_emergency: 'Тест срочно',
         ad_dash: 'Панель', ad_clients: 'Клиенты', ad_clients_sub: 'API и модель могут быть глобальными или отдельными по клиенту.',
-        ad_alarms: 'Оповещения', ad_alarms_sub: 'Настройка очереди и срочных разговоров.',
+        ad_alarms: 'Оповещения', ad_alarms_sub: 'Зарезервировано для будущей эскалации в human support.',
+        support_alarm_future: 'Оповещение human support появится позже', support_alarm_desc: 'Этот раздел будет использоваться, когда AI не сможет выполнить запрос клиента с пакетом и потребуется подключение поддержки.',
         ad_integrations: 'Интеграции', ad_integrations_sub: 'Каналы, через которые Kaleya принимает заявки и записывает клиентов.',
         ad_set: 'Настройки', logout: 'Выход', demo_queue: 'Демо следующий', demo_emergency: 'Демо срочно',
         ad_s1: 'Активные звонки', ad_s2: 'Записано сегодня', ad_s3: 'Пропущено', ad_s4: 'Оценка', ad_recent: 'Последние звонки Kaleya',

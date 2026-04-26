@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaleya Business - registracija</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/kaleya-pages.css">
+</head>
+<body>
+    <div class="page">
+        <header class="nav">
+            <div class="nav-inner">
+                <a class="brand" href="za sajt popraviti.html"><img src="logo.png" alt="Kaleya"><span>Kaleya<small>aikaleya.com</small></span></a>
+                <div class="nav-actions">
+                    <select id="pageLangSelect" class="lang-select" onchange="setPageLang(this.value)"><option value="sr">SR</option><option value="en">EN</option><option value="es">ES</option><option value="pt">PT</option><option value="ru">RU</option></select>
+                    <a class="ghost-link" href="za sajt popraviti.html" data-i18n="back_home">Nazad na početnu</a>
+                </div>
+            </div>
+        </header>
+        <main class="wrap hero">
+            <span class="eyebrow" data-i18n="reg_badge">Registracija i plaćanje</span>
+            <h1><span data-i18n="reg_title">Aktiviraj paket</span> Business</h1>
+            <p class="lead" data-i18n="reg_lead">Ova strana je frontend priprema za plaćanje i registraciju klijenta. Prava naplata ide kroz backend.</p>
+            <form class="form-card">
+                <input type="hidden" name="package" value="business">
+                <div class="form-grid">
+                    <div><label data-i18n="company">Naziv firme</label><input name="company" required></div>
+                    <div><label data-i18n="name">Ime i prezime</label><input name="name" required></div>
+                    <div><label data-i18n="email">Email</label><input name="email" type="email" required></div>
+                    <div><label data-i18n="phone">Telefon</label><input name="phone" required></div>
+                    <div><label data-i18n="country">Država</label><input name="country" value="Serbia"></div>
+                    <div><label>Paket</label><input value="Business - €199/mes" readonly></div>
+                </div>
+                <div style="margin-top:14px;"><label data-i18n="note">Napomena</label><textarea name="note"></textarea></div>
+                <button class="btn alt" type="button" style="width:100%;margin-top:18px;" data-i18n="start_trial">Probaj 14 dana</button>
+                <div class="notice" data-i18n="payment_note">Za produkciju ovde se povezuje payment provider, backend registracija, email potvrda i webhook za aktivaciju paketa.</div>
+            </form>
+        </main>
+        <footer class="footer"><div class="wrap"><span>© 2026 Kaleya AI</span><span><a href="privacy.html" data-i18n="footer_privacy">Privatnost</a> · <a href="terms.html" data-i18n="footer_terms">Uslovi</a></span></div></footer>
+    </div>
+    <script src="assets/js/kaleya-pages.js"></script>
+</body>
+</html>

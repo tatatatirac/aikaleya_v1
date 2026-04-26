@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaleya demo - kako radi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/kaleya-pages.css">
+</head>
+<body>
+    <div class="page">
+        <header class="nav">
+            <div class="nav-inner">
+                <a class="brand" href="za sajt popraviti.html">
+                    <img src="logo.png" alt="Kaleya">
+                    <span>Kaleya<small>aikaleya.com</small></span>
+                </a>
+                <div class="nav-actions">
+                    <select id="pageLangSelect" class="lang-select" onchange="setPageLang(this.value)">
+                        <option value="sr">SR</option>
+                        <option value="en">EN</option>
+                        <option value="es">ES</option>
+                        <option value="pt">PT</option>
+                        <option value="ru">RU</option>
+                    </select>
+                    <a class="ghost-link" href="za sajt popraviti.html" data-i18n="back_home">Nazad na početnu</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="wrap hero">
+            <span class="eyebrow" data-i18n="demo_badge">Klikabilan demo</span>
+            <h1 data-i18n="demo_title">Kako Kaleya radi u praksi</h1>
+            <p class="lead" data-i18n="demo_lead">Mobilni i laptop prikaz su demo okruženje. Dugmad su klikabilna, a glas se pušta iz MP3 fajla.</p>
+
+            <section class="grid demo-grid">
+                <div class="phone">
+                    <div class="phone-top">
+                        <strong data-i18n="mobile_title">Klijent app</strong>
+                        <span style="font-size:12px;color:#16a34a;font-weight:800;">Online</span>
+                    </div>
+                    <div class="phone-main">
+                        <div class="assistant-orb" onclick="playKaleyaDemo()" role="button" tabindex="0">K</div>
+                        <p id="demoStatus" style="text-align:center;color:#64748b;font-weight:700;" data-i18n="status_ready">Spremna za razgovor</p>
+                        <button class="btn alt" style="width:100%;margin-top:18px;" onclick="playKaleyaDemo()" data-i18n="voice_cta">Pusti Kaleya glas</button>
+                        <div class="quick-grid">
+                            <button class="quick" onclick="setDemoStatus('status_scheduled')"><span data-i18n="schedule">Zakaži</span><span>15:00</span></button>
+                            <button class="quick" onclick="setDemoStatus('status_cancelled')"><span data-i18n="cancel">Otkaži</span><span>Demo</span></button>
+                            <button class="quick" onclick="setDemoStatus('status_checked')"><span data-i18n="check">Proveri</span><span>3</span></button>
+                        </div>
+                        <div class="card" style="margin-top:28px;">
+                            <strong style="font-size:18px;">15:00</strong>
+                            <p style="margin:6px 0 0;color:#64748b;">Novi klijent - Kaleya zakazala</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="laptop">
+                    <div class="laptop-screen">
+                        <div class="toolbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                        <h2 data-i18n="laptop_title">Admin dashboard</h2>
+                        <div class="panel-grid">
+                            <div class="card"><span data-i18n="calls">Pozivi</span><strong>27</strong></div>
+                            <div class="card"><span data-i18n="clients">Klijenti</span><strong>148</strong></div>
+                            <div class="card"><span data-i18n="channels">Kanali</span><strong>5</strong></div>
+                        </div>
+                        <div class="card" style="margin-top:20px;">
+                            <h3 data-i18n="recent">Poslednje demo aktivnosti</h3>
+                            <div class="row"><span id="demoActivity" data-i18n="status_ready">Spremna za razgovor</span><button class="btn light" onclick="playKaleyaDemo()" data-i18n="voice_cta">Pusti Kaleya glas</button></div>
+                            <div class="row"><span>WhatsApp</span><strong>Aktivan</strong></div>
+                            <div class="row"><span>Telegram</span><strong>Aktivan</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <div class="wrap">
+                <span>© 2026 Kaleya AI</span>
+                <span><a href="privacy.html" data-i18n="footer_privacy">Privatnost</a> · <a href="terms.html" data-i18n="footer_terms">Uslovi</a></span>
+            </div>
+        </footer>
+    </div>
+    <audio id="kaleyaAudio" preload="auto"></audio>
+    <script src="assets/js/kaleya-pages.js"></script>
+</body>
+</html>
