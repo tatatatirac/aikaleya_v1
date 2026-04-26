@@ -1,0 +1,18 @@
+{% extends "admin/change_form.html" %}
+
+{% block content %}
+<div class="kaleya-guide">
+    <div class="kaleya-guide-header">Jednostavan unos integracije</div>
+    <div class="kaleya-guide-body">
+        <p>Ovde popunjavaš samo osnovne podatke. Tehničke stvari kao webhook, JSON konfiguracija i greške su sakrivene dok nam stvarno ne zatrebaju.</p>
+        <ul class="kaleya-guide-list">
+            <li><strong>Klijent</strong><br>Izaberi kome kanal pripada.</li>
+            <li><strong>Kanal / servis</strong><br>Izaberi WhatsApp, Viber, Telegram, SMS ili Phone Call.</li>
+            <li><strong>Uključeno</strong><br>Uključi tek kada kanal sme da se koristi.</li>
+            <li><strong>Status</strong><br>Draft za pripremu, Connected kada je povezano, Paused kada je pauzirano, Error kada ima grešku.</li>
+            <li><strong>Javni broj ili nalog</strong><br>Broj/nalog koji korisnici kontaktiraju, na primer +381641234567.</li>
+        </ul>
+    </div>
+</div>
+{{ block.super }}
+{% endblock %}

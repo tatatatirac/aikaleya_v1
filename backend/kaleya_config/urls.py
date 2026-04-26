@@ -8,6 +8,11 @@ from django.views.static import serve
 from kaleya_config.dashboard_views import dashboard
 
 
+admin.site.site_header = "Kaleya"
+admin.site.site_title = "Kaleya Admin"
+admin.site.index_title = "Kaleya administracija"
+
+
 def health_check(request):
     return JsonResponse({"status": "ok", "service": "kaleya-backend"})
 

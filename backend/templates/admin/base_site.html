@@ -1,0 +1,497 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | Kaleya{% endblock %}
+
+{% block branding %}
+<div id="kaleya-brand">
+    <img src="/logo.png" alt="Kaleya">
+    <span>
+        <strong>Kaleya</strong>
+        <small>aikaleya.com</small>
+    </span>
+</div>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+    :root {
+        color-scheme: dark;
+        --primary: #13b8ad;
+        --secondary: #111b2d;
+        --accent: #86efac;
+        --primary-fg: #f4f7fb;
+        --body-fg: #f4f7fb;
+        --body-bg: #060b16;
+        --body-quiet-color: #7f8da3;
+        --body-loud-color: #ffffff;
+        --header-color: #f4f7fb;
+        --header-branding-color: #f4f7fb;
+        --header-bg: #070c18;
+        --header-link-color: #cbd5e1;
+        --breadcrumbs-fg: #9aa8bb;
+        --breadcrumbs-link-fg: #f4f7fb;
+        --breadcrumbs-bg: #0b1322;
+        --link-fg: #7dd3fc;
+        --link-hover-color: #2dd4bf;
+        --link-selected-fg: #2dd4bf;
+        --hairline-color: #253248;
+        --border-color: #253248;
+        --error-fg: #fda4af;
+        --message-success-bg: rgba(34, 197, 94, .13);
+        --message-warning-bg: rgba(245, 158, 11, .16);
+        --message-error-bg: rgba(240, 95, 114, .15);
+        --darkened-bg: #0c1423;
+        --selected-bg: #172337;
+        --selected-row: #142033;
+        --button-fg: #ffffff;
+        --button-bg: linear-gradient(135deg, #13b8ad, #3487f5);
+        --button-hover-bg: linear-gradient(135deg, #0f9f98, #2563eb);
+        --default-button-bg: linear-gradient(135deg, #13b8ad, #3487f5);
+        --default-button-hover-bg: linear-gradient(135deg, #0f9f98, #2563eb);
+        --close-button-bg: #172337;
+        --close-button-hover-bg: #253248;
+        --delete-button-bg: #be123c;
+        --delete-button-hover-bg: #9f1239;
+        --object-tools-fg: #ffffff;
+        --object-tools-bg: #172337;
+        --object-tools-hover-bg: #253248;
+        --font-family-primary: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --font-family-monospace: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+
+    html, body {
+        background:
+            radial-gradient(circle at top right, rgba(20, 184, 166, .12), transparent 34rem),
+            radial-gradient(circle at bottom left, rgba(59, 130, 246, .10), transparent 32rem),
+            var(--body-bg) !important;
+        color: var(--body-fg);
+        font-family: var(--font-family-primary);
+    }
+
+    body.login {
+        background:
+            radial-gradient(circle at top right, rgba(20, 184, 166, .18), transparent 34rem),
+            radial-gradient(circle at bottom left, rgba(59, 130, 246, .12), transparent 32rem),
+            #060b16 !important;
+    }
+
+    #header {
+        min-height: 78px;
+        padding: 0 30px;
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: none;
+    }
+
+    #branding h1,
+    #branding h1 a:link,
+    #branding h1 a:visited {
+        color: var(--header-branding-color);
+    }
+
+    #kaleya-brand {
+        min-height: 78px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    #kaleya-brand img {
+        width: 48px;
+        height: 48px;
+        border-radius: 999px;
+        background: white;
+        padding: 4px;
+    }
+
+    #kaleya-brand strong {
+        display: block;
+        font-size: 25px;
+        line-height: 1;
+        letter-spacing: 0;
+    }
+
+    #kaleya-brand small {
+        display: block;
+        margin-top: 5px;
+        color: var(--body-quiet-color);
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    #user-tools {
+        color: var(--body-quiet-color);
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    #user-tools a {
+        color: #cbd5e1;
+        border-bottom: 0;
+    }
+
+    div.breadcrumbs {
+        padding: 14px 30px;
+        border-bottom: 1px solid var(--border-color);
+        font-weight: 800;
+    }
+
+    #content {
+        padding: 38px;
+    }
+
+    #content h1 {
+        color: var(--body-loud-color);
+        font-size: 30px;
+        font-weight: 900;
+        letter-spacing: 0;
+        margin-bottom: 24px;
+    }
+
+    .dashboard #content {
+        width: min(1180px, calc(100% - 28px));
+        margin: 0 auto;
+    }
+
+    .module,
+    .inline-group,
+    fieldset,
+    .submit-row,
+    .results,
+    #changelist,
+    #content-related {
+        border: 1px solid var(--border-color) !important;
+        border-radius: 22px !important;
+        background: #111b2d !important;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, .18);
+        overflow: hidden;
+    }
+
+    fieldset.module {
+        margin-bottom: 18px;
+    }
+
+    fieldset.module h2 {
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .description {
+        color: #9aa8bb !important;
+        font-weight: 700;
+        line-height: 1.55;
+        padding: 14px 18px 0;
+    }
+
+    .module h2,
+    .module caption,
+    .inline-group h2 {
+        background: #172337 !important;
+        color: #f4f7fb !important;
+        font-size: 13px !important;
+        font-weight: 900 !important;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        padding: 16px 18px !important;
+    }
+
+    .module table {
+        background: #111b2d;
+    }
+
+    table {
+        border-color: var(--border-color);
+    }
+
+    thead th,
+    tfoot td {
+        background: #172337 !important;
+        color: #7f8da3 !important;
+        border-bottom: 1px solid var(--border-color) !important;
+        font-weight: 900 !important;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        font-size: 12px;
+    }
+
+    tr:nth-child(odd),
+    tr:nth-child(even),
+    .row1,
+    .row2 {
+        background: #111b2d !important;
+    }
+
+    td,
+    th {
+        border-bottom: 1px solid var(--border-color) !important;
+        color: #dbe4f2;
+        padding-top: 14px !important;
+        padding-bottom: 14px !important;
+    }
+
+    a:link,
+    a:visited {
+        color: #7dd3fc;
+        font-weight: 800;
+    }
+
+    a:hover {
+        color: #2dd4bf;
+    }
+
+    input,
+    textarea,
+    select,
+    .vTextField {
+        min-height: 42px;
+        border: 1px solid #314057 !important;
+        border-radius: 14px !important;
+        background: #0c1423 !important;
+        color: #f4f7fb !important;
+        padding: 9px 12px !important;
+        outline: none;
+    }
+
+    textarea {
+        min-height: 130px;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+        border-color: #13b8ad !important;
+        box-shadow: 0 0 0 4px rgba(19, 184, 173, .14);
+    }
+
+    label {
+        color: #cbd5e1 !important;
+        font-weight: 900 !important;
+    }
+
+    .form-row {
+        border-bottom: 1px solid var(--border-color) !important;
+        padding: 18px !important;
+    }
+
+    .help,
+    .helptext,
+    .quiet {
+        color: var(--body-quiet-color) !important;
+        font-weight: 700;
+        font-size: 12px;
+        line-height: 1.45;
+    }
+
+    .button,
+    input[type=submit],
+    input[type=button],
+    .submit-row input,
+    a.button {
+        min-height: 42px;
+        border: 0 !important;
+        border-radius: 14px !important;
+        background: linear-gradient(135deg, #13b8ad, #3487f5) !important;
+        color: white !important;
+        padding: 0 18px !important;
+        font-weight: 900 !important;
+        cursor: pointer;
+    }
+
+    .button:hover,
+    input[type=submit]:hover,
+    input[type=button]:hover,
+    .submit-row input:hover,
+    a.button:hover {
+        background: linear-gradient(135deg, #0f9f98, #2563eb) !important;
+    }
+
+    .deletelink,
+    input[type=submit].deletelink {
+        background: #be123c !important;
+        color: white !important;
+        border-radius: 14px !important;
+        font-weight: 900 !important;
+    }
+
+    .object-tools a {
+        min-height: 42px;
+        display: inline-flex;
+        align-items: center;
+        border-radius: 14px !important;
+        background: #172337 !important;
+        color: #f4f7fb !important;
+        border: 1px solid #314057;
+        font-weight: 900;
+    }
+
+    .object-tools a:hover {
+        background: #253248 !important;
+    }
+
+    #toolbar {
+        border: 1px solid var(--border-color) !important;
+        border-radius: 18px !important;
+        background: #111b2d !important;
+        padding: 14px !important;
+    }
+
+    #toolbar form input[type="submit"] {
+        height: 42px;
+        margin-left: 8px;
+    }
+
+    #changelist-filter {
+        background: #111b2d !important;
+        border-left: 1px solid var(--border-color) !important;
+    }
+
+    #changelist-filter h2 {
+        background: #172337 !important;
+        color: #f4f7fb !important;
+    }
+
+    #changelist-filter h3,
+    #changelist-filter li.selected a {
+        color: #f4f7fb !important;
+    }
+
+    #changelist-filter a {
+        color: #9aa8bb !important;
+    }
+
+    .paginator {
+        background: #111b2d !important;
+        color: #9aa8bb !important;
+        border-top: 1px solid var(--border-color) !important;
+    }
+
+    body.login #container {
+        width: min(440px, calc(100% - 28px));
+        margin: 9vh auto 0;
+        border: 1px solid var(--border-color);
+        border-radius: 28px;
+        background: #111b2d;
+        box-shadow: 0 28px 90px rgba(0, 0, 0, .32);
+        overflow: hidden;
+    }
+
+    body.login #header {
+        justify-content: center;
+        padding: 22px;
+        min-height: auto;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    body.login #kaleya-brand {
+        justify-content: center;
+        min-height: auto;
+    }
+
+    body.login #kaleya-brand img {
+        width: 58px;
+        height: 58px;
+    }
+
+    body.login #content {
+        padding: 30px;
+    }
+
+    body.login .form-row {
+        padding: 0 0 18px !important;
+        border: 0 !important;
+    }
+
+    body.login .submit-row {
+        border: 0 !important;
+        background: transparent !important;
+        box-shadow: none;
+        padding: 0 !important;
+        margin: 8px 0 0;
+    }
+
+    body.login input[type=submit] {
+        width: 100%;
+        height: 50px;
+    }
+
+    .errornote,
+    ul.errorlist {
+        border-radius: 14px;
+        background: rgba(240, 95, 114, .15) !important;
+        color: #fda4af !important;
+        border: 1px solid rgba(240, 95, 114, .35) !important;
+        font-weight: 800;
+    }
+
+    .kaleya-guide {
+        margin: 0 0 20px;
+        border: 1px solid #314057;
+        border-radius: 22px;
+        background: #111b2d;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, .18);
+        overflow: hidden;
+    }
+
+    .kaleya-guide-header {
+        padding: 16px 18px;
+        background: #172337;
+        color: #f4f7fb;
+        font-size: 13px;
+        font-weight: 900;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+    .kaleya-guide-body {
+        display: grid;
+        gap: 10px;
+        padding: 18px;
+        color: #cbd5e1;
+        line-height: 1.55;
+        font-weight: 700;
+    }
+
+    .kaleya-guide-body strong {
+        color: #f4f7fb;
+    }
+
+    .kaleya-guide-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px 18px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .kaleya-guide-list li {
+        border: 1px solid #253248;
+        border-radius: 14px;
+        background: #0c1423;
+        padding: 12px;
+    }
+
+    @media (max-width: 800px) {
+        .kaleya-guide-list {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 800px) {
+        #header {
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 16px;
+        }
+
+        #content {
+            padding: 20px 14px;
+        }
+
+        div.breadcrumbs {
+            padding: 12px 16px;
+        }
+    }
+</style>
+{% endblock %}

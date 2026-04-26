@@ -1,0 +1,20 @@
+{% extends "admin/change_list.html" %}
+
+{% block content %}
+<div class="kaleya-guide">
+    <div class="kaleya-guide-header">Putokaz za integracije</div>
+    <div class="kaleya-guide-body">
+        <p>Ova stranica služi da za svakog klijenta vidiš koji kanali komunikacije postoje i da li su spremni za rad.</p>
+        <ul class="kaleya-guide-list">
+            <li><strong>Klijent</strong><br>Firma ili nalog kome integracija pripada.</li>
+            <li><strong>Kanal</strong><br>WhatsApp, Viber, Telegram, SMS ili telefonski poziv.</li>
+            <li><strong>Uključeno</strong><br>Da znači da Kaleya sme da koristi taj kanal. Ne znači da je kanal privremeno ugašen.</li>
+            <li><strong>Status</strong><br>Priprema, povezano, pauzirano ili greška.</li>
+            <li><strong>Javni broj</strong><br>Broj telefona ili nalog koji krajnji korisnici vide i kontaktiraju.</li>
+            <li><strong>Updated at</strong><br>Kada je poslednji put promenjeno podešavanje.</li>
+        </ul>
+        <p>Za unos nove integracije klikni <strong>Add integration connection</strong>. Za izmenu klikni na postojeći red.</p>
+    </div>
+</div>
+{{ block.super }}
+{% endblock %}

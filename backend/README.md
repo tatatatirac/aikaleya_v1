@@ -65,6 +65,20 @@ http://127.0.0.1:8000/dashboard/
 
 `/admin/` ostaje tehnički Django panel, a `/dashboard/` je Kaleya radni panel sa pregledom, podešavanjima klijenta, glasom, alarmima klijenta, integracijama i API podešavanjima za admina.
 
+## `.env` za Claude Haiku 4.5 i ElevenLabs
+
+Ako koristiš Claude, OpenAI polja mogu ostati prazna:
+
+```txt
+AI_PROVIDER=anthropic
+ANTHROPIC_API_KEY=ovde_ide_tvoj_claude_api_key
+ANTHROPIC_MODEL=claude-haiku-4-5-20251001
+OPENAI_API_KEY=
+OPENAI_MODEL=
+ELEVENLABS_API_KEY=ovde_ide_tvoj_elevenlabs_api_key
+ELEVENLABS_VOICE_ID=lxYfHSkYm1EzQzGhdbfca
+```
+
 ## Produkcija
 
 Za VPS koristi PostgreSQL kroz `DATABASE_URL`, pravi `DJANGO_SECRET_KEY`, `DJANGO_DEBUG=False`, domen u `DJANGO_ALLOWED_HOSTS`, i API kljuceve samo u `.env`.
