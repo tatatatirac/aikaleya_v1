@@ -17,7 +17,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         admin = self.create_user(
             email="admin@aikaleya.com",
-            password="admin12345",
+            password="admin123",
             is_staff=True,
             is_superuser=True,
             first_name="Kaleya",
@@ -95,7 +95,7 @@ class Command(BaseCommand):
         self.create_demo_calendar(client)
 
         self.stdout.write(self.style.SUCCESS("Kaleya demo backend podaci su spremni."))
-        self.stdout.write("Admin login: admin@aikaleya.com / admin12345")
+        self.stdout.write("Admin login: admin@aikaleya.com / admin123")
         self.stdout.write("Client login: klijent@test.com / test123")
 
     def create_user(self, email, password, **defaults):
@@ -103,8 +103,8 @@ class Command(BaseCommand):
             username=email.lower(),
             defaults={"email": email.lower(), **defaults},
         )
+        user.set_password(password)
         if created:
-            user.set_password(password)
             user.save()
         else:
             changed = False
@@ -117,6 +117,8 @@ class Command(BaseCommand):
                 changed = True
             if changed:
                 user.save()
+            else:
+                user.save(update_fields=["password"])
         return user
 
     def create_plans(self):
@@ -229,4 +231,3 @@ class Command(BaseCommand):
             channel="web",
             source="demo",
         )
-

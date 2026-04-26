@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.conf import settings
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 from django.views.static import serve
@@ -27,7 +28,10 @@ urlpatterns = [
     path("register-pro.html", TemplateView.as_view(template_name="register-pro.html"), name="frontend-register-pro"),
     path("register-business.html", TemplateView.as_view(template_name="register-business.html"), name="frontend-register-business"),
     path("dashboard/", dashboard, name="dashboard"),
-    path("admin/", admin.site.urls),
+    path("admin/", dashboard, name="kaleya-admin"),
+    path("admin/login/", lambda request: redirect("/django-admin/login/?next=/admin/")),
+    re_path(r"^admin/.+$", lambda request: redirect("/admin/")),
+    path("django-admin/", admin.site.urls),
     path("api/health/", health_check, name="health-check"),
     path("api/auth/", include("accounts.urls")),
     path("api/clients/", include("clients.urls")),

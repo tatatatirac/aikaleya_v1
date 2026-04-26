@@ -40,6 +40,13 @@ Za kasniji backend:
 backend/
 ```
 
+Za pravi rad preko backend-a koristi:
+
+```txt
+http://127.0.0.1:8000/
+http://127.0.0.1:8000/admin/
+```
+
 Lokalno pokretanje backend-a:
 
 ```powershell
@@ -56,12 +63,19 @@ API provera:
 ```txt
 http://127.0.0.1:8000/api/health/
 http://127.0.0.1:8000/admin/
+http://127.0.0.1:8000/django-admin/
 http://127.0.0.1:8000/dashboard/
 ```
 
 Demo login:
 
 ```txt
-Admin: admin@aikaleya.com / admin12345
+Admin: admin@aikaleya.com / admin123
 Client: klijent@test.com / test123
+```
+
+Deploy uputstvo za VPS:
+
+```txt
+deployment/README_DEPLOY.md
 ```

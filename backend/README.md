@@ -29,7 +29,7 @@ python backend\manage.py runserver
 ## Demo nalozi
 
 ```txt
-Admin: admin@aikaleya.com / admin12345
+Admin: admin@aikaleya.com / admin123
 Client: klijent@test.com / test123
 ```
 
@@ -61,9 +61,10 @@ Za svakodnevni rad koristi:
 
 ```txt
 http://127.0.0.1:8000/dashboard/
+http://127.0.0.1:8000/admin/
 ```
 
-`/admin/` ostaje tehnički Django panel, a `/dashboard/` je Kaleya radni panel sa pregledom, podešavanjima klijenta, glasom, alarmima klijenta, integracijama i API podešavanjima za admina.
+`/admin/` i `/dashboard/` vode na lep Kaleya radni panel. Tehnički Django panel je pomeren na `/django-admin/`.
 
 ## `.env` za Claude Haiku 4.5 i ElevenLabs
 

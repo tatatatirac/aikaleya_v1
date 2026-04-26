@@ -1492,18 +1492,53 @@ async function logoTap() {
 }
 
 // ===== LOGIN =====
-document.getElementById('login-form').addEventListener('submit', (e) => {
+function isBackendServed() {
+    return window.location.protocol === 'http:' || window.location.protocol === 'https:';
+}
+
+async function backendLogin(email, password) {
+    const response = await fetch('/api/auth/login/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+    });
+    if (!response.ok) throw new Error('login_failed');
+    return response.json();
+}
+
+document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value.trim();
     const pass = document.getElementById('password').value.trim();
+    const error = document.getElementById('login-error');
+    error.classList.add('hidden');
+
+    if (isBackendServed()) {
+        try {
+            const data = await backendLogin(email, pass);
+            localStorage.setItem('kaleya_auth_token', data.token);
+            localStorage.setItem('kaleya_user_role', data.user.role);
+            localStorage.setItem('kaleya_user_email', data.user.email);
+
+            if (data.user.role === 'admin' || data.user.is_staff) {
+                window.location.href = '/admin/';
+                return;
+            }
+
+            showView('client');
+            return;
+        } catch (err) {
+            error.classList.remove('hidden');
+            return;
+        }
+    }
+
     if (email === 'admin@aikaleya.com' && pass === 'admin123') {
-        document.getElementById('login-error').classList.add('hidden');
         showView('admin');
     } else if (email === 'klijent@test.com' && pass === 'test123') {
-        document.getElementById('login-error').classList.add('hidden');
         showView('client');
     } else {
-        document.getElementById('login-error').classList.remove('hidden');
+        error.classList.remove('hidden');
     }
 });
 function fillLogin(type) {
