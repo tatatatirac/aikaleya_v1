@@ -553,7 +553,7 @@
                     <div class="mt-5">
                         <div class="flex items-center justify-between">
                             <p id="clientSelectedDayLabel" class="text-sm font-semibold">Today</p>
-                            <span class="text-[11px] px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-900 text-slate-500">09:00-16:00</span>
+                            <span id="clientWorkRangeLabel" class="text-[11px] px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-900 text-slate-500">09:00-16:00</span>
                         </div>
                         <div id="clientDaySlots" class="mt-3 space-y-2"></div>
                     </div>
@@ -633,6 +633,36 @@
                             </div>
 
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                                <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3">Calendar settings</p>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <label class="text-[11px] text-slate-500">Start
+                                        <input id="clientWorkStart" type="time" value="09:00" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
+                                    </label>
+                                    <label class="text-[11px] text-slate-500">End
+                                        <input id="clientWorkEnd" type="time" value="16:00" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
+                                    </label>
+                                    <label class="text-[11px] text-slate-500">Slot
+                                        <select id="clientSlotInterval" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
+                                            <option value="30">30 min</option>
+                                            <option value="60">60 min</option>
+                                        </select>
+                                    </label>
+                                    <label class="text-[11px] text-slate-500">Time
+                                        <select id="clientTimeFormat" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
+                                            <option value="24">09:00</option>
+                                            <option value="12">9 AM</option>
+                                        </select>
+                                    </label>
+                                    <label class="text-[11px] text-slate-500 col-span-2">First day
+                                        <select id="clientWeekStart" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
+                                            <option value="sunday">Sunday</option>
+                                            <option value="monday">Monday</option>
+                                        </select>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                                 <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="cset_alarm">Alarmi za osoblje</p>
                                 <div class="space-y-3">
                                     <div>
@@ -697,6 +727,16 @@
                             <label class="text-[12px] text-slate-500">Kanal<select id="apptChannel" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option>WhatsApp</option><option>Viber</option><option>Telegram</option><option>SMS</option><option>Phone</option></select></label>
                             <label class="text-[12px] text-slate-500">Status<select id="apptStatus" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option value="confirmed">Zakazano</option><option value="moved">Pomereno</option><option value="cancelled">Otkazano</option><option value="pending">Na cekanju</option></select></label>
                         </div>
+                        <label class="mt-3 block text-[12px] text-slate-500">Trajanje termina
+                            <select id="apptDuration" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
+                                <option value="30">30 min</option>
+                                <option value="60">1 sat</option>
+                                <option value="120">2 sata</option>
+                                <option value="180">3 sata</option>
+                                <option value="240">4 sata</option>
+                                <option value="300">5 sati</option>
+                            </select>
+                        </label>
                         <div class="mt-5 grid grid-cols-2 gap-3">
                             <button onclick="deleteAppointment()" class="h-11 rounded-xl border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-sm font-semibold">Obrisi</button>
                             <button onclick="saveAppointmentEdit()" class="h-11 rounded-xl gradient-bg text-white text-sm font-semibold">Sacuvaj</button>
@@ -1023,13 +1063,13 @@ let kaleyaActive = false;
 let kaleyaEnabled = localStorage.getItem('kaleya_enabled') !== 'off';
 let recognition = null;
 let activeClientForApi = '';
-const CLIENT_WORK_HOURS = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00'];
+let openStatusMenuId = '';
 let clientCalendarState = { mode: 'month', monthOffset: 0, selectedDate: clientIsoDate(new Date()) };
 let schedule = [
-    { id: 'a1', date: clientDateOffset(0), time: '10:00', nameKey: 'client1', phone: '+38160111222', channel: 'WhatsApp', status: 'confirmed' },
-    { id: 'a2', date: clientDateOffset(0), time: '14:00', nameKey: 'client2', phone: '+381641234567', channel: 'Viber', status: 'moved' },
-    { id: 'a3', date: clientDateOffset(1), time: '11:00', nameKey: 'team', phone: '+381621234444', channel: 'Telegram', status: 'pending' },
-    { id: 'a4', date: clientDateOffset(2), time: '15:00', nameKey: 'newClient', phone: '+381631119999', channel: 'SMS', status: 'cancelled' },
+    { id: 'a1', date: clientDateOffset(0), time: '10:00', duration: 60, nameKey: 'client1', phone: '+38160111222', channel: 'WhatsApp', status: 'confirmed' },
+    { id: 'a2', date: clientDateOffset(0), time: '14:00', duration: 120, nameKey: 'client2', phone: '+381641234567', channel: 'Viber', status: 'moved' },
+    { id: 'a3', date: clientDateOffset(1), time: '11:00', duration: 60, nameKey: 'team', phone: '+381621234444', channel: 'Telegram', status: 'pending' },
+    { id: 'a4', date: clientDateOffset(2), time: '15:00', duration: 30, nameKey: 'newClient', phone: '+381631119999', channel: 'SMS', status: 'cancelled' },
 ];
 
 const CLIENT_SCHEDULE_NAMES = {
@@ -1047,7 +1087,8 @@ const CLIENT_STATUS_TEXT = {
     pending: { sr: 'Na cekanju', en: 'Pending', es: 'Pendiente', pt: 'Pendente', ru: 'В ожидании', fr: 'En attente', it: 'In attesa' },
     moved: { sr: 'Pomereno', en: 'Moved', es: 'Movido', pt: 'Remarcado', ru: 'Перенесено', fr: 'Deplace', it: 'Spostato' },
     cancelled: { sr: 'Otkazano', en: 'Cancelled', es: 'Cancelado', pt: 'Cancelado', ru: 'Отменено', fr: 'Annule', it: 'Annullato' },
-    free: { sr: 'Slobodno', en: 'Free', es: 'Libre', pt: 'Livre', ru: 'Свободно', fr: 'Libre', it: 'Libero' }
+    free: { sr: 'Slobodno', en: 'Free', es: 'Libre', pt: 'Livre', ru: 'Свободно', fr: 'Libre', it: 'Libero' },
+    blocked: { sr: 'Blokirano', en: 'Blocked', es: 'Bloqueado', pt: 'Bloqueado', ru: 'Заблокировано', fr: 'Bloque', it: 'Bloccato' }
 };
 
 // ===== TRANSLATIONS =====
@@ -1634,6 +1675,122 @@ function clientLocale() {
     return BROWSER_LANG_MAP[currentLang] || 'en-US';
 }
 
+function defaultWeekStart() {
+    return currentLang === 'en' ? 'sunday' : 'monday';
+}
+
+function getClientCalendarSettings() {
+    return {
+        start: localStorage.getItem('client_work_start') || '09:00',
+        end: localStorage.getItem('client_work_end') || '16:00',
+        interval: Number(localStorage.getItem('client_slot_interval') || 30),
+        format: localStorage.getItem('client_time_format') || '24',
+        weekStart: localStorage.getItem('client_week_start') || defaultWeekStart()
+    };
+}
+
+function timeToMinutes(value = '09:00') {
+    const [h, m] = value.split(':').map(Number);
+    return (h * 60) + (m || 0);
+}
+
+function minutesToTime(minutes) {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+}
+
+function formatClientTime(value) {
+    const settings = getClientCalendarSettings();
+    if (settings.format !== '12') return value;
+    const minutes = timeToMinutes(value);
+    const h24 = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    const suffix = h24 >= 12 ? 'PM' : 'AM';
+    const h12 = h24 % 12 || 12;
+    return `${h12}${m ? ':' + String(m).padStart(2, '0') : ''} ${suffix}`;
+}
+
+function addMinutesToTime(value, minutes) {
+    return minutesToTime(timeToMinutes(value) + minutes);
+}
+
+function formatWorkRange() {
+    const settings = getClientCalendarSettings();
+    return `${formatClientTime(settings.start)} - ${formatClientTime(settings.end)}`;
+}
+
+function getClientWorkSlots() {
+    const settings = getClientCalendarSettings();
+    const start = timeToMinutes(settings.start);
+    const end = timeToMinutes(settings.end);
+    const interval = settings.interval > 0 ? settings.interval : 30;
+    const slots = [];
+    for (let minute = start; minute < end; minute += interval) {
+        slots.push(minutesToTime(minute));
+    }
+    return slots;
+}
+
+function appointmentSlotSpan(item) {
+    const interval = getClientCalendarSettings().interval;
+    return Math.max(1, Math.ceil(Number(item.duration || interval) / interval));
+}
+
+function getDateSlotStats(dateIso) {
+    const slots = getClientWorkSlots();
+    const activeItems = schedule.filter(item => item.date === dateIso && item.status !== 'cancelled');
+    const busy = Math.min(slots.length, activeItems.reduce((sum, item) => sum + appointmentSlotSpan(item), 0));
+    return { busy, free: Math.max(slots.length - busy, 0) };
+}
+
+function getSlotOccupancy(events, time) {
+    const minute = timeToMinutes(time);
+    for (const item of events) {
+        if (item.status === 'cancelled') continue;
+        const start = timeToMinutes(item.time);
+        const end = start + Number(item.duration || getClientCalendarSettings().interval);
+        if (minute >= start && minute < end) return { item, isStart: minute === start };
+    }
+    return null;
+}
+
+function syncClientCalendarSettingsUI() {
+    const settings = getClientCalendarSettings();
+    const start = document.getElementById('clientWorkStart');
+    const end = document.getElementById('clientWorkEnd');
+    const interval = document.getElementById('clientSlotInterval');
+    const format = document.getElementById('clientTimeFormat');
+    const weekStart = document.getElementById('clientWeekStart');
+    if (start) start.value = settings.start;
+    if (end) end.value = settings.end;
+    if (interval) interval.value = String(settings.interval);
+    if (format) format.value = settings.format;
+    if (weekStart) weekStart.value = settings.weekStart;
+    const range = document.getElementById('clientWorkRangeLabel');
+    if (range) range.textContent = formatWorkRange();
+    const apptTime = document.getElementById('apptTime');
+    if (apptTime) {
+        apptTime.min = settings.start;
+        apptTime.max = settings.end;
+        apptTime.step = String(settings.interval * 60);
+    }
+}
+
+function saveClientCalendarSettings() {
+    const start = document.getElementById('clientWorkStart')?.value || '09:00';
+    const end = document.getElementById('clientWorkEnd')?.value || '16:00';
+    const validEnd = timeToMinutes(end) > timeToMinutes(start) ? end : '16:00';
+    localStorage.setItem('client_work_start', start);
+    localStorage.setItem('client_work_end', validEnd);
+    localStorage.setItem('client_slot_interval', document.getElementById('clientSlotInterval')?.value || '30');
+    localStorage.setItem('client_time_format', document.getElementById('clientTimeFormat')?.value || '24');
+    localStorage.setItem('client_week_start', document.getElementById('clientWeekStart')?.value || defaultWeekStart());
+    syncClientCalendarSettingsUI();
+    renderClientCalendar();
+    renderSchedule();
+}
+
 function escapeHtml(value = '') {
     return String(value).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 }
@@ -1651,6 +1808,39 @@ function statusDotClass(status) {
     if (status === 'moved') return 'bg-blue-500';
     if (status === 'pending') return 'bg-amber-500';
     return 'bg-green-500';
+}
+
+function renderStatusControl(item) {
+    const options = ['confirmed', 'moved', 'cancelled', 'pending'];
+    return `
+        <div class="relative">
+            <button onclick="toggleStatusMenu('${item.id}')" class="w-4 h-4 rounded-full ${statusDotClass(item.status)} ring-2 ring-white dark:ring-slate-900 shadow" aria-label="Promeni status"></button>
+            ${openStatusMenuId === item.id ? `
+                <div class="absolute right-0 top-6 z-40 w-36 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-xl p-1.5">
+                    ${options.map(status => `
+                        <button onclick="changeAppointmentStatus('${item.id}', '${status}')" class="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left text-[12px] hover:bg-slate-50 dark:hover:bg-slate-900">
+                            <span class="w-2.5 h-2.5 rounded-full ${statusDotClass(status)}"></span>
+                            <span>${escapeHtml(localizedStatus(status))}</span>
+                        </button>
+                    `).join('')}
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+function toggleStatusMenu(id) {
+    openStatusMenuId = openStatusMenuId === id ? '' : id;
+    renderSchedule();
+    renderClientCalendar();
+}
+
+function changeAppointmentStatus(id, status) {
+    const item = schedule.find(entry => entry.id === id);
+    if (item) item.status = status;
+    openStatusMenuId = '';
+    renderSchedule();
+    renderClientCalendar();
 }
 
 function normalizePhone(phone = '') {
@@ -1685,10 +1875,10 @@ function renderAppointmentCard(item) {
     return `
         <div class="group p-3.5 rounded-[18px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-md transition">
             <div class="flex items-start gap-3">
-                <button onclick="openAppointmentEditor('${item.id}')" class="w-11 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 grid place-items-center font-mono text-[13px] font-semibold">${item.time}</button>
+                <button onclick="openAppointmentEditor('${item.id}')" class="w-11 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 grid place-items-center font-mono text-[12px] font-semibold">${formatClientTime(item.time)}</button>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full ${statusDotClass(item.status)}"></span>
+                        ${renderStatusControl(item)}
                         <p class="text-[14px] font-medium truncate">${escapeHtml(localizedAppointmentName(item))}</p>
                     </div>
                     <p class="mt-0.5 text-[11px] text-slate-500">${escapeHtml(localizedStatus(item.status))} - ${escapeHtml(item.phone || '')}</p>
@@ -1723,6 +1913,7 @@ function addAppointment() {
         id: `a${Date.now()}`,
         date: clientDateOffset(1),
         time: '15:00',
+        duration: 30,
         nameKey: 'newClient',
         phone: '+381601010101',
         channel: 'WhatsApp',
@@ -1790,31 +1981,30 @@ function renderClientCalendar() {
     document.getElementById('clientCalendarDayBtn')?.classList.toggle('bg-white', clientCalendarState.mode === 'day');
     document.getElementById('clientCalendarDayBtn')?.classList.toggle('dark:bg-slate-800', clientCalendarState.mode === 'day');
 
-    const monday = new Date(2024, 0, 1);
+    const settings = getClientCalendarSettings();
+    const weekStartDate = settings.weekStart === 'sunday' ? new Date(2024, 0, 7) : new Date(2024, 0, 1);
     weekdays.innerHTML = Array.from({ length: 7 }, (_, i) => {
-        const day = new Date(monday);
-        day.setDate(monday.getDate() + i);
+        const day = new Date(weekStartDate);
+        day.setDate(weekStartDate.getDate() + i);
         return `<span>${day.toLocaleDateString(clientLocale(), { weekday: 'short' })}</span>`;
     }).join('');
 
-    const firstOffset = (base.getDay() + 6) % 7;
+    const firstOffset = settings.weekStart === 'sunday' ? base.getDay() : (base.getDay() + 6) % 7;
     const daysInMonth = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
     const todayIso = clientIsoDate(new Date());
     const blanks = Array.from({ length: firstOffset }, () => '<div></div>').join('');
     const days = Array.from({ length: daysInMonth }, (_, i) => {
         const day = i + 1;
         const dateIso = clientIsoDate(new Date(base.getFullYear(), base.getMonth(), day));
-        const events = schedule.filter(item => item.date === dateIso);
-        const active = events.filter(item => item.status !== 'cancelled').length;
-        const free = Math.max(CLIENT_WORK_HOURS.length - active, 0);
+        const stats = getDateSlotStats(dateIso);
         const selected = clientCalendarState.selectedDate === dateIso;
         const isToday = todayIso === dateIso;
         return `
-            <button onclick="selectClientCalendarDate('${dateIso}')" class="min-h-[58px] rounded-2xl border text-left p-1.5 ${selected ? 'border-teal-500 bg-teal-50 dark:bg-teal-950/40' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'}">
-                <span class="block text-[12px] font-semibold ${isToday ? 'text-teal-600 dark:text-teal-300' : ''}">${day}</span>
+            <button onclick="selectClientCalendarDate('${dateIso}')" class="aspect-square rounded-lg border text-left p-1.5 ${selected ? 'border-teal-500 ring-1 ring-teal-500 bg-white dark:bg-slate-900' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'}">
+                <span class="inline-grid place-items-center w-5 h-5 rounded-md text-[12px] font-bold ${isToday ? 'bg-blue-600 text-white' : 'text-slate-800 dark:text-slate-100'}">${day}</span>
                 <span class="mt-1 flex items-center gap-1">
-                    <span class="min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[9px] grid place-items-center">${active}</span>
-                    <span class="min-w-4 h-4 px-1 rounded-full bg-green-500 text-white text-[9px] grid place-items-center">${free}</span>
+                    <span class="w-5 h-5 rounded-full bg-red-600 text-white text-[10px] font-black grid place-items-center shadow-sm">${stats.busy}</span>
+                    <span class="w-5 h-5 rounded-full bg-green-600 text-white text-[10px] font-black grid place-items-center shadow-sm">${stats.free}</span>
                 </span>
             </button>
         `;
@@ -1830,26 +2020,41 @@ function renderClientDaySlots() {
     const label = document.getElementById('clientSelectedDayLabel');
     if (label) label.textContent = selected.toLocaleDateString(clientLocale(), { weekday: 'long', day: 'numeric', month: 'long' });
     if (!slots) return;
+    syncClientCalendarSettingsUI();
     const events = schedule.filter(item => item.date === clientCalendarState.selectedDate);
-    slots.innerHTML = CLIENT_WORK_HOURS.map(time => {
-        const item = events.find(event => event.time === time);
+    slots.innerHTML = getClientWorkSlots().map(time => {
+        const occupancy = getSlotOccupancy(events, time);
+        const cancelledItem = events.find(event => event.time === time && event.status === 'cancelled');
+        const item = occupancy?.item || cancelledItem;
         if (!item) {
             return `
                 <div class="flex items-center justify-between p-3 rounded-[16px] border border-slate-200 dark:border-slate-800 bg-green-50/70 dark:bg-green-950/20">
-                    <div><p class="font-mono text-sm font-semibold">${time}</p><p class="text-[11px] text-green-700 dark:text-green-300">${escapeHtml(localizedStatus('free'))}</p></div>
+                    <div><p class="font-mono text-sm font-semibold">${formatClientTime(time)}</p><p class="text-[11px] text-green-700 dark:text-green-300">${escapeHtml(localizedStatus('free'))}</p></div>
                     <button onclick="openAppointmentEditor('', '${clientCalendarState.selectedDate}', '${time}')" class="w-8 h-8 rounded-full bg-green-600 text-white grid place-items-center">+</button>
                 </div>
             `;
         }
+        if (occupancy && !occupancy.isStart) {
+            return `
+                <div class="flex items-center justify-between p-3 rounded-[16px] border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900/70">
+                    <div>
+                        <p class="font-mono text-sm font-semibold">${formatClientTime(time)}</p>
+                        <p class="text-[11px] text-slate-500">${escapeHtml(localizedStatus('blocked'))} - ${escapeHtml(localizedAppointmentName(item))}</p>
+                    </div>
+                    <span class="w-2.5 h-2.5 rounded-full ${statusDotClass(item.status)}"></span>
+                </div>
+            `;
+        }
+        const endTime = addMinutesToTime(item.time, Number(item.duration || getClientCalendarSettings().interval));
         return `
             <div class="p-3 rounded-[16px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                 <div class="flex items-start justify-between gap-3">
                     <div>
-                        <p class="font-mono text-sm font-semibold">${item.time}</p>
+                        <p class="font-mono text-sm font-semibold">${formatClientTime(item.time)} - ${formatClientTime(endTime)}</p>
                         <p class="text-[13px] font-semibold">${escapeHtml(localizedAppointmentName(item))}</p>
                         <p class="text-[11px] text-slate-500">${escapeHtml(localizedStatus(item.status))} - ${escapeHtml(item.phone || '')}</p>
                     </div>
-                    <span class="w-2.5 h-2.5 rounded-full ${statusDotClass(item.status)}"></span>
+                    ${renderStatusControl(item)}
                 </div>
                 <div class="mt-3 flex items-center justify-between gap-2">
                     <span class="text-[10px] px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">${escapeHtml(item.channel || 'Phone')}</span>
@@ -1861,10 +2066,13 @@ function renderClientDaySlots() {
 }
 
 function openAppointmentEditor(id = '', date = '', time = '') {
+    syncClientCalendarSettingsUI();
+    const settings = getClientCalendarSettings();
     const item = schedule.find(entry => entry.id === id) || {
         id: '',
         date: date || clientCalendarState.selectedDate,
-        time: time || '09:00',
+        time: time || settings.start,
+        duration: settings.interval,
         name: '',
         phone: '+381',
         channel: 'WhatsApp',
@@ -1877,6 +2085,7 @@ function openAppointmentEditor(id = '', date = '', time = '') {
     document.getElementById('apptPhone').value = item.phone || '';
     document.getElementById('apptChannel').value = item.channel || 'WhatsApp';
     document.getElementById('apptStatus').value = item.status || 'confirmed';
+    document.getElementById('apptDuration').value = String(item.duration || settings.interval);
     document.getElementById('appointmentModal')?.classList.remove('hidden');
 }
 
@@ -1889,7 +2098,8 @@ function saveAppointmentEdit() {
     const payload = {
         id: id || `a${Date.now()}`,
         date: document.getElementById('apptDate').value || clientCalendarState.selectedDate,
-        time: document.getElementById('apptTime').value || '09:00',
+        time: document.getElementById('apptTime').value || getClientCalendarSettings().start,
+        duration: Number(document.getElementById('apptDuration').value || getClientCalendarSettings().interval),
         name: document.getElementById('apptName').value.trim() || 'New client',
         phone: document.getElementById('apptPhone').value.trim() || '+381',
         channel: document.getElementById('apptChannel').value,
@@ -1917,7 +2127,7 @@ function openChannelDemo(channel, phone) {
 }
 
 // Client settings
-function openClientSettings() { switchClientTab('settings'); document.getElementById('client-settings').classList.remove('hidden'); updateElStatus(); updateClientLangButtons(); }
+function openClientSettings() { switchClientTab('settings'); document.getElementById('client-settings').classList.remove('hidden'); updateElStatus(); updateClientLangButtons(); syncClientCalendarSettingsUI(); }
 function closeClientSettings() { document.getElementById('client-settings').classList.add('hidden'); }
 function updateElStatus() {
     const hasKey = !!localStorage.getItem('elevenlabs_key');
@@ -2167,6 +2377,7 @@ initTheme();
 if (!T[currentLang]) currentLang = 'en';
 if (!T[currentVoiceLang]) currentVoiceLang = currentLang;
 applyLang();
+syncClientCalendarSettingsUI();
 renderSchedule();
 renderClientCalendar();
 updateKaleyaPowerUI();

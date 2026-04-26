@@ -378,7 +378,7 @@ const PAGE_AUDIO = {
     it: 'assets/audio/kaleya-demo-it.mp3'
 };
 
-const WORK_HOURS = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
+const WORK_HOURS = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30'];
 const DEMO_EVENT_PATTERN = {
     3: [{ time: '10:00', titleKey: 'person1', status: 'booked' }],
     5: [{ time: '09:00', titleKey: 'person2', status: 'booked' }, { time: '13:00', titleKey: 'person3', status: 'cancelled' }],
@@ -780,13 +780,14 @@ function renderCalendar(calendar) {
 
     const grid = calendar.querySelector('[data-calendar-grid]');
     if (grid) {
+        const weekStartsOnSunday = lang === 'en';
         const weekdayNames = Array.from({ length: 7 }, (_, index) => {
-            const date = new Date(2026, 0, 5 + index);
+            const date = new Date(2026, 0, (weekStartsOnSunday ? 4 : 5) + index);
             return date.toLocaleDateString(lang, { weekday: 'short' }).slice(0, 2);
         });
         const first = new Date(base.getFullYear(), base.getMonth(), 1);
         const last = new Date(base.getFullYear(), base.getMonth() + 1, 0);
-        const offset = (first.getDay() + 6) % 7;
+        const offset = weekStartsOnSunday ? first.getDay() : (first.getDay() + 6) % 7;
         const cells = [];
         weekdayNames.forEach((name) => cells.push(`<span>${name}</span>`));
         for (let i = 0; i < offset; i++) cells.push('<button class="muted" type="button"></button>');
@@ -795,11 +796,12 @@ function renderCalendar(calendar) {
             const iso = isoDate(date);
             const counts = eventCounts(date);
             const selectedClass = iso === isoDate(selected) ? ' selected' : '';
+            const todayClass = iso === isoDate(new Date()) ? ' today' : '';
             cells.push(`
-                <button type="button" class="${selectedClass}" onclick="selectCalendarDate(this, '${iso}')">
+                <button type="button" class="${selectedClass}${todayClass}" onclick="selectCalendarDate(this, '${iso}')">
                     <span class="date-num">${day}</span>
                     <span class="date-badges">
-                        ${counts.booked ? `<span class="date-badge booked">${counts.booked}</span>` : ''}
+                        <span class="date-badge booked">${counts.booked}</span>
                         <span class="date-badge free">${counts.free}</span>
                     </span>
                 </button>

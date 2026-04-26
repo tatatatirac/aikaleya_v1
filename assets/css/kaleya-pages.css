@@ -492,7 +492,7 @@ h3 {
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
+    gap: 5px;
 }
 
 .calendar-grid span {
@@ -503,10 +503,11 @@ h3 {
 }
 
 .calendar-grid button {
-    min-height: 44px;
+    aspect-ratio: 1 / 1;
+    min-height: 0;
     border: 1px solid #e2e8f0;
-    background: #f8fafc;
-    border-radius: 12px;
+    background: #ffffff;
+    border-radius: 8px;
     font-weight: 800;
     cursor: pointer;
     padding: 5px;
@@ -523,28 +524,42 @@ h3 {
 }
 
 .date-num {
-    display: block;
+    display: inline-grid;
+    place-items: center;
+    width: 21px;
+    height: 21px;
+    border-radius: 6px;
     line-height: 1;
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 900;
+}
+
+.calendar-grid button.today .date-num {
+    background: #2563eb;
+    color: #ffffff;
 }
 
 .date-badges {
-    margin-top: 5px;
+    margin-top: 4px;
     display: flex;
     justify-content: center;
-    gap: 3px;
+    gap: 2px;
 }
 
 .date-badge {
-    min-width: 16px;
-    height: 16px;
-    padding: 0 4px;
+    width: 17px;
+    height: 17px;
+    padding: 0;
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 900;
+    line-height: 1;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .18);
 }
 
 .date-badge.booked {
@@ -559,6 +574,14 @@ h3 {
     background: #111827;
     border-color: #334155;
     color: #e2e8f0;
+}
+
+.device-dark .date-num {
+    color: #f8fafc;
+}
+
+.device-dark .calendar-grid button.today .date-num {
+    color: #ffffff;
 }
 
 .day-list {
