@@ -5,7 +5,7 @@ const PAGE_LANGS = {
         demo_title: 'Kako Kaleya radi u praksi',
         demo_lead: 'Mobilni i laptop prikaz su demo okruženje. Dugmad su klikabilna, a glas se pušta iz MP3 fajla.',
         mobile_title: 'Klijent app',
-        laptop_title: 'Admin dashboard',
+        laptop_title: 'Klijent app',
         voice_cta: 'Pusti Kaleya glas',
         schedule: 'Zakaži',
         cancel: 'Otkaži',
@@ -14,6 +14,18 @@ const PAGE_LANGS = {
         status_scheduled: 'Demo termin je zakazan za 15:00',
         status_cancelled: 'Demo sastanak je otkazan',
         status_checked: 'Danas ima 3 slobodna termina',
+        online: 'Online',
+        offline: 'Offline',
+        nav_home: 'Početna',
+        nav_calendar: 'Kalendar',
+        nav_settings: 'Podešavanja',
+        calendar_title: 'Kalendar',
+        month: 'Mesec',
+        day: 'Dan',
+        free: 'Slobodno',
+        booked: 'Zakazano',
+        cancelled_status: 'Otkazano',
+        moved_status: 'Pomereno',
         calls: 'Pozivi',
         clients: 'Klijenti',
         channels: 'Kanali',
@@ -46,7 +58,7 @@ const PAGE_LANGS = {
         demo_title: 'How Kaleya works in practice',
         demo_lead: 'Mobile and laptop views are a demo environment. Buttons are clickable and the voice plays from an MP3 file.',
         mobile_title: 'Client app',
-        laptop_title: 'Admin dashboard',
+        laptop_title: 'Client app',
         voice_cta: 'Play Kaleya voice',
         schedule: 'Schedule',
         cancel: 'Cancel',
@@ -55,6 +67,18 @@ const PAGE_LANGS = {
         status_scheduled: 'Demo appointment is scheduled for 3 PM',
         status_cancelled: 'Demo meeting has been cancelled',
         status_checked: 'There are 3 free slots today',
+        online: 'Online',
+        offline: 'Offline',
+        nav_home: 'Home',
+        nav_calendar: 'Calendar',
+        nav_settings: 'Settings',
+        calendar_title: 'Calendar',
+        month: 'Month',
+        day: 'Day',
+        free: 'Free',
+        booked: 'Booked',
+        cancelled_status: 'Cancelled',
+        moved_status: 'Moved',
         calls: 'Calls',
         clients: 'Clients',
         channels: 'Channels',
@@ -87,7 +111,7 @@ const PAGE_LANGS = {
         demo_title: 'Cómo funciona Kaleya en la práctica',
         demo_lead: 'Las vistas móvil y laptop son un entorno demo. Los botones son clicables y la voz se reproduce desde un archivo MP3.',
         mobile_title: 'App del cliente',
-        laptop_title: 'Panel admin',
+        laptop_title: 'App del cliente',
         voice_cta: 'Reproducir voz Kaleya',
         schedule: 'Agendar',
         cancel: 'Cancelar',
@@ -96,6 +120,18 @@ const PAGE_LANGS = {
         status_scheduled: 'La cita demo está agendada a las 15:00',
         status_cancelled: 'La reunión demo fue cancelada',
         status_checked: 'Hoy hay 3 horarios libres',
+        online: 'Online',
+        offline: 'Offline',
+        nav_home: 'Inicio',
+        nav_calendar: 'Calendario',
+        nav_settings: 'Ajustes',
+        calendar_title: 'Calendario',
+        month: 'Mes',
+        day: 'Día',
+        free: 'Libre',
+        booked: 'Agendado',
+        cancelled_status: 'Cancelado',
+        moved_status: 'Movido',
         calls: 'Llamadas',
         clients: 'Clientes',
         channels: 'Canales',
@@ -128,7 +164,7 @@ const PAGE_LANGS = {
         demo_title: 'Como Kaleya funciona na prática',
         demo_lead: 'As visualizações mobile e laptop são um ambiente demo. Os botões são clicáveis e a voz toca por MP3.',
         mobile_title: 'App do cliente',
-        laptop_title: 'Dashboard admin',
+        laptop_title: 'App do cliente',
         voice_cta: 'Tocar voz Kaleya',
         schedule: 'Agendar',
         cancel: 'Cancelar',
@@ -137,6 +173,18 @@ const PAGE_LANGS = {
         status_scheduled: 'O horário demo foi agendado para 15:00',
         status_cancelled: 'A reunião demo foi cancelada',
         status_checked: 'Hoje há 3 horários livres',
+        online: 'Online',
+        offline: 'Offline',
+        nav_home: 'Início',
+        nav_calendar: 'Calendário',
+        nav_settings: 'Ajustes',
+        calendar_title: 'Calendário',
+        month: 'Mês',
+        day: 'Dia',
+        free: 'Livre',
+        booked: 'Agendado',
+        cancelled_status: 'Cancelado',
+        moved_status: 'Remarcado',
         calls: 'Chamadas',
         clients: 'Clientes',
         channels: 'Canais',
@@ -169,7 +217,7 @@ const PAGE_LANGS = {
         demo_title: 'Как Kaleya работает на практике',
         demo_lead: 'Мобильный и laptop вид являются demo средой. Кнопки кликабельны, а голос воспроизводится из MP3 файла.',
         mobile_title: 'Клиентское приложение',
-        laptop_title: 'Админ панель',
+        laptop_title: 'Клиентское приложение',
         voice_cta: 'Воспроизвести голос Kaleya',
         schedule: 'Записать',
         cancel: 'Отменить',
@@ -178,6 +226,18 @@ const PAGE_LANGS = {
         status_scheduled: 'Demo запись назначена на 15:00',
         status_cancelled: 'Demo встреча отменена',
         status_checked: 'Сегодня есть 3 свободных времени',
+        online: 'Online',
+        offline: 'Offline',
+        nav_home: 'Главная',
+        nav_calendar: 'Календарь',
+        nav_settings: 'Настройки',
+        calendar_title: 'Календарь',
+        month: 'Месяц',
+        day: 'День',
+        free: 'Свободно',
+        booked: 'Записано',
+        cancelled_status: 'Отменено',
+        moved_status: 'Перенесено',
         calls: 'Звонки',
         clients: 'Клиенты',
         channels: 'Каналы',
@@ -212,6 +272,16 @@ const PAGE_AUDIO = {
     es: 'assets/audio/kaleya-demo-es.mp3',
     pt: 'assets/audio/kaleya-demo-pt.mp3',
     ru: 'assets/audio/kaleya-demo-ru.mp3'
+};
+
+const WORK_HOURS = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
+const DEMO_EVENT_PATTERN = {
+    3: [{ time: '10:00', title: 'Ana Jović', status: 'booked' }],
+    5: [{ time: '09:00', title: 'Dr. Petrović', status: 'booked' }, { time: '13:00', title: 'Milica Jovanović', status: 'cancelled' }],
+    10: [{ time: '11:00', title: 'Salon Bella', status: 'moved' }, { time: '15:00', title: 'Novi klijent', status: 'booked' }],
+    18: [{ time: '12:00', title: 'Marko Petrović', status: 'booked' }],
+    24: [{ time: '09:00', title: 'Tim sastanak', status: 'moved' }, { time: '14:00', title: 'Kontrola', status: 'booked' }],
+    26: [{ time: '10:00', title: 'Pregled', status: 'booked' }, { time: '15:00', title: 'Konsultacije', status: 'cancelled' }]
 };
 
 const PAGE_LEGAL = {
@@ -309,6 +379,8 @@ function applyPageLang() {
     document.querySelectorAll('[data-i18n]').forEach((el) => {
         el.textContent = pageText(el.dataset.i18n);
     });
+    updateOnlineLabels();
+    renderDemoCalendars();
     renderLegalPage();
 }
 
@@ -323,6 +395,186 @@ function setDemoStatus(key) {
     if (el) el.textContent = pageText(key);
     const row = document.getElementById('demoActivity');
     if (row) row.textContent = pageText(key);
+}
+
+function initPageTheme() {
+    const saved = localStorage.getItem('kaleya_page_theme');
+    const wantsDark = saved === 'dark' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.classList.toggle('page-dark', wantsDark);
+}
+
+function togglePageTheme() {
+    document.documentElement.classList.toggle('page-dark');
+    localStorage.setItem('kaleya_page_theme', document.documentElement.classList.contains('page-dark') ? 'dark' : 'light');
+}
+
+function updateOnlineLabels() {
+    document.querySelectorAll('[data-online-toggle]').forEach((button) => {
+        button.textContent = button.classList.contains('off') ? pageText('offline') : pageText('online');
+    });
+}
+
+function toggleDemoOnline(button) {
+    button.classList.toggle('off');
+    updateOnlineLabels();
+}
+
+function toggleDeviceTheme(button) {
+    const device = button.closest('.device-app');
+    if (device) device.classList.toggle('device-dark');
+}
+
+function switchAppView(button, view) {
+    const device = button.closest('.device-app');
+    if (!device) return;
+    device.querySelectorAll('.app-screen').forEach((screen) => screen.classList.remove('active'));
+    device.querySelectorAll('.app-footer-item').forEach((item) => item.classList.remove('active'));
+    const target = device.querySelector(view === 'calendar' ? '.app-calendar' : '.app-home');
+    if (target) target.classList.add('active');
+    button.classList.add('active');
+    renderDemoCalendars();
+}
+
+function switchCalendarMode(button, mode) {
+    const calendar = button.closest('.app-calendar');
+    if (!calendar) return;
+    calendar.dataset.mode = mode;
+    calendar.querySelectorAll('.segmented button').forEach((item) => item.classList.remove('active'));
+    calendar.querySelectorAll('.calendar-month, .calendar-day').forEach((view) => view.classList.remove('active'));
+    button.classList.add('active');
+    const target = calendar.querySelector(mode === 'day' ? '.calendar-day' : '.calendar-month');
+    if (target) target.classList.add('active');
+    renderCalendar(calendar);
+}
+
+function isoDate(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+}
+
+function parseIsoDate(value) {
+    const [y, m, d] = value.split('-').map(Number);
+    return new Date(y, m - 1, d);
+}
+
+function calendarBaseDate(calendar) {
+    const now = new Date();
+    const offset = Number(calendar.dataset.monthOffset || 0);
+    return new Date(now.getFullYear(), now.getMonth() + offset, 1);
+}
+
+function demoEventsForDate(date) {
+    return DEMO_EVENT_PATTERN[date.getDate()] || [];
+}
+
+function eventCounts(date) {
+    const events = demoEventsForDate(date);
+    const active = events.filter((event) => event.status !== 'cancelled').length;
+    return { booked: active, free: Math.max(WORK_HOURS.length - active, 0) };
+}
+
+function statusLabel(status) {
+    if (status === 'cancelled') return pageText('cancelled_status');
+    if (status === 'moved') return pageText('moved_status');
+    if (status === 'booked') return pageText('booked');
+    return pageText('free');
+}
+
+function selectCalendarDate(button, dateIso) {
+    const calendar = button.closest('.app-calendar');
+    if (!calendar) return;
+    calendar.dataset.selectedDate = dateIso;
+    renderCalendar(calendar);
+    const dayButton = calendar.querySelector('.segmented button:nth-child(2)');
+    if (dayButton) switchCalendarMode(dayButton, 'day');
+}
+
+function moveCalendar(button, direction) {
+    const calendar = button.closest('.app-calendar');
+    if (!calendar) return;
+    if ((calendar.dataset.mode || 'month') === 'day') {
+        const current = parseIsoDate(calendar.dataset.selectedDate || isoDate(new Date()));
+        current.setDate(current.getDate() + direction);
+        calendar.dataset.selectedDate = isoDate(current);
+        const now = new Date();
+        calendar.dataset.monthOffset = (current.getFullYear() - now.getFullYear()) * 12 + current.getMonth() - now.getMonth();
+    } else {
+        calendar.dataset.monthOffset = String(Number(calendar.dataset.monthOffset || 0) + direction);
+        const base = calendarBaseDate(calendar);
+        calendar.dataset.selectedDate = isoDate(base);
+    }
+    renderCalendar(calendar);
+}
+
+function renderDemoCalendars() {
+    document.querySelectorAll('.app-calendar').forEach((calendar) => {
+        if (!calendar.dataset.mode) calendar.dataset.mode = 'month';
+        if (!calendar.dataset.selectedDate) calendar.dataset.selectedDate = isoDate(new Date());
+        if (!calendar.dataset.monthOffset) calendar.dataset.monthOffset = '0';
+        renderCalendar(calendar);
+    });
+}
+
+function renderCalendar(calendar) {
+    const lang = pageLang();
+    const base = calendarBaseDate(calendar);
+    const selected = parseIsoDate(calendar.dataset.selectedDate || isoDate(new Date()));
+    const label = calendar.querySelector('[data-calendar-label]');
+    const mode = calendar.dataset.mode || 'month';
+    if (label) {
+        label.textContent = mode === 'day'
+            ? selected.toLocaleDateString(lang, { day: '2-digit', month: 'long', year: 'numeric' })
+            : base.toLocaleDateString(lang, { month: 'long', year: 'numeric' });
+    }
+
+    const grid = calendar.querySelector('[data-calendar-grid]');
+    if (grid) {
+        const weekdayNames = Array.from({ length: 7 }, (_, index) => {
+            const date = new Date(2026, 0, 5 + index);
+            return date.toLocaleDateString(lang, { weekday: 'short' }).slice(0, 2);
+        });
+        const first = new Date(base.getFullYear(), base.getMonth(), 1);
+        const last = new Date(base.getFullYear(), base.getMonth() + 1, 0);
+        const offset = (first.getDay() + 6) % 7;
+        const cells = [];
+        weekdayNames.forEach((name) => cells.push(`<span>${name}</span>`));
+        for (let i = 0; i < offset; i++) cells.push('<button class="muted" type="button"></button>');
+        for (let day = 1; day <= last.getDate(); day++) {
+            const date = new Date(base.getFullYear(), base.getMonth(), day);
+            const iso = isoDate(date);
+            const counts = eventCounts(date);
+            const selectedClass = iso === isoDate(selected) ? ' selected' : '';
+            cells.push(`
+                <button type="button" class="${selectedClass}" onclick="selectCalendarDate(this, '${iso}')">
+                    <span class="date-num">${day}</span>
+                    <span class="date-badges">
+                        ${counts.booked ? `<span class="date-badge booked">${counts.booked}</span>` : ''}
+                        <span class="date-badge free">${counts.free}</span>
+                    </span>
+                </button>
+            `);
+        }
+        grid.innerHTML = cells.join('');
+    }
+
+    const dayList = calendar.querySelector('[data-day-list]');
+    if (dayList) {
+        const events = demoEventsForDate(selected);
+        dayList.innerHTML = WORK_HOURS.map((time) => {
+            const event = events.find((item) => item.time === time);
+            const status = event ? event.status : 'free';
+            const title = event ? event.title : pageText('free');
+            return `
+                <div class="slot-row ${status}">
+                    <strong>${time}</strong>
+                    <span>${title}</span>
+                    <span class="slot-status">${statusLabel(status)}</span>
+                </div>
+            `;
+        }).join('');
+    }
 }
 
 function playKaleyaDemo() {
@@ -354,4 +606,7 @@ function renderLegalPage() {
     holder.innerHTML = content.map(([title, body]) => `<h2>${title}</h2><p>${body}</p>`).join('');
 }
 
-document.addEventListener('DOMContentLoaded', applyPageLang);
+document.addEventListener('DOMContentLoaded', () => {
+    initPageTheme();
+    applyPageLang();
+});
