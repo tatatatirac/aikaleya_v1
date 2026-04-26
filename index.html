@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="sr" class="scroll-smooth">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -96,7 +96,7 @@
                     <div class="flex items-center gap-2">
                         <div class="relative">
                             <button id="langToggleBtn" onclick="toggleLangMenu()" class="px-3 py-1.5 text-xs font-semibold rounded-full border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1" aria-label="Izaberi jezik">
-                                <span id="currentLangLabel">SR</span>
+                                <span id="currentLangLabel">EN</span>
                                 <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M2 3.5l3 3 3-3"/></svg>
                             </button>
                             <div id="langDropdown" class="absolute right-0 top-10 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl p-2 min-w-[150px]">
@@ -105,6 +105,8 @@
                                 <button onclick="setLang('es')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Español</button>
                                 <button onclick="setLang('pt')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Português</button>
                                 <button onclick="setLang('ru')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Русский</button>
+                                <button onclick="setLang('fr')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Français</button>
+                                <button onclick="setLang('it')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Italiano</button>
                             </div>
                         </div>
                         <button id="theme-toggle" class="w-9 h-9 grid place-items-center rounded-full border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition" aria-label="Toggle theme">
@@ -158,7 +160,7 @@
                                             <div class="flex items-center justify-between text-white">
                                                 <div class="flex items-center gap-2">
                                                     <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                                                    <span class="text-[13px] font-semibold">Kaleya aktivna</span>
+                                                    <span class="text-[13px] font-semibold">Kaleya online</span>
                                                 </div>
                                                 <span class="text-[11px] opacity-80">24/7</span>
                                             </div>
@@ -550,12 +552,14 @@
                         <div class="mt-6 space-y-5">
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                                 <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="cset_ui_lang">Jezik interfejsa</p>
-                                <div class="grid grid-cols-5 gap-2">
+                                <div class="grid grid-cols-7 gap-2">
                                     <button onclick="setLang('sr')" id="clientLangSR" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">SR</button>
                                     <button onclick="setLang('en')" id="clientLangEN" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">EN</button>
                                     <button onclick="setLang('es')" id="clientLangES" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">ES</button>
                                     <button onclick="setLang('pt')" id="clientLangPT" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">PT</button>
                                     <button onclick="setLang('ru')" id="clientLangRU" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">RU</button>
+                                    <button onclick="setLang('fr')" id="clientLangFR" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">FR</button>
+                                    <button onclick="setLang('it')" id="clientLangIT" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">IT</button>
                                 </div>
                             </div>
 
@@ -569,10 +573,12 @@
                                 </div>
                                 <select id="clientVoiceLang" onchange="saveClientVoiceLang()" class="mt-4 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px]">
                                     <option value="sr">Srpski (SR)</option>
-                                    <option value="en">English (US)</option>
+                                    <option value="en" selected>English (US)</option>
                                     <option value="es">Español</option>
                                     <option value="pt">Português</option>
                                     <option value="ru">Русский</option>
+                                    <option value="fr">Français</option>
+                                    <option value="it">Italiano</option>
                                 </select>
                                 <button onclick="testVoice()" class="mt-3 w-full h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium" data-i18n="cset_test">Testiraj glas Kaleye</button>
                                 <p class="mt-2 text-[11px] text-slate-500" data-i18n="cset_note">API ključ podešava administrator; klijent bira samo jezik i ponašanje.</p>
@@ -936,20 +942,36 @@
 
 <script>
 // ===== STATE =====
-let currentLang = localStorage.getItem('kaleya_lang') || 'sr';
+if (!localStorage.getItem('kaleya_lang_user_set') && localStorage.getItem('kaleya_lang') === 'sr') {
+    localStorage.setItem('kaleya_lang', 'en');
+}
+if (!localStorage.getItem('kaleya_voice_lang_user_set') && localStorage.getItem('kaleya_voice_lang') === 'sr') {
+    localStorage.setItem('kaleya_voice_lang', 'en');
+}
+let currentLang = localStorage.getItem('kaleya_lang') || 'en';
 let currentVoiceLang = localStorage.getItem('kaleya_voice_lang') || currentLang;
 let kaleyaActive = false;
 let recognition = null;
 let activeClientForApi = '';
 let schedule = [
-    { time: '10:00', name: 'Dr. Petrović - pregled', status: 'confirmed' },
-    { time: '14:30', name: 'Milica Jovanović - šišanje', status: 'confirmed' },
-    { time: '16:00', name: 'Tim sastanak', status: 'pending' },
+    { time: '10:00', nameKey: 'client1', status: 'confirmed' },
+    { time: '14:30', nameKey: 'client2', status: 'confirmed' },
+    { time: '16:00', nameKey: 'team', status: 'pending' },
 ];
 
+const CLIENT_SCHEDULE_NAMES = {
+    sr: { client1: 'Dr. Petrović - pregled', client2: 'Milica Jovanović - šišanje', team: 'Tim sastanak', newClient: 'Novi klijent - Kaleya zakazala' },
+    en: { client1: 'Dr. Michael Johnson - checkup', client2: 'Emily Carter - haircut', team: 'Team meeting', newClient: 'New client - scheduled by Kaleya' },
+    es: { client1: 'Dr. Alejandro Ruiz - revisión', client2: 'Lucía García - corte de pelo', team: 'Reunión de equipo', newClient: 'Nuevo cliente - Kaleya agendó' },
+    pt: { client1: 'Dr. João Pereira - consulta', client2: 'Ana Silva - corte de cabelo', team: 'Reunião da equipe', newClient: 'Novo cliente - Kaleya agendou' },
+    ru: { client1: 'Др. Алексей Петров - осмотр', client2: 'Анна Иванова - стрижка', team: 'Встреча команды', newClient: 'Новый клиент - Kaleya записала' },
+    fr: { client1: 'Dr. Thomas Bernard - controle', client2: 'Camille Martin - coiffure', team: 'Reunion equipe', newClient: 'Nouveau client - planifie par Kaleya' },
+    it: { client1: 'Dr. Marco Bianchi - visita', client2: 'Giulia Rossi - taglio capelli', team: 'Riunione team', newClient: 'Nuovo cliente - prenotato da Kaleya' }
+};
+
 // ===== TRANSLATIONS =====
-const LANG_LABELS = { sr: 'SR', en: 'EN', es: 'ES', pt: 'PT', ru: 'RU' };
-const BROWSER_LANG_MAP = { sr: 'sr-RS', en: 'en-US', es: 'es-ES', pt: 'pt-PT', ru: 'ru-RU' };
+const LANG_LABELS = { sr: 'SR', en: 'EN', es: 'ES', pt: 'PT', ru: 'RU', fr: 'FR', it: 'IT' };
+const BROWSER_LANG_MAP = { sr: 'sr-RS', en: 'en-US', es: 'es-ES', pt: 'pt-PT', ru: 'ru-RU', fr: 'fr-FR', it: 'it-IT' };
 
 const T = {
     sr: {
@@ -959,7 +981,7 @@ const T = {
         hero_cta_demo: 'Isprobaj besplatno', hero_cta_how: 'Pogledaj kako radi', hero_social: '500+ zadovoljnih firmi', hero_tap: 'Dodirni logo',
         hero_intro_hint: 'Kaleya se predstavlja', hero_demo_msg: '"Izvolite, kako mogu pomoći?"', integrates_with: 'Integracije:',
         feat_title: 'Sve što radi prava sekretarica, samo bolje', feat_sub: 'Kaleya razume klijente, pamti pravila i radi na jeziku koji korisnik izabere.',
-        f_lang_t: '5 jezika', f_lang_d: 'Srpski, English US, španski, portugalski i ruski sa ručnim izborom.',
+        f_lang_t: '7 jezika', f_lang_d: 'Srpski, English US, španski, portugalski, ruski, francuski i italijanski sa ručnim izborom.',
         f2_t: 'Pametno zakazivanje', f2_d: 'Proverava kalendar i predlaže slobodne termine.',
         f3_t: 'Prirodan glas', f3_d: 'ElevenLabs glas za prirodnije razgovore.',
         f_alarm_t: 'Alarmi za osoblje', f_alarm_d: 'Najava sledećeg klijenta i hitan poziv za razgovor.',
@@ -968,7 +990,7 @@ const T = {
         how_t: 'Kaleya uči vaš posao za 1 dan', how1_t: 'Poveži kanal', how1_d: 'Telefon, WhatsApp, Telegram, Viber ili SMS.',
         how2_t: 'Nauči Kaleyu', how2_d: 'Upiši radno vreme, usluge i pravila zakazivanja.',
         how3_t: 'Izaberi jezik i glas', how3_d: 'Kaleya govori jezikom koji klijent izabere.',
-        price_t: 'Jednostavne cene', price_s: 'Tri paketa za različite nivoe automatizacije.',
+        price_t: 'Jednostavne cene', price_s: 'Četiri paketa za različite nivoe automatizacije.',
         p1_d: 'Za male timove', p1_f1: '2 jezika', p1_f2: 'Zakazivanje termina', p2_d: 'Za rastuće firme', p2_f1: '5 jezika', p2_f3: 'Alarmi i obaveštenja',
         p3_d: 'Za pozivne centre', p3_f1: 'Neograničeni jezici prema dogovoru', p3_f2: 'Napredni admin i SLA', p3_f4: 'Integracije po meri',
         p4_d: 'Kompletan projekat', p4_note: 'Sve detalje prikazujemo na posebnoj Buy All strani.', custom_price: 'Po dogovoru',
@@ -976,7 +998,7 @@ const T = {
         footer_privacy: 'Privatnost', footer_terms: 'Uslovi',
         back_home: 'Nazad', login_title: 'Dobrodošli nazad', login_sub: 'Prijavite se na Kaleya',
         email: 'Email', password: 'Lozinka', login_btn: 'Prijavi se', login_err: 'Pogrešan email ili lozinka',
-        client_active: 'aktivna', client_greet: 'Dobro jutro, Marko', client_how: 'Kako mogu pomoći danas?',
+        client_active: 'online', client_greet: 'Dobro jutro, Marko', client_how: 'Kako mogu pomoći danas?',
         say_wake: 'Reci "hej Kaleya"', tap_to_talk: 'Dodirnite za razgovor', listening: 'Slušam...', quick: 'Brze akcije',
         qa1: 'Zakaži', qa1_s: 'Novi termin', qa2: 'Otkaži', qa2_s: 'Sastanak', qa3: 'Proveri', qa3_s: 'Termine',
         today: 'Danas', nav_home: 'Početna', nav_cal: 'Kalendar', nav_set: 'Podeš.',
@@ -1003,7 +1025,7 @@ const T = {
         hero_cta_demo: 'Try for free', hero_cta_how: 'See how it works', hero_social: '500+ happy businesses', hero_tap: 'Tap the logo',
         hero_intro_hint: 'Kaleya introduces itself', hero_demo_msg: '"Hello, how can I help?"', integrates_with: 'Integrations:',
         feat_title: 'Everything a real receptionist does, only better', feat_sub: 'Kaleya understands clients, remembers rules and works in the selected language.',
-        f_lang_t: '5 languages', f_lang_d: 'Serbian, English US, Spanish, Portuguese and Russian with manual selection.',
+        f_lang_t: '7 languages', f_lang_d: 'Serbian, English US, Spanish, Portuguese, Russian, French and Italian with manual selection.',
         f2_t: 'Smart scheduling', f2_d: 'Checks the calendar and suggests available slots.',
         f3_t: 'Natural voice', f3_d: 'ElevenLabs voice for more natural conversations.',
         f_alarm_t: 'Staff alarms', f_alarm_d: 'Next-client announcement and urgent call request.',
@@ -1012,7 +1034,7 @@ const T = {
         how_t: 'Kaleya learns your business in 1 day', how1_t: 'Connect a channel', how1_d: 'Phone, WhatsApp, Telegram, Viber or SMS.',
         how2_t: 'Teach Kaleya', how2_d: 'Add working hours, services and scheduling rules.',
         how3_t: 'Choose language and voice', how3_d: 'Kaleya speaks the language the client selects.',
-        price_t: 'Simple pricing', price_s: 'Three packages for different automation levels.',
+        price_t: 'Simple pricing', price_s: 'Four packages for different automation levels.',
         p1_d: 'For small teams', p1_f1: '2 languages', p1_f2: 'Appointment scheduling', p2_d: 'For growing companies', p2_f1: '5 languages', p2_f3: 'Alarms and notifications',
         p3_d: 'For call centers', p3_f1: 'More languages by agreement', p3_f2: 'Advanced admin and SLA', p3_f4: 'Custom integrations',
         p4_d: 'Complete project', p4_note: 'All details are shown on the dedicated Buy All page.', custom_price: 'By agreement',
@@ -1020,7 +1042,7 @@ const T = {
         footer_privacy: 'Privacy', footer_terms: 'Terms',
         back_home: 'Back', login_title: 'Welcome back', login_sub: 'Sign in to Kaleya',
         email: 'Email', password: 'Password', login_btn: 'Sign in', login_err: 'Wrong email or password',
-        client_active: 'active', client_greet: 'Good morning, Marko', client_how: 'How can I help today?',
+        client_active: 'online', client_greet: 'Good morning, Marko', client_how: 'How can I help today?',
         say_wake: 'Say "hey Kaleya"', tap_to_talk: 'Tap to talk', listening: 'Listening...', quick: 'Quick actions',
         qa1: 'Schedule', qa1_s: 'New slot', qa2: 'Cancel', qa2_s: 'Meeting', qa3: 'Check', qa3_s: 'Slots',
         today: 'Today', nav_home: 'Home', nav_cal: 'Calendar', nav_set: 'Settings',
@@ -1047,7 +1069,7 @@ const T = {
         hero_cta_demo: 'Probar gratis', hero_cta_how: 'Ver cómo funciona', hero_social: '500+ empresas satisfechas', hero_tap: 'Toca el logo',
         hero_intro_hint: 'Kaleya se presenta', hero_demo_msg: '"Hola, ¿cómo puedo ayudar?"', integrates_with: 'Integraciones:',
         feat_title: 'Todo lo que hace una recepcionista, pero mejor', feat_sub: 'Kaleya entiende clientes, recuerda reglas y trabaja en el idioma elegido.',
-        f_lang_t: '5 idiomas', f_lang_d: 'Serbio, inglés US, español, portugués y ruso con selección manual.',
+        f_lang_t: '7 idiomas', f_lang_d: 'Serbio, inglés US, español, portugués, ruso, francés e italiano con selección manual.',
         f2_t: 'Agenda inteligente', f2_d: 'Revisa el calendario y propone horarios libres.',
         f3_t: 'Voz natural', f3_d: 'Voz de ElevenLabs para conversaciones más naturales.',
         f_alarm_t: 'Alarmas para el equipo', f_alarm_d: 'Aviso del siguiente cliente y solicitud urgente de conversación.',
@@ -1056,7 +1078,7 @@ const T = {
         how_t: 'Kaleya aprende tu negocio en 1 día', how1_t: 'Conecta un canal', how1_d: 'Teléfono, WhatsApp, Telegram, Viber o SMS.',
         how2_t: 'Entrena a Kaleya', how2_d: 'Añade horarios, servicios y reglas de agenda.',
         how3_t: 'Elige idioma y voz', how3_d: 'Kaleya habla el idioma que el cliente elige.',
-        price_t: 'Precios simples', price_s: 'Tres paquetes para distintos niveles de automatización.',
+        price_t: 'Precios simples', price_s: 'Cuatro paquetes para distintos niveles de automatización.',
         p1_d: 'Para equipos pequeños', p1_f1: '2 idiomas', p1_f2: 'Agenda de citas', p2_d: 'Para empresas en crecimiento', p2_f1: '5 idiomas', p2_f3: 'Alarmas y notificaciones',
         p3_d: 'Para centros de llamadas', p3_f1: 'Más idiomas bajo acuerdo', p3_f2: 'Admin avanzado y SLA', p3_f4: 'Integraciones a medida',
         p4_d: 'Proyecto completo', p4_note: 'Todos los detalles están en la página Buy All.', custom_price: 'A convenir',
@@ -1064,7 +1086,7 @@ const T = {
         footer_privacy: 'Privacidad', footer_terms: 'Términos',
         back_home: 'Atrás', login_title: 'Bienvenido de nuevo', login_sub: 'Inicia sesión en Kaleya',
         email: 'Email', password: 'Contraseña', login_btn: 'Entrar', login_err: 'Email o contraseña incorrectos',
-        client_active: 'activa', client_greet: 'Buenos días, Marko', client_how: '¿Cómo puedo ayudar hoy?',
+        client_active: 'online', client_greet: 'Buenos días, Marko', client_how: '¿Cómo puedo ayudar hoy?',
         say_wake: 'Di "hey Kaleya"', tap_to_talk: 'Toca para hablar', listening: 'Escuchando...', quick: 'Acciones rápidas',
         qa1: 'Agendar', qa1_s: 'Nueva cita', qa2: 'Cancelar', qa2_s: 'Reunión', qa3: 'Revisar', qa3_s: 'Horarios',
         today: 'Hoy', nav_home: 'Inicio', nav_cal: 'Calendario', nav_set: 'Ajustes',
@@ -1091,7 +1113,7 @@ const T = {
         hero_cta_demo: 'Testar grátis', hero_cta_how: 'Ver como funciona', hero_social: '500+ empresas satisfeitas', hero_tap: 'Toque no logo',
         hero_intro_hint: 'Kaleya se apresenta', hero_demo_msg: '"Olá, como posso ajudar?"', integrates_with: 'Integrações:',
         feat_title: 'Tudo que uma recepcionista faz, só que melhor', feat_sub: 'Kaleya entende clientes, lembra regras e trabalha no idioma escolhido.',
-        f_lang_t: '5 idiomas', f_lang_d: 'Sérvio, inglês US, espanhol, português e russo com seleção manual.',
+        f_lang_t: '7 idiomas', f_lang_d: 'Sérvio, inglês US, espanhol, português, russo, francês e italiano com seleção manual.',
         f2_t: 'Agendamento inteligente', f2_d: 'Verifica o calendário e sugere horários livres.',
         f3_t: 'Voz natural', f3_d: 'Voz ElevenLabs para conversas mais naturais.',
         f_alarm_t: 'Alarmes para equipe', f_alarm_d: 'Aviso do próximo cliente e chamada urgente.',
@@ -1100,7 +1122,7 @@ const T = {
         how_t: 'Kaleya aprende seu negócio em 1 dia', how1_t: 'Conecte um canal', how1_d: 'Telefone, WhatsApp, Telegram, Viber ou SMS.',
         how2_t: 'Ensine a Kaleya', how2_d: 'Adicione horários, serviços e regras de agenda.',
         how3_t: 'Escolha idioma e voz', how3_d: 'Kaleya fala o idioma escolhido pelo cliente.',
-        price_t: 'Preços simples', price_s: 'Três pacotes para diferentes níveis de automação.',
+        price_t: 'Preços simples', price_s: 'Quatro pacotes para diferentes níveis de automação.',
         p1_d: 'Para equipes pequenas', p1_f1: '2 idiomas', p1_f2: 'Agendamento', p2_d: 'Para empresas em crescimento', p2_f1: '5 idiomas', p2_f3: 'Alarmes e notificações',
         p3_d: 'Para call centers', p3_f1: 'Mais idiomas sob acordo', p3_f2: 'Admin avançado e SLA', p3_f4: 'Integrações sob medida',
         p4_d: 'Projeto completo', p4_note: 'Todos os detalhes aparecem na página Buy All.', custom_price: 'Sob acordo',
@@ -1108,7 +1130,7 @@ const T = {
         footer_privacy: 'Privacidade', footer_terms: 'Termos',
         back_home: 'Voltar', login_title: 'Bem-vindo de volta', login_sub: 'Entrar na Kaleya',
         email: 'Email', password: 'Senha', login_btn: 'Entrar', login_err: 'Email ou senha incorretos',
-        client_active: 'ativa', client_greet: 'Bom dia, Marko', client_how: 'Como posso ajudar hoje?',
+        client_active: 'online', client_greet: 'Bom dia, Marko', client_how: 'Como posso ajudar hoje?',
         say_wake: 'Diga "hey Kaleya"', tap_to_talk: 'Toque para falar', listening: 'Ouvindo...', quick: 'Ações rápidas',
         qa1: 'Agendar', qa1_s: 'Novo horário', qa2: 'Cancelar', qa2_s: 'Reunião', qa3: 'Verificar', qa3_s: 'Horários',
         today: 'Hoje', nav_home: 'Início', nav_cal: 'Calendário', nav_set: 'Ajustes',
@@ -1135,7 +1157,7 @@ const T = {
         hero_cta_demo: 'Попробовать бесплатно', hero_cta_how: 'Как это работает', hero_social: '500+ довольных компаний', hero_tap: 'Нажмите логотип',
         hero_intro_hint: 'Kaleya представляется', hero_demo_msg: '"Здравствуйте, чем могу помочь?"', integrates_with: 'Интеграции:',
         feat_title: 'Все, что делает администратор, только лучше', feat_sub: 'Kaleya понимает клиентов, помнит правила и работает на выбранном языке.',
-        f_lang_t: '5 языков', f_lang_d: 'Сербский, английский US, испанский, португальский и русский с ручным выбором.',
+        f_lang_t: '7 языков', f_lang_d: 'Сербский, английский US, испанский, португальский, русский, французский и итальянский с ручным выбором.',
         f2_t: 'Умная запись', f2_d: 'Проверяет календарь и предлагает свободное время.',
         f3_t: 'Естественный голос', f3_d: 'Голос ElevenLabs для более естественных разговоров.',
         f_alarm_t: 'Оповещения персонала', f_alarm_d: 'Следующий клиент и срочный запрос на разговор.',
@@ -1144,7 +1166,7 @@ const T = {
         how_t: 'Kaleya изучает бизнес за 1 день', how1_t: 'Подключите канал', how1_d: 'Телефон, WhatsApp, Telegram, Viber или SMS.',
         how2_t: 'Обучите Kaleya', how2_d: 'Добавьте часы работы, услуги и правила записи.',
         how3_t: 'Выберите язык и голос', how3_d: 'Kaleya говорит на языке, выбранном клиентом.',
-        price_t: 'Простые тарифы', price_s: 'Три пакета для разных уровней автоматизации.',
+        price_t: 'Простые тарифы', price_s: 'Четыре пакета для разных уровней автоматизации.',
         p1_d: 'Для малых команд', p1_f1: '2 языка', p1_f2: 'Запись на прием', p2_d: 'Для растущих компаний', p2_f1: '5 языков', p2_f3: 'Оповещения и уведомления',
         p3_d: 'Для колл-центров', p3_f1: 'Больше языков по договоренности', p3_f2: 'Расширенный админ и SLA', p3_f4: 'Индивидуальные интеграции',
         p4_d: 'Полный проект', p4_note: 'Все детали находятся на отдельной странице Buy All.', custom_price: 'По договоренности',
@@ -1152,7 +1174,7 @@ const T = {
         footer_privacy: 'Конфиденциальность', footer_terms: 'Условия',
         back_home: 'Назад', login_title: 'С возвращением', login_sub: 'Войти в Kaleya',
         email: 'Email', password: 'Пароль', login_btn: 'Войти', login_err: 'Неверный email или пароль',
-        client_active: 'активна', client_greet: 'Доброе утро, Marko', client_how: 'Чем помочь сегодня?',
+        client_active: 'online', client_greet: 'Доброе утро, Marko', client_how: 'Чем помочь сегодня?',
         say_wake: 'Скажите "hey Kaleya"', tap_to_talk: 'Нажмите, чтобы говорить', listening: 'Слушаю...', quick: 'Быстрые действия',
         qa1: 'Записать', qa1_s: 'Новый слот', qa2: 'Отменить', qa2_s: 'Встреча', qa3: 'Проверить', qa3_s: 'Время',
         today: 'Сегодня', nav_home: 'Главная', nav_cal: 'Календарь', nav_set: 'Настр.',
@@ -1174,8 +1196,72 @@ const T = {
     }
 };
 
+T.fr = {
+    ...T.en,
+    nav_features: 'Fonctionnalites', nav_how: 'Comment ca marche', nav_pricing: 'Tarifs', nav_login: 'Connexion',
+    hero_badge: 'Receptionniste IA · active 24/7', hero_sub: 'Kaleya repond, planifie, annule et alerte votre equipe avec une voix naturelle. Fonctionne avec appels, WhatsApp, Viber, Telegram et SMS.',
+    hero_cta_demo: 'Essayer gratuitement', hero_cta_how: 'Voir le fonctionnement', hero_social: '500+ entreprises satisfaites', hero_tap: 'Touchez le logo',
+    hero_intro_hint: 'Kaleya se presente', hero_demo_msg: '"Bonjour, comment puis-je aider ?"',
+    feat_title: 'Tout ce qu une receptionniste fait, en mieux', feat_sub: 'Kaleya comprend les clients, retient les regles et travaille dans la langue choisie.',
+    f_lang_t: '7 langues', f_lang_d: 'Serbe, anglais US, espagnol, portugais, russe, francais et italien avec choix manuel.',
+    f2_t: 'Planification intelligente', f2_d: 'Verifie le calendrier et propose les creneaux libres.',
+    f3_t: 'Voix naturelle', f3_d: 'Voix ElevenLabs pour des conversations plus naturelles.',
+    f_alarm_t: 'Alertes equipe', f_alarm_d: 'Annonce du prochain client et demande urgente de conversation.',
+    f_msg_t: 'Canaux de messages', f_msg_d: 'WhatsApp, Viber, Telegram, SMS et appels telephoniques.',
+    how_t: 'Kaleya apprend votre activite en 1 jour', how1_t: 'Connecter un canal', how2_t: 'Former Kaleya', how3_t: 'Choisir langue et voix',
+    price_t: 'Tarifs simples', price_s: 'Quatre forfaits pour differents niveaux d automatisation.',
+    p1_d: 'Pour petites equipes', p2_d: 'Pour entreprises en croissance', p3_d: 'Pour centres d appels', p4_d: 'Projet complet',
+    popular: 'POPULAIRE', price_btn: 'Commencer', price_btn2: 'Essayer 14 jours', trial_btn: 'Essayer 14 jours', price_contact: 'Contact',
+    footer_privacy: 'Confidentialite', footer_terms: 'Conditions',
+    back_home: 'Retour', login_title: 'Bon retour', login_sub: 'Connectez-vous a Kaleya', password: 'Mot de passe', login_btn: 'Connexion', login_err: 'Email ou mot de passe incorrect',
+    client_active: 'online', client_greet: 'Bonjour, Marko', client_how: 'Comment puis-je aider aujourd hui ?',
+    say_wake: 'Dites "hey Kaleya"', tap_to_talk: 'Touchez pour parler', listening: 'J ecoute...', quick: 'Actions rapides',
+    qa1: 'Planifier', qa1_s: 'Nouveau creneau', qa2: 'Annuler', qa2_s: 'Rendez-vous', qa3: 'Verifier', qa3_s: 'Creneaux',
+    today: 'Aujourd hui', nav_home: 'Accueil', nav_cal: 'Calendrier', nav_set: 'Reglages',
+    cset_t: 'Reglages', cset_ui_lang: 'Langue interface', cset_voice_lang: 'Langue de la voix Kaleya',
+    cset_el_desc: 'Voix naturelle via ElevenLabs', cset_test: 'Tester la voix Kaleya', cset_note: 'L administrateur regle la cle API; le client choisit seulement la langue et le comportement.',
+    cset_integrations: 'Canaux de planification', cset_alarm: 'Alertes equipe', active: 'Actif', pending: 'En attente',
+    queue_alarm: 'Alerte prochain client', emergency_alarm: 'Alerte urgente', voice_alarm: 'Activer l annonce vocale',
+    ad_dash: 'Tableau de bord', ad_clients: 'Clients', ad_alarms: 'Alertes', ad_integrations: 'Integrations', ad_set: 'Reglages', logout: 'Deconnexion',
+    support_alarm_future: 'Alerte support humain plus tard', support_alarm_desc: 'Cet onglet servira quand l IA ne peut pas terminer une demande et doit connecter le client au support.',
+    global_ai_settings: 'API IA globale', save_global_api: 'Sauvegarder API globale', client_api_title: 'API par client', save_client_api: 'Sauvegarder pour client',
+    alarm_log_title: 'Journal des alertes', alarm_log_empty: 'Aucune alerte activee.'
+};
+
+T.it = {
+    ...T.en,
+    nav_features: 'Funzioni', nav_how: 'Come funziona', nav_pricing: 'Prezzi', nav_login: 'Login',
+    hero_badge: 'Receptionist AI · attiva 24/7', hero_sub: 'Kaleya risponde, prenota, annulla e avvisa il team con voce naturale. Funziona con chiamate, WhatsApp, Viber, Telegram e SMS.',
+    hero_cta_demo: 'Prova gratis', hero_cta_how: 'Vedi come funziona', hero_social: '500+ aziende soddisfatte', hero_tap: 'Tocca il logo',
+    hero_intro_hint: 'Kaleya si presenta', hero_demo_msg: '"Ciao, come posso aiutare?"',
+    feat_title: 'Tutto cio che fa una receptionist, ma meglio', feat_sub: 'Kaleya capisce i clienti, ricorda le regole e lavora nella lingua scelta.',
+    f_lang_t: '7 lingue', f_lang_d: 'Serbo, inglese US, spagnolo, portoghese, russo, francese e italiano con scelta manuale.',
+    f2_t: 'Prenotazione intelligente', f2_d: 'Controlla il calendario e propone slot liberi.',
+    f3_t: 'Voce naturale', f3_d: 'Voce ElevenLabs per conversazioni piu naturali.',
+    f_alarm_t: 'Allarmi team', f_alarm_d: 'Annuncio del prossimo cliente e richiesta urgente di conversazione.',
+    f_msg_t: 'Canali messaggi', f_msg_d: 'WhatsApp, Viber, Telegram, SMS e chiamate.',
+    how_t: 'Kaleya impara la tua attivita in 1 giorno', how1_t: 'Collega un canale', how2_t: 'Istruisci Kaleya', how3_t: 'Scegli lingua e voce',
+    price_t: 'Prezzi semplici', price_s: 'Quattro pacchetti per diversi livelli di automazione.',
+    p1_d: 'Per piccoli team', p2_d: 'Per aziende in crescita', p3_d: 'Per call center', p4_d: 'Progetto completo',
+    popular: 'POPOLARE', price_btn: 'Inizia', price_btn2: 'Prova 14 giorni', trial_btn: 'Prova 14 giorni', price_contact: 'Contatto',
+    footer_privacy: 'Privacy', footer_terms: 'Termini',
+    back_home: 'Indietro', login_title: 'Bentornato', login_sub: 'Accedi a Kaleya', password: 'Password', login_btn: 'Accedi', login_err: 'Email o password errati',
+    client_active: 'online', client_greet: 'Buongiorno, Marko', client_how: 'Come posso aiutare oggi?',
+    say_wake: 'Dici "hey Kaleya"', tap_to_talk: 'Tocca per parlare', listening: 'Sto ascoltando...', quick: 'Azioni rapide',
+    qa1: 'Prenota', qa1_s: 'Nuovo slot', qa2: 'Annulla', qa2_s: 'Riunione', qa3: 'Controlla', qa3_s: 'Slot',
+    today: 'Oggi', nav_home: 'Home', nav_cal: 'Calendario', nav_set: 'Impost.',
+    cset_t: 'Impostazioni', cset_ui_lang: 'Lingua interfaccia', cset_voice_lang: 'Lingua voce Kaleya',
+    cset_el_desc: 'Voce naturale tramite ElevenLabs', cset_test: 'Testa voce Kaleya', cset_note: 'L amministratore imposta la API key; il cliente sceglie solo lingua e comportamento.',
+    cset_integrations: 'Canali prenotazione', cset_alarm: 'Allarmi team', active: 'Attivo', pending: 'In attesa',
+    queue_alarm: 'Allarme prossimo cliente', emergency_alarm: 'Allarme urgente', voice_alarm: 'Abilita annuncio vocale',
+    ad_dash: 'Dashboard', ad_clients: 'Clienti', ad_alarms: 'Allarmi', ad_integrations: 'Integrazioni', ad_set: 'Impostazioni', logout: 'Logout',
+    support_alarm_future: 'Allarme supporto umano piu avanti', support_alarm_desc: 'Questo tab servira quando l AI non riesce a completare una richiesta e deve collegare il cliente al supporto.',
+    global_ai_settings: 'API AI globale', save_global_api: 'Salva API globale', client_api_title: 'API per cliente', save_client_api: 'Salva per cliente',
+    alarm_log_title: 'Registro allarmi', alarm_log_empty: 'Nessun allarme attivato.'
+};
+
 function tr(key) {
-    return (T[currentLang] && T[currentLang][key]) || T.sr[key] || key;
+    return (T[currentLang] && T[currentLang][key]) || T.en[key] || T.sr[key] || key;
 }
 
 function applyLang() {
@@ -1184,7 +1270,7 @@ function applyLang() {
         el.textContent = tr(key);
     });
     const label = document.getElementById('currentLangLabel');
-    if (label) label.textContent = LANG_LABELS[currentLang] || 'SR';
+    if (label) label.textContent = LANG_LABELS[currentLang] || 'EN';
     document.documentElement.lang = currentLang;
     updateClientLangButtons();
     renderSchedule();
@@ -1194,6 +1280,7 @@ function setLang(lang) {
     if (!T[lang]) return;
     currentLang = lang;
     localStorage.setItem('kaleya_lang', lang);
+    localStorage.setItem('kaleya_lang_user_set', '1');
     if (!localStorage.getItem('kaleya_voice_lang')) currentVoiceLang = lang;
     applyLang();
     document.getElementById('langDropdown')?.classList.remove('open');
@@ -1210,7 +1297,7 @@ document.addEventListener('click', (event) => {
 });
 
 function updateClientLangButtons() {
-    ['SR','EN','ES','PT','RU'].forEach(code => {
+    ['SR','EN','ES','PT','RU','FR','IT'].forEach(code => {
         const btn = document.getElementById('clientLang' + code);
         if (btn) btn.classList.toggle('active', code.toLowerCase() === currentLang);
     });
@@ -1252,9 +1339,11 @@ async function logoTap() {
         en: 'Hello, I am Kaleya, an AI receptionist that answers calls, schedules appointments and alerts your team.',
         es: 'Hola, soy Kaleya, una recepcionista de IA que atiende llamadas, agenda citas y avisa a tu equipo.',
         pt: 'Olá, eu sou Kaleya, uma recepcionista de IA que atende chamadas, agenda horários e avisa sua equipe.',
-        ru: 'Здравствуйте, я Kaleya, AI администратор, который отвечает на звонки, записывает клиентов и уведомляет команду.'
+        ru: 'Здравствуйте, я Kaleya, AI администратор, который отвечает на звонки, записывает клиентов и уведомляет команду.',
+        fr: 'Bonjour, je suis Kaleya, une receptionniste IA qui repond aux appels, planifie les rendez-vous et informe votre equipe.',
+        it: 'Ciao, sono Kaleya, una receptionist AI che risponde alle chiamate, organizza appuntamenti e avvisa il tuo team.'
     };
-    await speak(intro[currentLang] || intro.sr, currentLang);
+    await speak(intro[currentLang] || intro.en, currentLang);
 }
 
 // ===== LOGIN =====
@@ -1309,7 +1398,7 @@ async function speak(text, langOverride) {
     // Fallback
     if (!('speechSynthesis' in window)) return;
     const utter = new SpeechSynthesisUtterance(text);
-    utter.lang = BROWSER_LANG_MAP[lang] || 'sr-RS';
+    utter.lang = BROWSER_LANG_MAP[lang] || 'en-US';
     utter.rate = 1;
     speechSynthesis.cancel();
     speechSynthesis.speak(utter);
@@ -1329,9 +1418,11 @@ async function toggleKaleya() {
             en: 'Hello, how can I help?',
             es: 'Hola, ¿cómo puedo ayudar?',
             pt: 'Olá, como posso ajudar?',
-            ru: 'Здравствуйте, чем могу помочь?'
+            ru: 'Здравствуйте, чем могу помочь?',
+            fr: 'Bonjour, comment puis-je aider ?',
+            it: 'Ciao, come posso aiutare?'
         };
-        await speak(greeting[currentVoiceLang] || greeting.sr, currentVoiceLang);
+        await speak(greeting[currentVoiceLang] || greeting.en, currentVoiceLang);
         document.getElementById('kaleyaStatus').textContent = tr('listening');
         startListening();
         setTimeout(() => { if(kaleyaActive) toggleKaleya(); }, 8000);
@@ -1360,7 +1451,7 @@ function startListening() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SR();
     recognition.continuous = true;
-    recognition.lang = BROWSER_LANG_MAP[currentVoiceLang] || 'sr-RS';
+    recognition.lang = BROWSER_LANG_MAP[currentVoiceLang] || 'en-US';
     recognition.onresult = (e) => {
         const transcript = Array.from(e.results).map(r => r[0].transcript.toLowerCase()).join(' ');
         if (transcript.includes('hej kaleya') || transcript.includes('hey kaleya')) {
@@ -1383,24 +1474,30 @@ async function handleQuickAction(action) {
             en: 'The appointment is scheduled for tomorrow at 3 PM',
             es: 'La cita está agendada para mañana a las 15:00',
             pt: 'O horário foi agendado para amanhã às 15:00',
-            ru: 'Запись назначена на завтра в 15:00'
+            ru: 'Запись назначена на завтра в 15:00',
+            fr: 'Le rendez-vous est planifie pour demain a 15:00',
+            it: 'L appuntamento e prenotato per domani alle 15:00'
         },
         otkazi: {
             sr: 'Sastanak je otkazan',
             en: 'The meeting has been cancelled',
             es: 'La reunión fue cancelada',
             pt: 'A reunião foi cancelada',
-            ru: 'Встреча отменена'
+            ru: 'Встреча отменена',
+            fr: 'Le rendez-vous a ete annule',
+            it: 'La riunione e stata annullata'
         },
         proveri: {
             sr: 'Imate 3 slobodna termina danas',
             en: 'You have 3 available slots today',
             es: 'Tiene 3 horarios libres hoy',
             pt: 'Você tem 3 horários livres hoje',
-            ru: 'Сегодня доступно 3 свободных времени'
+            ru: 'Сегодня доступно 3 свободных времени',
+            fr: 'Vous avez 3 creneaux libres aujourd hui',
+            it: 'Hai 3 slot disponibili oggi'
         }
     };
-    const msg = (messages[action] && (messages[action][currentVoiceLang] || messages[action][currentLang])) || messages.proveri.sr;
+    const msg = (messages[action] && (messages[action][currentVoiceLang] || messages[action][currentLang])) || messages.proveri.en;
     if (action === 'zakazi') addAppointment();
     await speak(msg, currentVoiceLang);
     showToast(msg);
@@ -1410,22 +1507,22 @@ function renderSchedule() {
     const list = document.getElementById('scheduleList');
     if (!list) return;
     const statusText = {
-        confirmed: { sr: 'Potvrđeno', en: 'Confirmed', es: 'Confirmado', pt: 'Confirmado', ru: 'Подтверждено' },
-        pending: { sr: 'Na čekanju', en: 'Pending', es: 'Pendiente', pt: 'Pendente', ru: 'В ожидании' }
+        confirmed: { sr: 'Potvrđeno', en: 'Confirmed', es: 'Confirmado', pt: 'Confirmado', ru: 'Подтверждено', fr: 'Confirme', it: 'Confermato' },
+        pending: { sr: 'Na čekanju', en: 'Pending', es: 'Pendiente', pt: 'Pendente', ru: 'В ожидании', fr: 'En attente', it: 'In attesa' }
     };
     list.innerHTML = schedule.map(item => `
         <div class="group flex items-center gap-3 p-3.5 rounded-[18px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-md transition">
             <div class="w-11 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 grid place-items-center font-mono text-[13px] font-semibold">${item.time}</div>
             <div class="flex-1 min-w-0">
-                <p class="text-[14px] font-medium truncate">${item.name}</p>
-                <p class="text-[11px] text-slate-500">${statusText[item.status]?.[currentLang] || statusText.pending.sr}</p>
+                <p class="text-[14px] font-medium truncate">${CLIENT_SCHEDULE_NAMES[currentLang]?.[item.nameKey] || CLIENT_SCHEDULE_NAMES.en[item.nameKey] || item.nameKey}</p>
+                <p class="text-[11px] text-slate-500">${statusText[item.status]?.[currentLang] || statusText[item.status]?.en || statusText.pending.en}</p>
             </div>
             <span class="w-2 h-2 rounded-full ${item.status==='confirmed'?'bg-green-500':'bg-amber-500'}"></span>
         </div>
     `).join('');
 }
 function addAppointment() {
-    schedule.unshift({ time: '15:00', name: 'Novi klijent - Kaleya zakazala', status: 'confirmed' });
+    schedule.unshift({ time: '15:00', nameKey: 'newClient', status: 'confirmed' });
     renderSchedule();
 }
 
@@ -1443,6 +1540,7 @@ function saveClientVoiceLang() {
     const value = document.getElementById('clientVoiceLang')?.value || currentLang;
     currentVoiceLang = value;
     localStorage.setItem('kaleya_voice_lang', value);
+    localStorage.setItem('kaleya_voice_lang_user_set', '1');
     showToast('Jezik glasa je sačuvan');
 }
 async function testVoice() {
@@ -1451,9 +1549,11 @@ async function testVoice() {
         en: 'Hello, this is Kaleya. How can I help?',
         es: 'Hola, soy Kaleya. ¿Cómo puedo ayudar?',
         pt: 'Olá, aqui é Kaleya. Como posso ajudar?',
-        ru: 'Здравствуйте, это Kaleya. Чем могу помочь?'
+        ru: 'Здравствуйте, это Kaleya. Чем могу помочь?',
+        fr: 'Bonjour, ici Kaleya. Comment puis-je aider ?',
+        it: 'Ciao, sono Kaleya. Come posso aiutare?'
     };
-    await speak(text[currentVoiceLang] || text.sr, currentVoiceLang);
+    await speak(text[currentVoiceLang] || text.en, currentVoiceLang);
 }
 
 // ===== ADMIN =====
@@ -1599,13 +1699,15 @@ async function fireQueueAlarm(name = 'Marko Petrović') {
         en: `Client ${name} is next in line.`,
         es: `El cliente ${name} es el siguiente.`,
         pt: `O cliente ${name} é o próximo.`,
-        ru: `Клиент ${name} следующий в очереди.`
+        ru: `Клиент ${name} следующий в очереди.`,
+        fr: `Client ${name} est le prochain.`,
+        it: `Il cliente ${name} e il prossimo.`
     };
-    document.getElementById('notifQueueText').textContent = text[currentLang] || text.sr;
+    document.getElementById('notifQueueText').textContent = text[currentLang] || text.en;
     document.getElementById('notifQueue')?.classList.remove('hidden');
     playAlarmSound('queue');
-    addAlarmLog('queue', text[currentLang] || text.sr);
-    await speak(text[currentVoiceLang] || text.sr, currentVoiceLang);
+    addAlarmLog('queue', text[currentLang] || text.en);
+    await speak(text[currentVoiceLang] || text.en, currentVoiceLang);
 }
 
 function fireQueueAlarmCustom() {
@@ -1620,14 +1722,16 @@ async function fireEmergencyAlarm(name = '') {
         en: hasName ? `Client ${name} wants to speak with you.` : 'A client wants to speak with you.',
         es: hasName ? `El cliente ${name} quiere hablar con usted.` : 'Un cliente quiere hablar con usted.',
         pt: hasName ? `O cliente ${name} quer falar com você.` : 'Um cliente quer falar com você.',
-        ru: hasName ? `Клиент ${name} хочет поговорить с вами.` : 'Клиент хочет поговорить с вами.'
+        ru: hasName ? `Клиент ${name} хочет поговорить с вами.` : 'Клиент хочет поговорить с вами.',
+        fr: hasName ? `Le client ${name} veut vous parler.` : 'Un client veut vous parler.',
+        it: hasName ? `Il cliente ${name} vuole parlare con te.` : 'Un cliente vuole parlare con te.'
     };
-    document.getElementById('notifEmergText').textContent = text[currentLang] || text.sr;
+    document.getElementById('notifEmergText').textContent = text[currentLang] || text.en;
     document.getElementById('notifEmergency')?.classList.remove('hidden');
     playAlarmSound('emergency');
-    addAlarmLog('emergency', text[currentLang] || text.sr);
+    addAlarmLog('emergency', text[currentLang] || text.en);
     const voiceEnabled = document.getElementById('emergVoiceEnabled')?.checked ?? document.getElementById('clientEmergVoiceEnabled')?.checked ?? true;
-    if (voiceEnabled) await speak(text[currentVoiceLang] || text.sr, currentVoiceLang);
+    if (voiceEnabled) await speak(text[currentVoiceLang] || text.en, currentVoiceLang);
 }
 
 function dismissNotif(id) {
@@ -1653,7 +1757,7 @@ function showToast(text) {
 
 // ===== INIT =====
 initTheme();
-if (!T[currentLang]) currentLang = 'sr';
+if (!T[currentLang]) currentLang = 'en';
 if (!T[currentVoiceLang]) currentVoiceLang = currentLang;
 applyLang();
 renderSchedule();

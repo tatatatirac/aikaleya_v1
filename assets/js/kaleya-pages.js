@@ -266,22 +266,219 @@ const PAGE_LANGS = {
     }
 };
 
+PAGE_LANGS.fr = {
+    ...PAGE_LANGS.en,
+    back_home: 'Retour accueil',
+    demo_badge: 'Demo cliquable',
+    demo_title: 'Comment Kaleya fonctionne en pratique',
+    demo_lead: 'Les vues mobile et ordinateur sont un environnement demo. Les boutons sont cliquables et la voix se lance depuis un fichier MP3.',
+    mobile_title: 'App client',
+    laptop_title: 'App client',
+    voice_cta: 'Lire la voix Kaleya',
+    schedule: 'Planifier',
+    cancel: 'Annuler',
+    check: 'Verifier',
+    status_ready: 'Prete a parler',
+    status_scheduled: 'Le rendez-vous demo est planifie a 15:00',
+    status_cancelled: 'Le rendez-vous demo a ete annule',
+    status_checked: 'Il y a 3 creneaux libres aujourd hui',
+    nav_home: 'Accueil',
+    nav_calendar: 'Calendrier',
+    nav_settings: 'Reglages',
+    calendar_title: 'Calendrier',
+    month: 'Mois',
+    day: 'Jour',
+    free: 'Libre',
+    booked: 'Reserve',
+    cancelled_status: 'Annule',
+    moved_status: 'Deplace',
+    calls: 'Appels',
+    clients: 'Clients',
+    channels: 'Canaux',
+    recent: 'Activite demo recente',
+    reg_badge: 'Inscription et paiement',
+    reg_title: 'Activer le forfait',
+    reg_lead: 'Cette page prepare le frontend pour l inscription client et le paiement. La facturation reelle passe par le backend.',
+    company: 'Nom de l entreprise',
+    name: 'Nom complet',
+    phone: 'Telephone',
+    country: 'Pays',
+    note: 'Note',
+    start_trial: 'Essayer 14 jours',
+    payment_note: 'En production, cette page se connecte au paiement, a l inscription backend, a la confirmation email et au webhook d activation.',
+    god_title: 'Forfait GOD MODE',
+    god_lead: 'Achat du projet Kaleya complet avec frontend, backend, preparation hosting, domaine et documentation de deploiement.',
+    god_cta: 'Contact pour Buy All',
+    privacy_title: 'Politique de confidentialite',
+    privacy_lead: 'Ce texte est une version standard de depart et doit etre verifie juridiquement avant la production.',
+    terms_title: 'Conditions d utilisation',
+    terms_lead: 'Ce texte est une version standard de depart pour un service SaaS et doit etre verifie juridiquement avant la production.',
+    footer_privacy: 'Confidentialite',
+    footer_terms: 'Conditions'
+};
+
+PAGE_LANGS.it = {
+    ...PAGE_LANGS.en,
+    back_home: 'Torna alla home',
+    demo_badge: 'Demo cliccabile',
+    demo_title: 'Come funziona Kaleya in pratica',
+    demo_lead: 'Le viste mobile e laptop sono un ambiente demo. I pulsanti sono cliccabili e la voce parte da un file MP3.',
+    mobile_title: 'App cliente',
+    laptop_title: 'App cliente',
+    voice_cta: 'Riproduci voce Kaleya',
+    schedule: 'Prenota',
+    cancel: 'Annulla',
+    check: 'Controlla',
+    status_ready: 'Pronta a parlare',
+    status_scheduled: 'L appuntamento demo e prenotato per le 15:00',
+    status_cancelled: 'La riunione demo e stata annullata',
+    status_checked: 'Oggi ci sono 3 slot liberi',
+    nav_home: 'Home',
+    nav_calendar: 'Calendario',
+    nav_settings: 'Impostazioni',
+    calendar_title: 'Calendario',
+    month: 'Mese',
+    day: 'Giorno',
+    free: 'Libero',
+    booked: 'Prenotato',
+    cancelled_status: 'Annullato',
+    moved_status: 'Spostato',
+    calls: 'Chiamate',
+    clients: 'Clienti',
+    channels: 'Canali',
+    recent: 'Attivita demo recente',
+    reg_badge: 'Registrazione e pagamento',
+    reg_title: 'Attiva pacchetto',
+    reg_lead: 'Questa pagina prepara il frontend per registrazione cliente e pagamento. La fatturazione reale passa dal backend.',
+    company: 'Nome azienda',
+    name: 'Nome completo',
+    phone: 'Telefono',
+    country: 'Paese',
+    note: 'Nota',
+    start_trial: 'Prova 14 giorni',
+    payment_note: 'In produzione qui si collega payment provider, registrazione backend, conferma email e webhook di attivazione.',
+    god_title: 'Pacchetto GOD MODE',
+    god_lead: 'Acquisto del progetto Kaleya completo con frontend, backend, preparazione hosting, dominio e documentazione deploy.',
+    god_cta: 'Contatto per Buy All',
+    privacy_title: 'Privacy Policy',
+    privacy_lead: 'Questo testo e una versione standard iniziale e deve essere verificato legalmente prima della produzione.',
+    terms_title: 'Termini di servizio',
+    terms_lead: 'Questo testo e una versione standard iniziale per un servizio SaaS e deve essere verificato legalmente prima della produzione.',
+    footer_privacy: 'Privacy',
+    footer_terms: 'Termini'
+};
+
 const PAGE_AUDIO = {
     sr: 'assets/audio/kaleya-demo-sr.mp3',
     en: 'assets/audio/kaleya-demo-en.mp3',
     es: 'assets/audio/kaleya-demo-es.mp3',
     pt: 'assets/audio/kaleya-demo-pt.mp3',
-    ru: 'assets/audio/kaleya-demo-ru.mp3'
+    ru: 'assets/audio/kaleya-demo-ru.mp3',
+    fr: 'assets/audio/kaleya-demo-fr.mp3',
+    it: 'assets/audio/kaleya-demo-it.mp3'
 };
 
 const WORK_HOURS = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
 const DEMO_EVENT_PATTERN = {
-    3: [{ time: '10:00', title: 'Ana Jović', status: 'booked' }],
-    5: [{ time: '09:00', title: 'Dr. Petrović', status: 'booked' }, { time: '13:00', title: 'Milica Jovanović', status: 'cancelled' }],
-    10: [{ time: '11:00', title: 'Salon Bella', status: 'moved' }, { time: '15:00', title: 'Novi klijent', status: 'booked' }],
-    18: [{ time: '12:00', title: 'Marko Petrović', status: 'booked' }],
-    24: [{ time: '09:00', title: 'Tim sastanak', status: 'moved' }, { time: '14:00', title: 'Kontrola', status: 'booked' }],
-    26: [{ time: '10:00', title: 'Pregled', status: 'booked' }, { time: '15:00', title: 'Konsultacije', status: 'cancelled' }]
+    3: [{ time: '10:00', titleKey: 'person1', status: 'booked' }],
+    5: [{ time: '09:00', titleKey: 'person2', status: 'booked' }, { time: '13:00', titleKey: 'person3', status: 'cancelled' }],
+    10: [{ time: '11:00', titleKey: 'business1', status: 'moved' }, { time: '15:00', titleKey: 'person4', status: 'booked' }],
+    18: [{ time: '12:00', titleKey: 'person5', status: 'booked' }],
+    24: [{ time: '09:00', titleKey: 'team', status: 'moved' }, { time: '14:00', titleKey: 'checkup', status: 'booked' }],
+    26: [{ time: '10:00', titleKey: 'exam', status: 'booked' }, { time: '15:00', titleKey: 'consult', status: 'cancelled' }]
+};
+
+const HOME_DEMO_EVENTS = [
+    { time: '09:00', titleKey: 'person1', status: 'booked' },
+    { time: '12:00', titleKey: 'person5', status: 'moved' },
+    { time: '15:00', titleKey: 'person3', status: 'cancelled' }
+];
+
+const DEMO_NAMES = {
+    sr: {
+        person1: 'Ana Jović',
+        person2: 'Dr. Petrović',
+        person3: 'Milica Jovanović',
+        person4: 'Novi klijent',
+        person5: 'Marko Petrović',
+        business1: 'Salon Bella',
+        team: 'Tim sastanak',
+        checkup: 'Kontrola',
+        exam: 'Pregled',
+        consult: 'Konsultacije'
+    },
+    en: {
+        person1: 'Emily Carter',
+        person2: 'Dr. Michael Johnson',
+        person3: 'Sarah Miller',
+        person4: 'New client',
+        person5: 'David Anderson',
+        business1: 'Bella Studio',
+        team: 'Team meeting',
+        checkup: 'Follow-up',
+        exam: 'Consultation',
+        consult: 'Strategy call'
+    },
+    es: {
+        person1: 'Lucía García',
+        person2: 'Dr. Alejandro Ruiz',
+        person3: 'María Fernández',
+        person4: 'Nuevo cliente',
+        person5: 'Carlos Martínez',
+        business1: 'Salon Bella',
+        team: 'Reunión de equipo',
+        checkup: 'Control',
+        exam: 'Revisión',
+        consult: 'Consulta'
+    },
+    pt: {
+        person1: 'Ana Silva',
+        person2: 'Dr. João Pereira',
+        person3: 'Mariana Costa',
+        person4: 'Novo cliente',
+        person5: 'Pedro Santos',
+        business1: 'Studio Bella',
+        team: 'Reunião da equipe',
+        checkup: 'Controle',
+        exam: 'Consulta',
+        consult: 'Orientação'
+    },
+    ru: {
+        person1: 'Анна Иванова',
+        person2: 'Др. Алексей Петров',
+        person3: 'Мария Смирнова',
+        person4: 'Новый клиент',
+        person5: 'Дмитрий Волков',
+        business1: 'Студия Bella',
+        team: 'Встреча команды',
+        checkup: 'Контроль',
+        exam: 'Осмотр',
+        consult: 'Консультация'
+    },
+    fr: {
+        person1: 'Camille Martin',
+        person2: 'Dr. Thomas Bernard',
+        person3: 'Sophie Dubois',
+        person4: 'Nouveau client',
+        person5: 'Julien Moreau',
+        business1: 'Studio Bella',
+        team: 'Reunion equipe',
+        checkup: 'Controle',
+        exam: 'Rendez-vous',
+        consult: 'Consultation'
+    },
+    it: {
+        person1: 'Giulia Rossi',
+        person2: 'Dr. Marco Bianchi',
+        person3: 'Sofia Romano',
+        person4: 'Nuovo cliente',
+        person5: 'Luca Ferrari',
+        business1: 'Studio Bella',
+        team: 'Riunione team',
+        checkup: 'Controllo',
+        exam: 'Visita',
+        consult: 'Consulenza'
+    }
 };
 
 const PAGE_LEGAL = {
@@ -361,14 +558,47 @@ const PAGE_LEGAL = {
     }
 };
 
+PAGE_LEGAL.privacy.fr = [
+    ['Donnees collectees', 'Kaleya peut collecter des donnees de contact professionnel, des donnees d inscription, des informations sur le forfait choisi et des donnees techniques necessaires au service.'],
+    ['Utilisation des donnees', 'Les donnees sont utilisees pour l inscription, la livraison du service, la communication client, la facturation, le support et la securite du systeme.'],
+    ['API et services vocaux', 'Le traitement IA et vocal passe par des integrations backend. Les cles API ne doivent pas etre stockees dans le frontend et restent securisees cote backend en production.'],
+    ['Conservation', 'Les donnees sont conservees tant que la relation commerciale ou une obligation legale existe. Le client peut demander une correction ou suppression lorsque cela s applique.'],
+    ['Contact', 'Pour les questions de confidentialite, contactez hello@aikaleya.com. Ce texte doit etre verifie juridiquement avant le lancement public.']
+];
+
+PAGE_LEGAL.privacy.it = [
+    ['Dati raccolti', 'Kaleya puo raccogliere dati di contatto aziendale, dati di registrazione, informazioni sul pacchetto scelto e dati tecnici necessari al servizio.'],
+    ['Uso dei dati', 'I dati vengono usati per registrazione, erogazione del servizio, comunicazione con il cliente, fatturazione, supporto e sicurezza del sistema.'],
+    ['API e servizi vocali', 'Il trattamento AI e voce passa da integrazioni backend. Le API key non devono stare nel frontend e in produzione restano in un backend sicuro.'],
+    ['Conservazione', 'I dati vengono conservati finche esiste il rapporto commerciale o un obbligo legale. Il cliente puo richiedere correzione o cancellazione dove applicabile.'],
+    ['Contatto', 'Per domande sulla privacy contattare hello@aikaleya.com. Questo testo deve essere verificato legalmente prima del lancio pubblico.']
+];
+
+PAGE_LEGAL.terms.fr = [
+    ['Description du service', 'Kaleya est un systeme IA pour automatiser la communication, la planification, les reponses vocales et les notifications pour les entreprises.'],
+    ['Compte et acces', 'Le client est responsable de l exactitude des donnees, de la securite du compte et de l utilisation conforme a la loi.'],
+    ['Paiement et forfaits', 'Les forfaits, l essai et la facturation sont actives via le backend d inscription et le prestataire de paiement. Les details sont confirmes pendant l achat.'],
+    ['Limites', 'Kaleya ne garantit pas que l IA puisse terminer chaque demande. Si l IA ne peut pas terminer un processus, la demande peut etre transmise au support humain.'],
+    ['Modifications', 'Les conditions peuvent etre mises a jour. Continuer a utiliser le service apres modification signifie accepter les nouvelles conditions.']
+];
+
+PAGE_LEGAL.terms.it = [
+    ['Descrizione del servizio', 'Kaleya e un sistema AI per automatizzare comunicazione, prenotazioni, risposte vocali e notifiche per utenti business.'],
+    ['Account e accesso', 'Il cliente e responsabile della correttezza dei dati, della sicurezza dell account e dell uso conforme alla legge.'],
+    ['Pagamenti e pacchetti', 'Pacchetti, prova e fatturazione vengono attivati dal backend di registrazione e dal payment provider. I dettagli si confermano durante l acquisto.'],
+    ['Limiti', 'Kaleya non garantisce che l AI completi ogni richiesta. Quando non puo completare il processo, la richiesta puo essere inoltrata al supporto umano.'],
+    ['Modifiche', 'I termini possono essere aggiornati. Continuare a usare il servizio dopo le modifiche significa accettare i termini aggiornati.']
+];
+
 function pageLang() {
-    const saved = localStorage.getItem('kaleya_lang') || 'sr';
-    return PAGE_LANGS[saved] ? saved : 'sr';
+    const saved = localStorage.getItem('kaleya_lang') || 'en';
+    if (!localStorage.getItem('kaleya_lang_user_set') && saved === 'sr') return 'en';
+    return PAGE_LANGS[saved] ? saved : 'en';
 }
 
 function pageText(key) {
     const lang = pageLang();
-    return PAGE_LANGS[lang][key] || PAGE_LANGS.sr[key] || key;
+    return PAGE_LANGS[lang][key] || PAGE_LANGS.en[key] || PAGE_LANGS.sr[key] || key;
 }
 
 function applyPageLang() {
@@ -380,6 +610,7 @@ function applyPageLang() {
         el.textContent = pageText(el.dataset.i18n);
     });
     updateOnlineLabels();
+    renderHomeLists();
     renderDemoCalendars();
     renderLegalPage();
 }
@@ -387,6 +618,7 @@ function applyPageLang() {
 function setPageLang(lang) {
     if (!PAGE_LANGS[lang]) return;
     localStorage.setItem('kaleya_lang', lang);
+    localStorage.setItem('kaleya_lang_user_set', '1');
     applyPageLang();
 }
 
@@ -482,6 +714,23 @@ function statusLabel(status) {
     return pageText('free');
 }
 
+function eventTitle(event) {
+    if (!event) return pageText('free');
+    const lang = pageLang();
+    return DEMO_NAMES[lang]?.[event.titleKey] || DEMO_NAMES.en[event.titleKey] || event.titleKey;
+}
+
+function renderHomeLists() {
+    document.querySelectorAll('[data-home-list]').forEach((list) => {
+        list.innerHTML = HOME_DEMO_EVENTS.map((event) => `
+            <div class="appt-card ${event.status}">
+                <strong>${event.time}</strong>
+                <span>${eventTitle(event)} - ${statusLabel(event.status).toLowerCase()}</span>
+            </div>
+        `).join('');
+    });
+}
+
 function selectCalendarDate(button, dateIso) {
     const calendar = button.closest('.app-calendar');
     if (!calendar) return;
@@ -565,7 +814,7 @@ function renderCalendar(calendar) {
         dayList.innerHTML = WORK_HOURS.map((time) => {
             const event = events.find((item) => item.time === time);
             const status = event ? event.status : 'free';
-            const title = event ? event.title : pageText('free');
+            const title = eventTitle(event);
             return `
                 <div class="slot-row ${status}">
                     <strong>${time}</strong>
@@ -580,7 +829,7 @@ function renderCalendar(calendar) {
 function playKaleyaDemo() {
     const lang = pageLang();
     const audio = document.getElementById('kaleyaAudio') || new Audio();
-    audio.src = PAGE_AUDIO[lang] || PAGE_AUDIO.sr;
+    audio.src = PAGE_AUDIO[lang] || PAGE_AUDIO.en;
     audio.play().catch(() => {
         if (!('speechSynthesis' in window)) return;
         const fallback = {
@@ -588,11 +837,13 @@ function playKaleyaDemo() {
             en: 'Hello, I am Kaleya. I answer calls, schedule appointments and alert your team.',
             es: 'Hola, soy Kaleya. Atiendo llamadas, agendo citas y aviso a tu equipo.',
             pt: 'Olá, eu sou Kaleya. Atendo chamadas, agendo horários e aviso sua equipe.',
-            ru: 'Здравствуйте, я Kaleya. Я отвечаю на звонки, записываю клиентов и уведомляю команду.'
+            ru: 'Здравствуйте, я Kaleya. Я отвечаю на звонки, записываю клиентов и уведомляю команду.',
+            fr: 'Bonjour, je suis Kaleya. Je reponds aux appels, je planifie les rendez-vous et j informe votre equipe.',
+            it: 'Ciao, sono Kaleya. Rispondo alle chiamate, organizzo appuntamenti e avviso il tuo team.'
         };
-        const map = { sr: 'sr-RS', en: 'en-US', es: 'es-ES', pt: 'pt-PT', ru: 'ru-RU' };
-        const utter = new SpeechSynthesisUtterance(fallback[lang] || fallback.sr);
-        utter.lang = map[lang] || 'sr-RS';
+        const map = { sr: 'sr-RS', en: 'en-US', es: 'es-ES', pt: 'pt-PT', ru: 'ru-RU', fr: 'fr-FR', it: 'it-IT' };
+        const utter = new SpeechSynthesisUtterance(fallback[lang] || fallback.en);
+        utter.lang = map[lang] || 'en-US';
         speechSynthesis.cancel();
         speechSynthesis.speak(utter);
     });
@@ -602,7 +853,7 @@ function renderLegalPage() {
     const holder = document.getElementById('legalBody');
     if (!holder) return;
     const type = holder.dataset.legal;
-    const content = PAGE_LEGAL[type]?.[pageLang()] || PAGE_LEGAL[type]?.sr || [];
+    const content = PAGE_LEGAL[type]?.[pageLang()] || PAGE_LEGAL[type]?.en || PAGE_LEGAL[type]?.sr || [];
     holder.innerHTML = content.map(([title, body]) => `<h2>${title}</h2><p>${body}</p>`).join('');
 }
 
