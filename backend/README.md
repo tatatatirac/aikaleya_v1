@@ -55,6 +55,16 @@ GET  /api/billing/plans/
 GET  /api/support/tickets/
 ```
 
+## Radni dashboard
+
+Za svakodnevni rad koristi:
+
+```txt
+http://127.0.0.1:8000/dashboard/
+```
+
+`/admin/` ostaje tehnički Django panel, a `/dashboard/` je Kaleya radni panel sa pregledom, podešavanjima klijenta, glasom, alarmima klijenta, integracijama i API podešavanjima za admina.
+
 ## Produkcija
 
 Za VPS koristi PostgreSQL kroz `DATABASE_URL`, pravi `DJANGO_SECRET_KEY`, `DJANGO_DEBUG=False`, domen u `DJANGO_ALLOWED_HOSTS`, i API kljuceve samo u `.env`.

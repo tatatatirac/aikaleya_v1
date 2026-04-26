@@ -56,7 +56,7 @@ ROOT_URLCONF = "kaleya_config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [PROJECT_ROOT / "frontend"],
+        "DIRS": [PROJECT_ROOT / "frontend", BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

@@ -56,6 +56,7 @@ API provera:
 ```txt
 http://127.0.0.1:8000/api/health/
 http://127.0.0.1:8000/admin/
+http://127.0.0.1:8000/dashboard/
 ```
 
 Demo login:

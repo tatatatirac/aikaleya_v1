@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="sr" data-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kaleya Dashboard</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f8fbff;
+            --panel: #ffffff;
+            --panel-soft: #f1f5f9;
+            --text: #0f172a;
+            --muted: #64748b;
+            --line: #dbe5f2;
+            --accent: #0f766e;
+            --accent-soft: #ccfbf1;
+            --blue: #2563eb;
+            --red: #dc2626;
+            --green: #16a34a;
+            --shadow: 0 24px 70px rgba(15, 23, 42, .08);
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --bg: #060a14;
+            --panel: #0f172a;
+            --panel-soft: #111c2e;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --line: #243247;
+            --accent: #2dd4bf;
+            --accent-soft: rgba(45, 212, 191, .14);
+            --blue: #60a5fa;
+            --red: #f87171;
+            --green: #4ade80;
+            --shadow: 0 24px 70px rgba(0, 0, 0, .22);
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top right, rgba(20, 184, 166, .16), transparent 34rem),
+                radial-gradient(circle at bottom left, rgba(59, 130, 246, .13), transparent 32rem),
+                var(--bg);
+        }
+
+        a { color: inherit; text-decoration: none; }
+        button, input, select { font: inherit; }
+
+        .shell {
+            width: min(1380px, calc(100% - 28px));
+            margin: 0 auto;
+            padding: 18px 0 34px;
+        }
+
+        .topbar {
+            min-height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: color-mix(in srgb, var(--panel) 88%, transparent);
+            backdrop-filter: blur(16px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .brand img {
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            box-shadow: 0 0 0 7px var(--accent-soft);
+        }
+
+        .brand strong { display: block; font-size: 15px; }
+        .brand small { display: block; color: var(--muted); font-weight: 700; font-size: 11px; }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .chip, .icon-btn, .primary-btn {
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: var(--panel);
+            color: var(--text);
+            padding: 0 13px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .icon-btn { width: 38px; padding: 0; }
+        .primary-btn { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 270px minmax(0, 1fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .sidebar, .panel {
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            background: color-mix(in srgb, var(--panel) 92%, transparent);
+            box-shadow: var(--shadow);
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 16px;
+            padding: 14px;
+        }
+
+        .client-select {
+            width: 100%;
+            height: 40px;
+            border-radius: 13px;
+            border: 1px solid var(--line);
+            background: var(--panel);
+            color: var(--text);
+            padding: 0 12px;
+            font-weight: 700;
+        }
+
+        .nav-list { display: grid; gap: 7px; margin-top: 14px; }
+        .nav-item {
+            width: 100%;
+            min-height: 42px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 0;
+            border-radius: 14px;
+            background: transparent;
+            color: var(--muted);
+            padding: 0 12px;
+            text-align: left;
+            cursor: pointer;
+            font-weight: 800;
+        }
+        .nav-item:hover, .nav-item.active { background: var(--panel-soft); color: var(--text); }
+        .nav-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            background: var(--line);
+        }
+        .nav-item.active .nav-dot { background: var(--accent); box-shadow: 0 0 0 5px var(--accent-soft); }
+
+        .content { min-width: 0; }
+        .panel {
+            display: none;
+            padding: 20px;
+        }
+        .panel.active { display: block; }
+
+        .panel-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+        h1, h2, h3 { margin: 0; letter-spacing: 0; }
+        h1 { font-size: clamp(26px, 4vw, 38px); line-height: 1.05; }
+        h2 { font-size: 23px; }
+        h3 { font-size: 15px; }
+        p { color: var(--muted); line-height: 1.6; margin: 8px 0 0; }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            height: 30px;
+            border-radius: 999px;
+            padding: 0 11px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-weight: 900;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .status-pill.off {
+            background: rgba(220, 38, 38, .12);
+            color: var(--red);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .stat {
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 14px;
+            background: var(--panel-soft);
+            min-height: 104px;
+        }
+        .stat span { color: var(--muted); font-size: 12px; font-weight: 800; }
+        .stat strong { display: block; margin-top: 10px; font-size: 30px; letter-spacing: 0; }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .form-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .field { display: grid; gap: 7px; }
+        .field.full { grid-column: 1 / -1; }
+        label { color: var(--muted); font-weight: 900; font-size: 12px; }
+        input, select {
+            width: 100%;
+            height: 42px;
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            background: var(--panel);
+            color: var(--text);
+            padding: 0 12px;
+            outline: none;
+        }
+        input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+
+        .switch-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin: 14px 0;
+        }
+
+        .switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 12px;
+            background: var(--panel-soft);
+            color: var(--text);
+            font-weight: 800;
+        }
+
+        .switch input { width: 18px; height: 18px; }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: 16px;
+            border: 1px solid var(--line);
+        }
+        .table th, .table td {
+            padding: 13px 12px;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+            font-size: 13px;
+        }
+        .table th { color: var(--muted); background: var(--panel-soft); font-size: 12px; }
+        .table tr:last-child td { border-bottom: 0; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            height: 24px;
+            padding: 0 9px;
+            border-radius: 999px;
+            background: var(--panel-soft);
+            color: var(--muted);
+            font-weight: 900;
+            font-size: 11px;
+        }
+        .badge.ok { color: var(--green); background: rgba(22, 163, 74, .12); }
+        .badge.warn { color: #d97706; background: rgba(217, 119, 6, .13); }
+        .badge.danger { color: var(--red); background: rgba(220, 38, 38, .12); }
+
+        .messages {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .message {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 11px 13px;
+            background: var(--panel);
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        @media (max-width: 980px) {
+            .layout { grid-template-columns: 1fr; }
+            .sidebar { position: static; }
+            .stats, .form-grid.three, .switch-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 640px) {
+            .shell { width: min(100% - 18px, 1380px); }
+            .topbar, .panel-head { align-items: stretch; flex-direction: column; }
+            .stats, .form-grid, .form-grid.three, .switch-row { grid-template-columns: 1fr; }
+            .panel { padding: 15px; border-radius: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <header class="topbar">
+            <a class="brand" href="/dashboard/">
+                <img src="/logo.png" alt="Kaleya">
+                <span>
+                    <strong>Kaleya Dashboard</strong>
+                    <small>aikaleya.com</small>
+                </span>
+            </a>
+            <div class="top-actions">
+                {% if selected_client %}
+                    <span class="chip">{{ selected_client.package|upper }}</span>
+                    <span class="status-pill {% if not selected_client.kaleya_enabled %}off{% endif %}">
+                        {% if selected_client.kaleya_enabled %}Kaleya online{% else %}Kaleya offline{% endif %}
+                    </span>
+                {% endif %}
+                <button class="icon-btn" type="button" onclick="toggleTheme()" aria-label="Tema">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+                    </svg>
+                </button>
+                <a class="chip" href="/admin/">Django admin</a>
+            </div>
+        </header>
+
+        <div class="layout">
+            <aside class="sidebar">
+                {% if clients %}
+                    <form method="get">
+                        <select class="client-select" name="client_id" onchange="this.form.submit()">
+                            {% for client in clients %}
+                                <option value="{{ client.id }}" {% if selected_client and selected_client.id == client.id %}selected{% endif %}>
+                                    {{ client.public_name|default:client.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                {% endif %}
+
+                <nav class="nav-list" aria-label="Dashboard navigation">
+                    <button class="nav-item active" type="button" data-tab="overview"><span class="nav-dot"></span>Pregled</button>
+                    <button class="nav-item" type="button" data-tab="client"><span class="nav-dot"></span>Podešavanja</button>
+                    <button class="nav-item" type="button" data-tab="voice"><span class="nav-dot"></span>Glas</button>
+                    <button class="nav-item" type="button" data-tab="alarms"><span class="nav-dot"></span>Alarmi klijenta</button>
+                    <button class="nav-item" type="button" data-tab="integrations"><span class="nav-dot"></span>Integracije</button>
+                    {% if is_admin_user %}
+                        <button class="nav-item" type="button" data-tab="api"><span class="nav-dot"></span>API</button>
+                    {% endif %}
+                </nav>
+            </aside>
+
+            <section class="content">
+                {% if messages %}
+                    <div class="messages">
+                        {% for message in messages %}
+                            <div class="message">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% if not selected_client %}
+                    <section class="panel active">
+                        <h1>Nema klijenta</h1>
+                        <p>U Django adminu dodaj BusinessClient ili pokreni `python backend\manage.py seed_demo`.</p>
+                    </section>
+                {% else %}
+                    <section class="panel active" id="overview">
+                        <div class="panel-head">
+                            <div>
+                                <h1>{{ selected_client.public_name|default:selected_client.name }}</h1>
+                                <p>Radni pregled za termine, slobodne slotove i stanje Kaleye.</p>
+                            </div>
+                            <span class="status-pill {% if not selected_client.kaleya_enabled %}off{% endif %}">
+                                {% if selected_client.kaleya_enabled %}Kaleya online{% else %}Kaleya offline{% endif %}
+                            </span>
+                        </div>
+
+                        <div class="stats">
+                            <article class="stat">
+                                <span>Slobodno danas</span>
+                                <strong>{{ today_summary.free_count }}</strong>
+                            </article>
+                            <article class="stat">
+                                <span>Zauzeto danas</span>
+                                <strong>{{ today_summary.busy_count }}</strong>
+                            </article>
+                            <article class="stat">
+                                <span>Radno vreme</span>
+                                <strong style="font-size:21px">{{ selected_client.work_start|time:"H:i" }}-{{ selected_client.work_end|time:"H:i" }}</strong>
+                            </article>
+                            <article class="stat">
+                                <span>Otkazano ukupno</span>
+                                <strong>{{ cancelled_count }}</strong>
+                            </article>
+                        </div>
+
+                        <div style="margin-top:18px; overflow:auto;">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Datum</th>
+                                        <th>Vreme</th>
+                                        <th>Klijent</th>
+                                        <th>Kanal</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in upcoming_appointments %}
+                                        <tr>
+                                            <td>{{ appointment.date|date:"d.m.Y" }}</td>
+                                            <td>{{ appointment.start_time|time:"H:i" }}</td>
+                                            <td>{{ appointment.customer.full_name|default:appointment.title }}</td>
+                                            <td>{{ appointment.channel }}</td>
+                                            <td>
+                                                <span class="badge {% if appointment.status == 'confirmed' %}ok{% elif appointment.status == 'cancelled' %}danger{% else %}warn{% endif %}">
+                                                    {{ appointment.get_status_display }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    {% empty %}
+                                        <tr><td colspan="5">Nema termina za prikaz.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="panel" id="client">
+                        <div class="panel-head">
+                            <div>
+                                <h2>Podešavanja klijenta</h2>
+                                <p>Jezik, radno vreme, format termina i kanali komunikacije.</p>
+                            </div>
+                        </div>
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="section" value="client">
+                            <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+
+                            <div class="form-grid">
+                                <div class="field">
+                                    <label>Naziv</label>
+                                    <input name="name" value="{{ selected_client.name }}">
+                                </div>
+                                <div class="field">
+                                    <label>Javni naziv</label>
+                                    <input name="public_name" value="{{ selected_client.public_name }}">
+                                </div>
+                                <div class="field">
+                                    <label>Paket</label>
+                                    <select name="package">
+                                        {% for value,label in package_choices %}
+                                            <option value="{{ value }}" {% if selected_client.package == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label>Vremenska zona</label>
+                                    <input name="timezone" value="{{ selected_client.timezone }}">
+                                </div>
+                                <div class="field">
+                                    <label>Jezik aplikacije</label>
+                                    <select name="interface_language">
+                                        {% for value,label in language_choices %}
+                                            <option value="{{ value }}" {% if selected_client.interface_language == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label>Jezik glasa</label>
+                                    <select name="voice_language">
+                                        {% for value,label in language_choices %}
+                                            <option value="{{ value }}" {% if selected_client.voice_language == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label>Rad od</label>
+                                    <input type="time" name="work_start" value="{{ selected_client.work_start|time:'H:i' }}">
+                                </div>
+                                <div class="field">
+                                    <label>Rad do</label>
+                                    <input type="time" name="work_end" value="{{ selected_client.work_end|time:'H:i' }}">
+                                </div>
+                                <div class="field">
+                                    <label>Interval termina</label>
+                                    <select name="slot_interval_minutes">
+                                        {% for value in slot_choices %}
+                                            <option value="{{ value }}" {% if selected_client.slot_interval_minutes == value %}selected{% endif %}>{{ value }} min</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label>Format vremena</label>
+                                    <select name="time_format">
+                                        {% for value,label in time_format_choices %}
+                                            <option value="{{ value }}" {% if selected_client.time_format == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label>Prvi dan u nedelji</label>
+                                    <select name="week_start">
+                                        {% for value,label in week_start_choices %}
+                                            <option value="{{ value }}" {% if selected_client.week_start == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="switch-row">
+                                <label class="switch">Kaleya online <input type="checkbox" name="kaleya_enabled" {% if selected_client.kaleya_enabled %}checked{% endif %}></label>
+                                <label class="switch">Telefon <input type="checkbox" name="allow_phone_calls" {% if selected_client.allow_phone_calls %}checked{% endif %}></label>
+                                <label class="switch">SMS <input type="checkbox" name="allow_sms" {% if selected_client.allow_sms %}checked{% endif %}></label>
+                                <label class="switch">WhatsApp <input type="checkbox" name="allow_whatsapp" {% if selected_client.allow_whatsapp %}checked{% endif %}></label>
+                                <label class="switch">Viber <input type="checkbox" name="allow_viber" {% if selected_client.allow_viber %}checked{% endif %}></label>
+                                <label class="switch">Telegram <input type="checkbox" name="allow_telegram" {% if selected_client.allow_telegram %}checked{% endif %}></label>
+                            </div>
+
+                            <div class="actions">
+                                <button class="primary-btn" type="submit">Sačuvaj podešavanja</button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <section class="panel" id="voice">
+                        <div class="panel-head">
+                            <div>
+                                <h2>Glas</h2>
+                                <p>Podešavanja glasa po klijentu za ElevenLabs ili drugi voice provider.</p>
+                            </div>
+                        </div>
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="section" value="voice">
+                            <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                            <div class="form-grid">
+                                <div class="field">
+                                    <label>Jezik glasa</label>
+                                    <select name="voice_language">
+                                        {% for value,label in language_choices %}
+                                            <option value="{{ value }}" {% if voice_settings.language == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label>Voice ID</label>
+                                    <input name="voice_id" value="{{ voice_settings.voice_id }}">
+                                </div>
+                                <div class="field">
+                                    <label>Speed</label>
+                                    <input type="number" step="0.05" min="0.50" max="2" name="speed" value="{{ voice_settings.speed }}">
+                                </div>
+                                <div class="field">
+                                    <label>Stability</label>
+                                    <input type="number" step="0.05" min="0" max="1" name="stability" value="{{ voice_settings.stability }}">
+                                </div>
+                                <div class="field">
+                                    <label>Similarity boost</label>
+                                    <input type="number" step="0.05" min="0" max="1" name="similarity_boost" value="{{ voice_settings.similarity_boost }}">
+                                </div>
+                            </div>
+                            <div class="actions">
+                                <button class="primary-btn" type="submit">Sačuvaj glas</button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <section class="panel" id="alarms">
+                        <div class="panel-head">
+                            <div>
+                                <h2>Alarmi klijenta</h2>
+                                <p>Ovo su alarmi za klijentovu aplikaciju, ne globalni admin alarm tab.</p>
+                            </div>
+                        </div>
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="section" value="alarms">
+                            <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+
+                            <div class="switch-row">
+                                <label class="switch">Obaveštenja <input type="checkbox" name="notifications_enabled" {% if alarm_settings.notifications_enabled %}checked{% endif %}></label>
+                                <label class="switch">Hitno <input type="checkbox" name="urgent_enabled" {% if alarm_settings.urgent_enabled %}checked{% endif %}></label>
+                                <label class="switch">Najava reda <input type="checkbox" name="announcement_enabled" {% if alarm_settings.announcement_enabled %}checked{% endif %}></label>
+                            </div>
+
+                            <div class="form-grid three">
+                                <div class="field">
+                                    <label>Zvuk obaveštenja</label>
+                                    <input name="notification_sound" value="{{ alarm_settings.notification_sound }}">
+                                </div>
+                                <div class="field">
+                                    <label>Hitni zvuk</label>
+                                    <input name="urgent_sound" value="{{ alarm_settings.urgent_sound }}">
+                                </div>
+                                <div class="field">
+                                    <label>Zvuk najave</label>
+                                    <input name="announcement_sound" value="{{ alarm_settings.announcement_sound }}">
+                                </div>
+                                <div class="field">
+                                    <label>Jačina obaveštenja</label>
+                                    <input type="number" min="0" max="100" name="notification_volume" value="{{ alarm_settings.notification_volume }}">
+                                </div>
+                                <div class="field">
+                                    <label>Jačina hitnog alarma</label>
+                                    <input type="number" min="0" max="100" name="urgent_volume" value="{{ alarm_settings.urgent_volume }}">
+                                </div>
+                                <div class="field">
+                                    <label>Jačina najave</label>
+                                    <input type="number" min="0" max="100" name="announcement_volume" value="{{ alarm_settings.announcement_volume }}">
+                                </div>
+                            </div>
+                            <div class="actions">
+                                <button class="primary-btn" type="submit">Sačuvaj alarme</button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <section class="panel" id="integrations">
+                        <div class="panel-head">
+                            <div>
+                                <h2>Integracije</h2>
+                                <p>Kanali preko kojih Kaleya može da prima i šalje poruke ili pozive.</p>
+                            </div>
+                        </div>
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="section" value="integrations">
+                            <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                            <div style="overflow:auto;">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Kanal</th>
+                                            <th>Aktivno</th>
+                                            <th>Status</th>
+                                            <th>Broj / nalog</th>
+                                            <th>Webhook</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for integration in integrations %}
+                                            <tr>
+                                                <td><strong>{{ integration.get_provider_display }}</strong></td>
+                                                <td><input type="checkbox" name="integration_{{ integration.provider }}_enabled" {% if integration.enabled %}checked{% endif %}></td>
+                                                <td>
+                                                    <select name="integration_{{ integration.provider }}_status">
+                                                        <option value="draft" {% if integration.status == "draft" %}selected{% endif %}>Draft</option>
+                                                        <option value="connected" {% if integration.status == "connected" %}selected{% endif %}>Connected</option>
+                                                        <option value="paused" {% if integration.status == "paused" %}selected{% endif %}>Paused</option>
+                                                        <option value="error" {% if integration.status == "error" %}selected{% endif %}>Error</option>
+                                                    </select>
+                                                </td>
+                                                <td><input name="integration_{{ integration.provider }}_public_number" value="{{ integration.public_number }}"></td>
+                                                <td><input name="integration_{{ integration.provider }}_webhook_url" value="{{ integration.webhook_url }}"></td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="actions">
+                                <button class="primary-btn" type="submit">Sačuvaj integracije</button>
+                            </div>
+                        </form>
+                    </section>
+
+                    {% if is_admin_user %}
+                        <section class="panel" id="api">
+                            <div class="panel-head">
+                                <div>
+                                    <h2>API podešavanja</h2>
+                                    <p>API ključevi se unose ovde ili kroz `.env`, nikada u frontend.</p>
+                                </div>
+                                <span class="badge {% if api_settings.ai_api_key %}ok{% else %}warn{% endif %}">
+                                    {% if api_settings.ai_api_key %}AI key set{% else %}AI key missing{% endif %}
+                                </span>
+                            </div>
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="section" value="api">
+                                <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                                <div class="form-grid">
+                                    <div class="field">
+                                        <label>AI provider</label>
+                                        <input name="ai_provider" value="{{ api_settings.ai_provider }}">
+                                    </div>
+                                    <div class="field">
+                                        <label>AI model</label>
+                                        <input name="ai_model" value="{{ api_settings.ai_model }}">
+                                    </div>
+                                    <div class="field full">
+                                        <label>AI API key</label>
+                                        <input type="password" name="ai_api_key" placeholder="{% if api_settings.ai_api_key %}Ključ je već sačuvan{% else %}Unesi API ključ{% endif %}">
+                                    </div>
+                                    <div class="field">
+                                        <label>Voice provider</label>
+                                        <input name="voice_provider" value="{{ api_settings.voice_provider }}">
+                                    </div>
+                                    <div class="field">
+                                        <label>Voice model</label>
+                                        <input name="voice_model" value="{{ api_settings.voice_model }}">
+                                    </div>
+                                    <div class="field">
+                                        <label>Voice ID</label>
+                                        <input name="voice_id" value="{{ api_settings.voice_id }}">
+                                    </div>
+                                    <div class="field">
+                                        <label>Voice API key</label>
+                                        <input type="password" name="voice_api_key" placeholder="{% if api_settings.voice_api_key %}Ključ je već sačuvan{% else %}Unesi ElevenLabs ključ{% endif %}">
+                                    </div>
+                                </div>
+                                <div class="actions">
+                                    <button class="primary-btn" type="submit">Sačuvaj API</button>
+                                </div>
+                            </form>
+                        </section>
+                    {% endif %}
+                {% endif %}
+            </section>
+        </div>
+    </main>
+
+    <script>
+        const root = document.documentElement;
+        const savedTheme = localStorage.getItem("kaleya-dashboard-theme") || "light";
+        root.dataset.theme = savedTheme;
+
+        function toggleTheme() {
+            const next = root.dataset.theme === "dark" ? "light" : "dark";
+            root.dataset.theme = next;
+            localStorage.setItem("kaleya-dashboard-theme", next);
+        }
+
+        const tabButtons = Array.from(document.querySelectorAll("[data-tab]"));
+        const panels = Array.from(document.querySelectorAll(".panel[id]"));
+
+        function activateTab(tab) {
+            tabButtons.forEach((button) => button.classList.toggle("active", button.dataset.tab === tab));
+            panels.forEach((panel) => panel.classList.toggle("active", panel.id === tab));
+            if (history.replaceState) {
+                history.replaceState(null, "", "#" + tab);
+            }
+        }
+
+        tabButtons.forEach((button) => {
+            button.addEventListener("click", () => activateTab(button.dataset.tab));
+        });
+
+        const initialTab = window.location.hash.replace("#", "") || "overview";
+        if (document.getElementById(initialTab)) {
+            activateTab(initialTab);
+        }
+    </script>
+</body>
+</html>

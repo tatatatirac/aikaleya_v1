@@ -5,6 +5,8 @@ from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 from django.views.static import serve
 
+from kaleya_config.dashboard_views import dashboard
+
 
 def health_check(request):
     return JsonResponse({"status": "ok", "service": "kaleya-backend"})
@@ -19,6 +21,7 @@ urlpatterns = [
     path("register-basic.html", TemplateView.as_view(template_name="register-basic.html"), name="frontend-register-basic"),
     path("register-pro.html", TemplateView.as_view(template_name="register-pro.html"), name="frontend-register-pro"),
     path("register-business.html", TemplateView.as_view(template_name="register-business.html"), name="frontend-register-business"),
+    path("dashboard/", dashboard, name="dashboard"),
     path("admin/", admin.site.urls),
     path("api/health/", health_check, name="health-check"),
     path("api/auth/", include("accounts.urls")),
