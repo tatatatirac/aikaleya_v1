@@ -100,8 +100,8 @@
                                 <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M2 3.5l3 3 3-3"/></svg>
                             </button>
                             <div id="langDropdown" class="absolute right-0 top-10 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl p-2 min-w-[150px]">
+                                <button onclick="setLang('en')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">English</button>
                                 <button onclick="setLang('sr')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Srpski</button>
-                                <button onclick="setLang('en')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">English US</button>
                                 <button onclick="setLang('es')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Español</button>
                                 <button onclick="setLang('pt')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Português</button>
                                 <button onclick="setLang('ru')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Русский</button>
@@ -224,7 +224,7 @@
                             <div class="p-6 rounded-[24px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-black/30 transition">
                                 <div class="w-10 h-10 rounded-xl gradient-bg grid place-items-center text-white mb-4"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 5h18M3 12h18M3 19h18"/></svg></div>
                                 <h3 class="font-semibold" data-i18n="f_lang_t">5 jezika</h3>
-                                <p class="mt-2 text-sm text-slate-600 dark:text-slate-400" data-i18n="f_lang_d">Srpski, engleski, španski, portugalski i ruski.</p>
+                                <p class="mt-2 text-sm text-slate-600 dark:text-slate-400" data-i18n="f_lang_d">English, srpski, španski, portugalski, ruski, francuski i italijanski.</p>
                             </div>
                             <div class="p-6 rounded-[24px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 hover:shadow-xl transition">
                                 <div class="w-10 h-10 rounded-xl gradient-bg grid place-items-center text-white mb-4"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3M3 11h18M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg></div>
@@ -553,8 +553,8 @@
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                                 <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="cset_ui_lang">Jezik interfejsa</p>
                                 <div class="grid grid-cols-7 gap-2">
-                                    <button onclick="setLang('sr')" id="clientLangSR" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">SR</button>
                                     <button onclick="setLang('en')" id="clientLangEN" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">EN</button>
+                                    <button onclick="setLang('sr')" id="clientLangSR" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">SR</button>
                                     <button onclick="setLang('es')" id="clientLangES" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">ES</button>
                                     <button onclick="setLang('pt')" id="clientLangPT" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">PT</button>
                                     <button onclick="setLang('ru')" id="clientLangRU" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">RU</button>
@@ -572,8 +572,8 @@
                                     <span id="elStatus" class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800">Status</span>
                                 </div>
                                 <select id="clientVoiceLang" onchange="saveClientVoiceLang()" class="mt-4 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px]">
-                                    <option value="sr">Srpski (SR)</option>
-                                    <option value="en" selected>English (US)</option>
+                                    <option value="en" selected>English</option>
+                                    <option value="sr">Srpski</option>
                                     <option value="es">Español</option>
                                     <option value="pt">Português</option>
                                     <option value="ru">Русский</option>
@@ -981,7 +981,7 @@ const T = {
         hero_cta_demo: 'Isprobaj besplatno', hero_cta_how: 'Pogledaj kako radi', hero_social: '500+ zadovoljnih firmi', hero_tap: 'Dodirni logo',
         hero_intro_hint: 'Kaleya se predstavlja', hero_demo_msg: '"Izvolite, kako mogu pomoći?"', integrates_with: 'Integracije:',
         feat_title: 'Sve što radi prava sekretarica, samo bolje', feat_sub: 'Kaleya razume klijente, pamti pravila i radi na jeziku koji korisnik izabere.',
-        f_lang_t: '7 jezika', f_lang_d: 'Srpski, English US, španski, portugalski, ruski, francuski i italijanski sa ručnim izborom.',
+        f_lang_t: '7 jezika', f_lang_d: 'Srpski, English, španski, portugalski, ruski, francuski i italijanski sa ručnim izborom.',
         f2_t: 'Pametno zakazivanje', f2_d: 'Proverava kalendar i predlaže slobodne termine.',
         f3_t: 'Prirodan glas', f3_d: 'ElevenLabs glas za prirodnije razgovore.',
         f_alarm_t: 'Alarmi za osoblje', f_alarm_d: 'Najava sledećeg klijenta i hitan poziv za razgovor.',
@@ -1025,7 +1025,7 @@ const T = {
         hero_cta_demo: 'Try for free', hero_cta_how: 'See how it works', hero_social: '500+ happy businesses', hero_tap: 'Tap the logo',
         hero_intro_hint: 'Kaleya introduces itself', hero_demo_msg: '"Hello, how can I help?"', integrates_with: 'Integrations:',
         feat_title: 'Everything a real receptionist does, only better', feat_sub: 'Kaleya understands clients, remembers rules and works in the selected language.',
-        f_lang_t: '7 languages', f_lang_d: 'Serbian, English US, Spanish, Portuguese, Russian, French and Italian with manual selection.',
+        f_lang_t: '7 languages', f_lang_d: 'Serbian, English, Spanish, Portuguese, Russian, French and Italian with manual selection.',
         f2_t: 'Smart scheduling', f2_d: 'Checks the calendar and suggests available slots.',
         f3_t: 'Natural voice', f3_d: 'ElevenLabs voice for more natural conversations.',
         f_alarm_t: 'Staff alarms', f_alarm_d: 'Next-client announcement and urgent call request.',
@@ -1069,7 +1069,7 @@ const T = {
         hero_cta_demo: 'Probar gratis', hero_cta_how: 'Ver cómo funciona', hero_social: '500+ empresas satisfechas', hero_tap: 'Toca el logo',
         hero_intro_hint: 'Kaleya se presenta', hero_demo_msg: '"Hola, ¿cómo puedo ayudar?"', integrates_with: 'Integraciones:',
         feat_title: 'Todo lo que hace una recepcionista, pero mejor', feat_sub: 'Kaleya entiende clientes, recuerda reglas y trabaja en el idioma elegido.',
-        f_lang_t: '7 idiomas', f_lang_d: 'Serbio, inglés US, español, portugués, ruso, francés e italiano con selección manual.',
+        f_lang_t: '7 idiomas', f_lang_d: 'English, serbio, español, portugués, ruso, francés e italiano con selección manual.',
         f2_t: 'Agenda inteligente', f2_d: 'Revisa el calendario y propone horarios libres.',
         f3_t: 'Voz natural', f3_d: 'Voz de ElevenLabs para conversaciones más naturales.',
         f_alarm_t: 'Alarmas para el equipo', f_alarm_d: 'Aviso del siguiente cliente y solicitud urgente de conversación.',
@@ -1113,7 +1113,7 @@ const T = {
         hero_cta_demo: 'Testar grátis', hero_cta_how: 'Ver como funciona', hero_social: '500+ empresas satisfeitas', hero_tap: 'Toque no logo',
         hero_intro_hint: 'Kaleya se apresenta', hero_demo_msg: '"Olá, como posso ajudar?"', integrates_with: 'Integrações:',
         feat_title: 'Tudo que uma recepcionista faz, só que melhor', feat_sub: 'Kaleya entende clientes, lembra regras e trabalha no idioma escolhido.',
-        f_lang_t: '7 idiomas', f_lang_d: 'Sérvio, inglês US, espanhol, português, russo, francês e italiano com seleção manual.',
+        f_lang_t: '7 idiomas', f_lang_d: 'English, sérvio, espanhol, português, russo, francês e italiano com seleção manual.',
         f2_t: 'Agendamento inteligente', f2_d: 'Verifica o calendário e sugere horários livres.',
         f3_t: 'Voz natural', f3_d: 'Voz ElevenLabs para conversas mais naturais.',
         f_alarm_t: 'Alarmes para equipe', f_alarm_d: 'Aviso do próximo cliente e chamada urgente.',
@@ -1157,7 +1157,7 @@ const T = {
         hero_cta_demo: 'Попробовать бесплатно', hero_cta_how: 'Как это работает', hero_social: '500+ довольных компаний', hero_tap: 'Нажмите логотип',
         hero_intro_hint: 'Kaleya представляется', hero_demo_msg: '"Здравствуйте, чем могу помочь?"', integrates_with: 'Интеграции:',
         feat_title: 'Все, что делает администратор, только лучше', feat_sub: 'Kaleya понимает клиентов, помнит правила и работает на выбранном языке.',
-        f_lang_t: '7 языков', f_lang_d: 'Сербский, английский US, испанский, португальский, русский, французский и итальянский с ручным выбором.',
+        f_lang_t: '7 языков', f_lang_d: 'English, сербский, испанский, португальский, русский, французский и итальянский с ручным выбором.',
         f2_t: 'Умная запись', f2_d: 'Проверяет календарь и предлагает свободное время.',
         f3_t: 'Естественный голос', f3_d: 'Голос ElevenLabs для более естественных разговоров.',
         f_alarm_t: 'Оповещения персонала', f_alarm_d: 'Следующий клиент и срочный запрос на разговор.',
@@ -1203,7 +1203,7 @@ T.fr = {
     hero_cta_demo: 'Essayer gratuitement', hero_cta_how: 'Voir le fonctionnement', hero_social: '500+ entreprises satisfaites', hero_tap: 'Touchez le logo',
     hero_intro_hint: 'Kaleya se presente', hero_demo_msg: '"Bonjour, comment puis-je aider ?"',
     feat_title: 'Tout ce qu une receptionniste fait, en mieux', feat_sub: 'Kaleya comprend les clients, retient les regles et travaille dans la langue choisie.',
-    f_lang_t: '7 langues', f_lang_d: 'Serbe, anglais US, espagnol, portugais, russe, francais et italien avec choix manuel.',
+    f_lang_t: '7 langues', f_lang_d: 'English, serbe, espagnol, portugais, russe, francais et italien avec choix manuel.',
     f2_t: 'Planification intelligente', f2_d: 'Verifie le calendrier et propose les creneaux libres.',
     f3_t: 'Voix naturelle', f3_d: 'Voix ElevenLabs pour des conversations plus naturelles.',
     f_alarm_t: 'Alertes equipe', f_alarm_d: 'Annonce du prochain client et demande urgente de conversation.',
@@ -1235,7 +1235,7 @@ T.it = {
     hero_cta_demo: 'Prova gratis', hero_cta_how: 'Vedi come funziona', hero_social: '500+ aziende soddisfatte', hero_tap: 'Tocca il logo',
     hero_intro_hint: 'Kaleya si presenta', hero_demo_msg: '"Ciao, come posso aiutare?"',
     feat_title: 'Tutto cio che fa una receptionist, ma meglio', feat_sub: 'Kaleya capisce i clienti, ricorda le regole e lavora nella lingua scelta.',
-    f_lang_t: '7 lingue', f_lang_d: 'Serbo, inglese US, spagnolo, portoghese, russo, francese e italiano con scelta manuale.',
+    f_lang_t: '7 lingue', f_lang_d: 'English, serbo, spagnolo, portoghese, russo, francese e italiano con scelta manuale.',
     f2_t: 'Prenotazione intelligente', f2_d: 'Controlla il calendario e propone slot liberi.',
     f3_t: 'Voce naturale', f3_d: 'Voce ElevenLabs per conversazioni piu naturali.',
     f_alarm_t: 'Allarmi team', f_alarm_d: 'Annuncio del prossimo cliente e richiesta urgente di conversazione.',
