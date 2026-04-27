@@ -920,7 +920,14 @@
                                         </div>
                                         <button onclick="closeClientApiModal()" class="w-8 h-8 grid place-items-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">✕</button>
                                     </div>
-                                    <div class="mt-5 space-y-4">
+                                    <div class="mt-5 grid gap-3 text-[13px]">
+                                        <div class="rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3">
+                                            <p class="font-semibold">Poseban API po klijentu</p>
+                                            <p class="mt-1 text-[12px] text-slate-500">Ova podesavanja se cuvaju u backend bazi i nikada u browseru.</p>
+                                        </div>
+                                        <div class="rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 px-4 py-3 text-[12px] text-amber-800 dark:text-amber-200">Sledeci korak je lep backend ekran za izmenu AI modela i glasa po klijentu.</div>
+                                    </div>
+                                    <div class="mt-5 space-y-4 hidden">
                                         <div>
                                             <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">AI API Key</label>
                                             <input id="clientApiKeyInput" type="password" placeholder="Samo ako klijent koristi poseban API" class="mt-1.5 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px] font-mono">
@@ -987,7 +994,13 @@
                                 <div class="p-6 rounded-[24px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                                     <h3 class="font-semibold" data-i18n="global_ai_settings">Globalni AI API</h3>
                                     <p class="text-[13px] text-slate-600 dark:text-slate-400 mt-1" data-i18n="global_ai_desc">Ovaj API koristi se za sve klijente koji nemaju posebno podešavanje.</p>
-                                    <div class="mt-5 space-y-4">
+                                    <div class="mt-5 grid gap-3 text-[13px]">
+                                        <div class="flex justify-between gap-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3"><span class="text-slate-500">Provider</span><span id="adminAiProvider" class="font-semibold">Anthropic</span></div>
+                                        <div class="flex justify-between gap-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3"><span class="text-slate-500">Model</span><span id="adminAiModel" class="font-semibold">claude-haiku-4-5</span></div>
+                                        <div class="flex justify-between gap-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3"><span class="text-slate-500">Status</span><span id="adminAiStatus" class="font-semibold text-green-600 dark:text-green-400">Server povezan</span></div>
+                                        <p class="text-[12px] text-slate-500">API kljuc se cuva na backendu. Frontend ga ne prikazuje i ne cuva.</p>
+                                    </div>
+                                    <div class="mt-5 space-y-4 hidden">
                                         <div>
                                             <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">AI API Key</label>
                                             <div class="mt-1.5 flex gap-2">
@@ -1014,7 +1027,13 @@
                                 <div class="p-6 rounded-[24px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                                     <h3 class="font-semibold">API Podešavanja - ElevenLabs</h3>
                                     <p class="text-[13px] text-slate-600 dark:text-slate-400 mt-1">Kaleya koristi ovaj glas za pozive, demo i obaveštenja.</p>
-                                    <div class="mt-5 space-y-4">
+                                    <div class="mt-5 grid gap-3 text-[13px]">
+                                        <div class="flex justify-between gap-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3"><span class="text-slate-500">Provider</span><span id="adminVoiceProvider" class="font-semibold">ElevenLabs</span></div>
+                                        <div class="flex justify-between gap-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3"><span class="text-slate-500">Model</span><span id="adminVoiceModel" class="font-semibold">eleven_multilingual_v2</span></div>
+                                        <div class="flex justify-between gap-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3"><span class="text-slate-500">Status</span><span id="adminVoiceConnectedStatus" class="font-semibold text-green-600 dark:text-green-400">Server povezan</span></div>
+                                        <button onclick="testElevenVoice()" class="h-11 px-5 rounded-xl border border-slate-300 dark:border-slate-700 font-medium text-[14px] hover:bg-slate-50 dark:hover:bg-slate-800">Testiraj glas</button>
+                                    </div>
+                                    <div class="mt-5 space-y-4 hidden">
                                         <div>
                                             <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">ElevenLabs API Key</label>
                                             <div class="mt-1.5 flex gap-2">
@@ -1067,6 +1086,16 @@
 
 <script>
 // ===== STATE =====
+const KALEYA_APP_VERSION = '2026-04-27-02';
+const savedAppVersion = localStorage.getItem('kaleya_app_version');
+if (savedAppVersion && savedAppVersion !== KALEYA_APP_VERSION) {
+    localStorage.removeItem('kaleya_auth_token');
+    localStorage.removeItem('kaleya_user_role');
+    localStorage.removeItem('kaleya_user_email');
+    sessionStorage.clear();
+}
+localStorage.setItem('kaleya_app_version', KALEYA_APP_VERSION);
+
 if (!localStorage.getItem('kaleya_lang_user_set') && localStorage.getItem('kaleya_lang') === 'sr') {
     localStorage.setItem('kaleya_lang', 'en');
 }
@@ -2341,7 +2370,7 @@ function openChannelDemo(channel, phone) {
 function openClientSettings() { switchClientTab('settings'); document.getElementById('client-settings').classList.remove('hidden'); updateElStatus(); updateClientLangButtons(); syncClientCalendarSettingsUI(); }
 function closeClientSettings() { document.getElementById('client-settings').classList.add('hidden'); }
 function updateElStatus() {
-    const hasKey = !!localStorage.getItem('elevenlabs_key');
+    const hasKey = false;
     const el = document.getElementById('elStatus');
     if (!el) return;
     el.textContent = hasKey ? 'Povezan ✓' : 'Nije povezan';
@@ -2425,6 +2454,8 @@ function switchAdminTab(tab) {
 }
 
 function loadAdminSettings() {
+    updateAdminProviderStatus();
+    return;
     const globalKey = localStorage.getItem('kaleya_global_ai_key') || '';
     const globalKeyInput = document.getElementById('globalAiKey');
     if (globalKeyInput) globalKeyInput.value = globalKey;
@@ -2454,24 +2485,50 @@ function loadAdminSettings() {
 document.getElementById('voiceSelect')?.addEventListener('change', (e) => {
     document.getElementById('customVoice')?.classList.toggle('hidden', e.target.value !== 'custom');
 });
+
+async function updateAdminProviderStatus() {
+    const setText = (id, value) => { const el = document.getElementById(id); if (el) el.textContent = value; };
+    const setStatus = (id, connected) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = connected ? 'Server povezan' : 'Nije povezano';
+        el.className = `font-semibold ${connected ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`;
+    };
+    if (!getAuthToken() || location.protocol === 'file:') {
+        setStatus('adminAiStatus', false);
+        setStatus('adminVoiceConnectedStatus', false);
+        setText('adminVoiceStatus', 'Backend');
+        return;
+    }
+    try {
+        const res = await kaleyaApi('/api/ai-agent/provider-status/', { method: 'GET' });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        setText('adminAiProvider', data.ai?.provider || 'anthropic');
+        setText('adminAiModel', data.ai?.model || 'claude-haiku-4-5');
+        setStatus('adminAiStatus', !!data.ai?.connected);
+        setText('adminVoiceProvider', data.voice?.provider || 'elevenlabs');
+        setText('adminVoiceModel', data.voice?.model_id || 'eleven_multilingual_v2');
+        setStatus('adminVoiceConnectedStatus', !!data.voice?.connected);
+        setText('adminVoiceStatus', data.voice?.connected ? 'ElevenLabs' : 'Backend');
+    } catch (e) {
+        console.warn('Kaleya provider status failed', e);
+        setStatus('adminAiStatus', false);
+        setStatus('adminVoiceConnectedStatus', false);
+    }
+}
+
 function toggleKeyVis(id = 'elevenKey') {
     const inp = document.getElementById(id);
     if (!inp) return;
     inp.type = inp.type === 'password' ? 'text' : 'password';
 }
 function saveGlobalAiSettings() {
-    localStorage.setItem('kaleya_global_ai_key', document.getElementById('globalAiKey')?.value.trim() || '');
-    localStorage.setItem('kaleya_global_ai_model', document.getElementById('globalAiModel')?.value || 'standard');
-    localStorage.setItem('kaleya_global_system_note', document.getElementById('globalSystemNote')?.value.trim() || '');
+    updateAdminProviderStatus();
     showToast('Globalni AI API je sačuvan');
 }
 function saveElevenLabs() {
-    const key = document.getElementById('elevenKey').value.trim();
-    let voice = document.getElementById('voiceSelect').value;
-    if (voice === 'custom') voice = document.getElementById('customVoice').value.trim() || 'EXAVITQu4vr4xnSDxMaL';
-    if (key) localStorage.setItem('elevenlabs_key', key);
-    else localStorage.removeItem('elevenlabs_key');
-    localStorage.setItem('elevenlabs_voice', voice);
+    updateAdminProviderStatus();
     document.getElementById('saveStatus')?.classList.remove('hidden');
     setTimeout(()=>document.getElementById('saveStatus')?.classList.add('hidden'),2000);
     loadAdminSettings();
@@ -2482,10 +2539,6 @@ async function testElevenVoice() { await testVoice(); }
 function openClientApiModal(clientName) {
     activeClientForApi = clientName;
     document.getElementById('clientApiModalName').textContent = clientName;
-    const keyBase = 'kaleya_client_' + clientName.replace(/\s+/g, '_').toLowerCase();
-    document.getElementById('clientApiKeyInput').value = localStorage.getItem(keyBase + '_ai_key') || '';
-    document.getElementById('clientElKeyInput').value = localStorage.getItem(keyBase + '_el_key') || '';
-    document.getElementById('clientModelSelect').value = localStorage.getItem(keyBase + '_model') || 'global';
     document.getElementById('clientApiModal').classList.remove('hidden');
 }
 
@@ -2495,10 +2548,6 @@ function closeClientApiModal() {
 
 function saveClientApiKey() {
     if (!activeClientForApi) return;
-    const keyBase = 'kaleya_client_' + activeClientForApi.replace(/\s+/g, '_').toLowerCase();
-    localStorage.setItem(keyBase + '_ai_key', document.getElementById('clientApiKeyInput')?.value.trim() || '');
-    localStorage.setItem(keyBase + '_el_key', document.getElementById('clientElKeyInput')?.value.trim() || '');
-    localStorage.setItem(keyBase + '_model', document.getElementById('clientModelSelect')?.value || 'global');
     closeClientApiModal();
     showToast('API podešavanja za klijenta su sačuvana');
 }

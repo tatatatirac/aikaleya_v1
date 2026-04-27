@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ai_agent.models import AIIntent, AIToolRun
-from ai_agent.providers import ProviderError, get_client_voice_config, synthesize_elevenlabs_speech
+from ai_agent.providers import ProviderError, get_client_ai_config, get_client_voice_config, synthesize_elevenlabs_speech
 from ai_agent.serializers import AIIntentSerializer, AIToolRunSerializer, InboundTextSerializer, TextToSpeechSerializer
 from ai_agent.services import handle_inbound_text
 from appointments.models import Customer
@@ -102,5 +102,31 @@ class VoiceStatusAPIView(APIView):
                 "api_key_set": api_key_set,
                 "voice_id_set": voice_id_set,
                 "model_id": config.get("model_id", ""),
+            }
+        )
+
+
+class ProviderStatusAPIView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        client = client_for_request(request)
+        if not client:
+            return Response({"detail": "Klijent nije pronadjen."}, status=404)
+
+        ai_config = get_client_ai_config(client)
+        voice_config = get_client_voice_config(client)
+        return Response(
+            {
+                "ai": {
+                    "provider": ai_config.get("provider", ""),
+                    "model": ai_config.get("model", ""),
+                    "connected": bool(ai_config.get("api_key")),
+                },
+                "voice": {
+                    "provider": voice_config.get("provider", "elevenlabs"),
+                    "model_id": voice_config.get("model_id", ""),
+                    "connected": bool(voice_config.get("api_key")) and bool(voice_config.get("voice_id")),
+                },
             }
         )
