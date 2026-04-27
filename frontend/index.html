@@ -1553,35 +1553,80 @@ function fillLogin(type) {
 function setDemoClient() { fillLogin('client'); }
 function logout() { showView('landing'); }
 
-// ===== SPEAK (ElevenLabs + fallback) =====
-async function speak(text, langOverride) {
+// ===== BACKEND API + SPEAK =====
+function getAuthToken() {
+    return localStorage.getItem('kaleya_auth_token') || '';
+}
+
+async function kaleyaApi(path, options = {}) {
+    const token = getAuthToken();
+    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    if (token) headers.Authorization = `Token ${token}`;
+    return fetch(path, { ...options, headers });
+}
+
+async function playAudioUrl(audioUrl) {
+    if (!audioUrl) return false;
+    const audio = new Audio(audioUrl);
+    await audio.play();
+    return true;
+}
+
+function browserSpeak(text, langOverride) {
     const lang = langOverride || currentVoiceLang || currentLang;
-    const key = localStorage.getItem('elevenlabs_key');
-    const voiceId = localStorage.getItem('elevenlabs_voice') || 'EXAVITQu4vr4xnSDxMaL';
-    
-    // Try ElevenLabs
-    if (key) {
-        try {
-            const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
-                method: 'POST',
-                headers: { 'xi-api-key': key, 'Content-Type': 'application/json', 'Accept': 'audio/mpeg' },
-                body: JSON.stringify({ text, model_id: 'eleven_multilingual_v2', voice_settings: { stability: 0.5, similarity_boost: 0.8 } })
-            });
-            if (res.ok) {
-                const blob = await res.blob();
-                const audio = new Audio(URL.createObjectURL(blob));
-                await audio.play();
-                return;
-            }
-        } catch (e) { console.warn('ElevenLabs failed, fallback to browser'); }
-    }
-    // Fallback
     if (!('speechSynthesis' in window)) return;
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = BROWSER_LANG_MAP[lang] || 'en-US';
     utter.rate = 1;
     speechSynthesis.cancel();
     speechSynthesis.speak(utter);
+}
+
+async function speak(text, langOverride) {
+    if (getAuthToken() && location.protocol !== 'file:') {
+        try {
+            const res = await kaleyaApi('/api/ai-agent/tts/', {
+                method: 'POST',
+                body: JSON.stringify({ text })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                await playAudioUrl(data.audio_url);
+                return;
+            }
+        } catch (e) {
+            console.warn('Kaleya backend TTS failed, fallback to browser', e);
+        }
+    }
+    browserSpeak(text, langOverride);
+}
+
+function availabilityPrompt() {
+    const prompts = {
+        sr: 'Proveri koliko slobodnih termina ima danas i odgovori kratko.',
+        en: 'Check how many available slots there are today and answer briefly.',
+        es: 'Comprueba cuantos horarios disponibles hay hoy y responde brevemente.',
+        pt: 'Verifique quantos horarios livres existem hoje e responda brevemente.',
+        ru: 'Проверь, сколько свободных слотов есть сегодня, и ответь кратко.',
+        fr: 'Verifie combien de creneaux sont disponibles aujourd hui et reponds brievement.',
+        it: 'Controlla quanti slot disponibili ci sono oggi e rispondi brevemente.'
+    };
+    return prompts[currentVoiceLang] || prompts[currentLang] || prompts.en;
+}
+
+async function askKaleyaBackend(text, includeVoice = true) {
+    if (!getAuthToken() || location.protocol === 'file:') return null;
+    const res = await kaleyaApi('/api/ai-agent/inbound-text/', {
+        method: 'POST',
+        body: JSON.stringify({
+            text,
+            channel: 'web',
+            use_ai: true,
+            include_voice: includeVoice
+        })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
 }
 
 // ===== CLIENT APP =====
@@ -1693,8 +1738,19 @@ async function handleQuickAction(action) {
         return;
     }
     if (action === 'proveri') {
-        const msg = todayAvailabilityMessage();
-        await speak(msg, currentVoiceLang);
+        let msg = todayAvailabilityMessage();
+        try {
+            const result = await askKaleyaBackend(availabilityPrompt(), true);
+            if (result?.response_text) msg = result.response_text;
+            if (result?.voice?.audio_url) {
+                await playAudioUrl(result.voice.audio_url);
+            } else {
+                await speak(msg, currentVoiceLang);
+            }
+        } catch (e) {
+            console.warn('Kaleya availability backend failed, fallback to local demo', e);
+            await speak(msg, currentVoiceLang);
+        }
         showToast(msg);
         return;
     }
