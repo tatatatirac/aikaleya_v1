@@ -2,7 +2,7 @@ from rest_framework import permissions, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.permissions import IsAdminRole, user_role
+from accounts.permissions import IsAdminRole
 from ai_core.models import AlarmSettings, GlobalAISettings, KaleyaCommandLog, VoiceSettings
 from ai_core.serializers import (
     AlarmSettingsSerializer,
@@ -12,15 +12,7 @@ from ai_core.serializers import (
     VoiceSettingsSerializer,
 )
 from ai_core.services import handle_kaleya_command
-from clients.models import BusinessClient, get_active_client_for_user
-
-
-def client_for_request(request):
-    if user_role(request.user) == "admin":
-        client_id = request.query_params.get("client_id") or request.data.get("business_client")
-        if client_id:
-            return BusinessClient.objects.get(id=client_id)
-    return get_active_client_for_user(request.user)
+from clients.utils import client_for_request
 
 
 class GlobalAISettingsViewSet(viewsets.ModelViewSet):
@@ -96,4 +88,3 @@ class KaleyaCommandAPIView(APIView):
             success=True,
         )
         return Response({"output_text": output_text, "log": KaleyaCommandLogSerializer(log).data})
-

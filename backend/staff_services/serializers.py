@@ -1,0 +1,63 @@
+from rest_framework import serializers
+
+from staff_services.models import BlockedTime, Service, StaffMember, StaffService, WorkingHours
+
+
+class StaffMemberSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StaffMember
+        fields = (
+            "id",
+            "full_name",
+            "role_title",
+            "phone",
+            "email",
+            "color",
+            "is_active",
+            "notes",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = ("id", "created_at", "updated_at")
+
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = (
+            "id",
+            "name",
+            "category",
+            "description",
+            "duration_minutes",
+            "price",
+            "currency",
+            "is_active",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = ("id", "created_at", "updated_at")
+
+
+class StaffServiceSerializer(serializers.ModelSerializer):
+    staff_member_name = serializers.CharField(source="staff_member.full_name", read_only=True)
+    service_name = serializers.CharField(source="service.name", read_only=True)
+
+    class Meta:
+        model = StaffService
+        fields = ("id", "staff_member", "staff_member_name", "service", "service_name", "is_active", "created_at")
+        read_only_fields = ("id", "staff_member_name", "service_name", "created_at")
+
+
+class WorkingHoursSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WorkingHours
+        fields = ("id", "staff_member", "weekday", "start_time", "end_time", "is_closed")
+        read_only_fields = ("id",)
+
+
+class BlockedTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BlockedTime
+        fields = ("id", "staff_member", "start_at", "end_at", "reason", "source", "created_at")
+        read_only_fields = ("id", "created_at")

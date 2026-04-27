@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from appointments.models import Appointment, Customer
+from staff_services.models import StaffService
 
 
 class CustomerSerializer(serializers.ModelSerializer):
@@ -36,6 +37,8 @@ class AppointmentSerializer(serializers.ModelSerializer):
             "customer",
             "customer_id",
             "customer_data",
+            "staff_member",
+            "service",
             "title",
             "status",
             "date",
@@ -46,6 +49,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
             "source",
             "notes",
             "cancelled_reason",
+            "metadata",
             "created_at",
             "updated_at",
         )
@@ -59,10 +63,28 @@ class AppointmentSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Kupac ne pripada ovom klijentu.")
         return value
 
+    def validate(self, attrs):
+        business_client = self.context["business_client"]
+        staff_member = attrs.get("staff_member", getattr(self.instance, "staff_member", None))
+        service = attrs.get("service", getattr(self.instance, "service", None))
+
+        if staff_member and staff_member.business_client_id != business_client.id:
+            raise serializers.ValidationError({"staff_member": "Zaposleni ne pripada ovom klijentu."})
+        if service and service.business_client_id != business_client.id:
+            raise serializers.ValidationError({"service": "Usluga ne pripada ovom klijentu."})
+        if staff_member and service:
+            allowed = StaffService.objects.filter(staff_member=staff_member, service=service, is_active=True).exists()
+            if not allowed:
+                raise serializers.ValidationError({"service": "Ovaj zaposleni nema ukljucenu izabranu uslugu."})
+        return attrs
+
     def create(self, validated_data):
         business_client = self.context["business_client"]
         customer_id = validated_data.pop("customer_id", None)
         customer_data = validated_data.pop("customer_data", None)
+        service = validated_data.get("service")
+        if service and "duration_minutes" not in validated_data:
+            validated_data["duration_minutes"] = service.duration_minutes
 
         customer = None
         if customer_id:
@@ -99,4 +121,3 @@ class AppointmentSerializer(serializers.ModelSerializer):
         instance.full_clean()
         instance.save()
         return instance
-

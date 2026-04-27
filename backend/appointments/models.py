@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Q
 
 from clients.models import BusinessClient
 
@@ -49,11 +50,28 @@ class Appointment(models.Model):
         ("whatsapp", "WhatsApp"),
         ("viber", "Viber"),
         ("telegram", "Telegram"),
+        ("email", "Email"),
+        ("instagram", "Instagram"),
+        ("tiktok", "TikTok"),
         ("web", "Web"),
     )
 
     business_client = models.ForeignKey(BusinessClient, on_delete=models.CASCADE, related_name="appointments")
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="appointments", null=True, blank=True)
+    staff_member = models.ForeignKey(
+        "staff_services.StaffMember",
+        on_delete=models.SET_NULL,
+        related_name="appointments",
+        null=True,
+        blank=True,
+    )
+    service = models.ForeignKey(
+        "staff_services.Service",
+        on_delete=models.SET_NULL,
+        related_name="appointments",
+        null=True,
+        blank=True,
+    )
     title = models.CharField(max_length=160, blank=True)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default=STATUS_CONFIRMED)
     date = models.DateField()
@@ -63,6 +81,7 @@ class Appointment(models.Model):
     source = models.CharField(max_length=80, default="manual")
     notes = models.TextField(blank=True)
     cancelled_reason = models.CharField(max_length=240, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -85,6 +104,8 @@ class Appointment(models.Model):
     def clean(self):
         if self.duration_minutes <= 0:
             raise ValidationError({"duration_minutes": "Trajanje termina mora biti vece od 0."})
+        if self.service_id and self.duration_minutes == 30:
+            self.duration_minutes = self.service.duration_minutes
 
         work_start = self.business_client.work_start
         work_end = self.business_client.work_end
@@ -102,6 +123,8 @@ class Appointment(models.Model):
             date=self.date,
             status__in=[self.STATUS_CONFIRMED, self.STATUS_MOVED, self.STATUS_PENDING, self.STATUS_BLOCKED],
         )
+        if self.staff_member_id:
+            appointments = appointments.filter(Q(staff_member_id=self.staff_member_id) | Q(staff_member__isnull=True))
         if self.pk:
             appointments = appointments.exclude(pk=self.pk)
 
@@ -114,4 +137,3 @@ class Appointment(models.Model):
     def __str__(self):
         label = self.customer.full_name if self.customer else self.title or "Blokirano"
         return f"{label} - {self.date} {self.start_time}"
-

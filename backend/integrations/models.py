@@ -10,6 +10,10 @@ class IntegrationConnection(models.Model):
         ("telegram", "Telegram"),
         ("sms", "SMS"),
         ("phone", "Phone Call"),
+        ("email", "Email"),
+        ("google_calendar", "Google Calendar"),
+        ("instagram", "Instagram"),
+        ("tiktok", "TikTok"),
     )
 
     STATUS_CHOICES = (
@@ -36,4 +40,3 @@ class IntegrationConnection(models.Model):
 
     def __str__(self):
         return f"{self.business_client} - {self.provider}"
-

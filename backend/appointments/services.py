@@ -31,13 +31,15 @@ def appointment_overlaps(slot_start, duration_minutes, appointment):
     return start_dt < other_end and end_dt > other_start
 
 
-def availability_for_date(business_client, target_date, duration_minutes=None):
+def availability_for_date(business_client, target_date, duration_minutes=None, staff_member_id=None):
     duration = int(duration_minutes or business_client.slot_interval_minutes)
-    appointments = list(
-        Appointment.objects.select_related("customer")
-        .filter(business_client=business_client, date=target_date)
-        .order_by("start_time")
+    appointments_query = Appointment.objects.select_related("customer", "staff_member", "service").filter(
+        business_client=business_client,
+        date=target_date,
     )
+    if staff_member_id:
+        appointments_query = appointments_query.filter(staff_member_id=staff_member_id)
+    appointments = list(appointments_query.order_by("start_time"))
     active = [appointment for appointment in appointments if appointment.status in ACTIVE_STATUSES]
 
     slots = []
@@ -53,6 +55,8 @@ def availability_for_date(business_client, target_date, duration_minutes=None):
                 "appointment_id": blocking_appointment.id if blocking_appointment else None,
                 "status": blocking_appointment.status if blocking_appointment else "available",
                 "customer": blocking_appointment.customer.full_name if blocking_appointment and blocking_appointment.customer else "",
+                "staff_member": blocking_appointment.staff_member.full_name if blocking_appointment and blocking_appointment.staff_member else "",
+                "service": blocking_appointment.service.name if blocking_appointment and blocking_appointment.service else "",
             }
         )
 
@@ -64,12 +68,12 @@ def availability_for_date(business_client, target_date, duration_minutes=None):
         "work_start": business_client.work_start.strftime("%H:%M"),
         "work_end": business_client.work_end.strftime("%H:%M"),
         "duration_minutes": duration,
+        "staff_member_id": staff_member_id,
         "free_count": free_count,
         "busy_count": busy_count,
         "slots": slots,
     }
 
 
-def today_availability_summary(business_client):
-    return availability_for_date(business_client, date_cls.today())
-
+def today_availability_summary(business_client, staff_member_id=None):
+    return availability_for_date(business_client, date_cls.today(), staff_member_id=staff_member_id)

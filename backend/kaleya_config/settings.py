@@ -21,6 +21,8 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-only-change-me")
 DEBUG = env_bool("DJANGO_DEBUG", True)
 
 ALLOWED_HOSTS = [host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if host.strip()]
+if DEBUG and "testserver" not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append("testserver")
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()]
 
 INSTALLED_APPS = [
@@ -37,11 +39,16 @@ INSTALLED_APPS = [
     "channels",
     "accounts",
     "clients",
+    "staff_services",
     "appointments",
+    "communications",
     "ai_core",
+    "ai_agent",
     "integrations",
+    "notifications",
     "billing",
     "support",
+    "audit_log",
 ]
 
 MIDDLEWARE = [

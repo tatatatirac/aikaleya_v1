@@ -9,6 +9,8 @@ from appointments.models import Appointment, Customer
 from billing.models import Plan, Subscription
 from clients.models import BusinessClient, ClientApiSettings
 from integrations.models import IntegrationConnection
+from notifications.models import NotificationRule
+from staff_services.models import Service, StaffMember, StaffService, WorkingHours
 
 
 class Command(BaseCommand):
@@ -49,11 +51,11 @@ class Command(BaseCommand):
             },
         )
 
-        ClientApiSettings.objects.get_or_create(
+        ClientApiSettings.objects.update_or_create(
             business_client=client,
             defaults={
-                "ai_provider": "openai",
-                "ai_model": "gpt-4o-mini",
+                "ai_provider": "anthropic",
+                "ai_model": "claude-haiku-4-5-20251001",
                 "voice_provider": "elevenlabs",
                 "voice_model": "eleven_multilingual_v2",
             },
@@ -63,11 +65,11 @@ class Command(BaseCommand):
             defaults={"language": "en", "voice_id": "demo-voice"},
         )
         AlarmSettings.objects.get_or_create(business_client=client)
-        GlobalAISettings.objects.get_or_create(
+        GlobalAISettings.objects.update_or_create(
             id=1,
             defaults={
-                "ai_provider": "openai",
-                "ai_model": "gpt-4o-mini",
+                "ai_provider": "anthropic",
+                "ai_model": "claude-haiku-4-5-20251001",
                 "voice_provider": "elevenlabs",
                 "voice_model": "eleven_multilingual_v2",
                 "enabled": True,
@@ -85,7 +87,7 @@ class Command(BaseCommand):
             },
         )
 
-        for provider in ("whatsapp", "viber", "telegram", "sms", "phone"):
+        for provider in ("whatsapp", "viber", "telegram", "sms", "phone", "email", "google_calendar"):
             IntegrationConnection.objects.get_or_create(
                 business_client=client,
                 provider=provider,
@@ -93,6 +95,7 @@ class Command(BaseCommand):
             )
 
         self.create_demo_calendar(client)
+        self.create_notification_rules(client)
 
         self.stdout.write(self.style.SUCCESS("Kaleya demo backend podaci su spremni."))
         self.stdout.write("Admin login: admin@aikaleya.com / admin123")
@@ -164,6 +167,48 @@ class Command(BaseCommand):
     def create_demo_calendar(self, client):
         Appointment.objects.filter(business_client=client).delete()
         Customer.objects.filter(business_client=client).delete()
+        StaffService.objects.filter(staff_member__business_client=client).delete()
+        WorkingHours.objects.filter(business_client=client).delete()
+        StaffMember.objects.filter(business_client=client).delete()
+        Service.objects.filter(business_client=client).delete()
+
+        staff = StaffMember.objects.create(
+            business_client=client,
+            full_name="Mark Johnson",
+            role_title="Senior Specialist",
+            phone="+1 555 0199",
+            email="mark@example.com",
+            color="#14b8a6",
+        )
+        services = [
+            Service.objects.create(
+                business_client=client,
+                name="Standard appointment",
+                category="General",
+                duration_minutes=30,
+                price=40,
+                currency="USD",
+            ),
+            Service.objects.create(
+                business_client=client,
+                name="Extended appointment",
+                category="General",
+                duration_minutes=60,
+                price=75,
+                currency="USD",
+            ),
+        ]
+        for service in services:
+            StaffService.objects.create(staff_member=staff, service=service)
+
+        for weekday in range(5):
+            WorkingHours.objects.create(
+                business_client=client,
+                staff_member=staff,
+                weekday=weekday,
+                start_time=time(9, 0),
+                end_time=time(16, 0),
+            )
 
         customers = [
             Customer.objects.create(
@@ -193,6 +238,8 @@ class Command(BaseCommand):
         Appointment.objects.create(
             business_client=client,
             customer=customers[0],
+            staff_member=staff,
+            service=services[0],
             status=Appointment.STATUS_CONFIRMED,
             date=today,
             start_time=time(9, 0),
@@ -203,6 +250,8 @@ class Command(BaseCommand):
         Appointment.objects.create(
             business_client=client,
             customer=customers[1],
+            staff_member=staff,
+            service=services[1],
             status=Appointment.STATUS_MOVED,
             date=today,
             start_time=time(11, 0),
@@ -213,6 +262,8 @@ class Command(BaseCommand):
         Appointment.objects.create(
             business_client=client,
             customer=customers[2],
+            staff_member=staff,
+            service=services[0],
             status=Appointment.STATUS_CANCELLED,
             date=today + timedelta(days=1),
             start_time=time(10, 30),
@@ -223,6 +274,7 @@ class Command(BaseCommand):
         )
         Appointment.objects.create(
             business_client=client,
+            staff_member=staff,
             title="Blocked for staff meeting",
             status=Appointment.STATUS_BLOCKED,
             date=today + timedelta(days=2),
@@ -231,3 +283,23 @@ class Command(BaseCommand):
             channel="web",
             source="demo",
         )
+
+    def create_notification_rules(self, client):
+        NotificationRule.objects.filter(business_client=client).delete()
+        rules = [
+            ("appointment_created", "whatsapp", 0),
+            ("appointment_changed", "sms", 0),
+            ("appointment_cancelled", "sms", 0),
+            ("reminder_before", "whatsapp", -1440),
+            ("reminder_before", "sms", -120),
+            ("support_needed", "dashboard", 0),
+            ("daily_report", "email", 0),
+        ]
+        for event, channel, offset_minutes in rules:
+            NotificationRule.objects.create(
+                business_client=client,
+                event=event,
+                channel=channel,
+                offset_minutes=offset_minutes,
+                language=client.interface_language,
+            )

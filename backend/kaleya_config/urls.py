@@ -35,11 +35,16 @@ urlpatterns = [
     path("api/health/", health_check, name="health-check"),
     path("api/auth/", include("accounts.urls")),
     path("api/clients/", include("clients.urls")),
+    path("api/staff-services/", include("staff_services.urls")),
     path("api/appointments/", include("appointments.urls")),
+    path("api/communications/", include("communications.urls")),
     path("api/integrations/", include("integrations.urls")),
     path("api/ai/", include("ai_core.urls")),
+    path("api/ai-agent/", include("ai_agent.urls")),
+    path("api/notifications/", include("notifications.urls")),
     path("api/billing/", include("billing.urls")),
     path("api/support/", include("support.urls")),
+    path("api/audit-log/", include("audit_log.urls")),
 ]
 
 if settings.DEBUG:
