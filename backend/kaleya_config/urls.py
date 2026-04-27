@@ -51,4 +51,5 @@ if settings.DEBUG:
     urlpatterns += [
         re_path(r"^assets/(?P<path>.*)$", serve, {"document_root": settings.PROJECT_ROOT / "frontend" / "assets"}),
         re_path(r"^logo\.png$", serve, {"path": "logo.png", "document_root": settings.PROJECT_ROOT / "frontend"}),
+        re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
     ]

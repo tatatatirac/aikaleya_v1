@@ -3,7 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from ai_agent.models import AIIntent, AIToolRun
-from ai_agent.serializers import AIIntentSerializer, AIToolRunSerializer, InboundTextSerializer
+from ai_agent.providers import ProviderError, synthesize_elevenlabs_speech
+from ai_agent.serializers import AIIntentSerializer, AIToolRunSerializer, InboundTextSerializer, TextToSpeechSerializer
 from ai_agent.services import handle_inbound_text
 from appointments.models import Customer
 from clients.utils import client_for_request
@@ -61,5 +62,23 @@ class InboundTextAPIView(APIView):
             conversation=conversation,
             customer=customer,
             channel=serializer.validated_data.get("channel", "web"),
+            use_ai=serializer.validated_data.get("use_ai", True),
+            include_voice=serializer.validated_data.get("include_voice", False),
         )
         return Response(result)
+
+
+class TextToSpeechAPIView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        serializer = TextToSpeechSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        client = client_for_request(request)
+        if not client:
+            return Response({"detail": "Klijent nije pronadjen."}, status=404)
+
+        try:
+            return Response(synthesize_elevenlabs_speech(client, serializer.validated_data["text"]))
+        except ProviderError as exc:
+            return Response({"detail": str(exc)}, status=400)

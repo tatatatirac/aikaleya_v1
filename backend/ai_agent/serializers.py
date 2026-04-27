@@ -41,3 +41,9 @@ class InboundTextSerializer(serializers.Serializer):
     channel = serializers.CharField(required=False, default="web")
     conversation_id = serializers.IntegerField(required=False, allow_null=True)
     customer_id = serializers.IntegerField(required=False, allow_null=True)
+    use_ai = serializers.BooleanField(required=False, default=True)
+    include_voice = serializers.BooleanField(required=False, default=False)
+
+
+class TextToSpeechSerializer(serializers.Serializer):
+    text = serializers.CharField()
