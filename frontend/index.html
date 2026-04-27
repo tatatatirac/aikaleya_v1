@@ -2347,6 +2347,43 @@ function updateElStatus() {
     el.textContent = hasKey ? 'Povezan ✓' : 'Nije povezan';
     el.className = `px-2.5 py-1 rounded-full text-[11px] font-semibold ${hasKey ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-600'}`;
 }
+function voiceStatusText(connected, checking = false) {
+    if (checking) {
+        const labels = { sr: 'Provera...', en: 'Checking...', es: 'Comprobando...', pt: 'Verificando...', ru: 'Provera...', fr: 'Verification...', it: 'Controllo...' };
+        return labels[currentLang] || labels.en;
+    }
+    if (connected) {
+        const labels = { sr: 'Povezan preko servera ✓', en: 'Connected via server ✓', es: 'Conectado via servidor ✓', pt: 'Conectado pelo servidor ✓', ru: 'Povezan preko servera ✓', fr: 'Connecte via serveur ✓', it: 'Connesso via server ✓' };
+        return labels[currentLang] || labels.en;
+    }
+    const labels = { sr: 'Nije povezan', en: 'Not connected', es: 'No conectado', pt: 'Nao conectado', ru: 'Nije povezan', fr: 'Non connecte', it: 'Non connesso' };
+    return labels[currentLang] || labels.en;
+}
+
+function setVoiceStatusBadge(connected, checking = false) {
+    const el = document.getElementById('elStatus');
+    if (!el) return;
+    el.textContent = voiceStatusText(connected, checking);
+    el.className = `px-2.5 py-1 rounded-full text-[11px] font-semibold ${connected ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-600'}`;
+}
+
+async function updateElStatus() {
+    if (!getAuthToken() || location.protocol === 'file:') {
+        setVoiceStatusBadge(false);
+        return;
+    }
+    setVoiceStatusBadge(false, true);
+    try {
+        const res = await kaleyaApi('/api/ai-agent/voice-status/', { method: 'GET' });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        setVoiceStatusBadge(!!data.connected);
+    } catch (e) {
+        console.warn('Kaleya voice status failed', e);
+        setVoiceStatusBadge(false);
+    }
+}
+
 function saveClientVoiceLang() {
     const value = document.getElementById('clientVoiceLang')?.value || currentLang;
     currentVoiceLang = value;
