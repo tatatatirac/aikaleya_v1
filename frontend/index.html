@@ -1106,6 +1106,7 @@ let currentLang = localStorage.getItem('kaleya_lang') || 'en';
 let currentVoiceLang = localStorage.getItem('kaleya_voice_lang') || currentLang;
 let kaleyaActive = false;
 let kaleyaEnabled = localStorage.getItem('kaleya_enabled') !== 'off';
+let clientSettingsCache = null;
 let recognition = null;
 let activeClientForApi = '';
 let openStatusMenuId = '';
@@ -1452,6 +1453,9 @@ function setLang(lang) {
     localStorage.setItem('kaleya_lang_user_set', '1');
     if (!localStorage.getItem('kaleya_voice_lang')) currentVoiceLang = lang;
     applyLang();
+    saveClientSettingsToBackend({ interface_language: lang, language: lang }).catch(error => {
+        console.warn('Kaleya language save failed', error);
+    });
     document.getElementById('langDropdown')?.classList.remove('open');
 }
 
@@ -1495,6 +1499,8 @@ function showView(view) {
     if (view === 'client') {
         renderSchedule();
         renderClientCalendar();
+        loadClientSettingsFromBackend();
+        loadClientAppointmentsFromBackend();
         updateKaleyaPowerUI();
         switchClientTab('home');
     }
@@ -1580,7 +1586,19 @@ function fillLogin(type) {
     }
 }
 function setDemoClient() { fillLogin('client'); }
-function logout() { showView('landing'); }
+async function logout() {
+    if (getAuthToken() && isBackendServed()) {
+        try {
+            await kaleyaApi('/api/auth/logout/', { method: 'POST' });
+        } catch (error) {
+            console.warn('Kaleya logout failed', error);
+        }
+    }
+    localStorage.removeItem('kaleya_auth_token');
+    localStorage.removeItem('kaleya_user_role');
+    localStorage.removeItem('kaleya_user_email');
+    showView('landing');
+}
 
 // ===== BACKEND API + SPEAK =====
 function getAuthToken() {
@@ -1658,6 +1676,192 @@ async function askKaleyaBackend(text, includeVoice = true) {
     return res.json();
 }
 
+function normalizeClientTime(value, fallback) {
+    return String(value || fallback).slice(0, 5);
+}
+
+function timeFormatFromBackend(value) {
+    return value === '12h' ? '12' : '24';
+}
+
+function timeFormatToBackend(value) {
+    return value === '12' ? '12h' : '24h';
+}
+
+function weekStartFromBackend(value) {
+    return Number(value) === 6 ? 'sunday' : 'monday';
+}
+
+function weekStartToBackend(value) {
+    return value === 'sunday' ? 6 : 0;
+}
+
+function applyClientSettingsFromBackend(data = {}) {
+    const nextLang = data.interface_language || data.language;
+    const nextVoiceLang = data.voice_language;
+    clientSettingsCache = {
+        start: normalizeClientTime(data.work_start, '09:00'),
+        end: normalizeClientTime(data.work_end, '16:00'),
+        interval: Number(data.slot_interval_minutes || 30),
+        format: timeFormatFromBackend(data.time_format),
+        weekStart: weekStartFromBackend(data.week_start),
+        kaleyaEnabled: data.kaleya_enabled !== false,
+        interfaceLanguage: nextLang || currentLang,
+        voiceLanguage: nextVoiceLang || currentVoiceLang
+    };
+
+    localStorage.setItem('client_work_start', clientSettingsCache.start);
+    localStorage.setItem('client_work_end', clientSettingsCache.end);
+    localStorage.setItem('client_slot_interval', String(clientSettingsCache.interval));
+    localStorage.setItem('client_time_format', clientSettingsCache.format);
+    localStorage.setItem('client_week_start', clientSettingsCache.weekStart);
+
+    if (T[nextLang] && currentLang !== nextLang) {
+        currentLang = nextLang;
+        localStorage.setItem('kaleya_lang', nextLang);
+    }
+    if (T[nextVoiceLang]) {
+        currentVoiceLang = nextVoiceLang;
+        localStorage.setItem('kaleya_voice_lang', nextVoiceLang);
+    }
+
+    kaleyaEnabled = clientSettingsCache.kaleyaEnabled;
+    localStorage.setItem('kaleya_enabled', kaleyaEnabled ? 'on' : 'off');
+    applyLang();
+    syncClientCalendarSettingsUI();
+    updateKaleyaPowerUI();
+}
+
+async function loadClientSettingsFromBackend() {
+    if (!getAuthToken() || location.protocol === 'file:') return null;
+    try {
+        const res = await kaleyaApi('/api/clients/business-clients/current/', { method: 'GET' });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        applyClientSettingsFromBackend(data);
+        return data;
+    } catch (error) {
+        console.warn('Kaleya client settings load failed', error);
+        return null;
+    }
+}
+
+async function saveClientSettingsToBackend(payload) {
+    if (!getAuthToken() || location.protocol === 'file:') return null;
+    const res = await kaleyaApi('/api/clients/business-clients/current/', {
+        method: 'PATCH',
+        body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    applyClientSettingsFromBackend(data);
+    return data;
+}
+
+function frontendChannelToBackend(channel = 'Phone') {
+    const map = { WhatsApp: 'whatsapp', Viber: 'viber', Telegram: 'telegram', SMS: 'sms', Phone: 'phone', Email: 'email' };
+    return map[channel] || String(channel).toLowerCase();
+}
+
+function backendChannelToFrontend(channel = 'phone') {
+    const map = { whatsapp: 'WhatsApp', viber: 'Viber', telegram: 'Telegram', sms: 'SMS', phone: 'Phone', email: 'Email', web: 'Phone' };
+    return map[channel] || channel;
+}
+
+function splitCustomerName(name = '') {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (!parts.length) return { first_name: 'Client', last_name: '' };
+    return { first_name: parts[0], last_name: parts.slice(1).join(' ') };
+}
+
+function appointmentFromBackend(item) {
+    const customerName = item.customer?.full_name || item.title || 'Client';
+    return {
+        id: `b${item.id}`,
+        backendId: item.id,
+        date: item.date,
+        time: String(item.start_time || '').slice(0, 5),
+        duration: item.duration_minutes || getClientCalendarSettings().interval,
+        name: customerName,
+        phone: item.customer?.phone || '',
+        channel: backendChannelToFrontend(item.channel),
+        status: item.status || 'confirmed'
+    };
+}
+
+function appointmentPayloadForBackend(payload) {
+    const name = splitCustomerName(payload.name || 'Client');
+    return {
+        customer_data: {
+            first_name: name.first_name,
+            last_name: name.last_name,
+            phone: payload.phone || '',
+            preferred_channel: frontendChannelToBackend(payload.channel)
+        },
+        title: payload.name || '',
+        status: payload.status || 'confirmed',
+        date: payload.date,
+        start_time: payload.time,
+        duration_minutes: Number(payload.duration || getClientCalendarSettings().interval),
+        channel: frontendChannelToBackend(payload.channel),
+        source: 'client_app',
+        notes: ''
+    };
+}
+
+async function loadClientAppointmentsFromBackend() {
+    if (!getAuthToken() || location.protocol === 'file:') return;
+    try {
+        const res = await kaleyaApi('/api/appointments/appointments/', { method: 'GET' });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        const rows = Array.isArray(data) ? data : (data.results || []);
+        schedule = rows.map(appointmentFromBackend);
+        renderSchedule();
+        renderClientCalendar();
+    } catch (e) {
+        console.warn('Kaleya appointments load failed', e);
+    }
+}
+
+async function saveAppointmentToBackend(payload) {
+    if (!getAuthToken() || location.protocol === 'file:') return null;
+    const method = payload.backendId ? 'PATCH' : 'POST';
+    const path = payload.backendId ? `/api/appointments/appointments/${payload.backendId}/` : '/api/appointments/appointments/';
+    const res = await kaleyaApi(path, {
+        method,
+        body: JSON.stringify(appointmentPayloadForBackend(payload))
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return appointmentFromBackend(await res.json());
+}
+
+async function updateAppointmentStatusBackend(item, status) {
+    if (!item?.backendId || !getAuthToken() || location.protocol === 'file:') return null;
+    const res = await kaleyaApi(`/api/appointments/appointments/${item.backendId}/`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return appointmentFromBackend(await res.json());
+}
+
+async function cancelAppointmentBackend(item) {
+    if (!item?.backendId || !getAuthToken() || location.protocol === 'file:') return null;
+    const res = await kaleyaApi(`/api/appointments/appointments/${item.backendId}/cancel/`, {
+        method: 'POST',
+        body: JSON.stringify({ reason: 'Cancelled from client app' })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return appointmentFromBackend(await res.json());
+}
+
+async function deleteAppointmentBackend(item) {
+    if (!item?.backendId || !getAuthToken() || location.protocol === 'file:') return;
+    const res = await kaleyaApi(`/api/appointments/appointments/${item.backendId}/`, { method: 'DELETE' });
+    if (!res.ok && res.status !== 204) throw new Error(await res.text());
+}
+
 // ===== CLIENT APP =====
 const micBtn = document.getElementById('micBtn');
 const micRing = document.getElementById('micRing');
@@ -1706,12 +1910,16 @@ function updateMicUI() {
 function toggleKaleyaPower() {
     kaleyaEnabled = !kaleyaEnabled;
     localStorage.setItem('kaleya_enabled', kaleyaEnabled ? 'on' : 'off');
+    if (clientSettingsCache) clientSettingsCache.kaleyaEnabled = kaleyaEnabled;
     if (!kaleyaEnabled && kaleyaActive) {
         kaleyaActive = false;
         stopListening();
         updateMicUI();
     }
     updateKaleyaPowerUI();
+    saveClientSettingsToBackend({ kaleya_enabled: kaleyaEnabled }).catch(error => {
+        console.warn('Kaleya power save failed', error);
+    });
     showToast(kaleyaEnabled ? 'Kaleya je ukljucena' : 'Kaleya je iskljucena');
 }
 
@@ -1888,10 +2096,18 @@ function renderCancelSearchResults() {
     }).join('') : `<div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-sm text-slate-500">Nema termina za prikaz.</div>`;
 }
 
-function cancelAppointmentById(id) {
+async function cancelAppointmentById(id) {
     const item = schedule.find(entry => entry.id === id);
     if (!item) return;
-    item.status = 'cancelled';
+    try {
+        const saved = await cancelAppointmentBackend(item);
+        item.status = 'cancelled';
+        if (saved) Object.assign(item, saved);
+    } catch (e) {
+        console.warn('Kaleya cancel appointment failed', e);
+        showToast('Termin nije otkazan u bazi');
+        return;
+    }
     renderSchedule();
     renderClientCalendar();
     renderCancelSearchResults();
@@ -1920,6 +2136,15 @@ function defaultWeekStart() {
 }
 
 function getClientCalendarSettings() {
+    if (clientSettingsCache) {
+        return {
+            start: clientSettingsCache.start || '09:00',
+            end: clientSettingsCache.end || '16:00',
+            interval: Number(clientSettingsCache.interval || 30),
+            format: clientSettingsCache.format || '24',
+            weekStart: clientSettingsCache.weekStart || defaultWeekStart()
+        };
+    }
     return {
         start: localStorage.getItem('client_work_start') || '09:00',
         end: localStorage.getItem('client_work_end') || '16:00',
@@ -2017,18 +2242,43 @@ function syncClientCalendarSettingsUI() {
     }
 }
 
-function saveClientCalendarSettings() {
+async function saveClientCalendarSettings() {
     const start = document.getElementById('clientWorkStart')?.value || '09:00';
     const end = document.getElementById('clientWorkEnd')?.value || '16:00';
     const validEnd = timeToMinutes(end) > timeToMinutes(start) ? end : '16:00';
+    const interval = Number(document.getElementById('clientSlotInterval')?.value || 30);
+    const format = document.getElementById('clientTimeFormat')?.value || '24';
+    const weekStart = document.getElementById('clientWeekStart')?.value || defaultWeekStart();
+
+    clientSettingsCache = {
+        ...(clientSettingsCache || {}),
+        start,
+        end: validEnd,
+        interval,
+        format,
+        weekStart
+    };
     localStorage.setItem('client_work_start', start);
     localStorage.setItem('client_work_end', validEnd);
-    localStorage.setItem('client_slot_interval', document.getElementById('clientSlotInterval')?.value || '30');
-    localStorage.setItem('client_time_format', document.getElementById('clientTimeFormat')?.value || '24');
-    localStorage.setItem('client_week_start', document.getElementById('clientWeekStart')?.value || defaultWeekStart());
+    localStorage.setItem('client_slot_interval', String(interval));
+    localStorage.setItem('client_time_format', format);
+    localStorage.setItem('client_week_start', weekStart);
     syncClientCalendarSettingsUI();
     renderClientCalendar();
     renderSchedule();
+    try {
+        await saveClientSettingsToBackend({
+            work_start: start,
+            work_end: validEnd,
+            slot_interval_minutes: interval,
+            time_format: timeFormatToBackend(format),
+            week_start: weekStartToBackend(weekStart)
+        });
+        showToast('Podesavanja kalendara su sacuvana');
+    } catch (error) {
+        console.warn('Kaleya calendar settings save failed', error);
+        showToast('Podesavanja su sacuvana lokalno, ali ne u bazi');
+    }
 }
 
 function escapeHtml(value = '') {
@@ -2075,9 +2325,19 @@ function toggleStatusMenu(id) {
     renderClientCalendar();
 }
 
-function changeAppointmentStatus(id, status) {
+async function changeAppointmentStatus(id, status) {
     const item = schedule.find(entry => entry.id === id);
-    if (item) item.status = status;
+    if (item) {
+        try {
+            const saved = await updateAppointmentStatusBackend(item, status);
+            item.status = status;
+            if (saved) Object.assign(item, saved);
+        } catch (e) {
+            console.warn('Kaleya status update failed', e);
+            showToast('Status nije sacuvan u bazi');
+            return;
+        }
+    }
     openStatusMenuId = '';
     renderSchedule();
     renderClientCalendar();
@@ -2333,10 +2593,11 @@ function closeAppointmentEditor() {
     document.getElementById('appointmentModal')?.classList.add('hidden');
 }
 
-function saveAppointmentEdit() {
+async function saveAppointmentEdit() {
     const id = document.getElementById('apptId').value;
     const payload = {
         id: id || `a${Date.now()}`,
+        backendId: schedule.find(item => item.id === id)?.backendId || null,
         date: document.getElementById('apptDate').value || clientCalendarState.selectedDate,
         time: document.getElementById('apptTime').value || getClientCalendarSettings().start,
         duration: Number(document.getElementById('apptDuration').value || getClientCalendarSettings().interval),
@@ -2345,6 +2606,14 @@ function saveAppointmentEdit() {
         channel: document.getElementById('apptChannel').value,
         status: document.getElementById('apptStatus').value
     };
+    try {
+        const saved = await saveAppointmentToBackend(payload);
+        if (saved) Object.assign(payload, saved);
+    } catch (e) {
+        console.warn('Kaleya save appointment failed', e);
+        showToast('Termin nije sacuvan u bazi');
+        return;
+    }
     const index = schedule.findIndex(item => item.id === id);
     if (index >= 0) schedule[index] = { ...schedule[index], ...payload };
     else schedule.push(payload);
@@ -2354,9 +2623,19 @@ function saveAppointmentEdit() {
     showToast('Termin je sacuvan');
 }
 
-function deleteAppointment() {
+async function deleteAppointment() {
     const id = document.getElementById('apptId').value;
-    if (id) schedule = schedule.filter(item => item.id !== id);
+    if (id) {
+        const item = schedule.find(entry => entry.id === id);
+        try {
+            await deleteAppointmentBackend(item);
+        } catch (e) {
+            console.warn('Kaleya delete appointment failed', e);
+            showToast('Termin nije obrisan iz baze');
+            return;
+        }
+        schedule = schedule.filter(item => item.id !== id);
+    }
     closeAppointmentEditor();
     renderSchedule();
     renderClientCalendar();
@@ -2367,7 +2646,14 @@ function openChannelDemo(channel, phone) {
 }
 
 // Client settings
-function openClientSettings() { switchClientTab('settings'); document.getElementById('client-settings').classList.remove('hidden'); updateElStatus(); updateClientLangButtons(); syncClientCalendarSettingsUI(); }
+async function openClientSettings() {
+    switchClientTab('settings');
+    document.getElementById('client-settings').classList.remove('hidden');
+    updateElStatus();
+    updateClientLangButtons();
+    syncClientCalendarSettingsUI();
+    await loadClientSettingsFromBackend();
+}
 function closeClientSettings() { document.getElementById('client-settings').classList.add('hidden'); }
 function updateElStatus() {
     const hasKey = false;
@@ -2413,12 +2699,19 @@ async function updateElStatus() {
     }
 }
 
-function saveClientVoiceLang() {
+async function saveClientVoiceLang() {
     const value = document.getElementById('clientVoiceLang')?.value || currentLang;
     currentVoiceLang = value;
     localStorage.setItem('kaleya_voice_lang', value);
     localStorage.setItem('kaleya_voice_lang_user_set', '1');
-    showToast('Jezik glasa je sačuvan');
+    if (clientSettingsCache) clientSettingsCache.voiceLanguage = value;
+    try {
+        await saveClientSettingsToBackend({ voice_language: value });
+        showToast('Jezik glasa je sacuvan');
+    } catch (error) {
+        console.warn('Kaleya voice language save failed', error);
+        showToast('Jezik glasa je sacuvan lokalno');
+    }
 }
 async function testVoice() {
     const text = {
