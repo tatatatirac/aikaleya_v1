@@ -35,6 +35,9 @@ class ClientApiSettingsSerializer(serializers.ModelSerializer):
 
 class BusinessClientSerializer(serializers.ModelSerializer):
     api_settings = ClientApiSettingsSerializer(read_only=True)
+    owner_name = serializers.SerializerMethodField()
+    owner_email = serializers.EmailField(source="owner.email", read_only=True)
+    owner_phone = serializers.CharField(source="owner.profile.phone", read_only=True)
 
     class Meta:
         model = BusinessClient
@@ -42,6 +45,9 @@ class BusinessClientSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "public_name",
+            "owner_name",
+            "owner_email",
+            "owner_phone",
             "package",
             "language",
             "interface_language",
@@ -52,6 +58,7 @@ class BusinessClientSerializer(serializers.ModelSerializer):
             "work_end",
             "slot_interval_minutes",
             "time_format",
+            "date_format",
             "week_start",
             "allow_phone_calls",
             "allow_sms",
@@ -63,6 +70,10 @@ class BusinessClientSerializer(serializers.ModelSerializer):
             "updated_at",
         )
         read_only_fields = ("id", "created_at", "updated_at", "api_settings")
+
+    def get_owner_name(self, obj):
+        full_name = f"{obj.owner.first_name} {obj.owner.last_name}".strip()
+        return full_name or obj.owner.email or obj.owner.username
 
     def validate(self, attrs):
         work_start = attrs.get("work_start", getattr(self.instance, "work_start", None))

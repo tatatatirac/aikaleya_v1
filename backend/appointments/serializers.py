@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
 from appointments.models import Appointment, Customer
@@ -29,6 +30,8 @@ class AppointmentSerializer(serializers.ModelSerializer):
     customer_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     customer_data = CustomerSerializer(write_only=True, required=False)
     end_time = serializers.TimeField(read_only=True)
+    staff_member_name = serializers.CharField(source="staff_member.full_name", read_only=True)
+    service_name = serializers.CharField(source="service.name", read_only=True)
 
     class Meta:
         model = Appointment
@@ -38,7 +41,9 @@ class AppointmentSerializer(serializers.ModelSerializer):
             "customer_id",
             "customer_data",
             "staff_member",
+            "staff_member_name",
             "service",
+            "service_name",
             "title",
             "status",
             "date",
@@ -93,7 +98,10 @@ class AppointmentSerializer(serializers.ModelSerializer):
             customer = Customer.objects.create(business_client=business_client, **customer_data)
 
         appointment = Appointment(business_client=business_client, customer=customer, **validated_data)
-        appointment.full_clean()
+        try:
+            appointment.full_clean()
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError(exc.message_dict if hasattr(exc, "message_dict") else exc.messages)
         appointment.save()
         return appointment
 
@@ -118,6 +126,9 @@ class AppointmentSerializer(serializers.ModelSerializer):
         for key, value in validated_data.items():
             setattr(instance, key, value)
 
-        instance.full_clean()
+        try:
+            instance.full_clean()
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError(exc.message_dict if hasattr(exc, "message_dict") else exc.messages)
         instance.save()
         return instance

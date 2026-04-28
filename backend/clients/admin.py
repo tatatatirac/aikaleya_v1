@@ -19,6 +19,7 @@ class BusinessClientAdminForm(forms.ModelForm):
             "interface_language",
             "voice_language",
             "time_format",
+            "date_format",
             "week_start",
             "allow_phone_calls",
             "allow_sms",
@@ -38,6 +39,7 @@ class BusinessClientAdminForm(forms.ModelForm):
             "interface_language": "Jezik aplikacije",
             "voice_language": "Jezik glasa",
             "time_format": "Format vremena",
+            "date_format": "Format datuma",
             "week_start": "Prvi dan u nedelji",
             "allow_phone_calls": "Telefon",
             "allow_sms": "SMS",
@@ -96,7 +98,7 @@ class BusinessClientAdmin(admin.ModelAdmin):
     search_fields = ("name", "public_name", "owner__email", "owner__username")
     fieldsets = (
         ("Klijent", {"fields": ("owner", "name", "public_name", "package", "kaleya_enabled")}),
-        ("Radno vreme i jezik", {"fields": ("work_start", "work_end", "slot_interval_minutes", "interface_language", "voice_language", "time_format", "week_start")}),
+        ("Radno vreme i jezik", {"fields": ("work_start", "work_end", "slot_interval_minutes", "interface_language", "voice_language", "time_format", "date_format", "week_start")}),
         ("Kanali", {"fields": ("allow_phone_calls", "allow_sms", "allow_whatsapp", "allow_viber", "allow_telegram")}),
     )
 

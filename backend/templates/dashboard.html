@@ -868,6 +868,14 @@
                                     </select>
                                 </div>
                                 <div class="field">
+                                    <label>Format datuma</label>
+                                    <select name="date_format">
+                                        {% for value,label in date_format_choices %}
+                                            <option value="{{ value }}" {% if selected_client.date_format == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="field">
                                     <label>Prvi dan u nedelji</label>
                                     <select name="week_start">
                                         {% for value,label in week_start_choices %}

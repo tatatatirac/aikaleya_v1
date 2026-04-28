@@ -102,21 +102,34 @@ class Appointment(models.Model):
         return self.status in {self.STATUS_CONFIRMED, self.STATUS_MOVED, self.STATUS_PENDING, self.STATUS_BLOCKED}
 
     def clean(self):
+        from appointments.services import aware_client_datetime, blocked_times_for_date, effective_working_hours
+
         if self.duration_minutes <= 0:
             raise ValidationError({"duration_minutes": "Trajanje termina mora biti vece od 0."})
         if self.service_id and self.duration_minutes == 30:
             self.duration_minutes = self.service.duration_minutes
 
-        work_start = self.business_client.work_start
-        work_end = self.business_client.work_end
-        if self.start_time < work_start or self.end_time > work_end:
-            raise ValidationError("Termin mora biti unutar radnog vremena klijenta.")
+        work_window = effective_working_hours(
+            self.business_client,
+            self.date,
+            staff_member_id=self.staff_member_id,
+        )
+        if work_window["is_closed"]:
+            raise ValidationError("Izabrani dan je zatvoren za zakazivanje.")
+        if self.start_time < work_window["start"] or self.end_time > work_window["end"]:
+            raise ValidationError("Termin mora biti unutar radnog vremena klijenta ili zaposlenog.")
 
         if not self.is_active_booking:
             return
 
         current_start = datetime.combine(self.date, self.start_time)
         current_end = current_start + timedelta(minutes=self.duration_minutes)
+        current_start_aware = aware_client_datetime(self.business_client, self.date, self.start_time)
+        current_end_aware = current_start_aware + timedelta(minutes=self.duration_minutes)
+
+        for blocked_time in blocked_times_for_date(self.business_client, self.date, staff_member_id=self.staff_member_id):
+            if current_start_aware < blocked_time.end_at and current_end_aware > blocked_time.start_at:
+                raise ValidationError("Termin se preklapa sa blokiranim vremenom ili pauzom.")
 
         appointments = Appointment.objects.filter(
             business_client=self.business_client,

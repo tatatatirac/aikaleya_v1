@@ -1,5 +1,6 @@
 from rest_framework import permissions, viewsets
 
+from accounts.permissions import user_role
 from clients.utils import client_for_request
 from staff_services.models import BlockedTime, Service, StaffMember, StaffService, WorkingHours
 from staff_services.serializers import (
@@ -11,8 +12,17 @@ from staff_services.serializers import (
 )
 
 
+class ClientConfigurationPermission(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        if not super().has_permission(request, view):
+            return False
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return user_role(request.user) in {"admin", "client"}
+
+
 class BusinessScopedMixin:
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (ClientConfigurationPermission,)
 
     def get_client(self):
         return client_for_request(self.request)
@@ -43,7 +53,7 @@ class ServiceViewSet(BusinessScopedMixin, viewsets.ModelViewSet):
 
 class StaffServiceViewSet(viewsets.ModelViewSet):
     serializer_class = StaffServiceSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (ClientConfigurationPermission,)
 
     def get_queryset(self):
         client = client_for_request(self.request)
@@ -52,7 +62,7 @@ class StaffServiceViewSet(viewsets.ModelViewSet):
         return StaffService.objects.select_related("staff_member", "service").filter(
             staff_member__business_client=client,
             service__business_client=client,
-        )
+        ).order_by("staff_member__full_name", "service__name")
 
 
 class WorkingHoursViewSet(BusinessScopedMixin, viewsets.ModelViewSet):

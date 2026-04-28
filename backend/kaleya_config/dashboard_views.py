@@ -104,6 +104,7 @@ def dashboard(request):
         "language_choices": BusinessClient.LANGUAGE_CHOICES,
         "package_choices": BusinessClient.PACKAGE_CHOICES,
         "time_format_choices": BusinessClient.TIME_FORMAT_CHOICES,
+        "date_format_choices": BusinessClient.DATE_FORMAT_CHOICES,
         "week_start_choices": BusinessClient.WEEK_START_CHOICES,
         "slot_choices": [15, 20, 30, 45, 60],
     }
@@ -127,6 +128,7 @@ def update_client_settings(request, client):
     client.work_end = work_end or client.work_end
     client.slot_interval_minutes = int_value(post.get("slot_interval_minutes"), client.slot_interval_minutes)
     client.time_format = post.get("time_format", client.time_format)
+    client.date_format = post.get("date_format", client.date_format)
     client.week_start = int_value(post.get("week_start"), client.week_start)
     client.allow_phone_calls = checkbox_value(post, "allow_phone_calls")
     client.allow_sms = checkbox_value(post, "allow_sms")

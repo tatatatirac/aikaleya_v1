@@ -421,6 +421,7 @@
                     </form>
                     <div class="mt-6 grid grid-cols-1 gap-2">
                         <button onclick="fillLogin('client')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition">Demo client: klijent@test.com / test123</button>
+                        <button onclick="fillLogin('employee')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition">Demo employee: empl@test.com / emp123</button>
                     </div>
                     <p id="login-error" class="mt-4 text-center text-sm text-red-500 hidden" data-i18n="login_err">Pogrešan email ili lozinka</p>
                 </div>
@@ -445,7 +446,7 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button onclick="openClientSettings()" class="w-8 h-8 grid place-items-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-900">
+                            <button id="clientTopSettingsBtn" onclick="handleClientThirdTab()" class="w-8 h-8 grid place-items-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-900">
                                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 0 005 15.4a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06A2 2 0 017.04 4.3l.06.06a1.65 1.65 0 001.82.33H9a1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
                             </button>
                             <button onclick="logout()" class="w-8 h-8 grid place-items-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-900">
@@ -559,6 +560,20 @@
                     </div>
                 </div>
 
+                <div data-client-screen="team" class="hidden flex-1 px-5 pt-6 pb-24">
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-[12px] font-semibold uppercase tracking-wide text-slate-500">Tim</p>
+                            <h2 class="font-display text-[24px] font-bold leading-tight">Zaposleni</h2>
+                        </div>
+                        <span class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-900 grid place-items-center text-slate-600 dark:text-slate-300">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                        </span>
+                    </div>
+                    <p class="mt-2 text-sm text-slate-500">Lista kontakata za zaposlene. Vlasnik je uvek na vrhu.</p>
+                    <div id="employeeDirectoryList" class="mt-5 space-y-3"></div>
+                </div>
+
                 <!-- Bottom Nav -->
                 <div class="fixed bottom-0 inset-x-0 max-w-[430px] mx-auto pb-[max(12px,env(safe-area-inset-bottom))]">
                     <div class="mx-5 mb-3 h-[64px] rounded-[24px] bg-white/90 dark:bg-slate-900/90 glass border border-slate-200 dark:border-slate-800 shadow-xl flex items-center justify-around px-2">
@@ -570,9 +585,9 @@
                             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3M3 11h18M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                             <span class="text-[10px] font-medium" data-i18n="nav_cal">Kalendar</span>
                         </button>
-                        <button data-client-tab="settings" onclick="openClientSettings()" class="client-tab flex flex-col items-center gap-1 px-4 py-2 rounded-xl text-slate-500">
+                        <button id="clientSettingsNavBtn" data-client-tab="settings" onclick="handleClientThirdTab()" class="client-tab flex flex-col items-center gap-1 px-4 py-2 rounded-xl text-slate-500">
                             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35A1.724 0 004.317 8.4c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.573-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            <span class="text-[10px] font-medium" data-i18n="nav_set">Podeš.</span>
+                            <span id="clientSettingsNavLabel" class="text-[10px] font-medium" data-i18n="nav_set">Podeš.</span>
                         </button>
                     </div>
                 </div>
@@ -633,27 +648,36 @@
                             </div>
 
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
-                                <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3">Calendar settings</p>
+                                <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3">Podešavanja kalendara</p>
                                 <div class="grid grid-cols-2 gap-3">
-                                    <label class="text-[11px] text-slate-500">Start
-                                        <input id="clientWorkStart" type="time" value="09:00" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
+                                    <label class="text-[11px] text-slate-500">Rad od
+                                        <input id="clientWorkStart" type="text" inputmode="numeric" value="09:00" placeholder="09:00" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
                                     </label>
-                                    <label class="text-[11px] text-slate-500">End
-                                        <input id="clientWorkEnd" type="time" value="16:00" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
+                                    <label class="text-[11px] text-slate-500">Rad do
+                                        <input id="clientWorkEnd" type="text" inputmode="numeric" value="16:00" placeholder="16:00" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
                                     </label>
-                                    <label class="text-[11px] text-slate-500">Slot
+                                    <label class="text-[11px] text-slate-500">Interval
                                         <select id="clientSlotInterval" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
+                                            <option value="15">15 min</option>
+                                            <option value="20">20 min</option>
                                             <option value="30">30 min</option>
+                                            <option value="45">45 min</option>
                                             <option value="60">60 min</option>
                                         </select>
                                     </label>
-                                    <label class="text-[11px] text-slate-500">Time
+                                    <label class="text-[11px] text-slate-500">Vreme
                                         <select id="clientTimeFormat" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
                                             <option value="24">09:00</option>
                                             <option value="12">9 AM</option>
                                         </select>
                                     </label>
-                                    <label class="text-[11px] text-slate-500 col-span-2">First day
+                                    <label class="text-[11px] text-slate-500">Datum
+                                        <select id="clientDateFormat" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
+                                            <option value="dd-mm-yyyy">28-04-2026</option>
+                                            <option value="mm-dd-yyyy">04-28-2026</option>
+                                        </select>
+                                    </label>
+                                    <label class="text-[11px] text-slate-500">Prvi dan
                                         <select id="clientWeekStart" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
                                             <option value="sunday">Sunday</option>
                                             <option value="monday">Monday</option>
@@ -703,6 +727,57 @@
                                     <span class="text-[11px] px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300" data-i18n="active">Aktivno</span>
                                 </div>
                             </div>
+
+                            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                                <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3">Osoblje i usluge</p>
+                                <div id="clientStaffList" class="space-y-2"></div>
+                                <div id="clientServiceList" class="mt-3 space-y-2"></div>
+                                <div class="mt-4 grid grid-cols-2 gap-2">
+                                    <input id="newStaffName" type="text" placeholder="Ime zaposlenog" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                    <input id="newStaffRole" type="text" placeholder="Zanimanje" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                </div>
+                                <input id="editingStaffId" type="hidden">
+                                <div class="mt-2 grid grid-cols-[1fr_auto] gap-2">
+                                    <button id="clientStaffSaveBtn" onclick="saveClientStaffForm()" class="h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12px] font-semibold">Dodaj osobu</button>
+                                    <button id="clientStaffCancelBtn" onclick="resetClientStaffForm()" class="hidden h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold">Odustani</button>
+                                </div>
+                                <div class="mt-2 grid grid-cols-[1fr_82px] gap-2">
+                                    <input id="newServiceName" type="text" placeholder="Naziv usluge" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                    <select id="newServiceDuration" class="h-10 px-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px]">
+                                        <option value="30">30m</option>
+                                        <option value="45">45m</option>
+                                        <option value="60">60m</option>
+                                        <option value="90">90m</option>
+                                        <option value="120">120m</option>
+                                    </select>
+                                </div>
+                                <input id="newServicePrice" type="number" min="0" step="0.01" placeholder="Cena" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                <input id="editingServiceId" type="hidden">
+                                <div class="mt-2 grid grid-cols-[1fr_auto] gap-2">
+                                    <button id="clientServiceSaveBtn" onclick="saveClientServiceForm()" class="h-10 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold">Dodaj uslugu</button>
+                                    <button id="clientServiceCancelBtn" onclick="resetClientServiceForm()" class="hidden h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold">Odustani</button>
+                                </div>
+
+                                <div class="mt-5 pt-4 border-t border-slate-200 dark:border-slate-800">
+                                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3">Blokirano vreme / pauze</p>
+                                    <div id="clientBlockedList" class="space-y-2"></div>
+                                    <select id="blockedMode" onchange="toggleBlockedModeFields()" class="mt-3 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px]">
+                                        <option value="single">Jednodnevno</option>
+                                        <option value="multi">Vise dana</option>
+                                    </select>
+                                    <div class="mt-3 grid grid-cols-2 gap-2">
+                                        <input id="blockedDate" type="text" inputmode="numeric" placeholder="28-04-2026" onchange="handleDateInputChange('blockedDate')" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                        <input id="blockedDateTo" type="text" inputmode="numeric" placeholder="28-04-2026" onchange="handleDateInputChange('blockedDateTo')" class="hidden h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                        <select id="blockedStaff" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px]">
+                                            <option value="">Svi zaposleni</option>
+                                        </select>
+                                        <input id="blockedStart" type="text" inputmode="numeric" value="09:00" placeholder="09:00" onchange="handleBlockedTimeChange('start')" title="Blokada od" class="blocked-time-field h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                        <input id="blockedEnd" type="text" inputmode="numeric" value="09:30" placeholder="09:30" onchange="handleBlockedTimeChange('end')" title="Blokada do" class="blocked-time-field h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                    </div>
+                                    <input id="blockedReason" type="text" placeholder="Razlog, npr. pauza ili odmor" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                    <button onclick="createClientBlockedTime()" class="mt-2 w-full h-10 rounded-xl bg-amber-500 text-white text-[12px] font-semibold">Dodaj blokadu</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -718,19 +793,25 @@
                         </div>
                         <input id="apptId" type="hidden">
                         <div class="mt-5 grid grid-cols-2 gap-3">
-                            <label class="text-[12px] text-slate-500">Datum<input id="apptDate" type="date" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white"></label>
-                            <label class="text-[12px] text-slate-500">Vreme<input id="apptTime" type="time" min="09:00" max="16:00" step="1800" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white"></label>
+                            <label class="text-[12px] text-slate-500">Datum<input id="apptDate" type="text" inputmode="numeric" placeholder="28-04-2026" onchange="handleDateInputChange('apptDate')" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white"></label>
+                            <label class="text-[12px] text-slate-500">Vreme<input id="apptTime" type="text" inputmode="numeric" placeholder="09:00" onchange="handleAppointmentTimeChange()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white"></label>
                         </div>
                         <label class="mt-3 block text-[12px] text-slate-500">Ime i usluga<input id="apptName" type="text" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white"></label>
                         <label class="mt-3 block text-[12px] text-slate-500">Telefon<input id="apptPhone" type="tel" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white"></label>
+                        <div class="mt-3 grid grid-cols-2 gap-3">
+                            <label class="text-[12px] text-slate-500">Usluga<select id="apptService" onchange="handleAppointmentServiceChange()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option value="">Bez usluge</option></select></label>
+                            <label class="text-[12px] text-slate-500">Osoblje<select id="apptStaff" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option value="">Bilo ko</option></select></label>
+                        </div>
                         <div class="mt-3 grid grid-cols-2 gap-3">
                             <label class="text-[12px] text-slate-500">Kanal<select id="apptChannel" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option>WhatsApp</option><option>Viber</option><option>Telegram</option><option>SMS</option><option>Phone</option></select></label>
                             <label class="text-[12px] text-slate-500">Status<select id="apptStatus" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option value="confirmed">Zakazano</option><option value="moved">Pomereno</option><option value="cancelled">Otkazano</option><option value="pending">Na cekanju</option></select></label>
                         </div>
                         <label class="mt-3 block text-[12px] text-slate-500">Trajanje termina
-                            <select id="apptDuration" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
+                            <select id="apptDuration" onchange="handleAppointmentTimeChange()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
                                 <option value="30">30 min</option>
+                                <option value="45">45 min</option>
                                 <option value="60">1 sat</option>
+                                <option value="90">90 min</option>
                                 <option value="120">2 sata</option>
                                 <option value="180">3 sata</option>
                                 <option value="240">4 sata</option>
@@ -1086,7 +1167,7 @@
 
 <script>
 // ===== STATE =====
-const KALEYA_APP_VERSION = '2026-04-27-02';
+const KALEYA_APP_VERSION = '2026-04-28-employee-01';
 const savedAppVersion = localStorage.getItem('kaleya_app_version');
 if (savedAppVersion && savedAppVersion !== KALEYA_APP_VERSION) {
     localStorage.removeItem('kaleya_auth_token');
@@ -1107,6 +1188,11 @@ let currentVoiceLang = localStorage.getItem('kaleya_voice_lang') || currentLang;
 let kaleyaActive = false;
 let kaleyaEnabled = localStorage.getItem('kaleya_enabled') !== 'off';
 let clientSettingsCache = null;
+let currentClientInfo = null;
+let clientStaffMembers = [];
+let clientServices = [];
+let clientStaffServiceLinks = [];
+let clientBlockedTimes = [];
 let recognition = null;
 let activeClientForApi = '';
 let openStatusMenuId = '';
@@ -1497,9 +1583,11 @@ function showView(view) {
     });
     window.scrollTo(0,0);
     if (view === 'client') {
+        applyEmployeeModeUI();
         renderSchedule();
         renderClientCalendar();
         loadClientSettingsFromBackend();
+        loadClientOperationalDataFromBackend();
         loadClientAppointmentsFromBackend();
         updateKaleyaPowerUI();
         switchClientTab('home');
@@ -1569,8 +1657,16 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     }
 
     if (email === 'admin@aikaleya.com' && pass === 'admin123') {
+        localStorage.setItem('kaleya_user_role', 'admin');
+        localStorage.setItem('kaleya_user_email', email);
         showView('admin');
     } else if (email === 'klijent@test.com' && pass === 'test123') {
+        localStorage.setItem('kaleya_user_role', 'client');
+        localStorage.setItem('kaleya_user_email', email);
+        showView('client');
+    } else if (email === 'empl@test.com' && pass === 'emp123') {
+        localStorage.setItem('kaleya_user_role', 'employee');
+        localStorage.setItem('kaleya_user_email', email);
         showView('client');
     } else {
         error.classList.remove('hidden');
@@ -1580,6 +1676,9 @@ function fillLogin(type) {
     if (type === 'admin') {
         document.getElementById('email').value = 'admin@aikaleya.com';
         document.getElementById('password').value = 'admin123';
+    } else if (type === 'employee') {
+        document.getElementById('email').value = 'empl@test.com';
+        document.getElementById('password').value = 'emp123';
     } else {
         document.getElementById('email').value = 'klijent@test.com';
         document.getElementById('password').value = 'test123';
@@ -1603,6 +1702,14 @@ async function logout() {
 // ===== BACKEND API + SPEAK =====
 function getAuthToken() {
     return localStorage.getItem('kaleya_auth_token') || '';
+}
+
+function currentUserRole() {
+    return localStorage.getItem('kaleya_user_role') || 'client';
+}
+
+function isEmployeeUser() {
+    return currentUserRole() === 'employee';
 }
 
 async function kaleyaApi(path, options = {}) {
@@ -1688,6 +1795,14 @@ function timeFormatToBackend(value) {
     return value === '12' ? '12h' : '24h';
 }
 
+function dateFormatFromBackend(value) {
+    return value === 'mm-dd-yyyy' ? 'mm-dd-yyyy' : 'dd-mm-yyyy';
+}
+
+function dateFormatToBackend(value) {
+    return value === 'mm-dd-yyyy' ? 'mm-dd-yyyy' : 'dd-mm-yyyy';
+}
+
 function weekStartFromBackend(value) {
     return Number(value) === 6 ? 'sunday' : 'monday';
 }
@@ -1697,6 +1812,7 @@ function weekStartToBackend(value) {
 }
 
 function applyClientSettingsFromBackend(data = {}) {
+    currentClientInfo = data || currentClientInfo;
     const nextLang = data.interface_language || data.language;
     const nextVoiceLang = data.voice_language;
     clientSettingsCache = {
@@ -1704,6 +1820,7 @@ function applyClientSettingsFromBackend(data = {}) {
         end: normalizeClientTime(data.work_end, '16:00'),
         interval: Number(data.slot_interval_minutes || 30),
         format: timeFormatFromBackend(data.time_format),
+        dateFormat: dateFormatFromBackend(data.date_format),
         weekStart: weekStartFromBackend(data.week_start),
         kaleyaEnabled: data.kaleya_enabled !== false,
         interfaceLanguage: nextLang || currentLang,
@@ -1714,6 +1831,7 @@ function applyClientSettingsFromBackend(data = {}) {
     localStorage.setItem('client_work_end', clientSettingsCache.end);
     localStorage.setItem('client_slot_interval', String(clientSettingsCache.interval));
     localStorage.setItem('client_time_format', clientSettingsCache.format);
+    localStorage.setItem('client_date_format', clientSettingsCache.dateFormat);
     localStorage.setItem('client_week_start', clientSettingsCache.weekStart);
 
     if (T[nextLang] && currentLang !== nextLang) {
@@ -1728,8 +1846,10 @@ function applyClientSettingsFromBackend(data = {}) {
     kaleyaEnabled = clientSettingsCache.kaleyaEnabled;
     localStorage.setItem('kaleya_enabled', kaleyaEnabled ? 'on' : 'off');
     applyLang();
+    applyEmployeeModeUI();
     syncClientCalendarSettingsUI();
     updateKaleyaPowerUI();
+    renderEmployeeDirectory();
 }
 
 async function loadClientSettingsFromBackend() {
@@ -1785,7 +1905,11 @@ function appointmentFromBackend(item) {
         name: customerName,
         phone: item.customer?.phone || '',
         channel: backendChannelToFrontend(item.channel),
-        status: item.status || 'confirmed'
+        status: item.status || 'confirmed',
+        staffMemberId: item.staff_member || '',
+        staffMemberName: item.staff_member_name || '',
+        serviceId: item.service || '',
+        serviceName: item.service_name || ''
     };
 }
 
@@ -1803,6 +1927,8 @@ function appointmentPayloadForBackend(payload) {
         date: payload.date,
         start_time: payload.time,
         duration_minutes: Number(payload.duration || getClientCalendarSettings().interval),
+        staff_member: payload.staffMemberId ? Number(payload.staffMemberId) : null,
+        service: payload.serviceId ? Number(payload.serviceId) : null,
         channel: frontendChannelToBackend(payload.channel),
         source: 'client_app',
         notes: ''
@@ -1836,6 +1962,14 @@ async function saveAppointmentToBackend(payload) {
     return appointmentFromBackend(await res.json());
 }
 
+function friendlyApiError(error, fallback = 'Akcija nije sacuvana') {
+    const text = String(error?.message || error || '');
+    if (text.includes('blokiranim vremenom') || text.includes('blocked')) return 'Termin se preklapa sa blokiranim vremenom';
+    if (text.includes('preklapa')) return 'Termin se preklapa sa postojecim zauzetim slotom';
+    if (text.includes('radnog vremena') || text.includes('zatvoren')) return 'Termin nije unutar radnog vremena';
+    return fallback;
+}
+
 async function updateAppointmentStatusBackend(item, status) {
     if (!item?.backendId || !getAuthToken() || location.protocol === 'file:') return null;
     const res = await kaleyaApi(`/api/appointments/appointments/${item.backendId}/`, {
@@ -1860,6 +1994,596 @@ async function deleteAppointmentBackend(item) {
     if (!item?.backendId || !getAuthToken() || location.protocol === 'file:') return;
     const res = await kaleyaApi(`/api/appointments/appointments/${item.backendId}/`, { method: 'DELETE' });
     if (!res.ok && res.status !== 204) throw new Error(await res.text());
+}
+
+function unpackApiRows(data) {
+    return Array.isArray(data) ? data : (data.results || []);
+}
+
+async function loadClientOperationalDataFromBackend() {
+    if (!getAuthToken() || location.protocol === 'file:') {
+        renderClientOperationalSettings();
+        renderEmployeeDirectory();
+        populateAppointmentStaffServiceFields();
+        populateBlockedStaffSelect();
+        return;
+    }
+    try {
+        const [staffRes, serviceRes, linkRes, blockedRes] = await Promise.all([
+            kaleyaApi('/api/staff-services/staff/', { method: 'GET' }),
+            kaleyaApi('/api/staff-services/services/', { method: 'GET' }),
+            kaleyaApi('/api/staff-services/staff-services/', { method: 'GET' }),
+            kaleyaApi('/api/staff-services/blocked-times/', { method: 'GET' })
+        ]);
+        if (!staffRes.ok) throw new Error(await staffRes.text());
+        if (!serviceRes.ok) throw new Error(await serviceRes.text());
+        if (!linkRes.ok) throw new Error(await linkRes.text());
+        if (!blockedRes.ok) throw new Error(await blockedRes.text());
+
+        clientStaffMembers = unpackApiRows(await staffRes.json()).filter(item => item.is_active !== false);
+        clientServices = unpackApiRows(await serviceRes.json()).filter(item => item.is_active !== false);
+        clientStaffServiceLinks = unpackApiRows(await linkRes.json()).filter(item => item.is_active !== false);
+        clientBlockedTimes = unpackApiRows(await blockedRes.json());
+        renderClientOperationalSettings();
+        renderEmployeeDirectory();
+        populateAppointmentStaffServiceFields();
+        populateBlockedStaffSelect();
+        renderClientCalendar();
+    } catch (error) {
+        console.warn('Kaleya staff/services load failed', error);
+    }
+}
+
+function staffCanDoService(staffId, serviceId) {
+    if (!staffId || !serviceId) return true;
+    const hasLinksForService = clientStaffServiceLinks.some(link => String(link.service) === String(serviceId));
+    if (!hasLinksForService) return true;
+    return clientStaffServiceLinks.some(link => String(link.staff_member) === String(staffId) && String(link.service) === String(serviceId));
+}
+
+function localDateTimeParts(isoValue) {
+    const date = new Date(isoValue);
+    const time = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    return {
+        date: clientIsoDate(date),
+        time,
+        label: `${formatClientDate(date)} ${formatClientTime(time)}`
+    };
+}
+
+function isFullDayBlock(start, end) {
+    return start.date !== end.date || (start.time === '00:00' && end.time === '23:59');
+}
+
+function blockRangeLabel(block) {
+    const start = localDateTimeParts(block.start_at);
+    const end = localDateTimeParts(block.end_at);
+    if (isFullDayBlock(start, end)) return `${formatClientDate(start.date)} - ${formatClientDate(end.date)}`;
+    return `${formatClientDate(start.date)} ${formatClientTime(start.time)} - ${formatClientTime(end.time)}`;
+}
+
+function blockInlineTimeLabel(block) {
+    const start = localDateTimeParts(block.start_at);
+    const end = localDateTimeParts(block.end_at);
+    if (isFullDayBlock(start, end)) return 'ceo dan';
+    return `${formatClientTime(start.time)}-${formatClientTime(end.time)}`;
+}
+
+function staffNameById(staffId) {
+    if (!staffId) return 'Svi zaposleni';
+    return clientStaffMembers.find(staff => String(staff.id) === String(staffId))?.full_name || 'Zaposleni';
+}
+
+function populateBlockedStaffSelect() {
+    const select = document.getElementById('blockedStaff');
+    if (!select) return;
+    const previous = select.value || '';
+    select.innerHTML = '<option value="">Svi zaposleni</option>' + clientStaffMembers.map(staff => (
+        `<option value="${staff.id}">${escapeHtml(staff.full_name)}</option>`
+    )).join('');
+    select.value = clientStaffMembers.some(staff => String(staff.id) === String(previous)) ? previous : '';
+}
+
+function renderClientOperationalSettings() {
+    const staffList = document.getElementById('clientStaffList');
+    const serviceList = document.getElementById('clientServiceList');
+    const blockedList = document.getElementById('clientBlockedList');
+    if (staffList) {
+        staffList.innerHTML = clientStaffMembers.length
+            ? clientStaffMembers.map(staff => `
+                <div class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <p class="text-[12px] font-semibold truncate">${escapeHtml(staff.full_name)}</p>
+                        <p class="text-[10px] text-slate-500 truncate">${escapeHtml(staff.role_title || staff.phone || 'Osoblje')}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                        <button onclick="startEditClientStaffMember('${staff.id}')" class="h-7 px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-semibold">Izmeni</button>
+                        <button onclick="deleteClientStaffMember('${staff.id}')" class="h-7 px-2.5 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-[10px] font-semibold">Obrisi</button>
+                    </div>
+                </div>
+            `).join('')
+            : '<p class="text-[12px] text-slate-500">Nema dodatog osoblja.</p>';
+    }
+    if (serviceList) {
+        serviceList.innerHTML = clientServices.length
+            ? clientServices.map(service => `
+                <div class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <p class="text-[12px] font-semibold truncate">${escapeHtml(service.name)}</p>
+                        <p class="text-[10px] text-slate-500">${Number(service.duration_minutes || 30)} min</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] text-slate-500">${escapeHtml(service.currency || 'EUR')} ${escapeHtml(service.price || '0.00')}</span>
+                        <button onclick="startEditClientService('${service.id}')" class="h-7 px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-semibold">Izmeni</button>
+                        <button onclick="deleteClientService('${service.id}')" class="h-7 px-2.5 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-[10px] font-semibold">Obrisi</button>
+                    </div>
+                </div>
+            `).join('')
+            : '<p class="text-[12px] text-slate-500">Nema dodatih usluga.</p>';
+    }
+    if (blockedList) {
+        blockedList.innerHTML = clientBlockedTimes.length
+            ? clientBlockedTimes
+                .slice()
+                .sort((a, b) => new Date(a.start_at) - new Date(b.start_at))
+                .slice(0, 8)
+                .map(block => {
+                    return `
+                        <div class="px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/25 border border-amber-200 dark:border-amber-900 flex items-center justify-between gap-2">
+                            <div class="min-w-0">
+                                <p class="text-[12px] font-semibold truncate">${escapeHtml(blockRangeLabel(block))}</p>
+                                <p class="text-[10px] text-amber-700 dark:text-amber-300 truncate">${escapeHtml(block.staff_member_name || staffNameById(block.staff_member))} - ${escapeHtml(block.reason || 'Blokirano')}</p>
+                            </div>
+                            <button onclick="deleteClientBlockedTime('${block.id}')" class="h-7 px-2.5 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-[10px] font-semibold">Obrisi</button>
+                        </div>
+                    `;
+                }).join('')
+            : '<p class="text-[12px] text-slate-500">Nema blokiranog vremena.</p>';
+    }
+}
+
+function ensureDurationOption(duration) {
+    const select = document.getElementById('apptDuration');
+    if (!select) return;
+    const value = String(duration || getClientCalendarSettings().interval);
+    if (![...select.options].some(option => option.value === value)) {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = `${value} min`;
+        select.appendChild(option);
+    }
+}
+
+function populateAppointmentStaffServiceFields(selectedServiceId = '', selectedStaffId = '') {
+    const serviceSelect = document.getElementById('apptService');
+    const staffSelect = document.getElementById('apptStaff');
+    if (serviceSelect) {
+        const previous = selectedServiceId || serviceSelect.value || '';
+        serviceSelect.innerHTML = '<option value="">Bez usluge</option>' + clientServices.map(service => (
+            `<option value="${service.id}">${escapeHtml(service.name)} - ${Number(service.duration_minutes || 30)} min</option>`
+        )).join('');
+        serviceSelect.value = clientServices.some(service => String(service.id) === String(previous)) ? String(previous) : '';
+    }
+    if (staffSelect) {
+        const serviceId = serviceSelect?.value || selectedServiceId || '';
+        const previous = selectedStaffId || staffSelect.value || '';
+        const staffOptions = clientStaffMembers.filter(staff => staffCanDoService(staff.id, serviceId));
+        staffSelect.innerHTML = '<option value="">Bilo ko</option>' + staffOptions.map(staff => (
+            `<option value="${staff.id}">${escapeHtml(staff.full_name)}</option>`
+        )).join('');
+        staffSelect.value = staffOptions.some(staff => String(staff.id) === String(previous)) ? String(previous) : '';
+    }
+}
+
+function handleAppointmentServiceChange() {
+    const serviceId = document.getElementById('apptService')?.value || '';
+    const staffId = document.getElementById('apptStaff')?.value || '';
+    const service = clientServices.find(item => String(item.id) === String(serviceId));
+    if (service?.duration_minutes) {
+        ensureDurationOption(service.duration_minutes);
+        const duration = document.getElementById('apptDuration');
+        if (duration) duration.value = String(service.duration_minutes);
+    }
+    populateAppointmentStaffServiceFields(serviceId, staffId);
+}
+
+async function createStaffServiceLink(staffId, serviceId) {
+    if (!staffId || !serviceId || !getAuthToken() || location.protocol === 'file:') return;
+    const exists = clientStaffServiceLinks.some(link => String(link.staff_member) === String(staffId) && String(link.service) === String(serviceId));
+    if (exists) return;
+    const res = await kaleyaApi('/api/staff-services/staff-services/', {
+        method: 'POST',
+        body: JSON.stringify({ staff_member: Number(staffId), service: Number(serviceId), is_active: true })
+    });
+    if (!res.ok && res.status !== 400) throw new Error(await res.text());
+}
+
+function resetClientStaffForm() {
+    const id = document.getElementById('editingStaffId');
+    const name = document.getElementById('newStaffName');
+    const role = document.getElementById('newStaffRole');
+    const saveBtn = document.getElementById('clientStaffSaveBtn');
+    const cancelBtn = document.getElementById('clientStaffCancelBtn');
+    if (id) id.value = '';
+    if (name) name.value = '';
+    if (role) role.value = '';
+    if (saveBtn) saveBtn.textContent = 'Dodaj osobu';
+    cancelBtn?.classList.add('hidden');
+}
+
+function resetClientServiceForm() {
+    const id = document.getElementById('editingServiceId');
+    const name = document.getElementById('newServiceName');
+    const duration = document.getElementById('newServiceDuration');
+    const price = document.getElementById('newServicePrice');
+    const saveBtn = document.getElementById('clientServiceSaveBtn');
+    const cancelBtn = document.getElementById('clientServiceCancelBtn');
+    if (id) id.value = '';
+    if (name) name.value = '';
+    if (duration) duration.value = '30';
+    if (price) price.value = '';
+    if (saveBtn) saveBtn.textContent = 'Dodaj uslugu';
+    cancelBtn?.classList.add('hidden');
+}
+
+function startEditClientStaffMember(staffId) {
+    const staff = clientStaffMembers.find(item => String(item.id) === String(staffId));
+    if (!staff) return;
+    document.getElementById('editingStaffId').value = staff.id;
+    document.getElementById('newStaffName').value = staff.full_name || '';
+    document.getElementById('newStaffRole').value = staff.role_title || '';
+    document.getElementById('clientStaffSaveBtn').textContent = 'Sacuvaj izmene';
+    document.getElementById('clientStaffCancelBtn')?.classList.remove('hidden');
+    document.getElementById('newStaffName')?.focus();
+}
+
+function startEditClientService(serviceId) {
+    const service = clientServices.find(item => String(item.id) === String(serviceId));
+    if (!service) return;
+    document.getElementById('editingServiceId').value = service.id;
+    document.getElementById('newServiceName').value = service.name || '';
+    document.getElementById('newServiceDuration').value = String(service.duration_minutes || 30);
+    document.getElementById('newServicePrice').value = service.price || '';
+    document.getElementById('clientServiceSaveBtn').textContent = 'Sacuvaj izmene';
+    document.getElementById('clientServiceCancelBtn')?.classList.remove('hidden');
+    document.getElementById('newServiceName')?.focus();
+}
+
+async function saveClientStaffForm() {
+    const editingId = document.getElementById('editingStaffId')?.value || '';
+    if (editingId) return updateClientStaffMember(editingId);
+    return createClientStaffMember();
+}
+
+async function saveClientServiceForm() {
+    const editingId = document.getElementById('editingServiceId')?.value || '';
+    if (editingId) return updateClientService(editingId);
+    return createClientService();
+}
+
+async function createClientStaffMember() {
+    const input = document.getElementById('newStaffName');
+    const roleInput = document.getElementById('newStaffRole');
+    const name = input?.value.trim();
+    const roleTitle = roleInput?.value.trim() || '';
+    if (!name) return showToast('Unesi ime zaposlenog');
+    if (!getAuthToken() || location.protocol === 'file:') {
+        clientStaffMembers.push({ id: `local-staff-${Date.now()}`, full_name: name, role_title: roleTitle, is_active: true });
+        resetClientStaffForm();
+        renderClientOperationalSettings();
+        populateAppointmentStaffServiceFields();
+        showToast('Zaposleni je dodat');
+        return;
+    }
+    try {
+        const res = await kaleyaApi('/api/staff-services/staff/', {
+            method: 'POST',
+            body: JSON.stringify({ full_name: name, role_title: roleTitle, phone: '', email: '', is_active: true })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const staff = await res.json();
+        for (const service of clientServices) await createStaffServiceLink(staff.id, service.id);
+        resetClientStaffForm();
+        await loadClientOperationalDataFromBackend();
+        showToast('Zaposleni je dodat');
+    } catch (error) {
+        console.warn('Kaleya staff create failed', error);
+        showToast('Zaposleni nije sacuvan');
+    }
+}
+
+async function createClientService() {
+    const nameInput = document.getElementById('newServiceName');
+    const durationInput = document.getElementById('newServiceDuration');
+    const priceInput = document.getElementById('newServicePrice');
+    const name = nameInput?.value.trim();
+    const duration = Number(durationInput?.value || 30);
+    const price = Math.max(0, Number(String(priceInput?.value || '0').replace(',', '.')) || 0).toFixed(2);
+    if (!name) return showToast('Unesi naziv usluge');
+    if (!getAuthToken() || location.protocol === 'file:') {
+        clientServices.push({ id: `local-service-${Date.now()}`, name, duration_minutes: duration, currency: 'EUR', price, is_active: true });
+        resetClientServiceForm();
+        renderClientOperationalSettings();
+        populateAppointmentStaffServiceFields();
+        showToast('Usluga je dodata');
+        return;
+    }
+    try {
+        const res = await kaleyaApi('/api/staff-services/services/', {
+            method: 'POST',
+            body: JSON.stringify({ name, category: '', description: '', duration_minutes: duration, price, currency: 'EUR', is_active: true })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const service = await res.json();
+        for (const staff of clientStaffMembers) await createStaffServiceLink(staff.id, service.id);
+        resetClientServiceForm();
+        await loadClientOperationalDataFromBackend();
+        showToast('Usluga je dodata');
+    } catch (error) {
+        console.warn('Kaleya service create failed', error);
+        showToast('Usluga nije sacuvana');
+    }
+}
+
+async function updateClientStaffMember(staffId) {
+    const input = document.getElementById('newStaffName');
+    const roleInput = document.getElementById('newStaffRole');
+    const name = input?.value.trim();
+    const roleTitle = roleInput?.value.trim() || '';
+    if (!name) return showToast('Unesi ime zaposlenog');
+
+    if (!getAuthToken() || location.protocol === 'file:') {
+        clientStaffMembers = clientStaffMembers.map(staff => String(staff.id) === String(staffId)
+            ? { ...staff, full_name: name, role_title: roleTitle }
+            : staff);
+        resetClientStaffForm();
+        renderClientOperationalSettings();
+        populateAppointmentStaffServiceFields();
+        showToast('Zaposleni je izmenjen');
+        return;
+    }
+
+    try {
+        const res = await kaleyaApi(`/api/staff-services/staff/${staffId}/`, {
+            method: 'PATCH',
+            body: JSON.stringify({ full_name: name, role_title: roleTitle, is_active: true })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const saved = await res.json();
+        clientStaffMembers = clientStaffMembers.map(staff => String(staff.id) === String(staffId) ? saved : staff);
+        resetClientStaffForm();
+        renderClientOperationalSettings();
+        populateAppointmentStaffServiceFields();
+        showToast('Zaposleni je izmenjen');
+    } catch (error) {
+        console.warn('Kaleya staff update failed', error);
+        showToast('Zaposleni nije izmenjen');
+    }
+}
+
+async function updateClientService(serviceId) {
+    const nameInput = document.getElementById('newServiceName');
+    const durationInput = document.getElementById('newServiceDuration');
+    const priceInput = document.getElementById('newServicePrice');
+    const name = nameInput?.value.trim();
+    const duration = Number(durationInput?.value || 30);
+    const price = Math.max(0, Number(String(priceInput?.value || '0').replace(',', '.')) || 0).toFixed(2);
+    if (!name) return showToast('Unesi naziv usluge');
+
+    if (!getAuthToken() || location.protocol === 'file:') {
+        clientServices = clientServices.map(service => String(service.id) === String(serviceId)
+            ? { ...service, name, duration_minutes: duration, price, currency: service.currency || 'EUR' }
+            : service);
+        resetClientServiceForm();
+        renderClientOperationalSettings();
+        populateAppointmentStaffServiceFields();
+        showToast('Usluga je izmenjena');
+        return;
+    }
+
+    try {
+        const res = await kaleyaApi(`/api/staff-services/services/${serviceId}/`, {
+            method: 'PATCH',
+            body: JSON.stringify({ name, duration_minutes: duration, price, currency: 'EUR', is_active: true })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const saved = await res.json();
+        clientServices = clientServices.map(service => String(service.id) === String(serviceId) ? saved : service);
+        resetClientServiceForm();
+        renderClientOperationalSettings();
+        populateAppointmentStaffServiceFields();
+        showToast('Usluga je izmenjena');
+    } catch (error) {
+        console.warn('Kaleya service update failed', error);
+        showToast('Usluga nije izmenjena');
+    }
+}
+
+async function deleteClientStaffMember(staffId) {
+    const staff = clientStaffMembers.find(item => String(item.id) === String(staffId));
+    if (!staff) return;
+    if (!window.confirm(`Obrisati zaposlenog: ${staff.full_name}?`)) return;
+
+    if (!getAuthToken() || location.protocol === 'file:') {
+        clientStaffMembers = clientStaffMembers.filter(item => String(item.id) !== String(staffId));
+        clientStaffServiceLinks = clientStaffServiceLinks.filter(link => String(link.staff_member) !== String(staffId));
+        if (document.getElementById('editingStaffId')?.value === String(staffId)) resetClientStaffForm();
+        renderClientOperationalSettings();
+        populateAppointmentStaffServiceFields();
+        showToast('Zaposleni je obrisan');
+        return;
+    }
+
+    try {
+        const res = await kaleyaApi(`/api/staff-services/staff/${staffId}/`, {
+            method: 'PATCH',
+            body: JSON.stringify({ is_active: false })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        clientStaffMembers = clientStaffMembers.filter(item => String(item.id) !== String(staffId));
+        clientStaffServiceLinks = clientStaffServiceLinks.filter(link => String(link.staff_member) !== String(staffId));
+        if (document.getElementById('editingStaffId')?.value === String(staffId)) resetClientStaffForm();
+        renderClientOperationalSettings();
+        populateAppointmentStaffServiceFields();
+        showToast('Zaposleni je obrisan');
+    } catch (error) {
+        console.warn('Kaleya staff delete failed', error);
+        showToast('Zaposleni nije obrisan');
+    }
+}
+
+async function deleteClientService(serviceId) {
+    const service = clientServices.find(item => String(item.id) === String(serviceId));
+    if (!service) return;
+    if (!window.confirm(`Obrisati uslugu: ${service.name}?`)) return;
+
+    if (!getAuthToken() || location.protocol === 'file:') {
+        clientServices = clientServices.filter(item => String(item.id) !== String(serviceId));
+        clientStaffServiceLinks = clientStaffServiceLinks.filter(link => String(link.service) !== String(serviceId));
+        if (document.getElementById('editingServiceId')?.value === String(serviceId)) resetClientServiceForm();
+        renderClientOperationalSettings();
+        populateAppointmentStaffServiceFields();
+        showToast('Usluga je obrisana');
+        return;
+    }
+
+    try {
+        const res = await kaleyaApi(`/api/staff-services/services/${serviceId}/`, {
+            method: 'PATCH',
+            body: JSON.stringify({ is_active: false })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        clientServices = clientServices.filter(item => String(item.id) !== String(serviceId));
+        clientStaffServiceLinks = clientStaffServiceLinks.filter(link => String(link.service) !== String(serviceId));
+        if (document.getElementById('editingServiceId')?.value === String(serviceId)) resetClientServiceForm();
+        renderClientOperationalSettings();
+        populateAppointmentStaffServiceFields();
+        showToast('Usluga je obrisana');
+    } catch (error) {
+        console.warn('Kaleya service delete failed', error);
+        showToast('Usluga nije obrisana');
+    }
+}
+
+function localDateTimeToIso(dateIso, timeValue) {
+    return new Date(`${dateIso}T${timeValue || '00:00'}:00`).toISOString();
+}
+
+function toggleBlockedModeFields() {
+    const mode = document.getElementById('blockedMode')?.value || 'single';
+    const isMulti = mode === 'multi';
+    document.getElementById('blockedDateTo')?.classList.toggle('hidden', !isMulti);
+    document.querySelectorAll('.blocked-time-field').forEach(input => input.classList.toggle('hidden', isMulti));
+    applyCalendarSettingsToBlockedInputs();
+    const reason = document.getElementById('blockedReason');
+    if (reason && !reason.value) reason.placeholder = isMulti ? 'Razlog, npr. odmor ili bolovanje' : 'Razlog, npr. pauza';
+}
+
+function blockAppliesToStaff(block, staffMemberId = '') {
+    return !block.staff_member || !staffMemberId || String(block.staff_member) === String(staffMemberId);
+}
+
+function blockOverlapsSlot(block, dateIso, timeValue, durationMinutes, staffMemberId = '') {
+    if (!blockAppliesToStaff(block, staffMemberId)) return false;
+    const slotStart = new Date(`${dateIso}T${timeValue}:00`);
+    const slotEnd = new Date(slotStart.getTime() + (Number(durationMinutes || getClientCalendarSettings().interval) * 60000));
+    const blockStart = new Date(block.start_at);
+    const blockEnd = new Date(block.end_at);
+    return slotStart < blockEnd && slotEnd > blockStart;
+}
+
+function getBlockedSlot(dateIso, timeValue, durationMinutes = getClientCalendarSettings().interval, staffMemberId = '') {
+    return clientBlockedTimes.find(block => blockOverlapsSlot(block, dateIso, timeValue, durationMinutes, staffMemberId)) || null;
+}
+
+async function createClientBlockedTime() {
+    const settings = getClientCalendarSettings();
+    const date = readClientDateInputValue('blockedDate', clientCalendarState.selectedDate || clientIsoDate(new Date()));
+    const mode = document.getElementById('blockedMode')?.value || 'single';
+    const dateTo = mode === 'multi' ? readClientDateInputValue('blockedDateTo', date) : date;
+    const start = parseClientTimeInput(document.getElementById('blockedStart')?.value, settings.start);
+    const end = parseClientTimeInput(document.getElementById('blockedEnd')?.value, addMinutesToTime(start, settings.interval));
+    const staffId = document.getElementById('blockedStaff')?.value || '';
+    const reason = document.getElementById('blockedReason')?.value.trim() || 'Blokirano vreme';
+
+    if (mode === 'single' && timeToMinutes(end) <= timeToMinutes(start)) {
+        showToast('Kraj blokade mora biti posle pocetka');
+        return;
+    }
+    if (mode === 'single' && (timeToMinutes(start) < timeToMinutes(settings.start) || timeToMinutes(end) > timeToMinutes(settings.end))) {
+        showToast('Blokada mora biti u okviru radnog vremena');
+        return;
+    }
+    if (mode === 'multi' && new Date(`${dateTo}T00:00:00`) < new Date(`${date}T00:00:00`)) {
+        showToast('Datum do mora biti posle datuma od');
+        return;
+    }
+
+    const payload = {
+        staff_member: staffId ? Number(staffId) : null,
+        start_at: mode === 'multi' ? localDateTimeToIso(date, '00:00') : localDateTimeToIso(date, start),
+        end_at: mode === 'multi' ? localDateTimeToIso(dateTo, '23:59') : localDateTimeToIso(date, end),
+        reason,
+        source: 'client_app'
+    };
+
+    if (!getAuthToken() || location.protocol === 'file:') {
+        clientBlockedTimes.push({ id: `local-block-${Date.now()}`, staff_member: staffId || null, staff_member_name: staffNameById(staffId), ...payload });
+        renderClientOperationalSettings();
+        renderClientCalendar();
+        showToast('Blokada je dodata');
+        return;
+    }
+
+    try {
+        const res = await kaleyaApi('/api/staff-services/blocked-times/', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        clientBlockedTimes.push(await res.json());
+        document.getElementById('blockedReason').value = '';
+        if (mode === 'multi') {
+            const blockedDateTo = document.getElementById('blockedDateTo');
+            if (blockedDateTo) {
+                blockedDateTo.value = '';
+                blockedDateTo.dataset.iso = '';
+            }
+        }
+        renderClientOperationalSettings();
+        renderClientCalendar();
+        showToast('Blokada je dodata');
+    } catch (error) {
+        console.warn('Kaleya blocked time create failed', error);
+        showToast('Blokada nije sacuvana');
+    }
+}
+
+async function deleteClientBlockedTime(blockId) {
+    const block = clientBlockedTimes.find(item => String(item.id) === String(blockId));
+    if (!block) return;
+    if (!window.confirm('Obrisati blokirano vreme?')) return;
+
+    if (!getAuthToken() || location.protocol === 'file:') {
+        clientBlockedTimes = clientBlockedTimes.filter(item => String(item.id) !== String(blockId));
+        renderClientOperationalSettings();
+        renderClientCalendar();
+        showToast('Blokada je obrisana');
+        return;
+    }
+
+    try {
+        const res = await kaleyaApi(`/api/staff-services/blocked-times/${blockId}/`, { method: 'DELETE' });
+        if (!res.ok && res.status !== 204) throw new Error(await res.text());
+        clientBlockedTimes = clientBlockedTimes.filter(item => String(item.id) !== String(blockId));
+        renderClientOperationalSettings();
+        renderClientCalendar();
+        showToast('Blokada je obrisana');
+    } catch (error) {
+        console.warn('Kaleya blocked time delete failed', error);
+        showToast('Blokada nije obrisana');
+    }
 }
 
 // ===== CLIENT APP =====
@@ -1975,7 +2699,7 @@ async function handleQuickAction(action) {
         return;
     }
     if (action === 'proveri') {
-        let msg = todayAvailabilityMessage();
+        let msg = await todayAvailabilityMessageFromBackend() || todayAvailabilityMessage();
         try {
             const result = await askKaleyaBackend(availabilityPrompt(), true);
             if (result?.response_text) msg = result.response_text;
@@ -2036,7 +2760,7 @@ function openQuickScheduleModal() {
 
 function firstAvailableSlot(dateIso) {
     const events = schedule.filter(item => item.date === dateIso);
-    return getClientWorkSlots().find(time => !getSlotOccupancy(events, time)) || '';
+    return getClientWorkSlots().find(time => !getSlotOccupancy(events, time) && !getBlockedSlot(dateIso, time)) || '';
 }
 
 function todayAvailabilityMessage() {
@@ -2051,6 +2775,29 @@ function todayAvailabilityMessage() {
         it: stats.free > 0 ? `Hai ${stats.free} slot disponibili oggi.` : 'Non ci sono slot disponibili oggi.'
     };
     return messages[currentVoiceLang] || messages[currentLang] || messages.en;
+}
+
+async function todayAvailabilityMessageFromBackend() {
+    if (!getAuthToken() || location.protocol === 'file:') return '';
+    try {
+        const res = await kaleyaApi('/api/appointments/appointments/today-summary/', { method: 'GET' });
+        if (!res.ok) throw new Error(await res.text());
+        const stats = await res.json();
+        const free = Number(stats.free_count || 0);
+        const messages = {
+            sr: free > 0 ? `Danas imate ${free} slobodnih slotova.` : 'Danas nema slobodnih slotova.',
+            en: free > 0 ? `You have ${free} available slots today.` : 'There are no available slots today.',
+            es: free > 0 ? `Tiene ${free} horarios libres hoy.` : 'No hay horarios libres hoy.',
+            pt: free > 0 ? `Voce tem ${free} horarios livres hoje.` : 'Nao ha horarios livres hoje.',
+            ru: free > 0 ? `Danas imate ${free} slobodnih slotova.` : 'Danas nema slobodnih slotova.',
+            fr: free > 0 ? `Vous avez ${free} creneaux libres aujourd hui.` : 'Aucun creneau libre aujourd hui.',
+            it: free > 0 ? `Hai ${free} slot disponibili oggi.` : 'Non ci sono slot disponibili oggi.'
+        };
+        return messages[currentVoiceLang] || messages[currentLang] || messages.en;
+    } catch (error) {
+        console.warn('Kaleya availability summary failed', error);
+        return '';
+    }
 }
 
 function openCancelAppointmentModal() {
@@ -2080,7 +2827,7 @@ function renderCancelSearchResults() {
         .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`))
         .slice(0, 8);
     list.innerHTML = results.length ? results.map(item => {
-        const date = new Date(item.date + 'T12:00:00').toLocaleDateString(clientLocale(), { day: '2-digit', month: 'short', year: 'numeric' });
+        const date = formatClientDate(item.date);
         return `
             <div class="p-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
                 <div class="flex items-start justify-between gap-3">
@@ -2142,6 +2889,7 @@ function getClientCalendarSettings() {
             end: clientSettingsCache.end || '16:00',
             interval: Number(clientSettingsCache.interval || 30),
             format: clientSettingsCache.format || '24',
+            dateFormat: clientSettingsCache.dateFormat || 'dd-mm-yyyy',
             weekStart: clientSettingsCache.weekStart || defaultWeekStart()
         };
     }
@@ -2150,12 +2898,37 @@ function getClientCalendarSettings() {
         end: localStorage.getItem('client_work_end') || '16:00',
         interval: Number(localStorage.getItem('client_slot_interval') || 30),
         format: localStorage.getItem('client_time_format') || '24',
+        dateFormat: localStorage.getItem('client_date_format') || 'dd-mm-yyyy',
         weekStart: localStorage.getItem('client_week_start') || defaultWeekStart()
     };
 }
 
+function parseClientTimeInput(value, fallback = '09:00') {
+    const raw = String(value || '').trim().toUpperCase().replace(/\s+/g, ' ');
+    if (!raw) return fallback;
+
+    const amPmMatch = raw.match(/^(\d{1,2})(?::?(\d{2}))?\s*(AM|PM)$/);
+    if (amPmMatch) {
+        let hours = Number(amPmMatch[1]);
+        const minutes = Number(amPmMatch[2] || 0);
+        const suffix = amPmMatch[3];
+        if (hours < 1 || hours > 12 || minutes < 0 || minutes > 59) return fallback;
+        if (suffix === 'PM' && hours < 12) hours += 12;
+        if (suffix === 'AM' && hours === 12) hours = 0;
+        return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+    }
+
+    const timeMatch = raw.replace('.', ':').match(/^(\d{1,2})(?::(\d{1,2}))?$/);
+    if (!timeMatch) return fallback;
+    const hours = Number(timeMatch[1]);
+    const minutes = Number(timeMatch[2] || 0);
+    if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return fallback;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+}
+
 function timeToMinutes(value = '09:00') {
-    const [h, m] = value.split(':').map(Number);
+    const normalized = parseClientTimeInput(value, '09:00');
+    const [h, m] = normalized.split(':').map(Number);
     return (h * 60) + (m || 0);
 }
 
@@ -2174,6 +2947,138 @@ function formatClientTime(value) {
     const suffix = h24 >= 12 ? 'PM' : 'AM';
     const h12 = h24 % 12 || 12;
     return `${h12}${m ? ':' + String(m).padStart(2, '0') : ''} ${suffix}`;
+}
+
+function formatClientDate(value) {
+    const date = value instanceof Date ? value : new Date(String(value).includes('T') ? value : `${value}T12:00:00`);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return getClientCalendarSettings().dateFormat === 'mm-dd-yyyy' ? `${month}-${day}-${year}` : `${day}-${month}-${year}`;
+}
+
+function parseClientDateInput(value, fallbackIso = clientIsoDate(new Date())) {
+    const raw = String(value || '').trim();
+    if (!raw) return fallbackIso;
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw;
+
+    const match = raw.match(/^(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})$/);
+    if (!match) return fallbackIso;
+
+    let day;
+    let month;
+    const first = Number(match[1]);
+    const second = Number(match[2]);
+    const year = Number(match[3]);
+    if (getClientCalendarSettings().dateFormat === 'mm-dd-yyyy') {
+        month = first;
+        day = second;
+    } else {
+        day = first;
+        month = second;
+    }
+
+    const candidate = new Date(year, month - 1, day, 12, 0, 0);
+    if (candidate.getFullYear() !== year || candidate.getMonth() !== month - 1 || candidate.getDate() !== day) {
+        return fallbackIso;
+    }
+    return clientIsoDate(candidate);
+}
+
+function setClientDateInputValue(inputOrId, dateIso) {
+    const input = typeof inputOrId === 'string' ? document.getElementById(inputOrId) : inputOrId;
+    if (!input) return;
+    const safeIso = parseClientDateInput(dateIso, clientIsoDate(new Date()));
+    input.dataset.iso = safeIso;
+    input.value = formatClientDate(safeIso);
+}
+
+function readClientDateInputValue(inputOrId, fallbackIso = clientIsoDate(new Date())) {
+    const input = typeof inputOrId === 'string' ? document.getElementById(inputOrId) : inputOrId;
+    if (!input) return fallbackIso;
+    const safeIso = parseClientDateInput(input.value, input.dataset.iso || fallbackIso);
+    input.dataset.iso = safeIso;
+    input.value = formatClientDate(safeIso);
+    return safeIso;
+}
+
+function handleDateInputChange(inputId) {
+    readClientDateInputValue(inputId, clientCalendarState.selectedDate || clientIsoDate(new Date()));
+}
+
+function safeTimeMinutes(value, fallback = '09:00') {
+    return timeToMinutes(parseClientTimeInput(value, fallback));
+}
+
+function snapTimeToCalendar(value, settings, fallback = settings.start, allowEnd = false, durationMinutes = settings.interval) {
+    const min = timeToMinutes(settings.start);
+    const max = timeToMinutes(settings.end);
+    const interval = Math.max(Number(settings.interval || 30), 1);
+    const latestStart = Math.max(min, max - Number(durationMinutes || interval));
+    let minutes = safeTimeMinutes(value, fallback);
+    minutes = Math.max(min, Math.min(minutes, allowEnd ? max : latestStart));
+    const snapped = min + (Math.round((minutes - min) / interval) * interval);
+    minutes = Math.max(min, Math.min(snapped, allowEnd ? max : latestStart));
+    return minutesToTime(minutes);
+}
+
+function configureCalendarTimeInput(input, settings, fallback = settings.start, allowEnd = false, durationMinutes = settings.interval) {
+    if (!input) return;
+    const min = timeToMinutes(settings.start);
+    const max = timeToMinutes(settings.end);
+    const latestStart = Math.max(min, max - Number(durationMinutes || settings.interval || 30));
+    const snapped = snapTimeToCalendar(input.value, settings, fallback, allowEnd, durationMinutes);
+    input.dataset.value = snapped;
+    input.placeholder = formatClientTime(fallback);
+    input.value = formatClientTime(snapped);
+}
+
+function applyCalendarSettingsToBlockedInputs() {
+    const settings = getClientCalendarSettings();
+    const startInput = document.getElementById('blockedStart');
+    const endInput = document.getElementById('blockedEnd');
+    configureCalendarTimeInput(startInput, settings, settings.start, false);
+    if (!endInput) return;
+
+    const nextEnd = minutesToTime(Math.min(timeToMinutes(startInput?.value || settings.start) + Number(settings.interval || 30), timeToMinutes(settings.end)));
+    endInput.min = nextEnd;
+    endInput.max = settings.end;
+    endInput.step = String(Number(settings.interval || 30) * 60);
+    if (!endInput.value || timeToMinutes(endInput.value) <= timeToMinutes(startInput?.value || settings.start) || timeToMinutes(endInput.value) > timeToMinutes(settings.end)) {
+        endInput.dataset.value = nextEnd;
+        endInput.value = formatClientTime(nextEnd);
+    } else {
+        const snapped = snapTimeToCalendar(endInput.value, settings, nextEnd, true);
+        endInput.dataset.value = snapped;
+        endInput.value = formatClientTime(snapped);
+    }
+}
+
+function applyCalendarSettingsToTimeControls() {
+    const settings = getClientCalendarSettings();
+    const range = document.getElementById('clientWorkRangeLabel');
+    if (range) range.textContent = formatWorkRange();
+    const appointmentDuration = Number(document.getElementById('apptDuration')?.value || settings.interval);
+    configureCalendarTimeInput(document.getElementById('apptTime'), settings, settings.start, false, appointmentDuration);
+    applyCalendarSettingsToBlockedInputs();
+}
+
+function handleBlockedTimeChange(changedField = '') {
+    applyCalendarSettingsToBlockedInputs();
+    if (changedField === 'start') {
+        const settings = getClientCalendarSettings();
+        const startInput = document.getElementById('blockedStart');
+        const endInput = document.getElementById('blockedEnd');
+        if (startInput && endInput && timeToMinutes(endInput.value) <= timeToMinutes(startInput.value)) {
+            const nextEnd = minutesToTime(Math.min(timeToMinutes(startInput.value) + Number(settings.interval || 30), timeToMinutes(settings.end)));
+            endInput.dataset.value = nextEnd;
+            endInput.value = formatClientTime(nextEnd);
+        }
+    }
+}
+
+function handleAppointmentTimeChange() {
+    applyCalendarSettingsToTimeControls();
 }
 
 function addMinutesToTime(value, minutes) {
@@ -2205,7 +3110,7 @@ function appointmentSlotSpan(item) {
 function getDateSlotStats(dateIso) {
     const slots = getClientWorkSlots();
     const activeItems = schedule.filter(item => item.date === dateIso && item.status !== 'cancelled');
-    const busy = Math.min(slots.length, activeItems.reduce((sum, item) => sum + appointmentSlotSpan(item), 0));
+    const busy = slots.filter(time => getSlotOccupancy(activeItems, time) || getBlockedSlot(dateIso, time)).length;
     return { busy, free: Math.max(slots.length - busy, 0) };
 }
 
@@ -2226,28 +3131,50 @@ function syncClientCalendarSettingsUI() {
     const end = document.getElementById('clientWorkEnd');
     const interval = document.getElementById('clientSlotInterval');
     const format = document.getElementById('clientTimeFormat');
+    const dateFormat = document.getElementById('clientDateFormat');
     const weekStart = document.getElementById('clientWeekStart');
-    if (start) start.value = settings.start;
-    if (end) end.value = settings.end;
+    if (start) {
+        start.dataset.value = settings.start;
+        start.value = formatClientTime(settings.start);
+    }
+    if (end) {
+        end.dataset.value = settings.end;
+        end.value = formatClientTime(settings.end);
+    }
     if (interval) interval.value = String(settings.interval);
     if (format) format.value = settings.format;
+    if (dateFormat) dateFormat.value = settings.dateFormat;
     if (weekStart) weekStart.value = settings.weekStart;
-    const range = document.getElementById('clientWorkRangeLabel');
-    if (range) range.textContent = formatWorkRange();
-    const apptTime = document.getElementById('apptTime');
-    if (apptTime) {
-        apptTime.min = settings.start;
-        apptTime.max = settings.end;
-        apptTime.step = String(settings.interval * 60);
+    const datePlaceholder = formatClientDate('2026-04-28');
+    ['blockedDate', 'blockedDateTo', 'apptDate'].forEach(inputId => {
+        const input = document.getElementById(inputId);
+        if (input) input.placeholder = datePlaceholder;
+    });
+    applyCalendarSettingsToTimeControls();
+    const blockedDate = document.getElementById('blockedDate');
+    if (blockedDate) {
+        const fallbackDate = clientCalendarState.selectedDate || clientIsoDate(new Date());
+        if (!blockedDate.value) setClientDateInputValue(blockedDate, fallbackDate);
+        else setClientDateInputValue(blockedDate, readClientDateInputValue(blockedDate, fallbackDate));
     }
+    const blockedDateTo = document.getElementById('blockedDateTo');
+    if (blockedDateTo && blockedDateTo.value) {
+        setClientDateInputValue(blockedDateTo, readClientDateInputValue(blockedDateTo, blockedDate?.dataset.iso || clientIsoDate(new Date())));
+    }
+    const apptDate = document.getElementById('apptDate');
+    if (apptDate && apptDate.value) {
+        setClientDateInputValue(apptDate, readClientDateInputValue(apptDate, clientCalendarState.selectedDate || clientIsoDate(new Date())));
+    }
+    toggleBlockedModeFields();
 }
 
 async function saveClientCalendarSettings() {
-    const start = document.getElementById('clientWorkStart')?.value || '09:00';
-    const end = document.getElementById('clientWorkEnd')?.value || '16:00';
+    const start = parseClientTimeInput(document.getElementById('clientWorkStart')?.value, '09:00');
+    const end = parseClientTimeInput(document.getElementById('clientWorkEnd')?.value, '16:00');
     const validEnd = timeToMinutes(end) > timeToMinutes(start) ? end : '16:00';
     const interval = Number(document.getElementById('clientSlotInterval')?.value || 30);
     const format = document.getElementById('clientTimeFormat')?.value || '24';
+    const dateFormat = document.getElementById('clientDateFormat')?.value || 'dd-mm-yyyy';
     const weekStart = document.getElementById('clientWeekStart')?.value || defaultWeekStart();
 
     clientSettingsCache = {
@@ -2256,12 +3183,14 @@ async function saveClientCalendarSettings() {
         end: validEnd,
         interval,
         format,
+        dateFormat,
         weekStart
     };
     localStorage.setItem('client_work_start', start);
     localStorage.setItem('client_work_end', validEnd);
     localStorage.setItem('client_slot_interval', String(interval));
     localStorage.setItem('client_time_format', format);
+    localStorage.setItem('client_date_format', dateFormat);
     localStorage.setItem('client_week_start', weekStart);
     syncClientCalendarSettingsUI();
     renderClientCalendar();
@@ -2272,6 +3201,7 @@ async function saveClientCalendarSettings() {
             work_end: validEnd,
             slot_interval_minutes: interval,
             time_format: timeFormatToBackend(format),
+            date_format: dateFormatToBackend(dateFormat),
             week_start: weekStartToBackend(weekStart)
         });
         showToast('Podesavanja kalendara su sacuvana');
@@ -2291,6 +3221,11 @@ function localizedAppointmentName(item) {
 
 function localizedStatus(status) {
     return CLIENT_STATUS_TEXT[status]?.[currentLang] || CLIENT_STATUS_TEXT[status]?.en || status;
+}
+
+function appointmentDetailText(item) {
+    const details = [item.serviceName, item.staffMemberName].filter(Boolean);
+    return details.length ? details.join(' - ') : '';
 }
 
 function statusDotClass(status) {
@@ -2371,6 +3306,128 @@ function renderContactActions(item) {
     `;
 }
 
+function escapeJsString(value = '') {
+    return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\r?\n/g, ' ');
+}
+
+function personInitials(name = '') {
+    const parts = String(name).trim().split(/\s+/).filter(Boolean);
+    const first = parts[0]?.[0] || 'K';
+    const second = parts.length > 1 ? parts[parts.length - 1][0] : '';
+    return `${first}${second}`.toUpperCase();
+}
+
+async function copyPhoneNumber(phone, silent = false) {
+    const normalized = normalizePhone(phone || '');
+    if (!normalized) {
+        showToast('Broj telefona nije unet');
+        return;
+    }
+    try {
+        await navigator.clipboard.writeText(normalized);
+        if (!silent) showToast('Broj je kopiran');
+    } catch (error) {
+        showToast(`Broj: ${normalized}`);
+    }
+}
+
+function renderDirectoryActions(phone = '') {
+    const normalized = normalizePhone(phone);
+    if (!normalized) {
+        return '<span class="text-[11px] text-slate-400">Nema broja</span>';
+    }
+    const jsPhone = escapeJsString(normalized);
+    return `
+        <div class="flex items-center gap-2">
+            <button onclick="copyPhoneNumber('${jsPhone}')" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 grid place-items-center text-slate-700 dark:text-slate-200" aria-label="Kopiraj broj">
+                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+            <a href="tel:${normalized}" onclick="copyPhoneNumber('${jsPhone}', true)" class="w-10 h-10 rounded-full bg-teal-600 text-white grid place-items-center shadow-lg shadow-teal-500/20" aria-label="Pozovi">
+                <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2A19.8 19.8 0 013 5.18 2 2 0 015 3h3a2 2 0 012 1.72c.12.9.33 1.77.63 2.6a2 2 0 01-.45 2.11L9 10.6a16 16 0 004.4 4.4l1.17-1.18a2 2 0 012.11-.45c.83.3 1.7.51 2.6.63A2 2 0 0122 16.92z"/></svg>
+            </a>
+        </div>
+    `;
+}
+
+function renderDirectoryRow(person, owner = false) {
+    const name = person.full_name || person.name || person.email || 'Zaposleni';
+    const role = owner ? 'Vlasnik' : (person.role_title || 'Zaposleni');
+    const phone = person.phone || '';
+    const email = person.email || '';
+    return `
+        <div class="p-4 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="shrink-0 w-11 h-11 rounded-2xl ${owner ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200'} grid place-items-center text-sm font-bold">
+                    ${escapeHtml(personInitials(name))}
+                </div>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                        <p class="text-sm font-semibold truncate">${escapeHtml(name)}</p>
+                        ${owner ? '<span class="px-2 py-0.5 rounded-full bg-teal-100 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 text-[10px] font-bold">owner</span>' : ''}
+                    </div>
+                    <p class="mt-0.5 text-[11px] text-slate-500 truncate">${escapeHtml(role)}${phone ? ` - ${escapeHtml(phone)}` : ''}</p>
+                    ${email ? `<p class="text-[10px] text-slate-400 truncate">${escapeHtml(email)}</p>` : ''}
+                </div>
+            </div>
+            ${renderDirectoryActions(phone)}
+        </div>
+    `;
+}
+
+function renderEmployeeDirectory() {
+    const list = document.getElementById('employeeDirectoryList');
+    if (!list) return;
+    const owner = {
+        full_name: currentClientInfo?.owner_name || currentClientInfo?.public_name || currentClientInfo?.name || 'Demo Client',
+        role_title: 'Vlasnik',
+        phone: currentClientInfo?.owner_phone || '+1 555 0100',
+        email: currentClientInfo?.owner_email || 'klijent@test.com'
+    };
+    const fallbackStaff = [
+        { full_name: 'Ana Employee', role_title: 'Receptionist', phone: '+1 555 0177', email: 'empl@test.com' },
+        { full_name: 'Mark Johnson', role_title: 'Senior Specialist', phone: '+1 555 0199', email: 'mark@example.com' }
+    ];
+    const staffRows = clientStaffMembers.length ? clientStaffMembers : fallbackStaff;
+    list.innerHTML = [
+        renderDirectoryRow(owner, true),
+        ...staffRows.map(staff => renderDirectoryRow(staff, false))
+    ].join('');
+}
+
+function applyEmployeeModeUI() {
+    const employee = isEmployeeUser();
+    const navBtn = document.getElementById('clientSettingsNavBtn');
+    const navLabel = document.getElementById('clientSettingsNavLabel');
+    if (navBtn) navBtn.dataset.clientTab = employee ? 'team' : 'settings';
+    if (navLabel) {
+        if (employee) {
+            navLabel.removeAttribute('data-i18n');
+            navLabel.textContent = 'Tim';
+        } else {
+            navLabel.setAttribute('data-i18n', 'nav_set');
+            navLabel.textContent = T[currentLang]?.nav_set || 'Podes.';
+        }
+    }
+    if (employee) closeClientSettings();
+}
+
+async function openEmployeeDirectory() {
+    applyEmployeeModeUI();
+    switchClientTab('team');
+    renderEmployeeDirectory();
+    if (getAuthToken() && location.protocol !== 'file:') {
+        await Promise.all([loadClientSettingsFromBackend(), loadClientOperationalDataFromBackend()]);
+    }
+}
+
+function handleClientThirdTab() {
+    if (isEmployeeUser()) {
+        openEmployeeDirectory();
+        return;
+    }
+    openClientSettings();
+}
+
 function renderAppointmentCard(item) {
     return `
         <div class="group p-3.5 rounded-[18px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-md transition">
@@ -2381,7 +3438,8 @@ function renderAppointmentCard(item) {
                         ${renderStatusControl(item)}
                         <p class="text-[14px] font-medium truncate">${escapeHtml(localizedAppointmentName(item))}</p>
                     </div>
-                    <p class="mt-0.5 text-[11px] text-slate-500">${escapeHtml(localizedStatus(item.status))} - ${escapeHtml(item.phone || '')}</p>
+                    ${appointmentDetailText(item) ? `<p class="mt-0.5 text-[11px] text-slate-500 truncate">${escapeHtml(appointmentDetailText(item))}</p>` : ''}
+                    <p class="mt-0.5 text-[11px] text-slate-500">${escapeHtml(formatClientDate(item.date))} - ${escapeHtml(localizedStatus(item.status))} - ${escapeHtml(item.phone || '')}</p>
                 </div>
             </div>
             <div class="mt-3 flex items-center justify-between gap-2">
@@ -2409,11 +3467,12 @@ function renderSchedule() {
 }
 
 function addAppointment() {
+    const settings = getClientCalendarSettings();
     schedule.unshift({
         id: `a${Date.now()}`,
         date: clientDateOffset(1),
-        time: '15:00',
-        duration: 30,
+        time: settings.start,
+        duration: settings.interval,
         nameKey: 'newClient',
         phone: '+381601010101',
         channel: 'WhatsApp',
@@ -2424,6 +3483,7 @@ function addAppointment() {
 }
 
 function switchClientTab(tab) {
+    if (tab === 'settings' && isEmployeeUser()) tab = 'team';
     if (tab !== 'settings') {
         document.querySelectorAll('[data-client-screen]').forEach(screen => {
             screen.classList.toggle('hidden', screen.dataset.clientScreen !== tab);
@@ -2458,6 +3518,7 @@ function switchClientCalendarMode(mode) {
 function selectClientCalendarDate(dateIso) {
     clientCalendarState.selectedDate = dateIso;
     clientCalendarState.mode = 'day';
+    setClientDateInputValue('blockedDate', dateIso);
     renderClientCalendar();
 }
 
@@ -2472,7 +3533,7 @@ function renderClientCalendar() {
     const base = new Date(now.getFullYear(), now.getMonth() + clientCalendarState.monthOffset, 1);
     const selectedDate = new Date(clientCalendarState.selectedDate + 'T12:00:00');
     label.textContent = clientCalendarState.mode === 'day'
-        ? selectedDate.toLocaleDateString(clientLocale(), { weekday: 'long', day: 'numeric', month: 'long' })
+        ? `${selectedDate.toLocaleDateString(clientLocale(), { weekday: 'long' })}, ${formatClientDate(selectedDate)}`
         : base.toLocaleDateString(clientLocale(), { month: 'long', year: 'numeric' });
     document.getElementById('clientCalendarMonthView')?.classList.toggle('hidden', clientCalendarState.mode === 'day');
 
@@ -2518,14 +3579,26 @@ function renderClientDaySlots() {
     const slots = document.getElementById('clientDaySlots');
     const selected = new Date(clientCalendarState.selectedDate + 'T12:00:00');
     const label = document.getElementById('clientSelectedDayLabel');
-    if (label) label.textContent = selected.toLocaleDateString(clientLocale(), { weekday: 'long', day: 'numeric', month: 'long' });
+    if (label) label.textContent = `${selected.toLocaleDateString(clientLocale(), { weekday: 'long' })}, ${formatClientDate(selected)}`;
     if (!slots) return;
     syncClientCalendarSettingsUI();
     const events = schedule.filter(item => item.date === clientCalendarState.selectedDate);
     slots.innerHTML = getClientWorkSlots().map(time => {
         const occupancy = getSlotOccupancy(events, time);
+        const blocked = getBlockedSlot(clientCalendarState.selectedDate, time);
         const cancelledItem = events.find(event => event.time === time && event.status === 'cancelled');
         const item = occupancy?.item || cancelledItem;
+        if (!item && blocked) {
+            return `
+                <div class="flex items-center justify-between p-3 rounded-[16px] border border-amber-200 dark:border-amber-900 bg-amber-50/80 dark:bg-amber-950/25">
+                    <div>
+                        <p class="font-mono text-sm font-semibold">${formatClientTime(time)}</p>
+                        <p class="text-[11px] text-amber-700 dark:text-amber-300">${escapeHtml(localizedStatus('blocked'))} - ${escapeHtml(blocked.reason || 'Blokirano')} (${escapeHtml(blockInlineTimeLabel(blocked))})</p>
+                    </div>
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                </div>
+            `;
+        }
         if (!item) {
             return `
                 <div class="flex items-center justify-between p-3 rounded-[16px] border border-slate-200 dark:border-slate-800 bg-green-50/70 dark:bg-green-950/20">
@@ -2552,6 +3625,7 @@ function renderClientDaySlots() {
                     <div>
                         <p class="font-mono text-sm font-semibold">${formatClientTime(item.time)} - ${formatClientTime(endTime)}</p>
                         <p class="text-[13px] font-semibold">${escapeHtml(localizedAppointmentName(item))}</p>
+                        ${appointmentDetailText(item) ? `<p class="text-[11px] text-slate-500">${escapeHtml(appointmentDetailText(item))}</p>` : ''}
                         <p class="text-[11px] text-slate-500">${escapeHtml(localizedStatus(item.status))} - ${escapeHtml(item.phone || '')}</p>
                     </div>
                     ${renderStatusControl(item)}
@@ -2576,16 +3650,24 @@ function openAppointmentEditor(id = '', date = '', time = '') {
         name: '',
         phone: '+381',
         channel: 'WhatsApp',
-        status: 'confirmed'
+        status: 'confirmed',
+        staffMemberId: '',
+        serviceId: ''
     };
+    populateAppointmentStaffServiceFields(item.serviceId || '', item.staffMemberId || '');
     document.getElementById('apptId').value = item.id || '';
-    document.getElementById('apptDate').value = item.date;
+    setClientDateInputValue('apptDate', item.date);
     document.getElementById('apptTime').value = item.time;
     document.getElementById('apptName').value = localizedAppointmentName(item) === 'Client' ? '' : localizedAppointmentName(item);
     document.getElementById('apptPhone').value = item.phone || '';
     document.getElementById('apptChannel').value = item.channel || 'WhatsApp';
     document.getElementById('apptStatus').value = item.status || 'confirmed';
+    document.getElementById('apptService').value = item.serviceId || '';
+    populateAppointmentStaffServiceFields(item.serviceId || '', item.staffMemberId || '');
+    document.getElementById('apptStaff').value = item.staffMemberId || '';
+    ensureDurationOption(item.duration || settings.interval);
     document.getElementById('apptDuration').value = String(item.duration || settings.interval);
+    applyCalendarSettingsToTimeControls();
     document.getElementById('appointmentModal')?.classList.remove('hidden');
 }
 
@@ -2595,23 +3677,42 @@ function closeAppointmentEditor() {
 
 async function saveAppointmentEdit() {
     const id = document.getElementById('apptId').value;
+    const serviceId = document.getElementById('apptService')?.value || '';
+    const staffMemberId = document.getElementById('apptStaff')?.value || '';
+    const selectedService = clientServices.find(service => String(service.id) === String(serviceId));
+    const selectedStaff = clientStaffMembers.find(staff => String(staff.id) === String(staffMemberId));
+    const calendarSettings = getClientCalendarSettings();
     const payload = {
         id: id || `a${Date.now()}`,
         backendId: schedule.find(item => item.id === id)?.backendId || null,
-        date: document.getElementById('apptDate').value || clientCalendarState.selectedDate,
-        time: document.getElementById('apptTime').value || getClientCalendarSettings().start,
-        duration: Number(document.getElementById('apptDuration').value || getClientCalendarSettings().interval),
+        date: readClientDateInputValue('apptDate', clientCalendarState.selectedDate),
+        time: parseClientTimeInput(document.getElementById('apptTime')?.value, calendarSettings.start),
+        duration: Number(document.getElementById('apptDuration').value || calendarSettings.interval),
         name: document.getElementById('apptName').value.trim() || 'New client',
         phone: document.getElementById('apptPhone').value.trim() || '+381',
         channel: document.getElementById('apptChannel').value,
-        status: document.getElementById('apptStatus').value
+        status: document.getElementById('apptStatus').value,
+        serviceId,
+        serviceName: selectedService?.name || '',
+        staffMemberId,
+        staffMemberName: selectedStaff?.full_name || ''
     };
+    const appointmentStart = timeToMinutes(payload.time);
+    const appointmentEnd = appointmentStart + Number(payload.duration || calendarSettings.interval);
+    if (appointmentStart < timeToMinutes(calendarSettings.start) || appointmentEnd > timeToMinutes(calendarSettings.end)) {
+        showToast('Termin mora biti u okviru radnog vremena');
+        return;
+    }
+    if (getBlockedSlot(payload.date, payload.time, payload.duration, staffMemberId)) {
+        showToast('Termin se preklapa sa blokiranim vremenom');
+        return;
+    }
     try {
         const saved = await saveAppointmentToBackend(payload);
         if (saved) Object.assign(payload, saved);
     } catch (e) {
         console.warn('Kaleya save appointment failed', e);
-        showToast('Termin nije sacuvan u bazi');
+        showToast(friendlyApiError(e, 'Termin nije sacuvan u bazi'));
         return;
     }
     const index = schedule.findIndex(item => item.id === id);
@@ -2647,12 +3748,16 @@ function openChannelDemo(channel, phone) {
 
 // Client settings
 async function openClientSettings() {
+    if (isEmployeeUser()) {
+        openEmployeeDirectory();
+        return;
+    }
     switchClientTab('settings');
     document.getElementById('client-settings').classList.remove('hidden');
     updateElStatus();
     updateClientLangButtons();
     syncClientCalendarSettingsUI();
-    await loadClientSettingsFromBackend();
+    await Promise.all([loadClientSettingsFromBackend(), loadClientOperationalDataFromBackend()]);
 }
 function closeClientSettings() { document.getElementById('client-settings').classList.add('hidden'); }
 function updateElStatus() {
@@ -2968,6 +4073,7 @@ if (!T[currentLang]) currentLang = 'en';
 if (!T[currentVoiceLang]) currentVoiceLang = currentLang;
 applyLang();
 syncClientCalendarSettingsUI();
+renderClientOperationalSettings();
 renderSchedule();
 renderClientCalendar();
 updateKaleyaPowerUI();

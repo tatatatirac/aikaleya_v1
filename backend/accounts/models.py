@@ -7,14 +7,23 @@ from django.dispatch import receiver
 class Profile(models.Model):
     ROLE_ADMIN = "admin"
     ROLE_CLIENT = "client"
+    ROLE_EMPLOYEE = "employee"
 
     ROLE_CHOICES = (
         (ROLE_ADMIN, "Admin"),
         (ROLE_CLIENT, "Client"),
+        (ROLE_EMPLOYEE, "Employee"),
     )
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_CLIENT)
+    business_client = models.ForeignKey(
+        "clients.BusinessClient",
+        on_delete=models.SET_NULL,
+        related_name="employee_profiles",
+        null=True,
+        blank=True,
+    )
     phone = models.CharField(max_length=40, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -35,4 +44,3 @@ def create_or_update_profile(sender, instance, created, **kwargs):
         if instance.profile.role != expected_role:
             instance.profile.role = expected_role
             instance.profile.save(update_fields=["role", "updated_at"])
-

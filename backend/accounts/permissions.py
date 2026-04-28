@@ -10,6 +10,11 @@ def user_role(user):
     return getattr(profile, "role", None)
 
 
+def profile_business_client(user):
+    profile = getattr(user, "profile", None)
+    return getattr(profile, "business_client", None)
+
+
 class IsAdminRole(BasePermission):
     def has_permission(self, request, view):
         return user_role(request.user) == "admin"
@@ -17,7 +22,7 @@ class IsAdminRole(BasePermission):
 
 class IsClientUser(BasePermission):
     def has_permission(self, request, view):
-        return user_role(request.user) in {"admin", "client"}
+        return user_role(request.user) in {"admin", "client", "employee"}
 
 
 class IsOwnerClientOrAdmin(BasePermission):
@@ -29,5 +34,12 @@ class IsOwnerClientOrAdmin(BasePermission):
         if owner is None and hasattr(obj, "business_client"):
             owner = getattr(obj.business_client, "owner", None)
 
-        return owner == request.user
+        if owner == request.user:
+            return True
 
+        employee_client = profile_business_client(request.user)
+        object_client = getattr(obj, "business_client", None)
+        if employee_client and object_client:
+            return object_client.id == employee_client.id
+
+        return False

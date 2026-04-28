@@ -31,6 +31,11 @@ class BusinessClient(models.Model):
         ("12h", "AM/PM"),
     )
 
+    DATE_FORMAT_CHOICES = (
+        ("dd-mm-yyyy", "DD-MM-YYYY"),
+        ("mm-dd-yyyy", "MM-DD-YYYY"),
+    )
+
     WEEK_START_CHOICES = (
         (0, "Monday"),
         (6, "Sunday"),
@@ -49,6 +54,7 @@ class BusinessClient(models.Model):
     work_end = models.TimeField(default="16:00")
     slot_interval_minutes = models.PositiveIntegerField(default=30)
     time_format = models.CharField(max_length=10, choices=TIME_FORMAT_CHOICES, default="24h")
+    date_format = models.CharField(max_length=20, choices=DATE_FORMAT_CHOICES, default="dd-mm-yyyy")
     week_start = models.IntegerField(choices=WEEK_START_CHOICES, default=0)
     allow_phone_calls = models.BooleanField(default=True)
     allow_sms = models.BooleanField(default=True)
@@ -90,4 +96,3 @@ def get_active_client_for_user(user):
     if not user or not user.is_authenticated:
         return None
     return BusinessClient.objects.filter(owner=user).first()
-

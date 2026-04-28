@@ -31,6 +31,12 @@ class Command(BaseCommand):
             first_name="Demo",
             last_name="Client",
         )
+        employee_user = self.create_user(
+            email="empl@test.com",
+            password="emp123",
+            first_name="Ana",
+            last_name="Employee",
+        )
 
         client, _created = BusinessClient.objects.update_or_create(
             owner=client_user,
@@ -47,9 +53,20 @@ class Command(BaseCommand):
                 "work_end": time(16, 0),
                 "slot_interval_minutes": 30,
                 "time_format": "24h",
+                "date_format": "dd-mm-yyyy",
                 "week_start": 0,
             },
         )
+
+        client_user.profile.role = "client"
+        client_user.profile.business_client = client
+        client_user.profile.phone = "+1 555 0100"
+        client_user.profile.save(update_fields=["role", "business_client", "phone", "updated_at"])
+
+        employee_user.profile.role = "employee"
+        employee_user.profile.business_client = client
+        employee_user.profile.phone = "+1 555 0177"
+        employee_user.profile.save(update_fields=["role", "business_client", "phone", "updated_at"])
 
         ClientApiSettings.objects.update_or_create(
             business_client=client,
@@ -100,6 +117,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Kaleya demo backend podaci su spremni."))
         self.stdout.write("Admin login: admin@aikaleya.com / admin123")
         self.stdout.write("Client login: klijent@test.com / test123")
+        self.stdout.write("Employee login: empl@test.com / emp123")
 
     def create_user(self, email, password, **defaults):
         user, created = User.objects.get_or_create(
@@ -180,6 +198,14 @@ class Command(BaseCommand):
             email="mark@example.com",
             color="#14b8a6",
         )
+        employee_staff = StaffMember.objects.create(
+            business_client=client,
+            full_name="Ana Employee",
+            role_title="Receptionist",
+            phone="+1 555 0177",
+            email="empl@test.com",
+            color="#3b82f6",
+        )
         services = [
             Service.objects.create(
                 business_client=client,
@@ -200,11 +226,19 @@ class Command(BaseCommand):
         ]
         for service in services:
             StaffService.objects.create(staff_member=staff, service=service)
+            StaffService.objects.create(staff_member=employee_staff, service=service)
 
         for weekday in range(5):
             WorkingHours.objects.create(
                 business_client=client,
                 staff_member=staff,
+                weekday=weekday,
+                start_time=time(9, 0),
+                end_time=time(16, 0),
+            )
+            WorkingHours.objects.create(
+                business_client=client,
+                staff_member=employee_staff,
                 weekday=weekday,
                 start_time=time(9, 0),
                 end_time=time(16, 0),
