@@ -1,3 +1,4 @@
+import os
 from datetime import date, time, timedelta
 
 from django.contrib.auth.models import User
@@ -17,9 +18,13 @@ class Command(BaseCommand):
     help = "Creates local demo data for Kaleya development."
 
     def handle(self, *args, **options):
+        admin_email = os.environ.get("KALEYA_DEMO_ADMIN_EMAIL", "admin@aikaleya.com").strip().lower()
+        admin_password = os.environ.get("KALEYA_DEMO_ADMIN_PASSWORD", "admin123")
+        self.rename_user_email("admin@aikaleya.com", admin_email)
+
         admin = self.create_user(
-            email="admin@aikaleya.com",
-            password="admin123",
+            email=admin_email,
+            password=admin_password,
             is_staff=True,
             is_superuser=True,
             first_name="Kaleya",
@@ -118,9 +123,21 @@ class Command(BaseCommand):
         self.create_notification_rules(client)
 
         self.stdout.write(self.style.SUCCESS("Kaleya demo backend podaci su spremni."))
-        self.stdout.write("Admin login: admin@aikaleya.com / admin123")
+        self.stdout.write(f"Admin login: {admin_email} / vrednost iz KALEYA_DEMO_ADMIN_PASSWORD")
         self.stdout.write("Client login: klijent@test.com / test123")
         self.stdout.write("Employee login: ana / emp123")
+
+    def rename_user_email(self, old_email, new_email):
+        if old_email.lower() == new_email.lower():
+            return
+        if User.objects.filter(email__iexact=new_email).exists():
+            return
+        user = User.objects.filter(email__iexact=old_email.lower()).first()
+        if not user:
+            return
+        user.email = new_email
+        user.username = new_email
+        user.save(update_fields=["email", "username"])
 
     def create_user(self, email, password, **defaults):
         user = User.objects.filter(email__iexact=email.lower()).first()

@@ -1198,7 +1198,7 @@
 
 <script>
 // ===== STATE =====
-const KALEYA_APP_VERSION = '2026-04-28-employee-01';
+const KALEYA_APP_VERSION = '2026-04-29-no-cache-05';
 const savedAppVersion = localStorage.getItem('kaleya_app_version');
 if (savedAppVersion && savedAppVersion !== KALEYA_APP_VERSION) {
     localStorage.removeItem('kaleya_auth_token');
@@ -1799,12 +1799,12 @@ async function logoTap() {
     };
     const audioLang = ['sr', 'en', 'es', 'pt', 'ru', 'fr', 'it', 'de'].includes(currentLang) ? currentLang : 'en';
     try {
-        await playAudioUrl(`/assets/audio/kaleya-demo-${audioLang}.mp3?v=2`);
+        await playAudioUrl(`assets/audio/kaleya-demo-${audioLang}.mp3?v=${KALEYA_APP_VERSION}`);
         return;
     } catch (error) {
-        console.warn('Kaleya public intro audio failed, fallback to TTS', error);
+        console.warn('Kaleya public intro audio failed', error);
+        showToast('Kaleya audio nije ucitan. Osvezi stranu sa Ctrl + F5.');
     }
-    await speak(intro[currentLang] || intro.en, currentLang);
 }
 
 // ===== LOGIN =====
@@ -4443,7 +4443,10 @@ const savedUserRole = localStorage.getItem('kaleya_user_role');
 if (savedAuthToken && (savedUserRole === 'client' || savedUserRole === 'employee')) {
     showView('client');
 } else if (savedAuthToken && savedUserRole === 'admin' && isBackendServed()) {
-    window.location.href = '/admin/';
+    localStorage.removeItem('kaleya_auth_token');
+    localStorage.removeItem('kaleya_user_role');
+    localStorage.removeItem('kaleya_user_email');
+    showView('landing');
 } else {
     showView('landing');
 }

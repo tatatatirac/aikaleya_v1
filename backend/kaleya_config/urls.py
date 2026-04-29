@@ -18,13 +18,21 @@ def health_check(request):
     return JsonResponse({"status": "ok", "service": "kaleya-backend"})
 
 
+def no_cache_response(response):
+    response["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response["Pragma"] = "no-cache"
+    response["Expires"] = "0"
+    return response
+
+
+def no_cache_static_serve(request, *args, **kwargs):
+    return no_cache_response(serve(request, *args, **kwargs))
+
+
 class FrontendTemplateView(TemplateView):
     def render_to_response(self, context, **response_kwargs):
         response = super().render_to_response(context, **response_kwargs)
-        response["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-        response["Pragma"] = "no-cache"
-        response["Expires"] = "0"
-        return response
+        return no_cache_response(response)
 
 
 urlpatterns = [
@@ -61,7 +69,7 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += [
-        re_path(r"^assets/(?P<path>.*)$", serve, {"document_root": settings.PROJECT_ROOT / "frontend" / "assets"}),
-        re_path(r"^logo\.png$", serve, {"path": "logo.png", "document_root": settings.PROJECT_ROOT / "frontend"}),
-        re_path(r"^media/(?P<path>.*)$", serve, {"document_root": settings.MEDIA_ROOT}),
+        re_path(r"^assets/(?P<path>.*)$", no_cache_static_serve, {"document_root": settings.PROJECT_ROOT / "frontend" / "assets"}),
+        re_path(r"^logo\.png$", no_cache_static_serve, {"path": "logo.png", "document_root": settings.PROJECT_ROOT / "frontend"}),
+        re_path(r"^media/(?P<path>.*)$", no_cache_static_serve, {"document_root": settings.MEDIA_ROOT}),
     ]

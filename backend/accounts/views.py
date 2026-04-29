@@ -1,3 +1,4 @@
+from django.contrib.auth import login as django_login, logout as django_logout
 from rest_framework import permissions, status
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -14,6 +15,7 @@ class LoginAPIView(APIView):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
+        django_login(request._request, user)
         token, _created = Token.objects.get_or_create(user=user)
         return Response({"token": token.key, "user": UserSerializer(user).data})
 
@@ -50,4 +52,5 @@ class LogoutAPIView(APIView):
 
     def post(self, request):
         Token.objects.filter(user=request.user).delete()
+        django_logout(request._request)
         return Response(status=status.HTTP_204_NO_CONTENT)
