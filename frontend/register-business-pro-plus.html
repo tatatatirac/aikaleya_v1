@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaleya - uslovi</title>
+    <title>Kaleya BusinessPro+ - kontakt</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -22,10 +22,24 @@
             </div>
         </header>
         <main class="wrap hero">
-            <span class="eyebrow" data-i18n="footer_terms">Uslovi</span>
-            <h1 data-i18n="terms_title">Uslovi korišćenja</h1>
-            <p class="lead" data-i18n="terms_lead">Ovaj tekst je standardna početna verzija uslova za SaaS servis i treba ga pravno proveriti pre produkcije.</p>
-            <article class="legal-card" id="legalBody" data-legal="terms"></article>
+            <span class="eyebrow" data-i18n="reg_badge">Registracija i plaćanje</span>
+            <h1><span data-i18n="reg_title">Aktiviraj paket</span> BusinessPro+</h1>
+            <p class="lead">BusinessPro+ je custom paket za 15+ radnika, posebne integracije i naprednu produkcionu arhitekturu.</p>
+            <form class="form-card">
+                <input type="hidden" name="package" value="business_pro_plus">
+                <div class="form-grid">
+                    <div><label data-i18n="company">Naziv firme</label><input name="company" required></div>
+                    <div><label data-i18n="name">Ime i prezime</label><input name="name" required></div>
+                    <div><label data-i18n="email">Email</label><input name="email" type="email" required></div>
+                    <div><label data-i18n="phone">Telefon</label><input name="phone" required></div>
+                    <div><label data-i18n="country">Država</label><input name="country" value="Serbia"></div>
+                    <div><label>Paket</label><input value="BusinessPro+ - Custom" readonly></div>
+                </div>
+                <div style="margin-top:14px;"><label data-i18n="note">Napomena</label><textarea name="note" placeholder="Broj radnika, kanali, custom integracije..."></textarea></div>
+                <button class="btn alt" type="submit" style="width:100%;margin-top:18px;" data-i18n="price_contact">Kontakt</button>
+                <div id="registrationStatus" class="notice" hidden></div>
+                <div class="notice">Ovaj paket se ne aktivira automatski. Posle kontakta definišu se integracije, cena i rok implementacije.</div>
+            </form>
         </main>
         <footer class="footer"><div class="wrap"><span>© 2026 Kaleya AI</span><span><a href="privacy.html" data-i18n="footer_privacy">Privatnost</a> · <a href="terms.html" data-i18n="footer_terms">Uslovi</a></span></div></footer>
     </div>

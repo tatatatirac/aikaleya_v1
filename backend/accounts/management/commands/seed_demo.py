@@ -37,6 +37,9 @@ class Command(BaseCommand):
             first_name="Ana",
             last_name="Employee",
         )
+        if employee_user.username != "ana":
+            employee_user.username = "ana"
+            employee_user.save(update_fields=["username"])
 
         client, _created = BusinessClient.objects.update_or_create(
             owner=client_user,
@@ -111,19 +114,22 @@ class Command(BaseCommand):
                 defaults={"enabled": False, "status": "draft"},
             )
 
-        self.create_demo_calendar(client)
+        self.create_demo_calendar(client, employee_user)
         self.create_notification_rules(client)
 
         self.stdout.write(self.style.SUCCESS("Kaleya demo backend podaci su spremni."))
         self.stdout.write("Admin login: admin@aikaleya.com / admin123")
         self.stdout.write("Client login: klijent@test.com / test123")
-        self.stdout.write("Employee login: empl@test.com / emp123")
+        self.stdout.write("Employee login: ana / emp123")
 
     def create_user(self, email, password, **defaults):
-        user, created = User.objects.get_or_create(
-            username=email.lower(),
-            defaults={"email": email.lower(), **defaults},
-        )
+        user = User.objects.filter(email__iexact=email.lower()).first()
+        created = False
+        if user is None:
+            user, created = User.objects.get_or_create(
+                username=email.lower(),
+                defaults={"email": email.lower(), **defaults},
+            )
         user.set_password(password)
         if created:
             user.save()
@@ -148,31 +154,84 @@ class Command(BaseCommand):
                 "code": Plan.CODE_BASIC,
                 "name": "Basic",
                 "monthly_price": 49,
+                "currency": "USD",
                 "sort_order": 1,
-                "description": "Starter paket za male timove.",
-                "features": ["AI zakazivanje", "Kalendar", "Osnovni kanali"],
+                "description": "AI Kaleya za vlasnika i osnovne komunikacione kanale.",
+                "features": [
+                    "AI Kaleya zakazivanja",
+                    "Vlasnik/firma Kaleya APP",
+                    "Vlasnik zakazivanja",
+                    "WA + Viber + Telegram",
+                    "AI voice",
+                    "Alarmi i obavestenja",
+                ],
             },
             {
                 "code": Plan.CODE_PRO,
                 "name": "Pro",
-                "monthly_price": 99,
+                "monthly_price": 119,
+                "currency": "USD",
                 "sort_order": 2,
-                "description": "Napredni paket za aktivne biznise.",
-                "features": ["Sve iz Basic", "Glas", "Alarmi", "Integracije"],
+                "description": "Za vlasnika plus jednog radnika sa Kaleya app pristupom.",
+                "features": [
+                    "Sve iz Basic",
+                    "1 radnik",
+                    "Radnik zakazivanja",
+                    "Radnik Kaleya APP",
+                    "Blokiranje termina po satu/danu/visednevno",
+                    "Instagram DM + TikTok DM",
+                ],
             },
             {
                 "code": Plan.CODE_BUSINESS,
                 "name": "Business",
-                "monthly_price": 199,
+                "monthly_price": 349,
+                "currency": "USD",
                 "sort_order": 3,
-                "description": "Paket za vise lokacija i veci obim.",
-                "features": ["Sve iz Pro", "Prioritet", "Napredni modeli"],
+                "description": "Za timove do 5 radnika.",
+                "features": [
+                    "Sve iz Basic + Pro",
+                    "Do 5 radnika",
+                    "Radnik Kaleya APP za svakog radnika",
+                    "More languages by agreement",
+                    "API po klijentu",
+                ],
+            },
+            {
+                "code": Plan.CODE_BUSINESS_PLUS,
+                "name": "Business+",
+                "monthly_price": 579,
+                "currency": "USD",
+                "sort_order": 4,
+                "description": "Za vece timove do 15 radnika i glasovne kanale.",
+                "features": [
+                    "Sve iz Basic + Pro + Business",
+                    "Do 15 radnika",
+                    "Telefonski pozivi i SMS",
+                    "ElevenLabs AI voice",
+                ],
+            },
+            {
+                "code": Plan.CODE_BUSINESS_PRO_PLUS,
+                "name": "BusinessPro+",
+                "monthly_price": 0,
+                "currency": "USD",
+                "sort_order": 5,
+                "is_contact_only": True,
+                "description": "Za 15+ radnika i custom integracije.",
+                "features": [
+                    "Sve iz Basic + Pro + Business + Business+",
+                    "15+ radnika",
+                    "Custom integracije",
+                    "Napredna arhitektura po dogovoru",
+                ],
             },
             {
                 "code": Plan.CODE_GOD_MODE,
                 "name": "GOD MODE",
                 "monthly_price": 0,
-                "sort_order": 4,
+                "currency": "USD",
+                "sort_order": 6,
                 "is_contact_only": True,
                 "description": "Kupovina kompletnog projekta sa hostingom i domenom.",
                 "features": ["Frontend", "Backend", "AI integracije", "Deploy priprema"],
@@ -182,7 +241,7 @@ class Command(BaseCommand):
         for plan in plans:
             Plan.objects.update_or_create(code=plan["code"], defaults=plan)
 
-    def create_demo_calendar(self, client):
+    def create_demo_calendar(self, client, employee_user):
         Appointment.objects.filter(business_client=client).delete()
         Customer.objects.filter(business_client=client).delete()
         StaffService.objects.filter(staff_member__business_client=client).delete()
@@ -200,6 +259,7 @@ class Command(BaseCommand):
         )
         employee_staff = StaffMember.objects.create(
             business_client=client,
+            user=employee_user,
             full_name="Ana Employee",
             role_title="Receptionist",
             phone="+1 555 0177",
@@ -291,6 +351,18 @@ class Command(BaseCommand):
             start_time=time(11, 0),
             duration_minutes=60,
             channel="whatsapp",
+            source="demo",
+        )
+        Appointment.objects.create(
+            business_client=client,
+            customer=customers[2],
+            staff_member=employee_staff,
+            service=services[0],
+            status=Appointment.STATUS_CONFIRMED,
+            date=today,
+            start_time=time(13, 0),
+            duration_minutes=30,
+            channel="phone",
             source="demo",
         )
         Appointment.objects.create(

@@ -1,4 +1,5 @@
 from rest_framework import permissions, viewsets
+from django.db.models import Q
 
 from accounts.permissions import user_role
 from clients.utils import client_for_request
@@ -10,6 +11,12 @@ from staff_services.serializers import (
     StaffServiceSerializer,
     WorkingHoursSerializer,
 )
+
+
+def staff_member_for_employee(user):
+    if user_role(user) != "employee":
+        return None
+    return getattr(user, "staff_member_profile", None)
 
 
 class ClientConfigurationPermission(permissions.IsAuthenticated):
@@ -72,7 +79,11 @@ class WorkingHoursViewSet(BusinessScopedMixin, viewsets.ModelViewSet):
         client = self.get_client()
         if not client:
             return WorkingHours.objects.none()
-        return WorkingHours.objects.select_related("staff_member").filter(business_client=client)
+        queryset = WorkingHours.objects.select_related("staff_member").filter(business_client=client)
+        staff_member = staff_member_for_employee(self.request.user)
+        if staff_member:
+            queryset = queryset.filter(Q(staff_member=staff_member) | Q(staff_member__isnull=True))
+        return queryset
 
 
 class BlockedTimeViewSet(BusinessScopedMixin, viewsets.ModelViewSet):
@@ -82,4 +93,8 @@ class BlockedTimeViewSet(BusinessScopedMixin, viewsets.ModelViewSet):
         client = self.get_client()
         if not client:
             return BlockedTime.objects.none()
-        return BlockedTime.objects.select_related("staff_member").filter(business_client=client)
+        queryset = BlockedTime.objects.select_related("staff_member").filter(business_client=client)
+        staff_member = staff_member_for_employee(self.request.user)
+        if staff_member:
+            queryset = queryset.filter(Q(staff_member=staff_member) | Q(staff_member__isnull=True))
+        return queryset

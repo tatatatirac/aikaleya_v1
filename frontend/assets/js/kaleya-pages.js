@@ -36,10 +36,15 @@ const PAGE_LANGS = {
         company: 'Naziv firme',
         name: 'Ime i prezime',
         email: 'Email',
+        password: 'Lozinka',
         phone: 'Telefon',
         country: 'Država',
         note: 'Napomena',
         start_trial: 'Probaj 14 dana',
+        registration_creating: 'Kreiram Kaleya nalog...',
+        registration_success: 'Nalog je kreiran. Otvaram Kaleya app...',
+        registration_failed: 'Registracija nije uspela.',
+        contact_custom: 'BusinessPro+ je custom paket. Posaljite zahtev, pa se dogovaramo oko integracija, cene i roka.',
         payment_note: 'Za produkciju ovde se povezuje payment provider, backend registracija, email potvrda i webhook za aktivaciju paketa.',
         god_badge: 'Buy All',
         god_title: 'GOD MODE paket',
@@ -89,10 +94,15 @@ const PAGE_LANGS = {
         company: 'Company name',
         name: 'Full name',
         email: 'Email',
+        password: 'Password',
         phone: 'Phone',
         country: 'Country',
         note: 'Note',
         start_trial: 'Try 14 days',
+        registration_creating: 'Creating your Kaleya account...',
+        registration_success: 'Account created. Opening Kaleya app...',
+        registration_failed: 'Registration failed.',
+        contact_custom: 'BusinessPro+ is a custom package. Send the request and we will agree on integrations, price and timeline.',
         payment_note: 'In production this connects to a payment provider, backend registration, email confirmation and activation webhook.',
         god_badge: 'Buy All',
         god_title: 'GOD MODE package',
@@ -142,10 +152,15 @@ const PAGE_LANGS = {
         company: 'Empresa',
         name: 'Nombre completo',
         email: 'Email',
+        password: 'Contraseña',
         phone: 'Teléfono',
         country: 'País',
         note: 'Nota',
         start_trial: 'Probar 14 días',
+        registration_creating: 'Creando la cuenta Kaleya...',
+        registration_success: 'Cuenta creada. Abriendo la app Kaleya...',
+        registration_failed: 'El registro falló.',
+        contact_custom: 'BusinessPro+ es un paquete a medida. Envíe la solicitud y acordaremos integraciones, precio y plazo.',
         payment_note: 'En producción se conecta proveedor de pago, registro backend, confirmación por email y webhook de activación.',
         god_badge: 'Buy All',
         god_title: 'Paquete GOD MODE',
@@ -195,10 +210,15 @@ const PAGE_LANGS = {
         company: 'Empresa',
         name: 'Nome completo',
         email: 'Email',
+        password: 'Senha',
         phone: 'Telefone',
         country: 'País',
         note: 'Nota',
         start_trial: 'Testar 14 dias',
+        registration_creating: 'Criando a conta Kaleya...',
+        registration_success: 'Conta criada. Abrindo o app Kaleya...',
+        registration_failed: 'O registro falhou.',
+        contact_custom: 'BusinessPro+ é um pacote customizado. Envie o pedido e combinaremos integrações, preço e prazo.',
         payment_note: 'Em produção conecta provedor de pagamento, registro backend, confirmação por email e webhook de ativação.',
         god_badge: 'Buy All',
         god_title: 'Pacote GOD MODE',
@@ -248,10 +268,15 @@ const PAGE_LANGS = {
         company: 'Компания',
         name: 'Имя и фамилия',
         email: 'Email',
+        password: 'Пароль',
         phone: 'Телефон',
         country: 'Страна',
         note: 'Примечание',
         start_trial: '14 дней бесплатно',
+        registration_creating: 'Создаю аккаунт Kaleya...',
+        registration_success: 'Аккаунт создан. Открываю приложение Kaleya...',
+        registration_failed: 'Регистрация не удалась.',
+        contact_custom: 'BusinessPro+ это индивидуальный пакет. Отправьте запрос, и мы согласуем интеграции, цену и сроки.',
         payment_note: 'В продакшене здесь подключается платежный провайдер, backend регистрация, email подтверждение и webhook активации.',
         god_badge: 'Buy All',
         god_title: 'Пакет GOD MODE',
@@ -368,6 +393,66 @@ PAGE_LANGS.it = {
     footer_terms: 'Termini'
 };
 
+PAGE_LANGS.de = {
+    ...PAGE_LANGS.en,
+    back_home: 'Zurueck zur Startseite',
+    demo_badge: 'Klickbare Demo',
+    demo_title: 'So funktioniert Kaleya in der Praxis',
+    demo_lead: 'Mobile und Laptop Ansicht sind eine Demo Umgebung. Die Buttons sind klickbar und die Stimme wird aus einer MP3 Datei abgespielt.',
+    mobile_title: 'Kunden App',
+    laptop_title: 'Kunden App',
+    voice_cta: 'Kaleya Stimme abspielen',
+    schedule: 'Buchen',
+    cancel: 'Absagen',
+    check: 'Pruefen',
+    status_ready: 'Bereit zum Gespraech',
+    status_scheduled: 'Demo Termin ist fuer 15:00 gebucht',
+    status_cancelled: 'Demo Termin wurde abgesagt',
+    status_checked: 'Heute gibt es 3 freie Termine',
+    online: 'Online',
+    offline: 'Offline',
+    nav_home: 'Start',
+    nav_calendar: 'Kalender',
+    nav_settings: 'Einstellungen',
+    calendar_title: 'Kalender',
+    month: 'Monat',
+    day: 'Tag',
+    free: 'Frei',
+    booked: 'Gebucht',
+    cancelled_status: 'Abgesagt',
+    moved_status: 'Verschoben',
+    calls: 'Anrufe',
+    clients: 'Kunden',
+    channels: 'Kanaele',
+    recent: 'Letzte Demo Aktivitaeten',
+    reg_badge: 'Registrierung und Zahlung',
+    reg_title: 'Paket aktivieren',
+    reg_lead: 'Diese Seite ist die Frontend Vorbereitung fuer Registrierung und Zahlung. Echte Abrechnung laeuft ueber das Backend.',
+    company: 'Firmenname',
+    name: 'Vollstaendiger Name',
+    email: 'Email',
+    password: 'Passwort',
+    phone: 'Telefon',
+    country: 'Land',
+    note: 'Notiz',
+    start_trial: '14 Tage testen',
+    registration_creating: 'Kaleya Konto wird erstellt...',
+    registration_success: 'Konto erstellt. Kaleya App wird geoeffnet...',
+    registration_failed: 'Registrierung fehlgeschlagen.',
+    contact_custom: 'BusinessPro+ ist ein Custom Paket. Senden Sie eine Anfrage, dann stimmen wir Integrationen, Preis und Zeitplan ab.',
+    payment_note: 'In Produktion werden hier Payment Provider, Backend Registrierung, Email Bestaetigung und Aktivierungs Webhook verbunden.',
+    god_badge: 'Buy All',
+    god_title: 'GOD MODE Paket',
+    god_lead: 'Kauf des kompletten Kaleya Projekts mit Frontend, Backend, Hosting Vorbereitung, Domain und Deploy Dokumentation.',
+    god_cta: 'Kontakt fuer Buy All',
+    privacy_title: 'Datenschutz',
+    privacy_lead: 'Dieser Text ist eine Standard Startversion und sollte vor Produktion rechtlich geprueft werden.',
+    terms_title: 'Nutzungsbedingungen',
+    terms_lead: 'Dieser Text ist eine Standard Startversion fuer einen SaaS Service und sollte vor Produktion rechtlich geprueft werden.',
+    footer_privacy: 'Datenschutz',
+    footer_terms: 'Bedingungen'
+};
+
 const PAGE_AUDIO = {
     sr: 'assets/audio/kaleya-demo-sr.mp3',
     en: 'assets/audio/kaleya-demo-en.mp3',
@@ -375,7 +460,8 @@ const PAGE_AUDIO = {
     pt: 'assets/audio/kaleya-demo-pt.mp3',
     ru: 'assets/audio/kaleya-demo-ru.mp3',
     fr: 'assets/audio/kaleya-demo-fr.mp3',
-    it: 'assets/audio/kaleya-demo-it.mp3'
+    it: 'assets/audio/kaleya-demo-it.mp3',
+    de: 'assets/audio/kaleya-demo-en.mp3'
 };
 
 const WORK_HOURS = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30'];
@@ -478,6 +564,18 @@ const DEMO_NAMES = {
         checkup: 'Controllo',
         exam: 'Visita',
         consult: 'Consulenza'
+    },
+    de: {
+        person1: 'Anna Schneider',
+        person2: 'Dr. Lukas Weber',
+        person3: 'Sophie Mueller',
+        person4: 'Neuer Kunde',
+        person5: 'Max Fischer',
+        business1: 'Studio Bella',
+        team: 'Teammeeting',
+        checkup: 'Kontrolle',
+        exam: 'Beratung',
+        consult: 'Konsultation'
     }
 };
 
@@ -588,6 +686,22 @@ PAGE_LEGAL.terms.it = [
     ['Pagamenti e pacchetti', 'Pacchetti, prova e fatturazione vengono attivati dal backend di registrazione e dal payment provider. I dettagli si confermano durante l acquisto.'],
     ['Limiti', 'Kaleya non garantisce che l AI completi ogni richiesta. Quando non puo completare il processo, la richiesta puo essere inoltrata al supporto umano.'],
     ['Modifiche', 'I termini possono essere aggiornati. Continuare a usare il servizio dopo le modifiche significa accettare i termini aggiornati.']
+];
+
+PAGE_LEGAL.privacy.de = [
+    ['Welche Daten wir sammeln', 'Kaleya kann geschäftliche Kontaktdaten, Registrierungsdaten, Informationen zum gewaehlten Paket und technische Daten sammeln, die fuer den Betrieb des Services erforderlich sind.'],
+    ['Wie wir Daten nutzen', 'Daten werden fuer Registrierung, Servicebereitstellung, Kundenkommunikation, Abrechnung, Support und Systemsicherheit genutzt.'],
+    ['API und Sprachdienste', 'AI und Sprachverarbeitung laufen ueber Backend Integrationen. API Schluessel duerfen nicht im Frontend gespeichert werden und bleiben in Produktion im sicheren Backend.'],
+    ['Aufbewahrung', 'Daten werden gespeichert, solange eine Geschaeftsbeziehung oder gesetzliche Pflicht besteht. Kunden koennen Korrektur oder Loeschung verlangen, wo dies anwendbar ist.'],
+    ['Kontakt', 'Bei Datenschutzfragen kontaktieren Sie hello@aikaleya.com. Dieser Text sollte vor dem oeffentlichen Launch rechtlich geprueft werden.']
+];
+
+PAGE_LEGAL.terms.de = [
+    ['Servicebeschreibung', 'Kaleya ist ein AI System zur Automatisierung von Kommunikation, Terminplanung, Sprachantworten und Benachrichtigungen fuer Unternehmen.'],
+    ['Konto und Zugang', 'Der Kunde ist fuer korrekte Daten, Kontosicherheit und gesetzeskonforme Nutzung des Services verantwortlich.'],
+    ['Zahlung und Pakete', 'Pakete, Testphase und Abrechnung werden ueber Backend Registrierung und Payment Provider aktiviert. Details werden beim Kauf bestaetigt.'],
+    ['Grenzen', 'Kaleya garantiert nicht, dass AI jede Anfrage abschliessen kann. Wenn AI einen Prozess nicht abschliessen kann, kann die Anfrage an Human Support eskaliert werden.'],
+    ['Aenderungen', 'Bedingungen koennen aktualisiert werden. Die weitere Nutzung nach Aenderungen bedeutet Zustimmung zu den aktualisierten Bedingungen.']
 ];
 
 function pageLang() {
@@ -841,9 +955,10 @@ function playKaleyaDemo() {
             pt: 'Olá, eu sou Kaleya. Atendo chamadas, agendo horários e aviso sua equipe.',
             ru: 'Здравствуйте, я Kaleya. Я отвечаю на звонки, записываю клиентов и уведомляю команду.',
             fr: 'Bonjour, je suis Kaleya. Je reponds aux appels, je planifie les rendez-vous et j informe votre equipe.',
-            it: 'Ciao, sono Kaleya. Rispondo alle chiamate, organizzo appuntamenti e avviso il tuo team.'
+            it: 'Ciao, sono Kaleya. Rispondo alle chiamate, organizzo appuntamenti e avviso il tuo team.',
+            de: 'Hallo, ich bin Kaleya. Ich beantworte Anrufe, plane Termine und informiere Ihr Team.'
         };
-        const map = { sr: 'sr-RS', en: 'en-US', es: 'es-ES', pt: 'pt-PT', ru: 'ru-RU', fr: 'fr-FR', it: 'it-IT' };
+        const map = { sr: 'sr-RS', en: 'en-US', es: 'es-ES', pt: 'pt-PT', ru: 'ru-RU', fr: 'fr-FR', it: 'it-IT', de: 'de-DE' };
         const utter = new SpeechSynthesisUtterance(fallback[lang] || fallback.en);
         utter.lang = map[lang] || 'en-US';
         speechSynthesis.cancel();
@@ -859,7 +974,73 @@ function renderLegalPage() {
     holder.innerHTML = content.map(([title, body]) => `<h2>${title}</h2><p>${body}</p>`).join('');
 }
 
+function registrationErrorText(data) {
+    if (!data || typeof data !== 'object') return pageText('registration_failed');
+    if (data.detail) return data.detail;
+    return Object.values(data)
+        .flatMap((value) => Array.isArray(value) ? value : [value])
+        .map((value) => typeof value === 'object' ? JSON.stringify(value) : String(value))
+        .join(' ') || pageText('registration_failed');
+}
+
+async function submitRegistrationForm(form) {
+    const status = document.getElementById('registrationStatus');
+    const packageCode = form.querySelector('[name="package"]')?.value || 'basic';
+
+    if (status) {
+        status.hidden = false;
+        status.textContent = packageCode === 'business_pro_plus' ? pageText('contact_custom') : pageText('registration_creating');
+    }
+
+    if (packageCode === 'business_pro_plus') return;
+
+    if (window.location.protocol === 'file:') {
+        if (status) status.textContent = 'Registracija radi preko backend adrese: http://127.0.0.1:8000/';
+        return;
+    }
+
+    const payload = {
+        plan_code: packageCode,
+        company: form.elements.company?.value.trim() || '',
+        full_name: form.elements.name?.value.trim() || '',
+        email: form.elements.email?.value.trim() || '',
+        password: form.elements.password?.value || '',
+        phone: form.elements.phone?.value.trim() || '',
+        country: form.elements.country?.value.trim() || '',
+        note: form.elements.note?.value.trim() || ''
+    };
+
+    try {
+        const response = await fetch('/api/auth/register-client/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(registrationErrorText(data));
+
+        localStorage.setItem('kaleya_auth_token', data.token);
+        localStorage.setItem('kaleya_user_role', data.user.role);
+        localStorage.setItem('kaleya_user_email', data.user.email);
+
+        if (status) status.textContent = pageText('registration_success');
+        window.location.href = '/';
+    } catch (error) {
+        if (status) status.textContent = error.message || pageText('registration_failed');
+    }
+}
+
+function initRegistrationForms() {
+    document.querySelectorAll('form.form-card').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+            submitRegistrationForm(form);
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initPageTheme();
     applyPageLang();
+    initRegistrationForms();
 });

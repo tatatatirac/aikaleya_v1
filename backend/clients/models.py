@@ -7,12 +7,16 @@ class BusinessClient(models.Model):
     PACKAGE_BASIC = "basic"
     PACKAGE_PRO = "pro"
     PACKAGE_BUSINESS = "business"
+    PACKAGE_BUSINESS_PLUS = "business_plus"
+    PACKAGE_BUSINESS_PRO_PLUS = "business_pro_plus"
     PACKAGE_GOD_MODE = "god_mode"
 
     PACKAGE_CHOICES = (
         (PACKAGE_BASIC, "Basic"),
         (PACKAGE_PRO, "Pro"),
         (PACKAGE_BUSINESS, "Business"),
+        (PACKAGE_BUSINESS_PLUS, "Business+"),
+        (PACKAGE_BUSINESS_PRO_PLUS, "BusinessPro+"),
         (PACKAGE_GOD_MODE, "GOD MODE"),
     )
 
@@ -24,6 +28,7 @@ class BusinessClient(models.Model):
         ("sr", "Serbian"),
         ("fr", "French"),
         ("it", "Italian"),
+        ("de", "German"),
     )
 
     TIME_FORMAT_CHOICES = (

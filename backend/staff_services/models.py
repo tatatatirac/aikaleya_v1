@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -6,6 +7,13 @@ from clients.models import BusinessClient
 
 class StaffMember(models.Model):
     business_client = models.ForeignKey(BusinessClient, on_delete=models.CASCADE, related_name="staff_members")
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="staff_member_profile",
+        null=True,
+        blank=True,
+    )
     full_name = models.CharField(max_length=160)
     role_title = models.CharField(max_length=120, blank=True)
     phone = models.CharField(max_length=40, blank=True)

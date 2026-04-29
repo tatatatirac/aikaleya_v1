@@ -29,6 +29,7 @@ class FrontendTemplateView(TemplateView):
 
 urlpatterns = [
     path("", FrontendTemplateView.as_view(template_name="index.html"), name="frontend-index"),
+    path("index.html", FrontendTemplateView.as_view(template_name="index.html"), name="frontend-index-html"),
     path("demo.html", FrontendTemplateView.as_view(template_name="demo.html"), name="frontend-demo"),
     path("god-mode.html", FrontendTemplateView.as_view(template_name="god-mode.html"), name="frontend-god-mode"),
     path("privacy.html", FrontendTemplateView.as_view(template_name="privacy.html"), name="frontend-privacy"),
@@ -36,6 +37,8 @@ urlpatterns = [
     path("register-basic.html", FrontendTemplateView.as_view(template_name="register-basic.html"), name="frontend-register-basic"),
     path("register-pro.html", FrontendTemplateView.as_view(template_name="register-pro.html"), name="frontend-register-pro"),
     path("register-business.html", FrontendTemplateView.as_view(template_name="register-business.html"), name="frontend-register-business"),
+    path("register-business-plus.html", FrontendTemplateView.as_view(template_name="register-business-plus.html"), name="frontend-register-business-plus"),
+    path("register-business-pro-plus.html", FrontendTemplateView.as_view(template_name="register-business-pro-plus.html"), name="frontend-register-business-pro-plus"),
     path("dashboard/", dashboard, name="dashboard"),
     path("admin/", dashboard, name="kaleya-admin"),
     path("admin/login/", lambda request: redirect("/django-admin/login/?next=/admin/")),

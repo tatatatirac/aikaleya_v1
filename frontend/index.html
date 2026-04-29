@@ -107,6 +107,7 @@
                                 <button onclick="setLang('ru')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Русский</button>
                                 <button onclick="setLang('fr')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Français</button>
                                 <button onclick="setLang('it')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Italiano</button>
+                                <button onclick="setLang('de')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Deutsch</button>
                             </div>
                         </div>
                         <button id="theme-toggle" class="w-9 h-9 grid place-items-center rounded-full border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition" aria-label="Toggle theme">
@@ -313,17 +314,19 @@
                             <h2 class="font-display text-3xl sm:text-4xl font-bold" data-i18n="price_t">Jednostavne cene</h2>
                             <p class="mt-3 text-slate-600 dark:text-slate-400" data-i18n="price_s">Sve uključeno. Bez skrivenih troškova.</p>
                         </div>
-                        <div class="mt-12 grid md:grid-cols-2 xl:grid-cols-4 gap-6 max-w-6xl mx-auto">
+                        <div class="mt-12 grid md:grid-cols-2 xl:grid-cols-5 gap-5 max-w-7xl mx-auto">
                             <div class="p-[1px] rounded-[28px] bg-slate-200 dark:bg-slate-800">
                                 <div class="h-full rounded-[27px] bg-white dark:bg-slate-950 p-8">
                                     <h3 class="font-display font-bold text-xl">Basic</h3>
-                                    <p class="mt-1 text-sm text-slate-500" data-i18n="p1_d">Za male timove</p>
-                                    <div class="mt-6"><span class="text-4xl font-bold">€29</span><span class="text-slate-500">/mes</span></div>
+                                    <p class="mt-1 text-sm text-slate-500" data-i18n="p_basic_d">Za vlasnika/firmu</p>
+                                    <div class="mt-6"><span class="text-4xl font-bold">$49</span><span class="text-slate-500">/mes</span></div>
                                     <ul class="mt-6 space-y-3 text-sm">
-                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> 200 minuta</li>
-                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p1_f1">2 jezika</span></li>
-                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> WhatsApp</li>
-                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p1_f2">Zakazivanje</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_basic_f1">AI Kaleya zakazivanja</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_basic_f2">Vlasnik/firma Kaleya APP</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_basic_f3">Vlasnik zakazivanja</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_basic_f4">WA + Viber + Telegram</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_basic_f5">AI voice</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_basic_f6">Alarmi i obaveštenja</span></li>
                                     </ul>
                                     <a href="register-basic.html" class="mt-8 w-full h-11 rounded-full border border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 inline-flex items-center justify-center" data-i18n="trial_btn">Probaj 14 dana</a>
                                 </div>
@@ -332,14 +335,15 @@
                                 <div class="h-full rounded-[27px] bg-white dark:bg-slate-950 p-8 relative">
                                     <div class="absolute -top-3 right-6 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-900 text-white dark:bg-white dark:text-slate-900" data-i18n="popular">NAJPOPULARNIJE</div>
                                     <h3 class="font-display font-bold text-xl">Pro</h3>
-                                    <p class="mt-1 text-sm text-slate-500" data-i18n="p2_d">Za rastuće firme</p>
-                                    <div class="mt-6"><span class="text-4xl font-bold">€79</span><span class="text-slate-500">/mes</span></div>
+                                    <p class="mt-1 text-sm text-slate-500" data-i18n="p_pro_d">Vlasnik + 1 radnik</p>
+                                    <div class="mt-6"><span class="text-4xl font-bold">$119</span><span class="text-slate-500">/mes</span></div>
                                     <ul class="mt-6 space-y-3 text-sm">
-                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> 1000 minuta</li>
-                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p2_f1">5 jezika</span></li>
-                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> ElevenLabs glas</li>
-                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> WhatsApp + Viber</li>
-                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p2_f3">Alarmi i obaveštenja</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_pro_f1">Sve iz Basic</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_pro_f2">1 radnik</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_pro_f3">Radnik zakazivanja</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_pro_f4">Radnik Kaleya APP</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_pro_f5">Blokiranje termina</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_pro_f6">Instagram DM + TikTok DM</span></li>
                                     </ul>
                                     <a href="register-pro.html" class="mt-8 w-full h-11 rounded-full gradient-bg text-white font-semibold inline-flex items-center justify-center" data-i18n="trial_btn">Probaj 14 dana</a>
                                 </div>
@@ -347,25 +351,44 @@
                             <div class="p-[1px] rounded-[28px] bg-slate-200 dark:bg-slate-800">
                                 <div class="h-full rounded-[27px] bg-white dark:bg-slate-950 p-8">
                                     <h3 class="font-display font-bold text-xl">Business</h3>
-                                    <p class="mt-1 text-sm text-slate-500" data-i18n="p3_d">Za pozivne centre</p>
-                                    <div class="mt-6"><span class="text-4xl font-bold">€199</span><span class="text-slate-500">/mes</span></div>
+                                    <p class="mt-1 text-sm text-slate-500" data-i18n="p_business_d">Do 5 radnika</p>
+                                    <div class="mt-6"><span class="text-4xl font-bold">$349</span><span class="text-slate-500">/mes</span></div>
                                     <ul class="mt-6 space-y-3 text-sm">
-                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p3_f1">Neograničeno</span></li>
-                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p3_f2">Custom glas Kaleya</span></li>
-                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> API po klijentu</li>
-                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> Telefon + SMS + sve aplikacije</li>
-                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p3_f4">SLA podrška</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_f1">Sve iz Basic + Pro</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_f2">Do 5 radnika</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_f3">Radnik Kaleya APP</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_f4">Više jezika po dogovoru</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_f5">API po klijentu</span></li>
                                     </ul>
                                     <a href="register-business.html" class="mt-8 w-full h-11 rounded-full border border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 inline-flex items-center justify-center" data-i18n="trial_btn">Probaj 14 dana</a>
                                 </div>
                             </div>
+                            <div class="p-[1px] rounded-[28px] bg-slate-200 dark:bg-slate-800">
+                                <div class="h-full rounded-[27px] bg-white dark:bg-slate-950 p-8">
+                                    <h3 class="font-display font-bold text-xl">Business+</h3>
+                                    <p class="mt-1 text-sm text-slate-500" data-i18n="p_business_plus_d">Do 15 radnika</p>
+                                    <div class="mt-6"><span class="text-4xl font-bold">$579</span><span class="text-slate-500">/mes</span></div>
+                                    <ul class="mt-6 space-y-3 text-sm">
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_plus_f1">Sve iz Basic + Pro + Business</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_plus_f2">Do 15 radnika</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_plus_f3">Telefonski pozivi i SMS</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_plus_f4">ElevenLabs AI voice</span></li>
+                                    </ul>
+                                    <a href="register-business-plus.html" class="mt-8 w-full h-11 rounded-full border border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 inline-flex items-center justify-center" data-i18n="trial_btn">Probaj 14 dana</a>
+                                </div>
+                            </div>
                             <div class="p-[1px] rounded-[28px] bg-slate-900 dark:bg-white">
                                 <div class="h-full rounded-[27px] bg-slate-950 dark:bg-slate-950 p-8 text-white">
-                                    <h3 class="font-display font-bold text-xl">GOD MODE</h3>
-                                    <p class="mt-1 text-sm text-slate-300" data-i18n="p4_d">Kompletan projekat</p>
-                                    <div class="mt-6"><span class="text-4xl font-bold" data-i18n="custom_price">Po dogovoru</span></div>
-                                    <p class="mt-6 text-sm text-slate-300" data-i18n="p4_note">Sve detalje prikazujemo na posebnoj Buy All strani.</p>
-                                    <a href="god-mode.html" class="mt-8 w-full h-11 rounded-full bg-white text-slate-950 font-semibold inline-flex items-center justify-center" data-i18n="price_contact">Kontakt</a>
+                                    <h3 class="font-display font-bold text-xl">BusinessPro+</h3>
+                                    <p class="mt-1 text-sm text-slate-300" data-i18n="p_business_pro_d">15+ radnika</p>
+                                    <div class="mt-6"><span class="text-4xl font-bold" data-i18n="custom_price">Custom</span></div>
+                                    <ul class="mt-6 space-y-3 text-sm text-slate-300">
+                                        <li class="flex gap-2"><span class="text-teal-400">✓</span> <span data-i18n="p_business_pro_f1">Sve iz Basic + Pro + Business + Business+</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-400">✓</span> <span data-i18n="p_business_pro_f2">15+ radnika</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-400">✓</span> <span data-i18n="p_business_pro_f3">Custom integracije</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-400">✓</span> <span data-i18n="p_business_pro_f4">Napredna arhitektura po dogovoru</span></li>
+                                    </ul>
+                                    <a href="register-business-pro-plus.html" class="mt-8 w-full h-11 rounded-full bg-white text-slate-950 font-semibold inline-flex items-center justify-center" data-i18n="price_contact">Kontakt</a>
                                 </div>
                             </div>
                         </div>
@@ -411,7 +434,7 @@
                     <form id="login-form" class="mt-8 space-y-4">
                         <div>
                             <label class="text-xs font-medium text-slate-600 dark:text-slate-400" data-i18n="email">Email</label>
-                            <input id="email" type="email" required class="mt-1 w-full h-12 px-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-teal-500/50" placeholder="vi@firma.rs">
+                            <input id="email" type="text" required class="mt-1 w-full h-12 px-4 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-teal-500/50" placeholder="email ili korisnicko ime">
                         </div>
                         <div>
                             <label class="text-xs font-medium text-slate-600 dark:text-slate-400" data-i18n="password">Lozinka</label>
@@ -421,7 +444,7 @@
                     </form>
                     <div class="mt-6 grid grid-cols-1 gap-2">
                         <button onclick="fillLogin('client')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition">Demo client: klijent@test.com / test123</button>
-                        <button onclick="fillLogin('employee')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition">Demo employee: empl@test.com / emp123</button>
+                        <button onclick="fillLogin('employee')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition">Demo employee: ana / emp123</button>
                     </div>
                     <p id="login-error" class="mt-4 text-center text-sm text-red-500 hidden" data-i18n="login_err">Pogrešan email ili lozinka</p>
                 </div>
@@ -563,14 +586,14 @@
                 <div data-client-screen="team" class="hidden flex-1 px-5 pt-6 pb-24">
                     <div class="flex items-center justify-between gap-3">
                         <div>
-                            <p class="text-[12px] font-semibold uppercase tracking-wide text-slate-500">Tim</p>
-                            <h2 class="font-display text-[24px] font-bold leading-tight">Zaposleni</h2>
+                            <p class="text-[12px] font-semibold uppercase tracking-wide text-slate-500" data-i18n="team_label">Tim</p>
+                            <h2 class="font-display text-[24px] font-bold leading-tight" data-i18n="employee_list_title">Zaposleni</h2>
                         </div>
                         <span class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-900 grid place-items-center text-slate-600 dark:text-slate-300">
                             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
                         </span>
                     </div>
-                    <p class="mt-2 text-sm text-slate-500">Lista kontakata za zaposlene. Vlasnik je uvek na vrhu.</p>
+                    <p class="mt-2 text-sm text-slate-500" data-i18n="employee_list_desc">Lista kontakata za zaposlene. Vlasnik je uvek na vrhu.</p>
                     <div id="employeeDirectoryList" class="mt-5 space-y-3"></div>
                 </div>
 
@@ -605,7 +628,7 @@
                         <div class="mt-6 space-y-5">
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                                 <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="cset_ui_lang">Jezik interfejsa</p>
-                                <div class="grid grid-cols-7 gap-2">
+                                <div class="grid grid-cols-4 gap-2">
                                     <button onclick="setLang('en')" id="clientLangEN" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">EN</button>
                                     <button onclick="setLang('sr')" id="clientLangSR" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">SR</button>
                                     <button onclick="setLang('es')" id="clientLangES" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">ES</button>
@@ -613,6 +636,7 @@
                                     <button onclick="setLang('ru')" id="clientLangRU" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">RU</button>
                                     <button onclick="setLang('fr')" id="clientLangFR" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">FR</button>
                                     <button onclick="setLang('it')" id="clientLangIT" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">IT</button>
+                                    <button onclick="setLang('de')" id="clientLangDE" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">DE</button>
                                 </div>
                             </div>
 
@@ -632,6 +656,7 @@
                                     <option value="ru">Русский</option>
                                     <option value="fr">Français</option>
                                     <option value="it">Italiano</option>
+                                    <option value="de">Deutsch</option>
                                 </select>
                                 <button onclick="testVoice()" class="mt-3 w-full h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium" data-i18n="cset_test">Testiraj glas Kaleye</button>
                                 <p class="mt-2 text-[11px] text-slate-500" data-i18n="cset_note">API ključ podešava administrator; klijent bira samo jezik i ponašanje.</p>
@@ -648,15 +673,15 @@
                             </div>
 
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
-                                <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3">Podešavanja kalendara</p>
+                                <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="calendar_settings">Podešavanja kalendara</p>
                                 <div class="grid grid-cols-2 gap-3">
-                                    <label class="text-[11px] text-slate-500">Rad od
+                                    <label class="text-[11px] text-slate-500"><span data-i18n="work_from">Rad od</span>
                                         <input id="clientWorkStart" type="text" inputmode="numeric" value="09:00" placeholder="09:00" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
                                     </label>
-                                    <label class="text-[11px] text-slate-500">Rad do
+                                    <label class="text-[11px] text-slate-500"><span data-i18n="work_to">Rad do</span>
                                         <input id="clientWorkEnd" type="text" inputmode="numeric" value="16:00" placeholder="16:00" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
                                     </label>
-                                    <label class="text-[11px] text-slate-500">Interval
+                                    <label class="text-[11px] text-slate-500"><span data-i18n="interval_label">Interval</span>
                                         <select id="clientSlotInterval" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
                                             <option value="15">15 min</option>
                                             <option value="20">20 min</option>
@@ -665,19 +690,19 @@
                                             <option value="60">60 min</option>
                                         </select>
                                     </label>
-                                    <label class="text-[11px] text-slate-500">Vreme
+                                    <label class="text-[11px] text-slate-500"><span data-i18n="time_label">Vreme</span>
                                         <select id="clientTimeFormat" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
                                             <option value="24">09:00</option>
                                             <option value="12">9 AM</option>
                                         </select>
                                     </label>
-                                    <label class="text-[11px] text-slate-500">Datum
+                                    <label class="text-[11px] text-slate-500"><span data-i18n="date_label">Datum</span>
                                         <select id="clientDateFormat" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
                                             <option value="dd-mm-yyyy">28-04-2026</option>
                                             <option value="mm-dd-yyyy">04-28-2026</option>
                                         </select>
                                     </label>
-                                    <label class="text-[11px] text-slate-500">Prvi dan
+                                    <label class="text-[11px] text-slate-500"><span data-i18n="first_day_label">Prvi dan</span>
                                         <select id="clientWeekStart" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
                                             <option value="sunday">Sunday</option>
                                             <option value="monday">Monday</option>
@@ -729,20 +754,26 @@
                             </div>
 
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
-                                <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3">Osoblje i usluge</p>
+                                <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="staff_services_title">Osoblje i usluge</p>
                                 <div id="clientStaffList" class="space-y-2"></div>
                                 <div id="clientServiceList" class="mt-3 space-y-2"></div>
                                 <div class="mt-4 grid grid-cols-2 gap-2">
-                                    <input id="newStaffName" type="text" placeholder="Ime zaposlenog" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
-                                    <input id="newStaffRole" type="text" placeholder="Zanimanje" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                    <input id="newStaffName" type="text" placeholder="Ime zaposlenog" data-i18n-placeholder="staff_name_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                    <input id="newStaffRole" type="text" placeholder="Zanimanje" data-i18n-placeholder="staff_role_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                 </div>
+                                <input id="newStaffPhone" type="tel" placeholder="Telefon zaposlenog" data-i18n-placeholder="staff_phone_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                <div class="mt-2 grid grid-cols-2 gap-2">
+                                    <input id="newStaffUsername" type="text" placeholder="Korisnicko ime" data-i18n-placeholder="staff_username_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                    <input id="newStaffPassword" type="password" placeholder="Lozinka" data-i18n-placeholder="staff_password_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                </div>
+                                <p class="mt-1 text-[10px] text-slate-500" data-i18n="staff_login_note">Vlasnik unosi login za zaposlenog. Ako menjate osobu, lozinku unesite samo kada zelite novu.</p>
                                 <input id="editingStaffId" type="hidden">
                                 <div class="mt-2 grid grid-cols-[1fr_auto] gap-2">
-                                    <button id="clientStaffSaveBtn" onclick="saveClientStaffForm()" class="h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12px] font-semibold">Dodaj osobu</button>
-                                    <button id="clientStaffCancelBtn" onclick="resetClientStaffForm()" class="hidden h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold">Odustani</button>
+                                    <button id="clientStaffSaveBtn" onclick="saveClientStaffForm()" class="h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12px] font-semibold" data-i18n="add_person">Dodaj osobu</button>
+                                    <button id="clientStaffCancelBtn" onclick="resetClientStaffForm()" class="hidden h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="cancel_btn">Odustani</button>
                                 </div>
                                 <div class="mt-2 grid grid-cols-[1fr_82px] gap-2">
-                                    <input id="newServiceName" type="text" placeholder="Naziv usluge" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                    <input id="newServiceName" type="text" placeholder="Naziv usluge" data-i18n-placeholder="service_name_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                     <select id="newServiceDuration" class="h-10 px-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px]">
                                         <option value="30">30m</option>
                                         <option value="45">45m</option>
@@ -751,31 +782,31 @@
                                         <option value="120">120m</option>
                                     </select>
                                 </div>
-                                <input id="newServicePrice" type="number" min="0" step="0.01" placeholder="Cena" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                <input id="newServicePrice" type="number" min="0" step="0.01" placeholder="Cena" data-i18n-placeholder="price_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                 <input id="editingServiceId" type="hidden">
                                 <div class="mt-2 grid grid-cols-[1fr_auto] gap-2">
-                                    <button id="clientServiceSaveBtn" onclick="saveClientServiceForm()" class="h-10 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold">Dodaj uslugu</button>
-                                    <button id="clientServiceCancelBtn" onclick="resetClientServiceForm()" class="hidden h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold">Odustani</button>
+                                    <button id="clientServiceSaveBtn" onclick="saveClientServiceForm()" class="h-10 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="add_service">Dodaj uslugu</button>
+                                    <button id="clientServiceCancelBtn" onclick="resetClientServiceForm()" class="hidden h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="cancel_btn">Odustani</button>
                                 </div>
 
                                 <div class="mt-5 pt-4 border-t border-slate-200 dark:border-slate-800">
-                                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3">Blokirano vreme / pauze</p>
+                                    <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="blocked_time_title">Blokirano vreme / pauze</p>
                                     <div id="clientBlockedList" class="space-y-2"></div>
                                     <select id="blockedMode" onchange="toggleBlockedModeFields()" class="mt-3 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px]">
-                                        <option value="single">Jednodnevno</option>
-                                        <option value="multi">Vise dana</option>
+                                        <option value="single" data-i18n="one_day">Jednodnevno</option>
+                                        <option value="multi" data-i18n="multi_day">Više dana</option>
                                     </select>
                                     <div class="mt-3 grid grid-cols-2 gap-2">
                                         <input id="blockedDate" type="text" inputmode="numeric" placeholder="28-04-2026" onchange="handleDateInputChange('blockedDate')" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                         <input id="blockedDateTo" type="text" inputmode="numeric" placeholder="28-04-2026" onchange="handleDateInputChange('blockedDateTo')" class="hidden h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                         <select id="blockedStaff" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px]">
-                                            <option value="">Svi zaposleni</option>
+                                            <option value="" data-i18n="all_staff">Svi zaposleni</option>
                                         </select>
                                         <input id="blockedStart" type="text" inputmode="numeric" value="09:00" placeholder="09:00" onchange="handleBlockedTimeChange('start')" title="Blokada od" class="blocked-time-field h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                         <input id="blockedEnd" type="text" inputmode="numeric" value="09:30" placeholder="09:30" onchange="handleBlockedTimeChange('end')" title="Blokada do" class="blocked-time-field h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                     </div>
-                                    <input id="blockedReason" type="text" placeholder="Razlog, npr. pauza ili odmor" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
-                                    <button onclick="createClientBlockedTime()" class="mt-2 w-full h-10 rounded-xl bg-amber-500 text-white text-[12px] font-semibold">Dodaj blokadu</button>
+                                    <input id="blockedReason" type="text" placeholder="Razlog, npr. pauza ili odmor" data-i18n-placeholder="blocked_reason_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                    <button onclick="createClientBlockedTime()" class="mt-2 w-full h-10 rounded-xl bg-amber-500 text-white text-[12px] font-semibold" data-i18n="add_block">Dodaj blokadu</button>
                                 </div>
                             </div>
                         </div>
@@ -788,39 +819,39 @@
                 <div class="absolute bottom-0 inset-x-0 max-w-[430px] mx-auto">
                     <div class="mx-3 mb-3 rounded-[28px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6">
                         <div class="flex items-center justify-between">
-                            <h3 class="font-display font-bold text-lg">Termin</h3>
+                            <h3 class="font-display font-bold text-lg" data-i18n="appointment_title">Termin</h3>
                             <button onclick="closeAppointmentEditor()" class="w-8 h-8 grid place-items-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">x</button>
                         </div>
                         <input id="apptId" type="hidden">
                         <div class="mt-5 grid grid-cols-2 gap-3">
-                            <label class="text-[12px] text-slate-500">Datum<input id="apptDate" type="text" inputmode="numeric" placeholder="28-04-2026" onchange="handleDateInputChange('apptDate')" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white"></label>
-                            <label class="text-[12px] text-slate-500">Vreme<input id="apptTime" type="text" inputmode="numeric" placeholder="09:00" onchange="handleAppointmentTimeChange()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white"></label>
+                            <label class="text-[12px] text-slate-500"><span data-i18n="date_label">Datum</span><input id="apptDate" type="text" inputmode="numeric" placeholder="28-04-2026" onchange="handleDateInputChange('apptDate')" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white"></label>
+                            <label class="text-[12px] text-slate-500"><span data-i18n="time_label">Vreme</span><input id="apptTime" type="text" inputmode="numeric" placeholder="09:00" onchange="handleAppointmentTimeChange()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white"></label>
                         </div>
-                        <label class="mt-3 block text-[12px] text-slate-500">Ime i usluga<input id="apptName" type="text" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white"></label>
-                        <label class="mt-3 block text-[12px] text-slate-500">Telefon<input id="apptPhone" type="tel" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white"></label>
+                        <label class="mt-3 block text-[12px] text-slate-500"><span data-i18n="name_service_label">Ime i usluga</span><input id="apptName" type="text" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white"></label>
+                        <label class="mt-3 block text-[12px] text-slate-500"><span data-i18n="phone">Telefon</span><input id="apptPhone" type="tel" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white"></label>
                         <div class="mt-3 grid grid-cols-2 gap-3">
-                            <label class="text-[12px] text-slate-500">Usluga<select id="apptService" onchange="handleAppointmentServiceChange()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option value="">Bez usluge</option></select></label>
-                            <label class="text-[12px] text-slate-500">Osoblje<select id="apptStaff" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option value="">Bilo ko</option></select></label>
+                            <label class="text-[12px] text-slate-500"><span data-i18n="service_label">Usluga</span><select id="apptService" onchange="handleAppointmentServiceChange()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option value="" data-i18n="no_service">Bez usluge</option></select></label>
+                            <label class="text-[12px] text-slate-500"><span data-i18n="staff_label">Osoblje</span><select id="apptStaff" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option value="" data-i18n="any_staff">Bilo ko</option></select></label>
                         </div>
                         <div class="mt-3 grid grid-cols-2 gap-3">
-                            <label class="text-[12px] text-slate-500">Kanal<select id="apptChannel" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option>WhatsApp</option><option>Viber</option><option>Telegram</option><option>SMS</option><option>Phone</option></select></label>
-                            <label class="text-[12px] text-slate-500">Status<select id="apptStatus" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option value="confirmed">Zakazano</option><option value="moved">Pomereno</option><option value="cancelled">Otkazano</option><option value="pending">Na cekanju</option></select></label>
+                            <label class="text-[12px] text-slate-500"><span data-i18n="channel_label">Kanal</span><select id="apptChannel" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option>WhatsApp</option><option>Viber</option><option>Telegram</option><option>SMS</option><option>Phone</option></select></label>
+                            <label class="text-[12px] text-slate-500"><span data-i18n="status_label">Status</span><select id="apptStatus" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option value="confirmed" data-i18n="status_confirmed">Zakazano</option><option value="moved" data-i18n="status_moved">Pomereno</option><option value="cancelled" data-i18n="status_cancelled">Otkazano</option><option value="pending" data-i18n="status_pending">Na čekanju</option></select></label>
                         </div>
-                        <label class="mt-3 block text-[12px] text-slate-500">Trajanje termina
+                        <label class="mt-3 block text-[12px] text-slate-500"><span data-i18n="duration_label">Trajanje termina</span>
                             <select id="apptDuration" onchange="handleAppointmentTimeChange()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
                                 <option value="30">30 min</option>
                                 <option value="45">45 min</option>
-                                <option value="60">1 sat</option>
+                                <option value="60">60 min</option>
                                 <option value="90">90 min</option>
-                                <option value="120">2 sata</option>
-                                <option value="180">3 sata</option>
-                                <option value="240">4 sata</option>
-                                <option value="300">5 sati</option>
+                                <option value="120">120 min</option>
+                                <option value="180">180 min</option>
+                                <option value="240">240 min</option>
+                                <option value="300">300 min</option>
                             </select>
                         </label>
                         <div class="mt-5 grid grid-cols-2 gap-3">
-                            <button onclick="deleteAppointment()" class="h-11 rounded-xl border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-sm font-semibold">Obrisi</button>
-                            <button onclick="saveAppointmentEdit()" class="h-11 rounded-xl gradient-bg text-white text-sm font-semibold">Sacuvaj</button>
+                            <button onclick="deleteAppointment()" class="h-11 rounded-xl border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-sm font-semibold" data-i18n="delete_btn">Obrisi</button>
+                            <button onclick="saveAppointmentEdit()" class="h-11 rounded-xl gradient-bg text-white text-sm font-semibold" data-i18n="save_btn">Sacuvaj</button>
                         </div>
                     </div>
                 </div>
@@ -831,11 +862,11 @@
                 <div class="absolute bottom-0 inset-x-0 max-w-[430px] mx-auto">
                     <div class="mx-3 mb-3 rounded-[28px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6">
                         <div class="flex items-center justify-between">
-                            <h3 class="font-display font-bold text-lg">Otkazi termin</h3>
+                            <h3 class="font-display font-bold text-lg" data-i18n="cancel_appt_title">Otkazi termin</h3>
                             <button onclick="closeCancelAppointmentModal()" class="w-8 h-8 grid place-items-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">x</button>
                         </div>
-                        <label class="mt-5 block text-[12px] text-slate-500">Pretraga po imenu
-                            <input id="cancelSearchInput" type="search" oninput="renderCancelSearchResults()" placeholder="Unesite ime klijenta" class="mt-1 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white">
+                        <label class="mt-5 block text-[12px] text-slate-500"><span data-i18n="search_by_name">Pretraga po imenu</span>
+                            <input id="cancelSearchInput" type="search" oninput="renderCancelSearchResults()" placeholder="Unesite ime klijenta" data-i18n-placeholder="client_search_placeholder" class="mt-1 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white">
                         </label>
                         <div id="cancelSearchResults" class="mt-4 space-y-2 max-h-[320px] overflow-auto"></div>
                     </div>
@@ -1211,21 +1242,22 @@ const CLIENT_SCHEDULE_NAMES = {
     pt: { client1: 'Dr. João Pereira - consulta', client2: 'Ana Silva - corte de cabelo', team: 'Reunião da equipe', newClient: 'Novo cliente - Kaleya agendou' },
     ru: { client1: 'Др. Алексей Петров - осмотр', client2: 'Анна Иванова - стрижка', team: 'Встреча команды', newClient: 'Новый клиент - Kaleya записала' },
     fr: { client1: 'Dr. Thomas Bernard - controle', client2: 'Camille Martin - coiffure', team: 'Reunion equipe', newClient: 'Nouveau client - planifie par Kaleya' },
-    it: { client1: 'Dr. Marco Bianchi - visita', client2: 'Giulia Rossi - taglio capelli', team: 'Riunione team', newClient: 'Nuovo cliente - prenotato da Kaleya' }
+    it: { client1: 'Dr. Marco Bianchi - visita', client2: 'Giulia Rossi - taglio capelli', team: 'Riunione team', newClient: 'Nuovo cliente - prenotato da Kaleya' },
+    de: { client1: 'Dr. Lukas Weber - Kontrolle', client2: 'Anna Schneider - Haarschnitt', team: 'Teammeeting', newClient: 'Neuer Kunde - von Kaleya geplant' }
 };
 
 const CLIENT_STATUS_TEXT = {
-    confirmed: { sr: 'Zakazano', en: 'Scheduled', es: 'Agendado', pt: 'Agendado', ru: 'Записано', fr: 'Planifie', it: 'Prenotato' },
-    pending: { sr: 'Na cekanju', en: 'Pending', es: 'Pendiente', pt: 'Pendente', ru: 'В ожидании', fr: 'En attente', it: 'In attesa' },
-    moved: { sr: 'Pomereno', en: 'Moved', es: 'Movido', pt: 'Remarcado', ru: 'Перенесено', fr: 'Deplace', it: 'Spostato' },
-    cancelled: { sr: 'Otkazano', en: 'Cancelled', es: 'Cancelado', pt: 'Cancelado', ru: 'Отменено', fr: 'Annule', it: 'Annullato' },
-    free: { sr: 'Slobodno', en: 'Free', es: 'Libre', pt: 'Livre', ru: 'Свободно', fr: 'Libre', it: 'Libero' },
-    blocked: { sr: 'Blokirano', en: 'Blocked', es: 'Bloqueado', pt: 'Bloqueado', ru: 'Заблокировано', fr: 'Bloque', it: 'Bloccato' }
+    confirmed: { sr: 'Zakazano', en: 'Scheduled', es: 'Agendado', pt: 'Agendado', ru: 'Записано', fr: 'Planifie', it: 'Prenotato', de: 'Gebucht' },
+    pending: { sr: 'Na čekanju', en: 'Pending', es: 'Pendiente', pt: 'Pendente', ru: 'В ожидании', fr: 'En attente', it: 'In attesa', de: 'Ausstehend' },
+    moved: { sr: 'Pomereno', en: 'Moved', es: 'Movido', pt: 'Remarcado', ru: 'Перенесено', fr: 'Deplace', it: 'Spostato', de: 'Verschoben' },
+    cancelled: { sr: 'Otkazano', en: 'Cancelled', es: 'Cancelado', pt: 'Cancelado', ru: 'Отменено', fr: 'Annule', it: 'Annullato', de: 'Abgesagt' },
+    free: { sr: 'Slobodno', en: 'Free', es: 'Libre', pt: 'Livre', ru: 'Свободно', fr: 'Libre', it: 'Libero', de: 'Frei' },
+    blocked: { sr: 'Blokirano', en: 'Blocked', es: 'Bloqueado', pt: 'Bloqueado', ru: 'Заблокировано', fr: 'Bloque', it: 'Bloccato', de: 'Blockiert' }
 };
 
 // ===== TRANSLATIONS =====
-const LANG_LABELS = { sr: 'SR', en: 'EN', es: 'ES', pt: 'PT', ru: 'RU', fr: 'FR', it: 'IT' };
-const BROWSER_LANG_MAP = { sr: 'sr-RS', en: 'en-US', es: 'es-ES', pt: 'pt-PT', ru: 'ru-RU', fr: 'fr-FR', it: 'it-IT' };
+const LANG_LABELS = { sr: 'SR', en: 'EN', es: 'ES', pt: 'PT', ru: 'RU', fr: 'FR', it: 'IT', de: 'DE' };
+const BROWSER_LANG_MAP = { sr: 'sr-RS', en: 'en-US', es: 'es-ES', pt: 'pt-PT', ru: 'ru-RU', fr: 'fr-FR', it: 'it-IT', de: 'de-DE' };
 
 const T = {
     sr: {
@@ -1244,7 +1276,7 @@ const T = {
         how_t: 'Kaleya uči vaš posao za 1 dan', how1_t: 'Poveži kanal', how1_d: 'Telefon, WhatsApp, Telegram, Viber ili SMS.',
         how2_t: 'Nauči Kaleyu', how2_d: 'Upiši radno vreme, usluge i pravila zakazivanja.',
         how3_t: 'Izaberi jezik i glas', how3_d: 'Kaleya govori jezikom koji klijent izabere.',
-        price_t: 'Jednostavne cene', price_s: 'Četiri paketa za različite nivoe automatizacije.',
+        price_t: 'Jednostavne cene', price_s: 'Pet paketa za različite nivoe automatizacije.',
         p1_d: 'Za male timove', p1_f1: '2 jezika', p1_f2: 'Zakazivanje termina', p2_d: 'Za rastuće firme', p2_f1: '5 jezika', p2_f3: 'Alarmi i obaveštenja',
         p3_d: 'Za pozivne centre', p3_f1: 'Neograničeni jezici prema dogovoru', p3_f2: 'Napredni admin i SLA', p3_f4: 'Integracije po meri',
         p4_d: 'Kompletan projekat', p4_note: 'Sve detalje prikazujemo na posebnoj Buy All strani.', custom_price: 'Po dogovoru',
@@ -1288,7 +1320,7 @@ const T = {
         how_t: 'Kaleya learns your business in 1 day', how1_t: 'Connect a channel', how1_d: 'Phone, WhatsApp, Telegram, Viber or SMS.',
         how2_t: 'Teach Kaleya', how2_d: 'Add working hours, services and scheduling rules.',
         how3_t: 'Choose language and voice', how3_d: 'Kaleya speaks the language the client selects.',
-        price_t: 'Simple pricing', price_s: 'Four packages for different automation levels.',
+        price_t: 'Simple pricing', price_s: 'Five packages for different automation levels.',
         p1_d: 'For small teams', p1_f1: '2 languages', p1_f2: 'Appointment scheduling', p2_d: 'For growing companies', p2_f1: '5 languages', p2_f3: 'Alarms and notifications',
         p3_d: 'For call centers', p3_f1: 'More languages by agreement', p3_f2: 'Advanced admin and SLA', p3_f4: 'Custom integrations',
         p4_d: 'Complete project', p4_note: 'All details are shown on the dedicated Buy All page.', custom_price: 'By agreement',
@@ -1332,7 +1364,7 @@ const T = {
         how_t: 'Kaleya aprende tu negocio en 1 día', how1_t: 'Conecta un canal', how1_d: 'Teléfono, WhatsApp, Telegram, Viber o SMS.',
         how2_t: 'Entrena a Kaleya', how2_d: 'Añade horarios, servicios y reglas de agenda.',
         how3_t: 'Elige idioma y voz', how3_d: 'Kaleya habla el idioma que el cliente elige.',
-        price_t: 'Precios simples', price_s: 'Cuatro paquetes para distintos niveles de automatización.',
+        price_t: 'Precios simples', price_s: 'Cinco paquetes para distintos niveles de automatización.',
         p1_d: 'Para equipos pequeños', p1_f1: '2 idiomas', p1_f2: 'Agenda de citas', p2_d: 'Para empresas en crecimiento', p2_f1: '5 idiomas', p2_f3: 'Alarmas y notificaciones',
         p3_d: 'Para centros de llamadas', p3_f1: 'Más idiomas bajo acuerdo', p3_f2: 'Admin avanzado y SLA', p3_f4: 'Integraciones a medida',
         p4_d: 'Proyecto completo', p4_note: 'Todos los detalles están en la página Buy All.', custom_price: 'A convenir',
@@ -1376,7 +1408,7 @@ const T = {
         how_t: 'Kaleya aprende seu negócio em 1 dia', how1_t: 'Conecte um canal', how1_d: 'Telefone, WhatsApp, Telegram, Viber ou SMS.',
         how2_t: 'Ensine a Kaleya', how2_d: 'Adicione horários, serviços e regras de agenda.',
         how3_t: 'Escolha idioma e voz', how3_d: 'Kaleya fala o idioma escolhido pelo cliente.',
-        price_t: 'Preços simples', price_s: 'Quatro pacotes para diferentes níveis de automação.',
+        price_t: 'Preços simples', price_s: 'Cinco pacotes para diferentes níveis de automação.',
         p1_d: 'Para equipes pequenas', p1_f1: '2 idiomas', p1_f2: 'Agendamento', p2_d: 'Para empresas em crescimento', p2_f1: '5 idiomas', p2_f3: 'Alarmes e notificações',
         p3_d: 'Para call centers', p3_f1: 'Mais idiomas sob acordo', p3_f2: 'Admin avançado e SLA', p3_f4: 'Integrações sob medida',
         p4_d: 'Projeto completo', p4_note: 'Todos os detalhes aparecem na página Buy All.', custom_price: 'Sob acordo',
@@ -1420,7 +1452,7 @@ const T = {
         how_t: 'Kaleya изучает бизнес за 1 день', how1_t: 'Подключите канал', how1_d: 'Телефон, WhatsApp, Telegram, Viber или SMS.',
         how2_t: 'Обучите Kaleya', how2_d: 'Добавьте часы работы, услуги и правила записи.',
         how3_t: 'Выберите язык и голос', how3_d: 'Kaleya говорит на языке, выбранном клиентом.',
-        price_t: 'Простые тарифы', price_s: 'Четыре пакета для разных уровней автоматизации.',
+        price_t: 'Простые тарифы', price_s: 'Пять пакетов для разных уровней автоматизации.',
         p1_d: 'Для малых команд', p1_f1: '2 языка', p1_f2: 'Запись на прием', p2_d: 'Для растущих компаний', p2_f1: '5 языков', p2_f3: 'Оповещения и уведомления',
         p3_d: 'Для колл-центров', p3_f1: 'Больше языков по договоренности', p3_f2: 'Расширенный админ и SLA', p3_f4: 'Индивидуальные интеграции',
         p4_d: 'Полный проект', p4_note: 'Все детали находятся на отдельной странице Buy All.', custom_price: 'По договоренности',
@@ -1463,7 +1495,7 @@ T.fr = {
     f_alarm_t: 'Alertes equipe', f_alarm_d: 'Annonce du prochain client et demande urgente de conversation.',
     f_msg_t: 'Canaux de messages', f_msg_d: 'WhatsApp, Viber, Telegram, SMS et appels telephoniques.',
     how_t: 'Kaleya apprend votre activite en 1 jour', how1_t: 'Connecter un canal', how2_t: 'Former Kaleya', how3_t: 'Choisir langue et voix',
-    price_t: 'Tarifs simples', price_s: 'Quatre forfaits pour differents niveaux d automatisation.',
+    price_t: 'Tarifs simples', price_s: 'Cinq forfaits pour differents niveaux d automatisation.',
     p1_d: 'Pour petites equipes', p2_d: 'Pour entreprises en croissance', p3_d: 'Pour centres d appels', p4_d: 'Projet complet',
     popular: 'POPULAIRE', price_btn: 'Commencer', price_btn2: 'Essayer 14 jours', trial_btn: 'Essayer 14 jours', price_contact: 'Contact',
     footer_privacy: 'Confidentialite', footer_terms: 'Conditions',
@@ -1495,7 +1527,7 @@ T.it = {
     f_alarm_t: 'Allarmi team', f_alarm_d: 'Annuncio del prossimo cliente e richiesta urgente di conversazione.',
     f_msg_t: 'Canali messaggi', f_msg_d: 'WhatsApp, Viber, Telegram, SMS e chiamate.',
     how_t: 'Kaleya impara la tua attivita in 1 giorno', how1_t: 'Collega un canale', how2_t: 'Istruisci Kaleya', how3_t: 'Scegli lingua e voce',
-    price_t: 'Prezzi semplici', price_s: 'Quattro pacchetti per diversi livelli di automazione.',
+    price_t: 'Prezzi semplici', price_s: 'Cinque pacchetti per diversi livelli di automazione.',
     p1_d: 'Per piccoli team', p2_d: 'Per aziende in crescita', p3_d: 'Per call center', p4_d: 'Progetto completo',
     popular: 'POPOLARE', price_btn: 'Inizia', price_btn2: 'Prova 14 giorni', trial_btn: 'Prova 14 giorni', price_contact: 'Contatto',
     footer_privacy: 'Privacy', footer_terms: 'Termini',
@@ -1514,6 +1546,150 @@ T.it = {
     alarm_log_title: 'Registro allarmi', alarm_log_empty: 'Nessun allarme attivato.'
 };
 
+const EXTRA_TRANSLATIONS = {
+    sr: {
+        f_lang_t: '8 jezika', f_lang_d: 'Srpski, English, španski, portugalski, ruski, francuski, italijanski i nemački sa ručnim izborom.',
+        p_basic_d: 'Za vlasnika/firmu', p_basic_f1: 'AI Kaleya zakazivanja', p_basic_f2: 'Vlasnik/firma Kaleya APP', p_basic_f3: 'Vlasnik zakazivanja', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'AI voice', p_basic_f6: 'Alarmi i obaveštenja',
+        p_pro_d: 'Vlasnik + 1 radnik', p_pro_f1: 'Sve iz Basic', p_pro_f2: '1 radnik', p_pro_f3: 'Radnik zakazivanja', p_pro_f4: 'Radnik Kaleya APP', p_pro_f5: 'Blokiranje termina po satu/danu/višednevno', p_pro_f6: 'Instagram DM + TikTok DM',
+        p_business_d: 'Do 5 radnika', p_business_f1: 'Sve iz Basic + Pro', p_business_f2: 'Do 5 radnika', p_business_f3: 'Radnik Kaleya APP', p_business_f4: 'Više jezika po dogovoru', p_business_f5: 'API po klijentu',
+        p_business_plus_d: 'Do 15 radnika', p_business_plus_f1: 'Sve iz Basic + Pro + Business', p_business_plus_f2: 'Do 15 radnika', p_business_plus_f3: 'Telefonski pozivi i SMS', p_business_plus_f4: 'ElevenLabs AI voice',
+        p_business_pro_d: '15+ radnika', p_business_pro_f1: 'Sve iz Basic + Pro + Business + Business+', p_business_pro_f2: '15+ radnika', p_business_pro_f3: 'Custom integracije', p_business_pro_f4: 'Napredna arhitektura po dogovoru', custom_price: 'Custom',
+        team_label: 'Tim', employee_list_title: 'Zaposleni', employee_list_desc: 'Lista kontakata za zaposlene. Vlasnik je uvek na vrhu.', calendar_settings: 'Podešavanja kalendara', work_from: 'Rad od', work_to: 'Rad do', interval_label: 'Interval', time_label: 'Vreme', date_label: 'Datum', first_day_label: 'Prvi dan',
+        staff_services_title: 'Osoblje i usluge', blocked_time_title: 'Blokirano vreme / pauze', one_day: 'Jednodnevno', multi_day: 'Više dana', all_staff: 'Svi zaposleni', add_block: 'Dodaj blokadu', appointment_title: 'Termin', name_service_label: 'Ime i usluga', service_label: 'Usluga', staff_label: 'Osoblje', no_service: 'Bez usluge', any_staff: 'Bilo ko', channel_label: 'Kanal', status_label: 'Status', status_confirmed: 'Zakazano', status_moved: 'Pomereno', status_cancelled: 'Otkazano', status_pending: 'Na čekanju', duration_label: 'Trajanje termina'
+    },
+    en: {
+        f_lang_t: '8 languages', f_lang_d: 'Serbian, English, Spanish, Portuguese, Russian, French, Italian and German with manual selection.',
+        p_basic_d: 'For owner/company', p_basic_f1: 'AI Kaleya scheduling', p_basic_f2: 'Owner/company Kaleya APP', p_basic_f3: 'Owner scheduling', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'AI voice', p_basic_f6: 'Alarms and notifications',
+        p_pro_d: 'Owner + 1 employee', p_pro_f1: 'Everything in Basic', p_pro_f2: '1 employee', p_pro_f3: 'Employee scheduling', p_pro_f4: 'Employee Kaleya APP', p_pro_f5: 'Blocking by hour/day/multiple days', p_pro_f6: 'Instagram DM + TikTok DM',
+        p_business_d: 'Up to 5 employees', p_business_f1: 'Everything in Basic + Pro', p_business_f2: 'Up to 5 employees', p_business_f3: 'Employee Kaleya APP', p_business_f4: 'More languages by agreement', p_business_f5: 'Client-specific API',
+        p_business_plus_d: 'Up to 15 employees', p_business_plus_f1: 'Everything in Basic + Pro + Business', p_business_plus_f2: 'Up to 15 employees', p_business_plus_f3: 'Phone calls and SMS', p_business_plus_f4: 'ElevenLabs AI voice',
+        p_business_pro_d: '15+ employees', p_business_pro_f1: 'Everything in Basic + Pro + Business + Business+', p_business_pro_f2: '15+ employees', p_business_pro_f3: 'Custom integrations', p_business_pro_f4: 'Advanced architecture by agreement', custom_price: 'Custom',
+        team_label: 'Team', employee_list_title: 'Employees', employee_list_desc: 'Employee contact list. The owner is always at the top.', calendar_settings: 'Calendar settings', work_from: 'Work from', work_to: 'Work until', interval_label: 'Interval', time_label: 'Time', date_label: 'Date', first_day_label: 'First day',
+        staff_services_title: 'Staff and services', blocked_time_title: 'Blocked time / breaks', one_day: 'One day', multi_day: 'Multiple days', all_staff: 'All employees', add_block: 'Add block', appointment_title: 'Appointment', name_service_label: 'Name and service', service_label: 'Service', staff_label: 'Staff', no_service: 'No service', any_staff: 'Anyone', channel_label: 'Channel', status_label: 'Status', status_confirmed: 'Scheduled', status_moved: 'Moved', status_cancelled: 'Cancelled', status_pending: 'Pending', duration_label: 'Appointment duration'
+    },
+    es: {
+        f_lang_t: '8 idiomas', f_lang_d: 'Serbio, English, español, portugués, ruso, francés, italiano y alemán con selección manual.',
+        p_basic_d: 'Para propietario/empresa', p_basic_f1: 'Agenda AI Kaleya', p_basic_f2: 'APP Kaleya propietario/empresa', p_basic_f3: 'Agenda del propietario', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'Voz AI', p_basic_f6: 'Alarmas y notificaciones',
+        p_pro_d: 'Propietario + 1 empleado', p_pro_f1: 'Todo de Basic', p_pro_f2: '1 empleado', p_pro_f3: 'Agenda del empleado', p_pro_f4: 'APP Kaleya del empleado', p_pro_f5: 'Bloqueo por hora/día/varios días', p_pro_f6: 'Instagram DM + TikTok DM',
+        p_business_d: 'Hasta 5 empleados', p_business_f1: 'Todo de Basic + Pro', p_business_f2: 'Hasta 5 empleados', p_business_f3: 'APP Kaleya del empleado', p_business_f4: 'Más idiomas por acuerdo', p_business_f5: 'API por cliente',
+        p_business_plus_d: 'Hasta 15 empleados', p_business_plus_f1: 'Todo de Basic + Pro + Business', p_business_plus_f2: 'Hasta 15 empleados', p_business_plus_f3: 'Llamadas telefónicas y SMS', p_business_plus_f4: 'Voz AI ElevenLabs',
+        p_business_pro_d: '15+ empleados', p_business_pro_f1: 'Todo de Basic + Pro + Business + Business+', p_business_pro_f2: '15+ empleados', p_business_pro_f3: 'Integraciones custom', p_business_pro_f4: 'Arquitectura avanzada por acuerdo', custom_price: 'Custom',
+        team_label: 'Equipo', employee_list_title: 'Empleados', employee_list_desc: 'Lista de contactos de empleados. El propietario siempre está arriba.', calendar_settings: 'Ajustes del calendario', work_from: 'Trabajo desde', work_to: 'Trabajo hasta', interval_label: 'Intervalo', time_label: 'Hora', date_label: 'Fecha', first_day_label: 'Primer día',
+        staff_services_title: 'Personal y servicios', blocked_time_title: 'Tiempo bloqueado / pausas', one_day: 'Un día', multi_day: 'Varios días', all_staff: 'Todos los empleados', add_block: 'Añadir bloqueo', appointment_title: 'Cita', name_service_label: 'Nombre y servicio', service_label: 'Servicio', staff_label: 'Personal', no_service: 'Sin servicio', any_staff: 'Cualquiera', channel_label: 'Canal', status_label: 'Estado', status_confirmed: 'Agendado', status_moved: 'Movido', status_cancelled: 'Cancelado', status_pending: 'Pendiente', duration_label: 'Duración de la cita'
+    },
+    pt: {
+        f_lang_t: '8 idiomas', f_lang_d: 'Sérvio, English, espanhol, português, russo, francês, italiano e alemão com seleção manual.',
+        p_basic_d: 'Para dono/empresa', p_basic_f1: 'Agendamento AI Kaleya', p_basic_f2: 'APP Kaleya do dono/empresa', p_basic_f3: 'Agendamento do dono', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'Voz AI', p_basic_f6: 'Alarmes e notificações',
+        p_pro_d: 'Dono + 1 funcionário', p_pro_f1: 'Tudo do Basic', p_pro_f2: '1 funcionário', p_pro_f3: 'Agendamento do funcionário', p_pro_f4: 'APP Kaleya do funcionário', p_pro_f5: 'Bloqueio por hora/dia/vários dias', p_pro_f6: 'Instagram DM + TikTok DM',
+        p_business_d: 'Até 5 funcionários', p_business_f1: 'Tudo do Basic + Pro', p_business_f2: 'Até 5 funcionários', p_business_f3: 'APP Kaleya do funcionário', p_business_f4: 'Mais idiomas por acordo', p_business_f5: 'API por cliente',
+        p_business_plus_d: 'Até 15 funcionários', p_business_plus_f1: 'Tudo do Basic + Pro + Business', p_business_plus_f2: 'Até 15 funcionários', p_business_plus_f3: 'Chamadas telefônicas e SMS', p_business_plus_f4: 'Voz AI ElevenLabs',
+        p_business_pro_d: '15+ funcionários', p_business_pro_f1: 'Tudo do Basic + Pro + Business + Business+', p_business_pro_f2: '15+ funcionários', p_business_pro_f3: 'Integrações custom', p_business_pro_f4: 'Arquitetura avançada por acordo', custom_price: 'Custom',
+        team_label: 'Equipe', employee_list_title: 'Funcionários', employee_list_desc: 'Lista de contatos dos funcionários. O dono fica sempre no topo.', calendar_settings: 'Configurações do calendário', work_from: 'Trabalho de', work_to: 'Trabalho até', interval_label: 'Intervalo', time_label: 'Hora', date_label: 'Data', first_day_label: 'Primeiro dia',
+        staff_services_title: 'Equipe e serviços', blocked_time_title: 'Tempo bloqueado / pausas', one_day: 'Um dia', multi_day: 'Vários dias', all_staff: 'Todos os funcionários', add_block: 'Adicionar bloqueio', appointment_title: 'Agendamento', name_service_label: 'Nome e serviço', service_label: 'Serviço', staff_label: 'Equipe', no_service: 'Sem serviço', any_staff: 'Qualquer pessoa', channel_label: 'Canal', status_label: 'Status', status_confirmed: 'Agendado', status_moved: 'Remarcado', status_cancelled: 'Cancelado', status_pending: 'Pendente', duration_label: 'Duração do agendamento'
+    },
+    ru: {
+        f_lang_t: '8 языков', f_lang_d: 'Сербский, English, испанский, португальский, русский, французский, итальянский и немецкий с ручным выбором.',
+        p_basic_d: 'Для владельца/компании', p_basic_f1: 'AI запись Kaleya', p_basic_f2: 'Kaleya APP владельца/компании', p_basic_f3: 'Запись владельца', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'AI голос', p_basic_f6: 'Оповещения и уведомления',
+        p_pro_d: 'Владелец + 1 сотрудник', p_pro_f1: 'Все из Basic', p_pro_f2: '1 сотрудник', p_pro_f3: 'Запись сотрудника', p_pro_f4: 'Kaleya APP сотрудника', p_pro_f5: 'Блокировка по часу/дню/нескольким дням', p_pro_f6: 'Instagram DM + TikTok DM',
+        p_business_d: 'До 5 сотрудников', p_business_f1: 'Все из Basic + Pro', p_business_f2: 'До 5 сотрудников', p_business_f3: 'Kaleya APP сотрудника', p_business_f4: 'Больше языков по договоренности', p_business_f5: 'API по клиенту',
+        p_business_plus_d: 'До 15 сотрудников', p_business_plus_f1: 'Все из Basic + Pro + Business', p_business_plus_f2: 'До 15 сотрудников', p_business_plus_f3: 'Телефонные звонки и SMS', p_business_plus_f4: 'AI голос ElevenLabs',
+        p_business_pro_d: '15+ сотрудников', p_business_pro_f1: 'Все из Basic + Pro + Business + Business+', p_business_pro_f2: '15+ сотрудников', p_business_pro_f3: 'Custom интеграции', p_business_pro_f4: 'Продвинутая архитектура по договоренности', custom_price: 'Custom',
+        team_label: 'Команда', employee_list_title: 'Сотрудники', employee_list_desc: 'Список контактов сотрудников. Владелец всегда сверху.', calendar_settings: 'Настройки календаря', work_from: 'Работа с', work_to: 'Работа до', interval_label: 'Интервал', time_label: 'Время', date_label: 'Дата', first_day_label: 'Первый день',
+        staff_services_title: 'Сотрудники и услуги', blocked_time_title: 'Заблокированное время / паузы', one_day: 'Один день', multi_day: 'Несколько дней', all_staff: 'Все сотрудники', add_block: 'Добавить блокировку', appointment_title: 'Запись', name_service_label: 'Имя и услуга', service_label: 'Услуга', staff_label: 'Сотрудник', no_service: 'Без услуги', any_staff: 'Любой', channel_label: 'Канал', status_label: 'Статус', status_confirmed: 'Записано', status_moved: 'Перенесено', status_cancelled: 'Отменено', status_pending: 'В ожидании', duration_label: 'Длительность записи'
+    },
+    fr: {
+        f_lang_t: '8 langues', f_lang_d: 'Serbe, English, espagnol, portugais, russe, francais, italien et allemand avec choix manuel.',
+        p_basic_d: 'Pour proprietaire/entreprise', p_basic_f1: 'Planification AI Kaleya', p_basic_f2: 'APP Kaleya proprietaire/entreprise', p_basic_f3: 'Planification proprietaire', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'Voix AI', p_basic_f6: 'Alertes et notifications',
+        p_pro_d: 'Proprietaire + 1 employe', p_pro_f1: 'Tout Basic', p_pro_f2: '1 employe', p_pro_f3: 'Planification employe', p_pro_f4: 'APP Kaleya employe', p_pro_f5: 'Blocage par heure/jour/plusieurs jours', p_pro_f6: 'Instagram DM + TikTok DM',
+        p_business_d: 'Jusqu a 5 employes', p_business_f1: 'Tout Basic + Pro', p_business_f2: 'Jusqu a 5 employes', p_business_f3: 'APP Kaleya employe', p_business_f4: 'Plus de langues sur accord', p_business_f5: 'API par client',
+        p_business_plus_d: 'Jusqu a 15 employes', p_business_plus_f1: 'Tout Basic + Pro + Business', p_business_plus_f2: 'Jusqu a 15 employes', p_business_plus_f3: 'Appels telephoniques et SMS', p_business_plus_f4: 'Voix AI ElevenLabs',
+        p_business_pro_d: '15+ employes', p_business_pro_f1: 'Tout Basic + Pro + Business + Business+', p_business_pro_f2: '15+ employes', p_business_pro_f3: 'Integrations custom', p_business_pro_f4: 'Architecture avancee sur accord', custom_price: 'Custom',
+        team_label: 'Equipe', employee_list_title: 'Employes', employee_list_desc: 'Liste de contacts des employes. Le proprietaire reste toujours en haut.', calendar_settings: 'Reglages calendrier', work_from: 'Travail de', work_to: 'Travail jusqu a', interval_label: 'Intervalle', time_label: 'Heure', date_label: 'Date', first_day_label: 'Premier jour',
+        staff_services_title: 'Equipe et services', blocked_time_title: 'Temps bloque / pauses', one_day: 'Un jour', multi_day: 'Plusieurs jours', all_staff: 'Tous les employes', add_block: 'Ajouter blocage', appointment_title: 'Rendez-vous', name_service_label: 'Nom et service', service_label: 'Service', staff_label: 'Equipe', no_service: 'Sans service', any_staff: 'N importe qui', channel_label: 'Canal', status_label: 'Statut', status_confirmed: 'Planifie', status_moved: 'Deplace', status_cancelled: 'Annule', status_pending: 'En attente', duration_label: 'Duree du rendez-vous'
+    },
+    it: {
+        f_lang_t: '8 lingue', f_lang_d: 'Serbo, English, spagnolo, portoghese, russo, francese, italiano e tedesco con scelta manuale.',
+        p_basic_d: 'Per titolare/azienda', p_basic_f1: 'Prenotazioni AI Kaleya', p_basic_f2: 'APP Kaleya titolare/azienda', p_basic_f3: 'Prenotazioni titolare', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'Voce AI', p_basic_f6: 'Allarmi e notifiche',
+        p_pro_d: 'Titolare + 1 dipendente', p_pro_f1: 'Tutto Basic', p_pro_f2: '1 dipendente', p_pro_f3: 'Prenotazioni dipendente', p_pro_f4: 'APP Kaleya dipendente', p_pro_f5: 'Blocco per ora/giorno/piu giorni', p_pro_f6: 'Instagram DM + TikTok DM',
+        p_business_d: 'Fino a 5 dipendenti', p_business_f1: 'Tutto Basic + Pro', p_business_f2: 'Fino a 5 dipendenti', p_business_f3: 'APP Kaleya dipendente', p_business_f4: 'Piu lingue su accordo', p_business_f5: 'API per cliente',
+        p_business_plus_d: 'Fino a 15 dipendenti', p_business_plus_f1: 'Tutto Basic + Pro + Business', p_business_plus_f2: 'Fino a 15 dipendenti', p_business_plus_f3: 'Chiamate telefoniche e SMS', p_business_plus_f4: 'Voce AI ElevenLabs',
+        p_business_pro_d: '15+ dipendenti', p_business_pro_f1: 'Tutto Basic + Pro + Business + Business+', p_business_pro_f2: '15+ dipendenti', p_business_pro_f3: 'Integrazioni custom', p_business_pro_f4: 'Architettura avanzata su accordo', custom_price: 'Custom',
+        team_label: 'Team', employee_list_title: 'Dipendenti', employee_list_desc: 'Lista contatti dei dipendenti. Il titolare resta sempre in alto.', calendar_settings: 'Impostazioni calendario', work_from: 'Lavora da', work_to: 'Lavora fino a', interval_label: 'Intervallo', time_label: 'Ora', date_label: 'Data', first_day_label: 'Primo giorno',
+        staff_services_title: 'Staff e servizi', blocked_time_title: 'Tempo bloccato / pause', one_day: 'Un giorno', multi_day: 'Piu giorni', all_staff: 'Tutti i dipendenti', add_block: 'Aggiungi blocco', appointment_title: 'Appuntamento', name_service_label: 'Nome e servizio', service_label: 'Servizio', staff_label: 'Staff', no_service: 'Nessun servizio', any_staff: 'Chiunque', channel_label: 'Canale', status_label: 'Stato', status_confirmed: 'Prenotato', status_moved: 'Spostato', status_cancelled: 'Annullato', status_pending: 'In attesa', duration_label: 'Durata appuntamento'
+    },
+    de: {
+        ...T.en,
+        nav_features: 'Funktionen', nav_how: 'So funktioniert es', nav_pricing: 'Preise', nav_login: 'Login',
+        hero_badge: 'AI Empfang · 24/7 aktiv', hero_title_1: 'Kaleya', hero_title_2: 'AI Empfang 24/7', hero_sub: 'Kaleya beantwortet Anrufe, bucht, storniert und benachrichtigt das Team mit natürlicher Stimme. Funktioniert mit Anrufen, WhatsApp, Viber, Telegram und SMS.',
+        hero_cta_demo: 'Kostenlos testen', hero_cta_how: 'So funktioniert es', hero_social: '500+ zufriedene Unternehmen', hero_tap: 'Logo antippen', hero_intro_hint: 'Kaleya stellt sich vor', hero_demo_msg: '"Hallo, wie kann ich helfen?"', integrates_with: 'Integrationen:',
+        feat_title: 'Alles, was eine echte Rezeption macht, nur besser', feat_sub: 'Kaleya versteht Kunden, merkt sich Regeln und arbeitet in der gewählten Sprache.', f_lang_t: '8 Sprachen', f_lang_d: 'Serbisch, English, Spanisch, Portugiesisch, Russisch, Französisch, Italienisch und Deutsch mit manueller Auswahl.',
+        f2_t: 'Intelligente Terminplanung', f2_d: 'Prüft den Kalender und schlägt freie Termine vor.', f3_t: 'Natürliche Stimme', f3_d: 'ElevenLabs Stimme für natürlichere Gespräche.', f_alarm_t: 'Team-Alarme', f_alarm_d: 'Ansage des nächsten Kunden und dringende Gesprächsanfrage.', f_msg_t: 'Nachrichtenkanäle', f_msg_d: 'WhatsApp, Viber, Telegram, SMS und Telefonanruf.', f6_t: 'Admin-Kontrolle', f6_d: 'Globale API und separate Einstellungen pro Kunde.',
+        how_t: 'Kaleya lernt Ihr Geschäft an 1 Tag', how1_t: 'Kanal verbinden', how1_d: 'Telefon, WhatsApp, Telegram, Viber oder SMS.', how2_t: 'Kaleya trainieren', how2_d: 'Arbeitszeiten, Services und Buchungsregeln eintragen.', how3_t: 'Sprache und Stimme wählen', how3_d: 'Kaleya spricht die Sprache, die der Kunde auswählt.',
+        price_t: 'Einfache Preise', price_s: 'Fünf Pakete für verschiedene Automatisierungsstufen.', popular: 'BELIEBT', trial_btn: '14 Tage testen', price_contact: 'Kontakt',
+        p_basic_d: 'Fuer Inhaber/Firma', p_basic_f1: 'AI Kaleya Terminplanung', p_basic_f2: 'Inhaber/Firma Kaleya APP', p_basic_f3: 'Inhaber Terminplanung', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'AI voice', p_basic_f6: 'Alarme und Benachrichtigungen',
+        p_pro_d: 'Inhaber + 1 Mitarbeiter', p_pro_f1: 'Alles aus Basic', p_pro_f2: '1 Mitarbeiter', p_pro_f3: 'Mitarbeiter Terminplanung', p_pro_f4: 'Mitarbeiter Kaleya APP', p_pro_f5: 'Blockierung nach Stunde/Tag/mehreren Tagen', p_pro_f6: 'Instagram DM + TikTok DM',
+        p_business_d: 'Bis zu 5 Mitarbeiter', p_business_f1: 'Alles aus Basic + Pro', p_business_f2: 'Bis zu 5 Mitarbeiter', p_business_f3: 'Mitarbeiter Kaleya APP', p_business_f4: 'Mehr Sprachen nach Vereinbarung', p_business_f5: 'API pro Kunde',
+        p_business_plus_d: 'Bis zu 15 Mitarbeiter', p_business_plus_f1: 'Alles aus Basic + Pro + Business', p_business_plus_f2: 'Bis zu 15 Mitarbeiter', p_business_plus_f3: 'Telefonanrufe und SMS', p_business_plus_f4: 'ElevenLabs AI voice',
+        p_business_pro_d: '15+ Mitarbeiter', p_business_pro_f1: 'Alles aus Basic + Pro + Business + Business+', p_business_pro_f2: '15+ Mitarbeiter', p_business_pro_f3: 'Custom Integrationen', p_business_pro_f4: 'Erweiterte Architektur nach Vereinbarung', custom_price: 'Custom',
+        footer_privacy: 'Datenschutz', footer_terms: 'Bedingungen', back_home: 'Zurück', login_title: 'Willkommen zurück', login_sub: 'Bei Kaleya anmelden', password: 'Passwort', login_btn: 'Anmelden', login_err: 'Falsche E-Mail oder falsches Passwort',
+        client_active: 'online', client_greet: 'Guten Morgen, Marko', client_how: 'Wie kann ich heute helfen?', say_wake: 'Sagen Sie "hey Kaleya"', tap_to_talk: 'Zum Sprechen tippen', listening: 'Ich höre zu...', quick: 'Schnellaktionen', qa1: 'Buchen', qa1_s: 'Neuer Termin', qa2: 'Stornieren', qa2_s: 'Termin', qa3: 'Prüfen', qa3_s: 'Slots', today: 'Heute', nav_home: 'Start', nav_cal: 'Kalender', nav_set: 'Einst.',
+        cset_t: 'Einstellungen', cset_ui_lang: 'Sprache der Oberfläche', cset_voice_lang: 'Kaleya Sprachstimme', cset_el_desc: 'Natürliche Stimme über ElevenLabs', cset_test: 'Kaleya Stimme testen', cset_note: 'Der Administrator setzt den API-Schlüssel; der Kunde wählt Sprache und Verhalten.', cset_integrations: 'Buchungskanäle', cset_alarm: 'Team-Alarme', active: 'Aktiv', pending: 'In Vorbereitung',
+        team_label: 'Team', employee_list_title: 'Mitarbeiter', employee_list_desc: 'Kontaktliste fuer Mitarbeiter. Der Inhaber steht immer oben.', calendar_settings: 'Kalender Einstellungen', work_from: 'Arbeit von', work_to: 'Arbeit bis', interval_label: 'Intervall', time_label: 'Zeit', date_label: 'Datum', first_day_label: 'Erster Tag',
+        staff_services_title: 'Team und Services', blocked_time_title: 'Blockierte Zeit / Pausen', one_day: 'Ein Tag', multi_day: 'Mehrere Tage', all_staff: 'Alle Mitarbeiter', add_block: 'Blockierung hinzufuegen', appointment_title: 'Termin', name_service_label: 'Name und Service', service_label: 'Service', staff_label: 'Team', no_service: 'Kein Service', any_staff: 'Jeder', channel_label: 'Kanal', status_label: 'Status', status_confirmed: 'Gebucht', status_moved: 'Verschoben', status_cancelled: 'Abgesagt', status_pending: 'Ausstehend', duration_label: 'Termindauer',
+        ad_dash: 'Dashboard', ad_clients: 'Kunden', ad_alarms: 'Alarme', ad_integrations: 'Integrationen', ad_set: 'Einstellungen', logout: 'Abmelden', global_ai_settings: 'Globale AI API', save_global_api: 'Globale API speichern', client_api_title: 'API pro Kunde', save_client_api: 'Für Kunden speichern', api_security_note: 'Produktions-API-Schlüssel werden im Backend und in der .env Datei gespeichert.'
+    }
+};
+
+Object.entries(EXTRA_TRANSLATIONS).forEach(([lang, values]) => {
+    T[lang] = { ...(T[lang] || T.en), ...values };
+});
+
+const UI_RUNTIME_TRANSLATIONS = {
+    sr: {
+        employee_fallback: 'Zaposleni', staff_default_role: 'Osoblje', no_staff_added: 'Nema dodatog osoblja.', no_services_added: 'Nema dodatih usluga.', no_blocked_time: 'Nema blokiranog vremena.', edit_btn: 'Izmeni', delete_btn: 'Obrisi', add_person: 'Dodaj osobu', add_service: 'Dodaj uslugu', save_changes: 'Sacuvaj izmene', whole_day: 'ceo dan', blocked_default_reason: 'Blokirano', kaleya_disabled: 'Kaleya je iskljucena', appointment_within_hours: 'Termin mora biti u okviru radnog vremena', appointment_block_conflict: 'Termin se preklapa sa blokiranim vremenom', appointment_saved: 'Termin je sacuvan', appointment_not_saved: 'Termin nije sacuvan u bazi', employee_no_delete: 'Zaposleni ne brise termine', appointment_not_deleted: 'Termin nije obrisan iz baze', voice_lang_saved: 'Jezik glasa je sacuvan', voice_lang_saved_local: 'Jezik glasa je sacuvan lokalno'
+    },
+    en: {
+        employee_fallback: 'Employee', staff_default_role: 'Staff', no_staff_added: 'No staff added.', no_services_added: 'No services added.', no_blocked_time: 'No blocked time.', edit_btn: 'Edit', delete_btn: 'Delete', add_person: 'Add person', add_service: 'Add service', save_changes: 'Save changes', whole_day: 'all day', blocked_default_reason: 'Blocked', kaleya_disabled: 'Kaleya is turned off', appointment_within_hours: 'Appointment must be inside working hours', appointment_block_conflict: 'Appointment overlaps blocked time', appointment_saved: 'Appointment saved', appointment_not_saved: 'Appointment was not saved in the database', employee_no_delete: 'Employees cannot delete appointments', appointment_not_deleted: 'Appointment was not deleted from the database', voice_lang_saved: 'Voice language saved', voice_lang_saved_local: 'Voice language saved locally'
+    },
+    es: {
+        employee_fallback: 'Empleado', staff_default_role: 'Personal', no_staff_added: 'No hay personal agregado.', no_services_added: 'No hay servicios agregados.', no_blocked_time: 'No hay tiempo bloqueado.', edit_btn: 'Editar', delete_btn: 'Borrar', add_person: 'Agregar persona', add_service: 'Agregar servicio', save_changes: 'Guardar cambios', whole_day: 'todo el dia', blocked_default_reason: 'Bloqueado', kaleya_disabled: 'Kaleya esta apagada', appointment_within_hours: 'La cita debe estar dentro del horario laboral', appointment_block_conflict: 'La cita se solapa con tiempo bloqueado', appointment_saved: 'Cita guardada', appointment_not_saved: 'La cita no se guardo en la base', employee_no_delete: 'Los empleados no borran citas', appointment_not_deleted: 'La cita no se borro de la base', voice_lang_saved: 'Idioma de voz guardado', voice_lang_saved_local: 'Idioma de voz guardado localmente'
+    },
+    pt: {
+        employee_fallback: 'Funcionario', staff_default_role: 'Equipe', no_staff_added: 'Nenhuma equipe adicionada.', no_services_added: 'Nenhum servico adicionado.', no_blocked_time: 'Nenhum tempo bloqueado.', edit_btn: 'Editar', delete_btn: 'Apagar', add_person: 'Adicionar pessoa', add_service: 'Adicionar servico', save_changes: 'Salvar alteracoes', whole_day: 'dia inteiro', blocked_default_reason: 'Bloqueado', kaleya_disabled: 'Kaleya esta desligada', appointment_within_hours: 'O agendamento deve estar dentro do horario de trabalho', appointment_block_conflict: 'O agendamento coincide com tempo bloqueado', appointment_saved: 'Agendamento salvo', appointment_not_saved: 'O agendamento nao foi salvo no banco', employee_no_delete: 'Funcionarios nao apagam agendamentos', appointment_not_deleted: 'O agendamento nao foi apagado do banco', voice_lang_saved: 'Idioma da voz salvo', voice_lang_saved_local: 'Idioma da voz salvo localmente'
+    },
+    ru: {
+        employee_fallback: 'Sotrudnik', staff_default_role: 'Personal', no_staff_added: 'Sotrudniki ne dobavleny.', no_services_added: 'Uslugi ne dobavleny.', no_blocked_time: 'Net zablokirovannogo vremeni.', edit_btn: 'Izmenit', delete_btn: 'Udalit', add_person: 'Dobavit sotrudnika', add_service: 'Dobavit uslugu', save_changes: 'Sohranit izmeneniya', whole_day: 'ves den', blocked_default_reason: 'Zablokirovano', kaleya_disabled: 'Kaleya vyklyuchena', appointment_within_hours: 'Zapis dolzhna byt v rabochem vremeni', appointment_block_conflict: 'Zapis peresekaetsya s blokirovkoy', appointment_saved: 'Zapis sohranena', appointment_not_saved: 'Zapis ne sohranena v baze', employee_no_delete: 'Sotrudniki ne udalyayut zapisi', appointment_not_deleted: 'Zapis ne udalena iz bazy', voice_lang_saved: 'Yazyk golosa sohranen', voice_lang_saved_local: 'Yazyk golosa sohranen lokalno'
+    },
+    fr: {
+        employee_fallback: 'Employe', staff_default_role: 'Equipe', no_staff_added: 'Aucun employe ajoute.', no_services_added: 'Aucun service ajoute.', no_blocked_time: 'Aucun temps bloque.', edit_btn: 'Modifier', delete_btn: 'Supprimer', add_person: 'Ajouter personne', add_service: 'Ajouter service', save_changes: 'Enregistrer', whole_day: 'toute la journee', blocked_default_reason: 'Bloque', kaleya_disabled: 'Kaleya est desactivee', appointment_within_hours: 'Le rendez-vous doit etre dans les horaires de travail', appointment_block_conflict: 'Le rendez-vous chevauche un temps bloque', appointment_saved: 'Rendez-vous enregistre', appointment_not_saved: 'Le rendez-vous n a pas ete enregistre', employee_no_delete: 'Les employes ne suppriment pas les rendez-vous', appointment_not_deleted: 'Le rendez-vous n a pas ete supprime', voice_lang_saved: 'Langue de voix enregistree', voice_lang_saved_local: 'Langue de voix enregistree localement'
+    },
+    it: {
+        employee_fallback: 'Dipendente', staff_default_role: 'Staff', no_staff_added: 'Nessun dipendente aggiunto.', no_services_added: 'Nessun servizio aggiunto.', no_blocked_time: 'Nessun tempo bloccato.', edit_btn: 'Modifica', delete_btn: 'Elimina', add_person: 'Aggiungi persona', add_service: 'Aggiungi servizio', save_changes: 'Salva modifiche', whole_day: 'tutto il giorno', blocked_default_reason: 'Bloccato', kaleya_disabled: 'Kaleya e disattivata', appointment_within_hours: 'L appuntamento deve essere negli orari di lavoro', appointment_block_conflict: 'L appuntamento si sovrappone a tempo bloccato', appointment_saved: 'Appuntamento salvato', appointment_not_saved: 'Appuntamento non salvato nel database', employee_no_delete: 'I dipendenti non eliminano appuntamenti', appointment_not_deleted: 'Appuntamento non eliminato dal database', voice_lang_saved: 'Lingua voce salvata', voice_lang_saved_local: 'Lingua voce salvata localmente'
+    },
+    de: {
+        employee_fallback: 'Mitarbeiter', staff_default_role: 'Team', no_staff_added: 'Keine Mitarbeiter hinzugefuegt.', no_services_added: 'Keine Services hinzugefuegt.', no_blocked_time: 'Keine blockierte Zeit.', edit_btn: 'Bearbeiten', delete_btn: 'Loeschen', add_person: 'Person hinzufuegen', add_service: 'Service hinzufuegen', save_changes: 'Aenderungen speichern', whole_day: 'ganzer Tag', blocked_default_reason: 'Blockiert', kaleya_disabled: 'Kaleya ist ausgeschaltet', appointment_within_hours: 'Der Termin muss innerhalb der Arbeitszeit liegen', appointment_block_conflict: 'Der Termin ueberschneidet sich mit blockierter Zeit', appointment_saved: 'Termin gespeichert', appointment_not_saved: 'Termin wurde nicht in der Datenbank gespeichert', employee_no_delete: 'Mitarbeiter koennen Termine nicht loeschen', appointment_not_deleted: 'Termin wurde nicht aus der Datenbank geloescht', voice_lang_saved: 'Stimme-Sprache gespeichert', voice_lang_saved_local: 'Stimme-Sprache lokal gespeichert'
+    }
+};
+
+Object.entries(UI_RUNTIME_TRANSLATIONS).forEach(([lang, values]) => {
+    T[lang] = { ...(T[lang] || T.en), ...values };
+});
+
+const FORM_RUNTIME_TRANSLATIONS = {
+    sr: { staff_name_placeholder: 'Ime zaposlenog', staff_role_placeholder: 'Zanimanje', staff_phone_placeholder: 'Telefon zaposlenog', staff_username_placeholder: 'Korisnicko ime', staff_password_placeholder: 'Lozinka', staff_login_note: 'Vlasnik unosi login za zaposlenog. Ako menjate osobu, lozinku unesite samo kada zelite novu.', service_name_placeholder: 'Naziv usluge', price_placeholder: 'Cena', blocked_reason_placeholder: 'Razlog, npr. pauza ili odmor', cancel_btn: 'Odustani', save_btn: 'Sacuvaj', cancel_appt_title: 'Otkazi termin', search_by_name: 'Pretraga po imenu', client_search_placeholder: 'Unesite ime klijenta', cancel_free_slot: 'Otkazi i oslobodi slot', appointment_not_cancelled: 'Termin nije otkazan u bazi', appointment_cancelled_free: 'Termin je otkazan i slot je oslobodjen' },
+    en: { staff_name_placeholder: 'Employee name', staff_role_placeholder: 'Role', staff_phone_placeholder: 'Employee phone', staff_username_placeholder: 'Username', staff_password_placeholder: 'Password', staff_login_note: 'The owner creates employee login details. When editing a person, enter a password only if you want a new one.', service_name_placeholder: 'Service name', price_placeholder: 'Price', blocked_reason_placeholder: 'Reason, for example break or vacation', cancel_btn: 'Cancel', save_btn: 'Save', cancel_appt_title: 'Cancel appointment', search_by_name: 'Search by name', client_search_placeholder: 'Enter client name', cancel_free_slot: 'Cancel and free the slot', appointment_not_cancelled: 'Appointment was not cancelled in the database', appointment_cancelled_free: 'Appointment cancelled and slot freed' },
+    es: { staff_name_placeholder: 'Nombre del empleado', staff_role_placeholder: 'Cargo', staff_phone_placeholder: 'Telefono del empleado', staff_username_placeholder: 'Usuario', staff_password_placeholder: 'Contrasena', staff_login_note: 'El propietario crea el login del empleado. Al editar, escriba contrasena solo si quiere una nueva.', service_name_placeholder: 'Nombre del servicio', price_placeholder: 'Precio', blocked_reason_placeholder: 'Motivo, por ejemplo pausa o vacaciones', cancel_btn: 'Cancelar', save_btn: 'Guardar', cancel_appt_title: 'Cancelar cita', search_by_name: 'Buscar por nombre', client_search_placeholder: 'Ingrese nombre del cliente', cancel_free_slot: 'Cancelar y liberar horario', appointment_not_cancelled: 'La cita no se cancelo en la base', appointment_cancelled_free: 'Cita cancelada y horario liberado' },
+    pt: { staff_name_placeholder: 'Nome do funcionario', staff_role_placeholder: 'Funcao', staff_phone_placeholder: 'Telefone do funcionario', staff_username_placeholder: 'Usuario', staff_password_placeholder: 'Senha', staff_login_note: 'O dono cria o login do funcionario. Ao editar, informe senha somente se quiser uma nova.', service_name_placeholder: 'Nome do servico', price_placeholder: 'Preco', blocked_reason_placeholder: 'Motivo, por exemplo pausa ou ferias', cancel_btn: 'Cancelar', save_btn: 'Salvar', cancel_appt_title: 'Cancelar agendamento', search_by_name: 'Buscar por nome', client_search_placeholder: 'Digite o nome do cliente', cancel_free_slot: 'Cancelar e liberar horario', appointment_not_cancelled: 'O agendamento nao foi cancelado no banco', appointment_cancelled_free: 'Agendamento cancelado e horario liberado' },
+    ru: { staff_name_placeholder: 'Imya sotrudnika', staff_role_placeholder: 'Dolzhnost', staff_phone_placeholder: 'Telefon sotrudnika', staff_username_placeholder: 'Login', staff_password_placeholder: 'Parol', staff_login_note: 'Vladelets sozdaet login dlya sotrudnika. Pri izmenenii vvodite parol tolko esli nuzhen novyy.', service_name_placeholder: 'Nazvanie uslugi', price_placeholder: 'Cena', blocked_reason_placeholder: 'Prichina, naprimer pauza ili otpusk', cancel_btn: 'Otmena', save_btn: 'Sohranit', cancel_appt_title: 'Otmenit zapis', search_by_name: 'Poisk po imeni', client_search_placeholder: 'Vvedite imya klienta', cancel_free_slot: 'Otmenit i osvobodit slot', appointment_not_cancelled: 'Zapis ne otmenena v baze', appointment_cancelled_free: 'Zapis otmenena i slot osvobozhden' },
+    fr: { staff_name_placeholder: 'Nom employe', staff_role_placeholder: 'Role', staff_phone_placeholder: 'Telephone employe', staff_username_placeholder: 'Identifiant', staff_password_placeholder: 'Mot de passe', staff_login_note: 'Le proprietaire cree les acces employe. En modification, saisissez un mot de passe seulement si vous en voulez un nouveau.', service_name_placeholder: 'Nom du service', price_placeholder: 'Prix', blocked_reason_placeholder: 'Raison, par exemple pause ou conge', cancel_btn: 'Annuler', save_btn: 'Enregistrer', cancel_appt_title: 'Annuler rendez-vous', search_by_name: 'Recherche par nom', client_search_placeholder: 'Entrez le nom du client', cancel_free_slot: 'Annuler et liberer le creneau', appointment_not_cancelled: 'Le rendez-vous n a pas ete annule', appointment_cancelled_free: 'Rendez-vous annule et creneau libere' },
+    it: { staff_name_placeholder: 'Nome dipendente', staff_role_placeholder: 'Ruolo', staff_phone_placeholder: 'Telefono dipendente', staff_username_placeholder: 'Username', staff_password_placeholder: 'Password', staff_login_note: 'Il titolare crea il login del dipendente. In modifica, inserisci password solo se ne vuoi una nuova.', service_name_placeholder: 'Nome servizio', price_placeholder: 'Prezzo', blocked_reason_placeholder: 'Motivo, per esempio pausa o ferie', cancel_btn: 'Annulla', save_btn: 'Salva', cancel_appt_title: 'Annulla appuntamento', search_by_name: 'Cerca per nome', client_search_placeholder: 'Inserisci nome cliente', cancel_free_slot: 'Annulla e libera slot', appointment_not_cancelled: 'Appuntamento non annullato nel database', appointment_cancelled_free: 'Appuntamento annullato e slot liberato' },
+    de: { staff_name_placeholder: 'Mitarbeitername', staff_role_placeholder: 'Beruf', staff_phone_placeholder: 'Telefon des Mitarbeiters', staff_username_placeholder: 'Benutzername', staff_password_placeholder: 'Passwort', staff_login_note: 'Der Inhaber erstellt die Mitarbeiter-Logins. Beim Bearbeiten Passwort nur eingeben, wenn ein neues gewuenscht ist.', service_name_placeholder: 'Servicename', price_placeholder: 'Preis', blocked_reason_placeholder: 'Grund, z.B. Pause oder Urlaub', cancel_btn: 'Abbrechen', save_btn: 'Speichern', cancel_appt_title: 'Termin absagen', search_by_name: 'Nach Name suchen', client_search_placeholder: 'Kundennamen eingeben', cancel_free_slot: 'Absagen und Slot freigeben', appointment_not_cancelled: 'Termin wurde nicht in der Datenbank abgesagt', appointment_cancelled_free: 'Termin abgesagt und Slot freigegeben' }
+};
+
+Object.entries(FORM_RUNTIME_TRANSLATIONS).forEach(([lang, values]) => {
+    T[lang] = { ...(T[lang] || T.en), ...values };
+});
+
 function tr(key) {
     return (T[currentLang] && T[currentLang][key]) || T.en[key] || T.sr[key] || key;
 }
@@ -1523,10 +1699,19 @@ function applyLang() {
         const key = el.getAttribute('data-i18n');
         el.textContent = tr(key);
     });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        el.setAttribute('placeholder', tr(el.getAttribute('data-i18n-placeholder')));
+    });
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        el.setAttribute('title', tr(el.getAttribute('data-i18n-title')));
+    });
     const label = document.getElementById('currentLangLabel');
     if (label) label.textContent = LANG_LABELS[currentLang] || 'EN';
     document.documentElement.lang = currentLang;
     updateClientLangButtons();
+    renderClientOperationalSettings();
+    populateAppointmentStaffServiceFields();
+    populateBlockedStaffSelect();
     renderSchedule();
     renderClientCalendar();
     updateKaleyaPowerUI();
@@ -1556,7 +1741,7 @@ document.addEventListener('click', (event) => {
 });
 
 function updateClientLangButtons() {
-    ['SR','EN','ES','PT','RU','FR','IT'].forEach(code => {
+    ['SR','EN','ES','PT','RU','FR','IT','DE'].forEach(code => {
         const btn = document.getElementById('clientLang' + code);
         if (btn) btn.classList.toggle('active', code.toLowerCase() === currentLang);
     });
@@ -1609,7 +1794,8 @@ async function logoTap() {
         pt: 'Olá, eu sou Kaleya, uma recepcionista de IA que atende chamadas, agenda horários e avisa sua equipe.',
         ru: 'Здравствуйте, я Kaleya, AI администратор, который отвечает на звонки, записывает клиентов и уведомляет команду.',
         fr: 'Bonjour, je suis Kaleya, une receptionniste IA qui repond aux appels, planifie les rendez-vous et informe votre equipe.',
-        it: 'Ciao, sono Kaleya, una receptionist AI che risponde alle chiamate, organizza appuntamenti e avvisa il tuo team.'
+        it: 'Ciao, sono Kaleya, una receptionist AI che risponde alle chiamate, organizza appuntamenti e avvisa il tuo team.',
+        de: 'Hallo, ich bin Kaleya, ein AI Empfang, der Anrufe beantwortet, Termine plant und Ihr Team benachrichtigt.'
     };
     await speak(intro[currentLang] || intro.en, currentLang);
 }
@@ -1664,7 +1850,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
         localStorage.setItem('kaleya_user_role', 'client');
         localStorage.setItem('kaleya_user_email', email);
         showView('client');
-    } else if (email === 'empl@test.com' && pass === 'emp123') {
+    } else if ((email === 'empl@test.com' || email.toLowerCase() === 'ana') && pass === 'emp123') {
         localStorage.setItem('kaleya_user_role', 'employee');
         localStorage.setItem('kaleya_user_email', email);
         showView('client');
@@ -1677,7 +1863,7 @@ function fillLogin(type) {
         document.getElementById('email').value = 'admin@aikaleya.com';
         document.getElementById('password').value = 'admin123';
     } else if (type === 'employee') {
-        document.getElementById('email').value = 'empl@test.com';
+        document.getElementById('email').value = 'ana';
         document.getElementById('password').value = 'emp123';
     } else {
         document.getElementById('email').value = 'klijent@test.com';
@@ -1763,7 +1949,8 @@ function availabilityPrompt() {
         pt: 'Verifique quantos horarios livres existem hoje e responda brevemente.',
         ru: 'Проверь, сколько свободных слотов есть сегодня, и ответь кратко.',
         fr: 'Verifie combien de creneaux sont disponibles aujourd hui et reponds brievement.',
-        it: 'Controlla quanti slot disponibili ci sono oggi e rispondi brevemente.'
+        it: 'Controlla quanti slot disponibili ci sono oggi e rispondi brevemente.',
+        de: 'Pruefe, wie viele freie Termine es heute gibt, und antworte kurz.'
     };
     return prompts[currentVoiceLang] || prompts[currentLang] || prompts.en;
 }
@@ -1962,11 +2149,11 @@ async function saveAppointmentToBackend(payload) {
     return appointmentFromBackend(await res.json());
 }
 
-function friendlyApiError(error, fallback = 'Akcija nije sacuvana') {
+function friendlyApiError(error, fallback = tr('appointment_not_saved')) {
     const text = String(error?.message || error || '');
-    if (text.includes('blokiranim vremenom') || text.includes('blocked')) return 'Termin se preklapa sa blokiranim vremenom';
-    if (text.includes('preklapa')) return 'Termin se preklapa sa postojecim zauzetim slotom';
-    if (text.includes('radnog vremena') || text.includes('zatvoren')) return 'Termin nije unutar radnog vremena';
+    if (text.includes('blokiranim vremenom') || text.includes('blocked')) return tr('appointment_block_conflict');
+    if (text.includes('preklapa')) return tr('appointment_block_conflict');
+    if (text.includes('radnog vremena') || text.includes('zatvoren')) return tr('appointment_within_hours');
     return fallback;
 }
 
@@ -2065,20 +2252,20 @@ function blockRangeLabel(block) {
 function blockInlineTimeLabel(block) {
     const start = localDateTimeParts(block.start_at);
     const end = localDateTimeParts(block.end_at);
-    if (isFullDayBlock(start, end)) return 'ceo dan';
+    if (isFullDayBlock(start, end)) return tr('whole_day');
     return `${formatClientTime(start.time)}-${formatClientTime(end.time)}`;
 }
 
 function staffNameById(staffId) {
-    if (!staffId) return 'Svi zaposleni';
-    return clientStaffMembers.find(staff => String(staff.id) === String(staffId))?.full_name || 'Zaposleni';
+    if (!staffId) return tr('all_staff');
+    return clientStaffMembers.find(staff => String(staff.id) === String(staffId))?.full_name || tr('employee_fallback');
 }
 
 function populateBlockedStaffSelect() {
     const select = document.getElementById('blockedStaff');
     if (!select) return;
     const previous = select.value || '';
-    select.innerHTML = '<option value="">Svi zaposleni</option>' + clientStaffMembers.map(staff => (
+    select.innerHTML = `<option value="">${escapeHtml(tr('all_staff'))}</option>` + clientStaffMembers.map(staff => (
         `<option value="${staff.id}">${escapeHtml(staff.full_name)}</option>`
     )).join('');
     select.value = clientStaffMembers.some(staff => String(staff.id) === String(previous)) ? previous : '';
@@ -2094,16 +2281,16 @@ function renderClientOperationalSettings() {
                 <div class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2">
                     <div class="min-w-0">
                         <p class="text-[12px] font-semibold truncate">${escapeHtml(staff.full_name)}</p>
-                        <p class="text-[10px] text-slate-500 truncate">${escapeHtml(staff.role_title || staff.phone || 'Osoblje')}</p>
+                        <p class="text-[10px] text-slate-500 truncate">${escapeHtml(staff.role_title || tr('staff_default_role'))}${staff.phone ? ` - ${escapeHtml(staff.phone)}` : ''}${staff.user_username ? ` - login: ${escapeHtml(staff.user_username)}` : ''}</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
-                        <button onclick="startEditClientStaffMember('${staff.id}')" class="h-7 px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-semibold">Izmeni</button>
-                        <button onclick="deleteClientStaffMember('${staff.id}')" class="h-7 px-2.5 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-[10px] font-semibold">Obrisi</button>
+                        <button onclick="startEditClientStaffMember('${staff.id}')" class="h-7 px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-semibold">${escapeHtml(tr('edit_btn'))}</button>
+                        <button onclick="deleteClientStaffMember('${staff.id}')" class="h-7 px-2.5 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-[10px] font-semibold">${escapeHtml(tr('delete_btn'))}</button>
                     </div>
                 </div>
             `).join('')
-            : '<p class="text-[12px] text-slate-500">Nema dodatog osoblja.</p>';
+            : `<p class="text-[12px] text-slate-500">${escapeHtml(tr('no_staff_added'))}</p>`;
     }
     if (serviceList) {
         serviceList.innerHTML = clientServices.length
@@ -2115,12 +2302,12 @@ function renderClientOperationalSettings() {
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="text-[10px] text-slate-500">${escapeHtml(service.currency || 'EUR')} ${escapeHtml(service.price || '0.00')}</span>
-                        <button onclick="startEditClientService('${service.id}')" class="h-7 px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-semibold">Izmeni</button>
-                        <button onclick="deleteClientService('${service.id}')" class="h-7 px-2.5 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-[10px] font-semibold">Obrisi</button>
+                        <button onclick="startEditClientService('${service.id}')" class="h-7 px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-semibold">${escapeHtml(tr('edit_btn'))}</button>
+                        <button onclick="deleteClientService('${service.id}')" class="h-7 px-2.5 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-[10px] font-semibold">${escapeHtml(tr('delete_btn'))}</button>
                     </div>
                 </div>
             `).join('')
-            : '<p class="text-[12px] text-slate-500">Nema dodatih usluga.</p>';
+            : `<p class="text-[12px] text-slate-500">${escapeHtml(tr('no_services_added'))}</p>`;
     }
     if (blockedList) {
         blockedList.innerHTML = clientBlockedTimes.length
@@ -2133,13 +2320,13 @@ function renderClientOperationalSettings() {
                         <div class="px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/25 border border-amber-200 dark:border-amber-900 flex items-center justify-between gap-2">
                             <div class="min-w-0">
                                 <p class="text-[12px] font-semibold truncate">${escapeHtml(blockRangeLabel(block))}</p>
-                                <p class="text-[10px] text-amber-700 dark:text-amber-300 truncate">${escapeHtml(block.staff_member_name || staffNameById(block.staff_member))} - ${escapeHtml(block.reason || 'Blokirano')}</p>
+                                <p class="text-[10px] text-amber-700 dark:text-amber-300 truncate">${escapeHtml(block.staff_member_name || staffNameById(block.staff_member))} - ${escapeHtml(block.reason || tr('blocked_default_reason'))}</p>
                             </div>
-                            <button onclick="deleteClientBlockedTime('${block.id}')" class="h-7 px-2.5 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-[10px] font-semibold">Obrisi</button>
+                            <button onclick="deleteClientBlockedTime('${block.id}')" class="h-7 px-2.5 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-[10px] font-semibold">${escapeHtml(tr('delete_btn'))}</button>
                         </div>
                     `;
                 }).join('')
-            : '<p class="text-[12px] text-slate-500">Nema blokiranog vremena.</p>';
+            : `<p class="text-[12px] text-slate-500">${escapeHtml(tr('no_blocked_time'))}</p>`;
     }
 }
 
@@ -2160,7 +2347,7 @@ function populateAppointmentStaffServiceFields(selectedServiceId = '', selectedS
     const staffSelect = document.getElementById('apptStaff');
     if (serviceSelect) {
         const previous = selectedServiceId || serviceSelect.value || '';
-        serviceSelect.innerHTML = '<option value="">Bez usluge</option>' + clientServices.map(service => (
+        serviceSelect.innerHTML = `<option value="">${escapeHtml(tr('no_service'))}</option>` + clientServices.map(service => (
             `<option value="${service.id}">${escapeHtml(service.name)} - ${Number(service.duration_minutes || 30)} min</option>`
         )).join('');
         serviceSelect.value = clientServices.some(service => String(service.id) === String(previous)) ? String(previous) : '';
@@ -2169,7 +2356,7 @@ function populateAppointmentStaffServiceFields(selectedServiceId = '', selectedS
         const serviceId = serviceSelect?.value || selectedServiceId || '';
         const previous = selectedStaffId || staffSelect.value || '';
         const staffOptions = clientStaffMembers.filter(staff => staffCanDoService(staff.id, serviceId));
-        staffSelect.innerHTML = '<option value="">Bilo ko</option>' + staffOptions.map(staff => (
+        staffSelect.innerHTML = `<option value="">${escapeHtml(tr('any_staff'))}</option>` + staffOptions.map(staff => (
             `<option value="${staff.id}">${escapeHtml(staff.full_name)}</option>`
         )).join('');
         staffSelect.value = staffOptions.some(staff => String(staff.id) === String(previous)) ? String(previous) : '';
@@ -2203,12 +2390,18 @@ function resetClientStaffForm() {
     const id = document.getElementById('editingStaffId');
     const name = document.getElementById('newStaffName');
     const role = document.getElementById('newStaffRole');
+    const phone = document.getElementById('newStaffPhone');
+    const username = document.getElementById('newStaffUsername');
+    const password = document.getElementById('newStaffPassword');
     const saveBtn = document.getElementById('clientStaffSaveBtn');
     const cancelBtn = document.getElementById('clientStaffCancelBtn');
     if (id) id.value = '';
     if (name) name.value = '';
     if (role) role.value = '';
-    if (saveBtn) saveBtn.textContent = 'Dodaj osobu';
+    if (phone) phone.value = '';
+    if (username) username.value = '';
+    if (password) password.value = '';
+    if (saveBtn) saveBtn.textContent = tr('add_person');
     cancelBtn?.classList.add('hidden');
 }
 
@@ -2223,7 +2416,7 @@ function resetClientServiceForm() {
     if (name) name.value = '';
     if (duration) duration.value = '30';
     if (price) price.value = '';
-    if (saveBtn) saveBtn.textContent = 'Dodaj uslugu';
+    if (saveBtn) saveBtn.textContent = tr('add_service');
     cancelBtn?.classList.add('hidden');
 }
 
@@ -2233,7 +2426,10 @@ function startEditClientStaffMember(staffId) {
     document.getElementById('editingStaffId').value = staff.id;
     document.getElementById('newStaffName').value = staff.full_name || '';
     document.getElementById('newStaffRole').value = staff.role_title || '';
-    document.getElementById('clientStaffSaveBtn').textContent = 'Sacuvaj izmene';
+    document.getElementById('newStaffPhone').value = staff.phone || '';
+    document.getElementById('newStaffUsername').value = staff.user_username || '';
+    document.getElementById('newStaffPassword').value = '';
+    document.getElementById('clientStaffSaveBtn').textContent = tr('save_changes');
     document.getElementById('clientStaffCancelBtn')?.classList.remove('hidden');
     document.getElementById('newStaffName')?.focus();
 }
@@ -2245,7 +2441,7 @@ function startEditClientService(serviceId) {
     document.getElementById('newServiceName').value = service.name || '';
     document.getElementById('newServiceDuration').value = String(service.duration_minutes || 30);
     document.getElementById('newServicePrice').value = service.price || '';
-    document.getElementById('clientServiceSaveBtn').textContent = 'Sacuvaj izmene';
+    document.getElementById('clientServiceSaveBtn').textContent = tr('save_changes');
     document.getElementById('clientServiceCancelBtn')?.classList.remove('hidden');
     document.getElementById('newServiceName')?.focus();
 }
@@ -2265,11 +2461,18 @@ async function saveClientServiceForm() {
 async function createClientStaffMember() {
     const input = document.getElementById('newStaffName');
     const roleInput = document.getElementById('newStaffRole');
+    const phoneInput = document.getElementById('newStaffPhone');
+    const usernameInput = document.getElementById('newStaffUsername');
+    const passwordInput = document.getElementById('newStaffPassword');
     const name = input?.value.trim();
     const roleTitle = roleInput?.value.trim() || '';
+    const phone = phoneInput?.value.trim() || '';
+    const loginUsername = usernameInput?.value.trim() || '';
+    const loginPassword = passwordInput?.value || '';
     if (!name) return showToast('Unesi ime zaposlenog');
+    if ((loginUsername && !loginPassword) || (!loginUsername && loginPassword)) return showToast('Za login unesi i korisnicko ime i lozinku');
     if (!getAuthToken() || location.protocol === 'file:') {
-        clientStaffMembers.push({ id: `local-staff-${Date.now()}`, full_name: name, role_title: roleTitle, is_active: true });
+        clientStaffMembers.push({ id: `local-staff-${Date.now()}`, full_name: name, role_title: roleTitle, phone, user_username: loginUsername, is_active: true });
         resetClientStaffForm();
         renderClientOperationalSettings();
         populateAppointmentStaffServiceFields();
@@ -2279,7 +2482,7 @@ async function createClientStaffMember() {
     try {
         const res = await kaleyaApi('/api/staff-services/staff/', {
             method: 'POST',
-            body: JSON.stringify({ full_name: name, role_title: roleTitle, phone: '', email: '', is_active: true })
+            body: JSON.stringify({ full_name: name, role_title: roleTitle, phone, email: '', login_username: loginUsername, login_password: loginPassword, is_active: true })
         });
         if (!res.ok) throw new Error(await res.text());
         const staff = await res.json();
@@ -2329,13 +2532,20 @@ async function createClientService() {
 async function updateClientStaffMember(staffId) {
     const input = document.getElementById('newStaffName');
     const roleInput = document.getElementById('newStaffRole');
+    const phoneInput = document.getElementById('newStaffPhone');
+    const usernameInput = document.getElementById('newStaffUsername');
+    const passwordInput = document.getElementById('newStaffPassword');
     const name = input?.value.trim();
     const roleTitle = roleInput?.value.trim() || '';
+    const phone = phoneInput?.value.trim() || '';
+    const loginUsername = usernameInput?.value.trim() || '';
+    const loginPassword = passwordInput?.value || '';
     if (!name) return showToast('Unesi ime zaposlenog');
+    if (!loginUsername && loginPassword) return showToast('Za novu lozinku mora postojati korisnicko ime');
 
     if (!getAuthToken() || location.protocol === 'file:') {
         clientStaffMembers = clientStaffMembers.map(staff => String(staff.id) === String(staffId)
-            ? { ...staff, full_name: name, role_title: roleTitle }
+            ? { ...staff, full_name: name, role_title: roleTitle, phone, user_username: loginUsername || staff.user_username }
             : staff);
         resetClientStaffForm();
         renderClientOperationalSettings();
@@ -2345,9 +2555,12 @@ async function updateClientStaffMember(staffId) {
     }
 
     try {
+        const payload = { full_name: name, role_title: roleTitle, phone, is_active: true };
+        if (loginUsername) payload.login_username = loginUsername;
+        if (loginPassword) payload.login_password = loginPassword;
         const res = await kaleyaApi(`/api/staff-services/staff/${staffId}/`, {
             method: 'PATCH',
-            body: JSON.stringify({ full_name: name, role_title: roleTitle, is_active: true })
+            body: JSON.stringify(payload)
         });
         if (!res.ok) throw new Error(await res.text());
         const saved = await res.json();
@@ -2593,7 +2806,7 @@ micBtn.addEventListener('click', toggleKaleya);
 
 async function toggleKaleya() {
     if (!kaleyaEnabled) {
-        showToast('Kaleya je iskljucena');
+        showToast(tr('kaleya_disabled'));
         return;
     }
     kaleyaActive = !kaleyaActive;
@@ -2606,7 +2819,8 @@ async function toggleKaleya() {
             pt: 'Olá, como posso ajudar?',
             ru: 'Здравствуйте, чем могу помочь?',
             fr: 'Bonjour, comment puis-je aider ?',
-            it: 'Ciao, come posso aiutare?'
+            it: 'Ciao, come posso aiutare?',
+            de: 'Hallo, wie kann ich helfen?'
         };
         await speak(greeting[currentVoiceLang] || greeting.en, currentVoiceLang);
         document.getElementById('kaleyaStatus').textContent = tr('listening');
@@ -2644,7 +2858,7 @@ function toggleKaleyaPower() {
     saveClientSettingsToBackend({ kaleya_enabled: kaleyaEnabled }).catch(error => {
         console.warn('Kaleya power save failed', error);
     });
-    showToast(kaleyaEnabled ? 'Kaleya je ukljucena' : 'Kaleya je iskljucena');
+    showToast(kaleyaEnabled ? 'Kaleya online' : tr('kaleya_disabled'));
 }
 
 function updateKaleyaPowerUI() {
@@ -2679,8 +2893,8 @@ function startListening() {
         if (transcript.includes('hej kaleya') || transcript.includes('hey kaleya')) {
             if (!kaleyaActive) toggleKaleya();
         }
-        if (kaleyaActive && /zakaži|schedule|agendar|запис/.test(transcript)) handleQuickAction('zakazi');
-        if (kaleyaActive && /otkaži|cancel|cancelar|отмен/.test(transcript)) handleQuickAction('otkazi');
+        if (kaleyaActive && /zakaži|schedule|agendar|запис|buchen|termin/.test(transcript)) handleQuickAction('zakazi');
+        if (kaleyaActive && /otkaži|cancel|cancelar|отмен|stornieren|absagen/.test(transcript)) handleQuickAction('otkazi');
     };
     try { recognition.start(); } catch {}
 }
@@ -2690,6 +2904,10 @@ document.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', () => handleQuickAction(btn.dataset.action));
 });
 async function handleQuickAction(action) {
+    if (isEmployeeUser() && (action === 'zakazi' || action === 'otkazi')) {
+        showToast('Zaposleni vidi samo svoje termine');
+        return;
+    }
     if (action === 'zakazi') {
         openQuickScheduleModal();
         return;
@@ -2723,7 +2941,8 @@ async function handleQuickAction(action) {
             pt: 'O horário foi agendado para amanhã às 15:00',
             ru: 'Запись назначена на завтра в 15:00',
             fr: 'Le rendez-vous est planifie pour demain a 15:00',
-            it: 'L appuntamento e prenotato per domani alle 15:00'
+            it: 'L appuntamento e prenotato per domani alle 15:00',
+            de: 'Der Termin ist fuer morgen um 15:00 Uhr gebucht'
         },
         otkazi: {
             sr: 'Sastanak je otkazan',
@@ -2732,7 +2951,8 @@ async function handleQuickAction(action) {
             pt: 'A reunião foi cancelada',
             ru: 'Встреча отменена',
             fr: 'Le rendez-vous a ete annule',
-            it: 'La riunione e stata annullata'
+            it: 'La riunione e stata annullata',
+            de: 'Der Termin wurde abgesagt'
         },
         proveri: {
             sr: 'Imate 3 slobodna termina danas',
@@ -2741,7 +2961,8 @@ async function handleQuickAction(action) {
             pt: 'Você tem 3 horários livres hoje',
             ru: 'Сегодня доступно 3 свободных времени',
             fr: 'Vous avez 3 creneaux libres aujourd hui',
-            it: 'Hai 3 slot disponibili oggi'
+            it: 'Hai 3 slot disponibili oggi',
+            de: 'Sie haben heute 3 freie Termine'
         }
     };
     const msg = (messages[action] && (messages[action][currentVoiceLang] || messages[action][currentLang])) || messages.proveri.en;
@@ -2772,7 +2993,8 @@ function todayAvailabilityMessage() {
         pt: stats.free > 0 ? `Voce tem ${stats.free} horarios livres hoje.` : 'Nao ha horarios livres hoje.',
         ru: stats.free > 0 ? `Сегодня доступно ${stats.free} свободных слотов.` : 'Сегодня нет свободных слотов.',
         fr: stats.free > 0 ? `Vous avez ${stats.free} creneaux libres aujourd hui.` : 'Aucun creneau libre aujourd hui.',
-        it: stats.free > 0 ? `Hai ${stats.free} slot disponibili oggi.` : 'Non ci sono slot disponibili oggi.'
+        it: stats.free > 0 ? `Hai ${stats.free} slot disponibili oggi.` : 'Non ci sono slot disponibili oggi.',
+        de: stats.free > 0 ? `Sie haben heute ${stats.free} freie Termine.` : 'Heute gibt es keine freien Termine.'
     };
     return messages[currentVoiceLang] || messages[currentLang] || messages.en;
 }
@@ -2789,9 +3011,10 @@ async function todayAvailabilityMessageFromBackend() {
             en: free > 0 ? `You have ${free} available slots today.` : 'There are no available slots today.',
             es: free > 0 ? `Tiene ${free} horarios libres hoy.` : 'No hay horarios libres hoy.',
             pt: free > 0 ? `Voce tem ${free} horarios livres hoje.` : 'Nao ha horarios livres hoje.',
-            ru: free > 0 ? `Danas imate ${free} slobodnih slotova.` : 'Danas nema slobodnih slotova.',
+            ru: free > 0 ? `Сегодня доступно ${free} свободных слотов.` : 'Сегодня нет свободных слотов.',
             fr: free > 0 ? `Vous avez ${free} creneaux libres aujourd hui.` : 'Aucun creneau libre aujourd hui.',
-            it: free > 0 ? `Hai ${free} slot disponibili oggi.` : 'Non ci sono slot disponibili oggi.'
+            it: free > 0 ? `Hai ${free} slot disponibili oggi.` : 'Non ci sono slot disponibili oggi.',
+            de: free > 0 ? `Sie haben heute ${free} freie Termine.` : 'Heute gibt es keine freien Termine.'
         };
         return messages[currentVoiceLang] || messages[currentLang] || messages.en;
     } catch (error) {
@@ -2837,13 +3060,17 @@ function renderCancelSearchResults() {
                     </div>
                     <span class="w-3 h-3 mt-1 rounded-full ${statusDotClass(item.status)} shrink-0"></span>
                 </div>
-                <button onclick="cancelAppointmentById('${item.id}')" class="mt-3 w-full h-10 rounded-xl bg-red-600 text-white text-sm font-semibold">Otkazi i oslobodi slot</button>
+                <button onclick="cancelAppointmentById('${item.id}')" class="mt-3 w-full h-10 rounded-xl bg-red-600 text-white text-sm font-semibold">${escapeHtml(tr('cancel_free_slot'))}</button>
             </div>
         `;
     }).join('') : `<div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 text-sm text-slate-500">Nema termina za prikaz.</div>`;
 }
 
 async function cancelAppointmentById(id) {
+    if (isEmployeeUser()) {
+        showToast('Zaposleni ne otkazuje termine');
+        return;
+    }
     const item = schedule.find(entry => entry.id === id);
     if (!item) return;
     try {
@@ -2852,13 +3079,13 @@ async function cancelAppointmentById(id) {
         if (saved) Object.assign(item, saved);
     } catch (e) {
         console.warn('Kaleya cancel appointment failed', e);
-        showToast('Termin nije otkazan u bazi');
+        showToast(tr('appointment_not_cancelled'));
         return;
     }
     renderSchedule();
     renderClientCalendar();
     renderCancelSearchResults();
-    showToast('Termin je otkazan i slot je oslobodjen');
+    showToast(tr('appointment_cancelled_free'));
 }
 
 function clientIsoDate(date) {
@@ -3107,11 +3334,37 @@ function appointmentSlotSpan(item) {
     return Math.max(1, Math.ceil(Number(item.duration || interval) / interval));
 }
 
+function calendarCapacityStaffIds() {
+    if (isEmployeeUser()) return ['employee'];
+    const ids = clientStaffMembers.map(staff => String(staff.id)).filter(Boolean);
+    return ids.length ? ids : [''];
+}
+
+function slotBusyForStaff(events, dateIso, time, staffId) {
+    const busyByAppointment = events.some(item => {
+        if (item.status === 'cancelled') return false;
+        if (staffId !== 'employee' && staffId && item.staffMemberId && String(item.staffMemberId) !== String(staffId)) return false;
+        const start = timeToMinutes(item.time);
+        const end = start + Number(item.duration || getClientCalendarSettings().interval);
+        const minute = timeToMinutes(time);
+        return minute >= start && minute < end;
+    });
+    if (busyByAppointment) return true;
+    return !!getBlockedSlot(dateIso, time, getClientCalendarSettings().interval, staffId === 'employee' ? '' : staffId);
+}
+
 function getDateSlotStats(dateIso) {
     const slots = getClientWorkSlots();
     const activeItems = schedule.filter(item => item.date === dateIso && item.status !== 'cancelled');
-    const busy = slots.filter(time => getSlotOccupancy(activeItems, time) || getBlockedSlot(dateIso, time)).length;
-    return { busy, free: Math.max(slots.length - busy, 0) };
+    const staffIds = calendarCapacityStaffIds();
+    let busy = 0;
+    slots.forEach(time => {
+        staffIds.forEach(staffId => {
+            if (slotBusyForStaff(activeItems, dateIso, time, staffId)) busy += 1;
+        });
+    });
+    const total = slots.length * staffIds.length;
+    return { busy, free: Math.max(total - busy, 0) };
 }
 
 function getSlotOccupancy(events, time) {
@@ -3236,6 +3489,9 @@ function statusDotClass(status) {
 }
 
 function renderStatusControl(item) {
+    if (isEmployeeUser()) {
+        return `<span class="w-4 h-4 rounded-full ${statusDotClass(item.status)} ring-2 ring-white dark:ring-slate-900 shadow"></span>`;
+    }
     const options = ['confirmed', 'moved', 'cancelled', 'pending'];
     return `
         <div class="relative">
@@ -3290,6 +3546,11 @@ function channelShort(channel = '') {
 function renderContactActions(item) {
     const phone = normalizePhone(item.phone || '');
     const channel = escapeHtml(item.channel || 'Phone');
+    const editAction = isEmployeeUser() ? '' : `
+            <button onclick="openAppointmentEditor('${item.id}')" class="w-8 h-8 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 grid place-items-center" aria-label="Uredi">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+            </button>
+    `;
     return `
         <div class="flex items-center gap-1.5">
             <a href="tel:${phone}" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 grid place-items-center text-slate-700 dark:text-slate-200" aria-label="Pozovi">
@@ -3299,9 +3560,7 @@ function renderContactActions(item) {
                 <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a4 4 0 01-4 4H7l-4 4V7a4 4 0 014-4h10a4 4 0 014 4z"/></svg>
             </a>
             <button onclick="openChannelDemo('${channel}', '${phone}')" class="h-8 px-2.5 rounded-full bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 text-[10px] font-bold">${channelShort(item.channel)}</button>
-            <button onclick="openAppointmentEditor('${item.id}')" class="w-8 h-8 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 grid place-items-center" aria-label="Uredi">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
-            </button>
+            ${editAction}
         </div>
     `;
 }
@@ -3429,10 +3688,13 @@ function handleClientThirdTab() {
 }
 
 function renderAppointmentCard(item) {
+    const timeBox = isEmployeeUser()
+        ? `<div class="w-11 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 grid place-items-center font-mono text-[12px] font-semibold">${formatClientTime(item.time)}</div>`
+        : `<button onclick="openAppointmentEditor('${item.id}')" class="w-11 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 grid place-items-center font-mono text-[12px] font-semibold">${formatClientTime(item.time)}</button>`;
     return `
         <div class="group p-3.5 rounded-[18px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:shadow-md transition">
             <div class="flex items-start gap-3">
-                <button onclick="openAppointmentEditor('${item.id}')" class="w-11 h-11 rounded-xl bg-slate-50 dark:bg-slate-800 grid place-items-center font-mono text-[12px] font-semibold">${formatClientTime(item.time)}</button>
+                ${timeBox}
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2">
                         ${renderStatusControl(item)}
@@ -3603,7 +3865,7 @@ function renderClientDaySlots() {
             return `
                 <div class="flex items-center justify-between p-3 rounded-[16px] border border-slate-200 dark:border-slate-800 bg-green-50/70 dark:bg-green-950/20">
                     <div><p class="font-mono text-sm font-semibold">${formatClientTime(time)}</p><p class="text-[11px] text-green-700 dark:text-green-300">${escapeHtml(localizedStatus('free'))}</p></div>
-                    <button onclick="openAppointmentEditor('', '${clientCalendarState.selectedDate}', '${time}')" class="w-8 h-8 rounded-full bg-green-600 text-white grid place-items-center">+</button>
+                    ${isEmployeeUser() ? '<span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>' : `<button onclick="openAppointmentEditor('', '${clientCalendarState.selectedDate}', '${time}')" class="w-8 h-8 rounded-full bg-green-600 text-white grid place-items-center">+</button>`}
                 </div>
             `;
         }
@@ -3640,6 +3902,10 @@ function renderClientDaySlots() {
 }
 
 function openAppointmentEditor(id = '', date = '', time = '') {
+    if (isEmployeeUser()) {
+        showToast('Zaposleni vidi samo svoje termine');
+        return;
+    }
     syncClientCalendarSettingsUI();
     const settings = getClientCalendarSettings();
     const item = schedule.find(entry => entry.id === id) || {
@@ -3676,6 +3942,10 @@ function closeAppointmentEditor() {
 }
 
 async function saveAppointmentEdit() {
+    if (isEmployeeUser()) {
+        showToast('Zaposleni ne menja termine');
+        return;
+    }
     const id = document.getElementById('apptId').value;
     const serviceId = document.getElementById('apptService')?.value || '';
     const staffMemberId = document.getElementById('apptStaff')?.value || '';
@@ -3700,11 +3970,11 @@ async function saveAppointmentEdit() {
     const appointmentStart = timeToMinutes(payload.time);
     const appointmentEnd = appointmentStart + Number(payload.duration || calendarSettings.interval);
     if (appointmentStart < timeToMinutes(calendarSettings.start) || appointmentEnd > timeToMinutes(calendarSettings.end)) {
-        showToast('Termin mora biti u okviru radnog vremena');
+        showToast(tr('appointment_within_hours'));
         return;
     }
     if (getBlockedSlot(payload.date, payload.time, payload.duration, staffMemberId)) {
-        showToast('Termin se preklapa sa blokiranim vremenom');
+        showToast(tr('appointment_block_conflict'));
         return;
     }
     try {
@@ -3712,7 +3982,7 @@ async function saveAppointmentEdit() {
         if (saved) Object.assign(payload, saved);
     } catch (e) {
         console.warn('Kaleya save appointment failed', e);
-        showToast(friendlyApiError(e, 'Termin nije sacuvan u bazi'));
+        showToast(friendlyApiError(e, tr('appointment_not_saved')));
         return;
     }
     const index = schedule.findIndex(item => item.id === id);
@@ -3721,10 +3991,14 @@ async function saveAppointmentEdit() {
     closeAppointmentEditor();
     renderSchedule();
     renderClientCalendar();
-    showToast('Termin je sacuvan');
+    showToast(tr('appointment_saved'));
 }
 
 async function deleteAppointment() {
+    if (isEmployeeUser()) {
+        showToast(tr('employee_no_delete'));
+        return;
+    }
     const id = document.getElementById('apptId').value;
     if (id) {
         const item = schedule.find(entry => entry.id === id);
@@ -3732,7 +4006,7 @@ async function deleteAppointment() {
             await deleteAppointmentBackend(item);
         } catch (e) {
             console.warn('Kaleya delete appointment failed', e);
-            showToast('Termin nije obrisan iz baze');
+            showToast(tr('appointment_not_deleted'));
             return;
         }
         schedule = schedule.filter(item => item.id !== id);
@@ -3769,14 +4043,14 @@ function updateElStatus() {
 }
 function voiceStatusText(connected, checking = false) {
     if (checking) {
-        const labels = { sr: 'Provera...', en: 'Checking...', es: 'Comprobando...', pt: 'Verificando...', ru: 'Provera...', fr: 'Verification...', it: 'Controllo...' };
+        const labels = { sr: 'Provera...', en: 'Checking...', es: 'Comprobando...', pt: 'Verificando...', ru: 'Проверка...', fr: 'Verification...', it: 'Controllo...', de: 'Pruefung...' };
         return labels[currentLang] || labels.en;
     }
     if (connected) {
-        const labels = { sr: 'Povezan preko servera ✓', en: 'Connected via server ✓', es: 'Conectado via servidor ✓', pt: 'Conectado pelo servidor ✓', ru: 'Povezan preko servera ✓', fr: 'Connecte via serveur ✓', it: 'Connesso via server ✓' };
+        const labels = { sr: 'Povezan preko servera ✓', en: 'Connected via server ✓', es: 'Conectado via servidor ✓', pt: 'Conectado pelo servidor ✓', ru: 'Подключено через сервер ✓', fr: 'Connecte via serveur ✓', it: 'Connesso via server ✓', de: 'Ueber Server verbunden ✓' };
         return labels[currentLang] || labels.en;
     }
-    const labels = { sr: 'Nije povezan', en: 'Not connected', es: 'No conectado', pt: 'Nao conectado', ru: 'Nije povezan', fr: 'Non connecte', it: 'Non connesso' };
+    const labels = { sr: 'Nije povezan', en: 'Not connected', es: 'No conectado', pt: 'Nao conectado', ru: 'Не подключено', fr: 'Non connecte', it: 'Non connesso', de: 'Nicht verbunden' };
     return labels[currentLang] || labels.en;
 }
 
@@ -3812,10 +4086,10 @@ async function saveClientVoiceLang() {
     if (clientSettingsCache) clientSettingsCache.voiceLanguage = value;
     try {
         await saveClientSettingsToBackend({ voice_language: value });
-        showToast('Jezik glasa je sacuvan');
+        showToast(tr('voice_lang_saved'));
     } catch (error) {
         console.warn('Kaleya voice language save failed', error);
-        showToast('Jezik glasa je sacuvan lokalno');
+        showToast(tr('voice_lang_saved_local'));
     }
 }
 async function testVoice() {
@@ -3826,7 +4100,8 @@ async function testVoice() {
         pt: 'Olá, aqui é Kaleya. Como posso ajudar?',
         ru: 'Здравствуйте, это Kaleya. Чем могу помочь?',
         fr: 'Bonjour, ici Kaleya. Comment puis-je aider ?',
-        it: 'Ciao, sono Kaleya. Come posso aiutare?'
+        it: 'Ciao, sono Kaleya. Come posso aiutare?',
+        de: 'Hallo, hier ist Kaleya. Wie kann ich helfen?'
     };
     await speak(text[currentVoiceLang] || text.en, currentVoiceLang);
 }
@@ -4008,7 +4283,8 @@ async function fireQueueAlarm(name = 'Marko Petrović') {
         pt: `O cliente ${name} é o próximo.`,
         ru: `Клиент ${name} следующий в очереди.`,
         fr: `Client ${name} est le prochain.`,
-        it: `Il cliente ${name} e il prossimo.`
+        it: `Il cliente ${name} e il prossimo.`,
+        de: `Kunde ${name} ist als Naechstes an der Reihe.`
     };
     document.getElementById('notifQueueText').textContent = text[currentLang] || text.en;
     document.getElementById('notifQueue')?.classList.remove('hidden');
@@ -4036,7 +4312,8 @@ async function fireEmergencyAlarm(name = '') {
         pt: hasName ? `O cliente ${name} quer falar com você.` : 'Um cliente quer falar com você.',
         ru: hasName ? `Клиент ${name} хочет поговорить с вами.` : 'Клиент хочет поговорить с вами.',
         fr: hasName ? `Le client ${name} veut vous parler.` : 'Un client veut vous parler.',
-        it: hasName ? `Il cliente ${name} vuole parlare con te.` : 'Un cliente vuole parlare con te.'
+        it: hasName ? `Il cliente ${name} vuole parlare con te.` : 'Un cliente vuole parlare con te.',
+        de: hasName ? `Kunde ${name} moechte mit Ihnen sprechen.` : 'Ein Kunde moechte mit Ihnen sprechen.'
     };
     document.getElementById('notifEmergText').textContent = text[currentLang] || text.en;
     document.getElementById('notifEmergency')?.classList.remove('hidden');
@@ -4077,7 +4354,15 @@ renderClientOperationalSettings();
 renderSchedule();
 renderClientCalendar();
 updateKaleyaPowerUI();
-showView('landing');
+const savedAuthToken = localStorage.getItem('kaleya_auth_token');
+const savedUserRole = localStorage.getItem('kaleya_user_role');
+if (savedAuthToken && (savedUserRole === 'client' || savedUserRole === 'employee')) {
+    showView('client');
+} else if (savedAuthToken && savedUserRole === 'admin' && isBackendServed()) {
+    window.location.href = '/admin/';
+} else {
+    showView('landing');
+}
 
 // Preload wake word listener on client view idle
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {

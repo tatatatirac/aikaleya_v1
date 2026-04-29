@@ -7,12 +7,16 @@ class Plan(models.Model):
     CODE_BASIC = "basic"
     CODE_PRO = "pro"
     CODE_BUSINESS = "business"
+    CODE_BUSINESS_PLUS = "business_plus"
+    CODE_BUSINESS_PRO_PLUS = "business_pro_plus"
     CODE_GOD_MODE = "god_mode"
 
     CODE_CHOICES = (
         (CODE_BASIC, "Basic"),
         (CODE_PRO, "Pro"),
         (CODE_BUSINESS, "Business"),
+        (CODE_BUSINESS_PLUS, "Business+"),
+        (CODE_BUSINESS_PRO_PLUS, "BusinessPro+"),
         (CODE_GOD_MODE, "GOD MODE"),
     )
 
@@ -60,4 +64,3 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f"{self.business_client} - {self.plan}"
-

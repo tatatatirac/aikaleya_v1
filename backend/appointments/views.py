@@ -6,21 +6,46 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.db.models import Q
 
+from accounts.permissions import user_role
 from appointments.models import Appointment, Customer
 from appointments.serializers import AppointmentSerializer, CustomerSerializer
 from appointments.services import availability_for_date, today_availability_summary
 from clients.utils import client_for_request
 
 
+def staff_member_for_employee(user):
+    if user_role(user) != "employee":
+        return None
+    return getattr(user, "staff_member_profile", None)
+
+
+class ClientAppointmentPermission(permissions.IsAuthenticated):
+    def has_permission(self, request, view):
+        if not super().has_permission(request, view):
+            return False
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return user_role(request.user) in {"admin", "client"}
+
+
 class CustomerViewSet(viewsets.ModelViewSet):
     serializer_class = CustomerSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (ClientAppointmentPermission,)
 
     def get_queryset(self):
         client = client_for_request(self.request)
         if not client:
             return Customer.objects.none()
-        return Customer.objects.filter(business_client=client)
+        queryset = Customer.objects.filter(business_client=client)
+        staff_member = staff_member_for_employee(self.request.user)
+        if staff_member:
+            customer_ids = Appointment.objects.filter(
+                business_client=client,
+                staff_member=staff_member,
+                customer__isnull=False,
+            ).values("customer_id")
+            queryset = queryset.filter(id__in=customer_ids)
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(business_client=client_for_request(self.request))
@@ -28,7 +53,7 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
 class AppointmentViewSet(viewsets.ModelViewSet):
     serializer_class = AppointmentSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (ClientAppointmentPermission,)
 
     def get_queryset(self):
         client = client_for_request(self.request)
@@ -36,6 +61,12 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             return Appointment.objects.none()
 
         queryset = Appointment.objects.select_related("customer", "staff_member", "service").filter(business_client=client)
+        staff_member = staff_member_for_employee(self.request.user)
+        if user_role(self.request.user) == "employee":
+            if not staff_member:
+                return Appointment.objects.none()
+            queryset = queryset.filter(staff_member=staff_member)
+
         target_date = self.request.query_params.get("date")
         status_filter = self.request.query_params.get("status")
 
@@ -60,6 +91,9 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         date_value = request.query_params.get("date")
         duration_value = request.query_params.get("duration_minutes")
         staff_member_id = request.query_params.get("staff_member")
+        staff_member = staff_member_for_employee(request.user)
+        if staff_member:
+            staff_member_id = staff_member.id
         target_date = datetime.strptime(date_value, "%Y-%m-%d").date() if date_value else date_cls.today()
         duration = int(duration_value) if duration_value else None
 
@@ -71,6 +105,9 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         if not client:
             return Response({"detail": "Klijent nije pronadjen."}, status=404)
         staff_member_id = request.query_params.get("staff_member")
+        staff_member = staff_member_for_employee(request.user)
+        if staff_member:
+            staff_member_id = staff_member.id
         return Response(today_availability_summary(client, staff_member_id=staff_member_id))
 
     @action(detail=False, methods=["get"], url_path="search")
@@ -78,6 +115,9 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         client = client_for_request(request)
         query = request.query_params.get("q", "").strip()
         queryset = Appointment.objects.select_related("customer").filter(business_client=client)
+        staff_member = staff_member_for_employee(request.user)
+        if staff_member:
+            queryset = queryset.filter(staff_member=staff_member)
 
         if query:
             queryset = queryset.filter(
