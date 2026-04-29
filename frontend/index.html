@@ -1797,6 +1797,13 @@ async function logoTap() {
         it: 'Ciao, sono Kaleya, una receptionist AI che risponde alle chiamate, organizza appuntamenti e avvisa il tuo team.',
         de: 'Hallo, ich bin Kaleya, ein AI Empfang, der Anrufe beantwortet, Termine plant und Ihr Team benachrichtigt.'
     };
+    const audioLang = ['sr', 'en', 'es', 'pt', 'ru', 'fr', 'it', 'de'].includes(currentLang) ? currentLang : 'en';
+    try {
+        await playAudioUrl(`/assets/audio/kaleya-demo-${audioLang}.mp3?v=2`);
+        return;
+    } catch (error) {
+        console.warn('Kaleya public intro audio failed, fallback to TTS', error);
+    }
     await speak(intro[currentLang] || intro.en, currentLang);
 }
 
@@ -1955,15 +1962,16 @@ function availabilityPrompt() {
     return prompts[currentVoiceLang] || prompts[currentLang] || prompts.en;
 }
 
-async function askKaleyaBackend(text, includeVoice = true) {
+async function askKaleyaBackend(text, includeVoice = true, payload = {}, useAi = true) {
     if (!getAuthToken() || location.protocol === 'file:') return null;
     const res = await kaleyaApi('/api/ai-agent/inbound-text/', {
         method: 'POST',
         body: JSON.stringify({
             text,
-            channel: 'web',
-            use_ai: true,
-            include_voice: includeVoice
+            channel: payload.channel || 'web',
+            use_ai: useAi,
+            include_voice: includeVoice,
+            ...payload
         })
     });
     if (!res.ok) throw new Error(await res.text());
@@ -2120,6 +2128,51 @@ function appointmentPayloadForBackend(payload) {
         source: 'client_app',
         notes: ''
     };
+}
+
+function appointmentPayloadForAi(payload) {
+    return {
+        customer_name: payload.name || '',
+        phone: payload.phone || '',
+        service_id: payload.serviceId ? Number(payload.serviceId) : null,
+        staff_member_id: payload.staffMemberId ? Number(payload.staffMemberId) : null,
+        date: payload.date,
+        time: payload.time,
+        duration_minutes: Number(payload.duration || getClientCalendarSettings().interval),
+        title: payload.name || '',
+        channel: frontendChannelToBackend(payload.channel)
+    };
+}
+
+async function saveAppointmentViaAi(payload) {
+    if (!getAuthToken() || location.protocol === 'file:') return null;
+    const result = await askKaleyaBackend(
+        `Book appointment for ${payload.name || 'client'} on ${payload.date} at ${payload.time}`,
+        false,
+        appointmentPayloadForAi(payload),
+        false
+    );
+    if (result?.tool_output?.status !== 'booked') {
+        throw new Error(result?.response_text || tr('appointment_not_saved'));
+    }
+    return result;
+}
+
+async function cancelAppointmentViaAi(item) {
+    if (!item?.backendId || !getAuthToken() || location.protocol === 'file:') return null;
+    const result = await askKaleyaBackend(
+        `Cancel appointment ${item.backendId}`,
+        false,
+        {
+            appointment_id: item.backendId,
+            channel: frontendChannelToBackend(item.channel || 'web')
+        },
+        false
+    );
+    if (result?.tool_output?.status !== 'cancelled') {
+        throw new Error(result?.response_text || tr('appointment_not_cancelled'));
+    }
+    return result;
 }
 
 async function loadClientAppointmentsFromBackend() {
@@ -2919,8 +2972,12 @@ async function handleQuickAction(action) {
     if (action === 'proveri') {
         let msg = await todayAvailabilityMessageFromBackend() || todayAvailabilityMessage();
         try {
-            const result = await askKaleyaBackend(availabilityPrompt(), true);
-            if (result?.response_text) msg = result.response_text;
+            const result = await askKaleyaBackend(availabilityPrompt(), true, { date: clientIsoDate(new Date()) }, false);
+            if (result?.tool_output && result.tool_output.free_count !== undefined) {
+                msg = availabilityMessageFromFreeCount(result.tool_output.free_count);
+            } else if (result?.response_text) {
+                msg = result.response_text;
+            }
             if (result?.voice?.audio_url) {
                 await playAudioUrl(result.voice.audio_url);
             } else {
@@ -2984,8 +3041,24 @@ function firstAvailableSlot(dateIso) {
     return getClientWorkSlots().find(time => !getSlotOccupancy(events, time) && !getBlockedSlot(dateIso, time)) || '';
 }
 
+function availabilityMessageFromFreeCount(freeCount) {
+    const free = Number(freeCount || 0);
+    const messages = {
+        sr: free > 0 ? `Danas imate ${free} slobodnih slotova.` : 'Danas nema slobodnih slotova.',
+        en: free > 0 ? `You have ${free} available slots today.` : 'There are no available slots today.',
+        es: free > 0 ? `Tiene ${free} horarios libres hoy.` : 'No hay horarios libres hoy.',
+        pt: free > 0 ? `Voce tem ${free} horarios livres hoje.` : 'Nao ha horarios livres hoje.',
+        ru: free > 0 ? `Segodnya dostupno ${free} svobodnyh slotov.` : 'Segodnya net svobodnyh slotov.',
+        fr: free > 0 ? `Vous avez ${free} creneaux libres aujourd hui.` : 'Aucun creneau libre aujourd hui.',
+        it: free > 0 ? `Hai ${free} slot disponibili oggi.` : 'Non ci sono slot disponibili oggi.',
+        de: free > 0 ? `Sie haben heute ${free} freie Termine.` : 'Heute gibt es keine freien Termine.'
+    };
+    return messages[currentVoiceLang] || messages[currentLang] || messages.en;
+}
+
 function todayAvailabilityMessage() {
     const stats = getDateSlotStats(clientIsoDate(new Date()));
+    return availabilityMessageFromFreeCount(stats.free);
     const messages = {
         sr: stats.free > 0 ? `Danas imate ${stats.free} slobodnih slotova.` : 'Danas nema slobodnih slotova.',
         en: stats.free > 0 ? `You have ${stats.free} available slots today.` : 'There are no available slots today.',
@@ -3005,6 +3078,7 @@ async function todayAvailabilityMessageFromBackend() {
         const res = await kaleyaApi('/api/appointments/appointments/today-summary/', { method: 'GET' });
         if (!res.ok) throw new Error(await res.text());
         const stats = await res.json();
+        return availabilityMessageFromFreeCount(stats.free_count);
         const free = Number(stats.free_count || 0);
         const messages = {
             sr: free > 0 ? `Danas imate ${free} slobodnih slotova.` : 'Danas nema slobodnih slotova.',
@@ -3074,9 +3148,10 @@ async function cancelAppointmentById(id) {
     const item = schedule.find(entry => entry.id === id);
     if (!item) return;
     try {
-        const saved = await cancelAppointmentBackend(item);
+        const saved = await cancelAppointmentViaAi(item) || await cancelAppointmentBackend(item);
         item.status = 'cancelled';
-        if (saved) Object.assign(item, saved);
+        if (saved?.id || saved?.backendId) Object.assign(item, saved);
+        if (getAuthToken() && location.protocol !== 'file:') await loadClientAppointmentsFromBackend();
     } catch (e) {
         console.warn('Kaleya cancel appointment failed', e);
         showToast(tr('appointment_not_cancelled'));
@@ -3978,6 +4053,15 @@ async function saveAppointmentEdit() {
         return;
     }
     try {
+        if (!payload.backendId && payload.status === 'confirmed' && getAuthToken() && location.protocol !== 'file:') {
+            await saveAppointmentViaAi(payload);
+            await loadClientAppointmentsFromBackend();
+            closeAppointmentEditor();
+            renderSchedule();
+            renderClientCalendar();
+            showToast(tr('appointment_saved'));
+            return;
+        }
         const saved = await saveAppointmentToBackend(payload);
         if (saved) Object.assign(payload, saved);
     } catch (e) {

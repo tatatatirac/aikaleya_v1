@@ -2,6 +2,7 @@ from rest_framework import permissions, viewsets
 from django.db.models import Q
 
 from accounts.permissions import user_role
+from billing.services import enforce_staff_limit
 from clients.utils import client_for_request
 from staff_services.models import BlockedTime, Service, StaffMember, StaffService, WorkingHours
 from staff_services.serializers import (
@@ -46,6 +47,11 @@ class StaffMemberViewSet(BusinessScopedMixin, viewsets.ModelViewSet):
         if not client:
             return StaffMember.objects.none()
         return StaffMember.objects.filter(business_client=client)
+
+    def perform_create(self, serializer):
+        if serializer.validated_data.get("is_active", True):
+            enforce_staff_limit(self.get_client())
+        serializer.save(business_client=self.get_client())
 
 
 class ServiceViewSet(BusinessScopedMixin, viewsets.ModelViewSet):

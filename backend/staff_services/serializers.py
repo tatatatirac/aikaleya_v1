@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db import transaction
 
 from accounts.models import Profile
+from billing.services import enforce_staff_limit
 from clients.utils import client_for_request
 from staff_services.models import BlockedTime, Service, StaffMember, StaffService, WorkingHours
 
@@ -36,6 +37,8 @@ class StaffMemberSerializer(serializers.ModelSerializer):
         login_password = attrs.get("login_password", "")
         if (login_username and not login_password and not getattr(self.instance, "user_id", None)) or (login_password and not login_username and not getattr(self.instance, "user_id", None)):
             raise serializers.ValidationError({"login_username": "Za prvi login zaposlenog unesite korisnicko ime i lozinku."})
+        if self.instance and not self.instance.is_active and attrs.get("is_active") is True:
+            enforce_staff_limit(self.instance.business_client)
         return attrs
 
     def _sync_employee_user(self, staff_member, login_username="", login_password=""):

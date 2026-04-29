@@ -14,6 +14,17 @@ class PlanSerializer(serializers.ModelSerializer):
             "currency",
             "trial_days",
             "is_contact_only",
+            "max_staff_members",
+            "allow_whatsapp",
+            "allow_viber",
+            "allow_telegram",
+            "allow_sms",
+            "allow_phone_calls",
+            "allow_instagram_dm",
+            "allow_tiktok_dm",
+            "allow_client_api_override",
+            "allow_more_languages_by_agreement",
+            "includes_elevenlabs_voice",
             "description",
             "features",
             "active",
@@ -42,4 +53,3 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             "updated_at",
         )
         read_only_fields = ("id", "created_at", "updated_at")
-

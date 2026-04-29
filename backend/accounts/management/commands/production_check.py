@@ -19,6 +19,9 @@ class Command(BaseCommand):
         if not settings.ALLOWED_HOSTS or any(host in {"localhost", "127.0.0.1", "testserver"} for host in settings.ALLOWED_HOSTS):
             warnings.append("DJANGO_ALLOWED_HOSTS treba da sadrzi produkcioni domen, bez localhost vrednosti.")
 
+        if not settings.CSRF_TRUSTED_ORIGINS:
+            warnings.append("DJANGO_CSRF_TRUSTED_ORIGINS treba da sadrzi https domen produkcije.")
+
         default_db = settings.DATABASES["default"]
         if "sqlite3" in default_db.get("ENGINE", ""):
             errors.append("Produkcija treba da koristi PostgreSQL kroz DATABASE_URL, ne SQLite.")
@@ -34,6 +37,12 @@ class Command(BaseCommand):
 
         if not settings.KALEYA_ELEVENLABS_VOICE_ID:
             warnings.append("ELEVENLABS_VOICE_ID nije podesen.")
+
+        if settings.EMAIL_BACKEND.endswith("smtp.EmailBackend") and not settings.EMAIL_HOST:
+            warnings.append("EMAIL_HOST nije podesen. Email potvrde i reset lozinke nece raditi.")
+
+        if not getattr(settings, "DATA_BACKUP_DIR", None):
+            warnings.append("DATA_BACKUP_DIR nije podesen. Backup komanda koristi podrazumevani lokalni folder.")
 
         demo_admin = User.objects.filter(username="admin@aikaleya.com").first()
         if demo_admin and demo_admin.check_password("admin123"):

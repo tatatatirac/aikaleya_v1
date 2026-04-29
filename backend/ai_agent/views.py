@@ -62,6 +62,23 @@ class InboundTextAPIView(APIView):
             conversation=conversation,
             customer=customer,
             channel=serializer.validated_data.get("channel", "web"),
+            payload={
+                key: serializer.validated_data.get(key)
+                for key in (
+                    "customer_name",
+                    "phone",
+                    "email",
+                    "appointment_id",
+                    "customer_id",
+                    "service_id",
+                    "staff_member_id",
+                    "date",
+                    "time",
+                    "duration_minutes",
+                    "title",
+                )
+                if key in serializer.validated_data
+            },
             use_ai=serializer.validated_data.get("use_ai", True),
             include_voice=serializer.validated_data.get("include_voice", False),
         )

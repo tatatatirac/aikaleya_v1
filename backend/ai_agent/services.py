@@ -1,17 +1,28 @@
-from datetime import date as date_cls
+import json
+
+from django.core.serializers.json import DjangoJSONEncoder
 
 from ai_agent.models import AIIntent, AIToolRun
 from ai_agent.providers import ProviderError, generate_anthropic_reply, synthesize_elevenlabs_speech
-from appointments.services import availability_for_date
+from ai_agent.tools import (
+    book_appointment_tool,
+    cancel_appointment_tool,
+    check_availability_tool,
+    reschedule_appointment_tool,
+)
 
 
 INTENT_KEYWORDS = {
-    "book_appointment": ("zakazi", "termin", "appointment", "book", "reserva", "reserver", "prenota"),
-    "reschedule_appointment": ("pomeri", "promeni", "reschedule", "move", "cambiar", "deplacer", "sposta"),
-    "cancel_appointment": ("otkazi", "cancel", "cancela", "annuler", "annulla"),
-    "check_availability": ("slobodno", "available", "free", "disponible", "livre", "libero"),
-    "support_handoff": ("covek", "operater", "support", "human", "agent"),
+    "reschedule_appointment": ("pomeri", "promeni", "reschedule", "move", "cambiar", "deplacer", "sposta", "verschieb"),
+    "cancel_appointment": ("otkazi", "otkaži", "cancel", "cancela", "annuler", "annulla", "absagen", "stornieren"),
+    "check_availability": ("slobodno", "available", "free", "disponible", "livre", "libero", "frei"),
+    "support_handoff": ("covek", "čovek", "operater", "support", "human", "agent", "mensch"),
+    "book_appointment": ("zakazi", "zakaži", "termin", "appointment", "book", "reserva", "reserver", "prenota", "buchen"),
 }
+
+
+def json_safe(value):
+    return json.loads(json.dumps(value, cls=DjangoJSONEncoder))
 
 
 def detect_intent(text):
@@ -27,9 +38,61 @@ def build_text_response(business_client, intent, tool_output):
 
     if intent == "check_availability":
         count = tool_output.get("free_count", 0)
+        suggestions = ", ".join(tool_output.get("suggested_slots", [])[:3])
         if language == "sr":
-            return f"Danas ima {count} slobodnih termina."
+            return f"Ima {count} slobodnih termina. Predlog: {suggestions}." if suggestions else f"Ima {count} slobodnih termina."
+        if language == "de":
+            return f"Es gibt {count} freie Termine. Vorschlag: {suggestions}." if suggestions else f"Es gibt {count} freie Termine."
         return f"There are {count} available slots today."
+
+    if intent == "book_appointment":
+        status = tool_output.get("status")
+        if status == "booked":
+            if language == "sr":
+                return f"Termin je zakazan za {tool_output.get('date')} u {tool_output.get('time')}."
+            if language == "de":
+                return f"Der Termin ist fuer {tool_output.get('date')} um {tool_output.get('time')} gebucht."
+            return f"The appointment is booked for {tool_output.get('date')} at {tool_output.get('time')}."
+        if status == "needs_time":
+            suggestions = ", ".join(tool_output.get("suggested_slots", [])[:3])
+            if language == "sr":
+                return f"Mogu da ponudim ove slobodne termine: {suggestions}. Koji zelite?"
+            if language == "de":
+                return f"Ich kann diese freien Termine anbieten: {suggestions}. Welchen moechten Sie?"
+            return f"I can offer these available slots: {suggestions}. Which one works for you?"
+        if status == "time_unavailable":
+            suggestions = ", ".join(tool_output.get("suggested_slots", [])[:3])
+            if language == "sr":
+                return f"Taj termin nije slobodan. Slobodni predlozi su: {suggestions}."
+            if language == "de":
+                return f"Dieser Termin ist nicht frei. Verfuegbare Vorschlaege: {suggestions}."
+            return f"That slot is not available. Available suggestions: {suggestions}."
+
+    if intent == "cancel_appointment":
+        if tool_output.get("status") == "cancelled":
+            if language == "sr":
+                return "Termin je otkazan i slot je oslobodjen."
+            if language == "de":
+                return "Der Termin wurde abgesagt und der Slot ist wieder frei."
+            return "The appointment has been cancelled and the slot is now free."
+        if language == "sr":
+            return "Treba mi ime, telefon ili tacan termin da bih otkazala pravi termin."
+        if language == "de":
+            return "Ich brauche Name, Telefon oder den genauen Termin, um den richtigen Termin abzusagen."
+        return "I need a name, phone number or exact appointment to cancel the right slot."
+
+    if intent == "reschedule_appointment":
+        if tool_output.get("status") == "rescheduled":
+            if language == "sr":
+                return f"Termin je pomeren na {tool_output.get('date')} u {tool_output.get('time')}."
+            if language == "de":
+                return f"Der Termin wurde auf {tool_output.get('date')} um {tool_output.get('time')} verschoben."
+            return f"The appointment has been moved to {tool_output.get('date')} at {tool_output.get('time')}."
+        if language == "sr":
+            return "Mogu da pomerim termin, ali treba mi novi datum i vreme."
+        if language == "de":
+            return "Ich kann den Termin verschieben, brauche aber neues Datum und Uhrzeit."
+        return "I can reschedule it, but I need the new date and time."
 
     if intent == "support_handoff":
         if language == "sr":
@@ -58,6 +121,7 @@ def handle_inbound_text(
     conversation=None,
     customer=None,
     channel="web",
+    payload=None,
     use_ai=True,
     include_voice=False,
 ):
@@ -77,10 +141,24 @@ def handle_inbound_text(
     tool_name = "none"
     status = "skipped"
 
+    payload = payload or {}
+
     if intent_name == "check_availability":
         tool_name = "check_availability"
-        tool_output = availability_for_date(business_client, date_cls.today())
+        tool_output = check_availability_tool(business_client, text, payload)
         status = "success"
+    elif intent_name == "book_appointment":
+        tool_name = "book_appointment"
+        tool_output = book_appointment_tool(business_client, text, customer=customer, channel=channel, payload=payload)
+        status = "success" if tool_output.get("status") in {"booked", "needs_time", "time_unavailable"} else "failed"
+    elif intent_name == "cancel_appointment":
+        tool_name = "cancel_appointment"
+        tool_output = cancel_appointment_tool(business_client, text, customer=customer, payload=payload)
+        status = "success" if tool_output.get("status") == "cancelled" else "planned"
+    elif intent_name == "reschedule_appointment":
+        tool_name = "reschedule_appointment"
+        tool_output = reschedule_appointment_tool(business_client, text, customer=customer, channel=channel, payload=payload)
+        status = "success" if tool_output.get("status") == "rescheduled" else "planned"
     elif intent_name == "support_handoff":
         tool_name = "handoff_to_support"
         tool_output = {"handoff": True, "channel": channel}
@@ -91,8 +169,8 @@ def handle_inbound_text(
         intent=intent,
         tool_name=tool_name,
         status=status,
-        input_payload={"text": text, "channel": channel},
-        output_payload=tool_output,
+        input_payload=json_safe({"text": text, "channel": channel, "payload": payload}),
+        output_payload=json_safe(tool_output),
     )
 
     response_text = build_text_response(business_client, intent.intent, tool_output)

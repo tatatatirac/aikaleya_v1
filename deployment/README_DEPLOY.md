@@ -55,6 +55,8 @@ ELEVENLABS_VOICE_ID
 DJANGO_ALLOWED_HOSTS
 DJANGO_CSRF_TRUSTED_ORIGINS
 CORS_ALLOWED_ORIGINS
+EMAIL_HOST / EMAIL_HOST_USER / EMAIL_HOST_PASSWORD
+DATA_BACKUP_DIR
 ```
 
 Ne koristi `seed_demo` na produkciji.
@@ -72,8 +74,8 @@ pip install -r requirements.txt
 
 ```bash
 python backend/manage.py check --deploy
-python backend/manage.py production_check
 python backend/manage.py migrate
+python backend/manage.py production_check
 python backend/manage.py collectstatic --noinput
 python backend/manage.py createsuperuser
 ```
@@ -113,3 +115,18 @@ https://aikaleya.com/api/health/
 ```
 
 `/admin/` je Kaleya radni dashboard. Tehnički Django admin je na `/django-admin/`.
+
+## 11. Backup baze
+
+Ručni JSON backup:
+
+```bash
+source /var/www/aikaleya/.venv/bin/activate
+python /var/www/aikaleya/backend/manage.py backup_data
+```
+
+Preporučeni cron primer za svaku noć u 03:15:
+
+```bash
+15 3 * * * cd /var/www/aikaleya && .venv/bin/python backend/manage.py backup_data >> /var/log/kaleya-backup.log 2>&1
+```

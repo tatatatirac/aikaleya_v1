@@ -7,6 +7,7 @@ __pycache__/
 db.sqlite3
 media/
 staticfiles/
+backups/
 .pytest_cache/
 .mypy_cache/
 .coverage

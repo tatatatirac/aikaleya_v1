@@ -46,7 +46,7 @@ class Command(BaseCommand):
             name="Demo Client",
             defaults={
                 "public_name": "Kaleya Demo Client",
-                "package": BusinessClient.PACKAGE_PRO,
+                "package": BusinessClient.PACKAGE_BUSINESS,
                 "language": "en",
                 "interface_language": "en",
                 "voice_language": "en",
@@ -97,11 +97,11 @@ class Command(BaseCommand):
         )
 
         self.create_plans()
-        pro_plan = Plan.objects.get(code=Plan.CODE_PRO)
-        Subscription.objects.get_or_create(
+        business_plan = Plan.objects.get(code=Plan.CODE_BUSINESS)
+        Subscription.objects.update_or_create(
             business_client=client,
             defaults={
-                "plan": pro_plan,
+                "plan": business_plan,
                 "status": Subscription.STATUS_TRIAL,
                 "trial_ends_at": timezone.now() + timedelta(days=14),
             },
@@ -156,6 +156,14 @@ class Command(BaseCommand):
                 "monthly_price": 49,
                 "currency": "USD",
                 "sort_order": 1,
+                "max_staff_members": 0,
+                "allow_sms": False,
+                "allow_phone_calls": False,
+                "allow_instagram_dm": False,
+                "allow_tiktok_dm": False,
+                "allow_client_api_override": False,
+                "allow_more_languages_by_agreement": False,
+                "includes_elevenlabs_voice": False,
                 "description": "AI Kaleya za vlasnika i osnovne komunikacione kanale.",
                 "features": [
                     "AI Kaleya zakazivanja",
@@ -172,6 +180,14 @@ class Command(BaseCommand):
                 "monthly_price": 119,
                 "currency": "USD",
                 "sort_order": 2,
+                "max_staff_members": 1,
+                "allow_sms": False,
+                "allow_phone_calls": False,
+                "allow_instagram_dm": True,
+                "allow_tiktok_dm": True,
+                "allow_client_api_override": False,
+                "allow_more_languages_by_agreement": False,
+                "includes_elevenlabs_voice": False,
                 "description": "Za vlasnika plus jednog radnika sa Kaleya app pristupom.",
                 "features": [
                     "Sve iz Basic",
@@ -188,6 +204,14 @@ class Command(BaseCommand):
                 "monthly_price": 349,
                 "currency": "USD",
                 "sort_order": 3,
+                "max_staff_members": 5,
+                "allow_sms": False,
+                "allow_phone_calls": False,
+                "allow_instagram_dm": True,
+                "allow_tiktok_dm": True,
+                "allow_client_api_override": True,
+                "allow_more_languages_by_agreement": True,
+                "includes_elevenlabs_voice": False,
                 "description": "Za timove do 5 radnika.",
                 "features": [
                     "Sve iz Basic + Pro",
@@ -203,6 +227,14 @@ class Command(BaseCommand):
                 "monthly_price": 579,
                 "currency": "USD",
                 "sort_order": 4,
+                "max_staff_members": 15,
+                "allow_sms": True,
+                "allow_phone_calls": True,
+                "allow_instagram_dm": True,
+                "allow_tiktok_dm": True,
+                "allow_client_api_override": True,
+                "allow_more_languages_by_agreement": True,
+                "includes_elevenlabs_voice": True,
                 "description": "Za vece timove do 15 radnika i glasovne kanale.",
                 "features": [
                     "Sve iz Basic + Pro + Business",
@@ -218,6 +250,14 @@ class Command(BaseCommand):
                 "currency": "USD",
                 "sort_order": 5,
                 "is_contact_only": True,
+                "max_staff_members": None,
+                "allow_sms": True,
+                "allow_phone_calls": True,
+                "allow_instagram_dm": True,
+                "allow_tiktok_dm": True,
+                "allow_client_api_override": True,
+                "allow_more_languages_by_agreement": True,
+                "includes_elevenlabs_voice": True,
                 "description": "Za 15+ radnika i custom integracije.",
                 "features": [
                     "Sve iz Basic + Pro + Business + Business+",
@@ -233,6 +273,14 @@ class Command(BaseCommand):
                 "currency": "USD",
                 "sort_order": 6,
                 "is_contact_only": True,
+                "max_staff_members": None,
+                "allow_sms": True,
+                "allow_phone_calls": True,
+                "allow_instagram_dm": True,
+                "allow_tiktok_dm": True,
+                "allow_client_api_override": True,
+                "allow_more_languages_by_agreement": True,
+                "includes_elevenlabs_voice": True,
                 "description": "Kupovina kompletnog projekta sa hostingom i domenom.",
                 "features": ["Frontend", "Backend", "AI integracije", "Deploy priprema"],
             },
