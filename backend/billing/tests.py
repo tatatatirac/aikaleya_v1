@@ -25,13 +25,27 @@ class PackageLimitTests(TestCase):
         self.api = APIClient()
         self.api.force_authenticate(self.user)
 
-    def make_plan(self, code, max_staff):
+    def make_plan(self, code, max_staff, **extra):
+        defaults = {
+            "allow_whatsapp": True,
+            "allow_viber": True,
+            "allow_telegram": True,
+            "allow_sms": False,
+            "allow_phone_calls": False,
+            "allow_instagram_dm": False,
+            "allow_tiktok_dm": False,
+            "allow_client_api_override": False,
+            "allow_more_languages_by_agreement": False,
+            "includes_elevenlabs_voice": False,
+        }
+        defaults.update(extra)
         return Plan.objects.create(
             code=code,
             name=code,
             monthly_price=1,
             currency="USD",
             max_staff_members=max_staff,
+            **defaults,
         )
 
     def test_basic_package_blocks_employee_creation(self):
@@ -67,3 +81,93 @@ class PackageLimitTests(TestCase):
         self.assertEqual(first.status_code, 201)
         self.assertEqual(second.status_code, 400)
         self.assertIn("package", second.data)
+
+    def test_business_package_blocks_sms_integration(self):
+        plan = self.make_plan(
+            Plan.CODE_BUSINESS,
+            5,
+            allow_instagram_dm=True,
+            allow_tiktok_dm=True,
+            allow_client_api_override=True,
+            allow_more_languages_by_agreement=True,
+        )
+        self.client_profile.package = Plan.CODE_BUSINESS
+        self.client_profile.save(update_fields=["package", "updated_at"])
+        Subscription.objects.create(business_client=self.client_profile, plan=plan)
+
+        response = self.api.post(
+            "/api/integrations/connections/",
+            {"provider": "sms", "enabled": True, "status": "connected"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("package", response.data)
+
+    def test_business_plus_package_allows_sms_integration(self):
+        plan = self.make_plan(
+            Plan.CODE_BUSINESS_PLUS,
+            15,
+            allow_sms=True,
+            allow_phone_calls=True,
+            allow_instagram_dm=True,
+            allow_tiktok_dm=True,
+            allow_client_api_override=True,
+            allow_more_languages_by_agreement=True,
+            includes_elevenlabs_voice=True,
+        )
+        self.client_profile.package = Plan.CODE_BUSINESS_PLUS
+        self.client_profile.save(update_fields=["package", "updated_at"])
+        Subscription.objects.create(business_client=self.client_profile, plan=plan)
+
+        response = self.api.post(
+            "/api/integrations/connections/",
+            {"provider": "sms", "enabled": True, "status": "connected"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+
+    def test_ai_sms_channel_is_blocked_until_business_plus(self):
+        plan = self.make_plan(
+            Plan.CODE_BUSINESS,
+            5,
+            allow_instagram_dm=True,
+            allow_tiktok_dm=True,
+            allow_client_api_override=True,
+        )
+        self.client_profile.package = Plan.CODE_BUSINESS
+        self.client_profile.save(update_fields=["package", "updated_at"])
+        Subscription.objects.create(business_client=self.client_profile, plan=plan)
+
+        response = self.api.post(
+            "/api/ai-agent/inbound-text/",
+            {"text": "Check free slots today", "channel": "sms", "use_ai": False},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("package", response.data)
+
+    def test_entitlements_endpoint_returns_package_rules(self):
+        plan = self.make_plan(
+            Plan.CODE_BUSINESS_PLUS,
+            15,
+            allow_sms=True,
+            allow_phone_calls=True,
+            allow_instagram_dm=True,
+            allow_tiktok_dm=True,
+            allow_client_api_override=True,
+            allow_more_languages_by_agreement=True,
+            includes_elevenlabs_voice=True,
+        )
+        self.client_profile.package = Plan.CODE_BUSINESS_PLUS
+        self.client_profile.save(update_fields=["package", "updated_at"])
+        Subscription.objects.create(business_client=self.client_profile, plan=plan)
+
+        response = self.api.get("/api/billing/subscriptions/entitlements/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["entitlements"]["max_staff_members"], 15)
+        self.assertTrue(response.data["entitlements"]["allow_sms"])
+        self.assertTrue(response.data["entitlements"]["includes_elevenlabs_voice"])

@@ -11,6 +11,17 @@ class ProviderError(Exception):
     pass
 
 
+def _extract_json_object(text):
+    start = text.find("{")
+    end = text.rfind("}")
+    if start == -1 or end == -1 or end <= start:
+        raise ProviderError("AI planner nije vratio JSON odgovor.")
+    try:
+        return json.loads(text[start : end + 1])
+    except json.JSONDecodeError as exc:
+        raise ProviderError(f"AI planner JSON nije validan: {exc}") from exc
+
+
 def _post_json(url, payload, headers, timeout=45):
     data = json.dumps(payload).encode("utf-8")
     req = request.Request(url, data=data, headers=headers, method="POST")
@@ -109,6 +120,58 @@ def generate_anthropic_reply(business_client, user_text, system_prompt, context=
     content = response.get("content") or []
     text_blocks = [item.get("text", "") for item in content if item.get("type") == "text"]
     return "\n".join(block for block in text_blocks if block).strip()
+
+
+def generate_anthropic_plan(business_client, user_text, context=None):
+    config = get_client_ai_config(business_client)
+    if config["provider"] != "anthropic":
+        raise ProviderError(f"Nepodrzan AI provider: {config['provider']}")
+    if not config["api_key"]:
+        raise ProviderError("ANTHROPIC_API_KEY nije podesen.")
+
+    context_text = json.dumps(context or {}, ensure_ascii=False, default=str)
+    system_prompt = (
+        "You are Kaleya's scheduling planner. "
+        "Your only job is to convert the user's message into one valid JSON object. "
+        "Do not answer conversationally. Do not use Markdown. "
+        "Allowed intents: book_appointment, reschedule_appointment, cancel_appointment, "
+        "check_availability, business_info, support_handoff, unknown. "
+        "Use null when a value is missing. Dates must be YYYY-MM-DD. Times must be HH:MM in 24h format. "
+        "If the user asks for the first available slot, leave staff_member_id null and set staff_hint to null. "
+        "If the user mentions a service or employee by name, put that text in service_hint or staff_hint. "
+        "Return keys: intent, confidence, date, time, duration_minutes, customer_name, phone, email, "
+        "appointment_id, service_id, service_hint, staff_member_id, staff_hint, title, needs_human_support."
+    )
+    payload = {
+        "model": config["model"],
+        "max_tokens": 700,
+        "temperature": 0,
+        "system": system_prompt,
+        "messages": [
+            {
+                "role": "user",
+                "content": (
+                    "Business context:\n"
+                    f"{context_text}\n\n"
+                    "User message:\n"
+                    f"{user_text}\n\n"
+                    "Return only JSON."
+                ),
+            }
+        ],
+    }
+    response = _post_json(
+        "https://api.anthropic.com/v1/messages",
+        payload,
+        {
+            "Content-Type": "application/json",
+            "x-api-key": config["api_key"],
+            "anthropic-version": "2023-06-01",
+        },
+    )
+    content = response.get("content") or []
+    text_blocks = [item.get("text", "") for item in content if item.get("type") == "text"]
+    return _extract_json_object("\n".join(text_blocks))
 
 
 def synthesize_elevenlabs_speech(business_client, text):

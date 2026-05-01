@@ -47,6 +47,8 @@ urlpatterns = [
     path("register-business.html", FrontendTemplateView.as_view(template_name="register-business.html"), name="frontend-register-business"),
     path("register-business-plus.html", FrontendTemplateView.as_view(template_name="register-business-plus.html"), name="frontend-register-business-plus"),
     path("register-business-pro-plus.html", FrontendTemplateView.as_view(template_name="register-business-pro-plus.html"), name="frontend-register-business-pro-plus"),
+    path("manifest.webmanifest", no_cache_static_serve, {"path": "manifest.webmanifest", "document_root": settings.PROJECT_ROOT / "frontend"}),
+    path("sw.js", no_cache_static_serve, {"path": "sw.js", "document_root": settings.PROJECT_ROOT / "frontend"}),
     path("dashboard/", dashboard, name="dashboard"),
     path("admin/", dashboard, name="kaleya-admin"),
     path("admin/login/", lambda request: redirect("/django-admin/login/?next=/admin/")),

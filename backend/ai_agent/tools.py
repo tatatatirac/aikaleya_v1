@@ -3,6 +3,7 @@ from datetime import date as date_cls
 from datetime import datetime, timedelta
 
 from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db.models import Q
 
 from appointments.models import Appointment, Customer
 from appointments.services import availability_for_date
@@ -100,6 +101,102 @@ def scoped_service(business_client, service_id):
     return Service.objects.filter(id=service_id, business_client=business_client, is_active=True).first()
 
 
+def eligible_staff_members(business_client, service=None, preferred_staff_member=None):
+    if preferred_staff_member:
+        return [preferred_staff_member]
+
+    queryset = StaffMember.objects.filter(business_client=business_client, is_active=True)
+    if service:
+        queryset = queryset.filter(staff_services__service=service, staff_services__is_active=True)
+
+    staff_members = list(queryset.distinct().order_by("full_name"))
+    return staff_members or [None]
+
+
+def format_suggested_slot(slot_time, staff_member=None):
+    if staff_member:
+        return f"{slot_time} - {staff_member.full_name}"
+    return slot_time
+
+
+def aggregate_staff_availability(business_client, target_date, duration_minutes, service=None, staff_member=None, limit=5):
+    total_free = 0
+    total_busy = 0
+    is_closed = True
+    suggested_details = []
+    per_staff = []
+
+    for candidate in eligible_staff_members(business_client, service=service, preferred_staff_member=staff_member):
+        availability, slots = first_free_slots(
+            business_client,
+            target_date,
+            duration_minutes=duration_minutes,
+            staff_member_id=candidate.id if candidate else None,
+            limit=limit,
+        )
+        total_free += availability["free_count"]
+        total_busy += availability["busy_count"]
+        is_closed = is_closed and availability["is_closed"]
+        per_staff.append(
+            {
+                "staff_member_id": candidate.id if candidate else None,
+                "staff_member": candidate.full_name if candidate else "",
+                "free_count": availability["free_count"],
+                "busy_count": availability["busy_count"],
+                "is_closed": availability["is_closed"],
+            }
+        )
+        for slot in slots:
+            suggested_details.append(
+                {
+                    "time": slot,
+                    "staff_member_id": candidate.id if candidate else None,
+                    "staff_member": candidate.full_name if candidate else "",
+                    "label": format_suggested_slot(slot, candidate),
+                }
+            )
+
+    suggested_details = sorted(suggested_details, key=lambda item: (item["time"], item["staff_member"]))[:limit]
+    return {
+        "date": target_date.isoformat(),
+        "work_start": business_client.work_start.strftime("%H:%M"),
+        "work_end": business_client.work_end.strftime("%H:%M"),
+        "duration_minutes": duration_minutes,
+        "staff_member_id": staff_member.id if staff_member else None,
+        "free_count": total_free,
+        "busy_count": total_busy,
+        "is_closed": is_closed,
+        "slots": [],
+        "per_staff": per_staff,
+        "suggested_slots": [item["label"] for item in suggested_details],
+        "suggested_slots_detail": suggested_details,
+    }
+
+
+def resolve_staff_member_by_hint(business_client, hint):
+    hint = (hint or "").strip()
+    if not hint:
+        return None
+    return (
+        StaffMember.objects.filter(business_client=business_client, is_active=True)
+        .filter(Q(full_name__icontains=hint) | Q(role_title__icontains=hint))
+        .order_by("full_name")
+        .first()
+    )
+
+
+def resolve_service_by_hint(business_client, hint):
+    hint = (hint or "").strip()
+    if not hint:
+        return None
+    return (
+        Service.objects.filter(business_client=business_client, is_active=True)
+        .filter(Q(name__icontains=hint) | Q(category__icontains=hint) | Q(description__icontains=hint))
+        .order_by("name")
+        .first()
+    )
+
+
 def ensure_customer(business_client, customer=None, payload=None):
     if customer:
         return customer
@@ -133,9 +230,17 @@ def ensure_customer(business_client, customer=None, payload=None):
 def check_availability_tool(business_client, text="", payload=None):
     payload = payload or {}
     target_date = parse_requested_date(text, payload.get("date"))
-    service = scoped_service(business_client, payload.get("service_id"))
-    staff_member = scoped_staff_member(business_client, payload.get("staff_member_id"))
+    service = scoped_service(business_client, payload.get("service_id")) or resolve_service_by_hint(business_client, payload.get("service_hint"))
+    staff_member = scoped_staff_member(business_client, payload.get("staff_member_id")) or resolve_staff_member_by_hint(business_client, payload.get("staff_hint"))
     duration = int(payload.get("duration_minutes") or (service.duration_minutes if service else business_client.slot_interval_minutes))
+    if not staff_member and StaffMember.objects.filter(business_client=business_client, is_active=True).exists():
+        return aggregate_staff_availability(
+            business_client,
+            target_date,
+            duration_minutes=duration,
+            service=service,
+            staff_member=None,
+        )
     availability, suggested_slots = first_free_slots(
         business_client,
         target_date,
@@ -150,15 +255,17 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
     payload = payload or {}
     target_date = parse_requested_date(text, payload.get("date"))
     requested_time = parse_requested_time(text, payload.get("time"))
-    service = scoped_service(business_client, payload.get("service_id"))
-    staff_member = scoped_staff_member(business_client, payload.get("staff_member_id"))
+    service = scoped_service(business_client, payload.get("service_id")) or resolve_service_by_hint(business_client, payload.get("service_hint"))
+    staff_member = scoped_staff_member(business_client, payload.get("staff_member_id")) or resolve_staff_member_by_hint(business_client, payload.get("staff_hint"))
     duration = int(payload.get("duration_minutes") or (service.duration_minutes if service else business_client.slot_interval_minutes))
-    availability, suggested_slots = first_free_slots(
+    aggregate_availability = aggregate_staff_availability(
         business_client,
         target_date,
         duration_minutes=duration,
-        staff_member_id=staff_member.id if staff_member else None,
+        service=service,
+        staff_member=staff_member,
     )
+    suggested_slots = aggregate_availability["suggested_slots"]
 
     if not requested_time:
         return {
@@ -166,23 +273,39 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
             "date": target_date.isoformat(),
             "duration_minutes": duration,
             "suggested_slots": suggested_slots,
-            "free_count": availability["free_count"],
+            "suggested_slots_detail": aggregate_availability["suggested_slots_detail"],
+            "free_count": aggregate_availability["free_count"],
         }
 
-    if requested_time not in [slot["time"] for slot in availability["slots"] if slot["available"]]:
+    selected_staff_member = None
+    requested_time_available = False
+    for candidate in eligible_staff_members(business_client, service=service, preferred_staff_member=staff_member):
+        availability, _ = first_free_slots(
+            business_client,
+            target_date,
+            duration_minutes=duration,
+            staff_member_id=candidate.id if candidate else None,
+        )
+        if requested_time in [slot["time"] for slot in availability["slots"] if slot["available"]]:
+            selected_staff_member = candidate
+            requested_time_available = True
+            break
+
+    if not requested_time_available:
         return {
             "status": "time_unavailable",
             "date": target_date.isoformat(),
             "requested_time": requested_time,
             "suggested_slots": suggested_slots,
-            "free_count": availability["free_count"],
+            "suggested_slots_detail": aggregate_availability["suggested_slots_detail"],
+            "free_count": aggregate_availability["free_count"],
         }
 
     customer = ensure_customer(business_client, customer=customer, payload={**payload, "channel": channel})
     appointment = Appointment(
         business_client=business_client,
         customer=customer,
-        staff_member=staff_member,
+        staff_member=selected_staff_member,
         service=service,
         title=payload.get("title") or ("AI booking request" if not customer else ""),
         status=Appointment.STATUS_CONFIRMED,

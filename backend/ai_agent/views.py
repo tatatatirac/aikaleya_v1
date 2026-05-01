@@ -7,6 +7,7 @@ from ai_agent.providers import ProviderError, get_client_ai_config, get_client_v
 from ai_agent.serializers import AIIntentSerializer, AIToolRunSerializer, InboundTextSerializer, TextToSpeechSerializer
 from ai_agent.services import handle_inbound_text
 from appointments.models import Customer
+from billing.services import enforce_channel_allowed, enforce_elevenlabs_voice_allowed
 from clients.utils import client_for_request
 from communications.models import Conversation
 
@@ -42,6 +43,7 @@ class InboundTextAPIView(APIView):
         client = client_for_request(request)
         if not client:
             return Response({"detail": "Klijent nije pronadjen."}, status=404)
+        enforce_channel_allowed(client, serializer.validated_data.get("channel", "web"))
 
         conversation = None
         customer = None
@@ -71,7 +73,9 @@ class InboundTextAPIView(APIView):
                     "appointment_id",
                     "customer_id",
                     "service_id",
+                    "service_hint",
                     "staff_member_id",
+                    "staff_hint",
                     "date",
                     "time",
                     "duration_minutes",
@@ -94,6 +98,7 @@ class TextToSpeechAPIView(APIView):
         client = client_for_request(request)
         if not client:
             return Response({"detail": "Klijent nije pronadjen."}, status=404)
+        enforce_elevenlabs_voice_allowed(client)
 
         try:
             return Response(synthesize_elevenlabs_speech(client, serializer.validated_data["text"]))
@@ -112,10 +117,17 @@ class VoiceStatusAPIView(APIView):
         config = get_client_voice_config(client)
         api_key_set = bool(config.get("api_key"))
         voice_id_set = bool(config.get("voice_id"))
+        package_allows_voice = False
+        try:
+            enforce_elevenlabs_voice_allowed(client)
+            package_allows_voice = True
+        except Exception:
+            package_allows_voice = False
         return Response(
             {
                 "provider": "elevenlabs",
-                "connected": api_key_set and voice_id_set,
+                "connected": package_allows_voice and api_key_set and voice_id_set,
+                "package_allows_voice": package_allows_voice,
                 "api_key_set": api_key_set,
                 "voice_id_set": voice_id_set,
                 "model_id": config.get("model_id", ""),
@@ -133,6 +145,12 @@ class ProviderStatusAPIView(APIView):
 
         ai_config = get_client_ai_config(client)
         voice_config = get_client_voice_config(client)
+        package_allows_voice = False
+        try:
+            enforce_elevenlabs_voice_allowed(client)
+            package_allows_voice = True
+        except Exception:
+            package_allows_voice = False
         return Response(
             {
                 "ai": {
@@ -143,7 +161,8 @@ class ProviderStatusAPIView(APIView):
                 "voice": {
                     "provider": voice_config.get("provider", "elevenlabs"),
                     "model_id": voice_config.get("model_id", ""),
-                    "connected": bool(voice_config.get("api_key")) and bool(voice_config.get("voice_id")),
+                    "connected": package_allows_voice and bool(voice_config.get("api_key")) and bool(voice_config.get("voice_id")),
+                    "package_allows_voice": package_allows_voice,
                 },
             }
         )

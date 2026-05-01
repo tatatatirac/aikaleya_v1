@@ -15,6 +15,7 @@ class IntegrationConnectionViewSet(viewsets.ModelViewSet):
             client_id = self.request.query_params.get("client_id") or self.request.data.get("business_client")
             if client_id:
                 return BusinessClient.objects.get(id=client_id)
+            return BusinessClient.objects.first()
         return get_active_client_for_user(self.request.user)
 
     def get_queryset(self):
@@ -23,6 +24,10 @@ class IntegrationConnectionViewSet(viewsets.ModelViewSet):
             return IntegrationConnection.objects.none()
         return IntegrationConnection.objects.filter(business_client=client)
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["business_client"] = self.get_client()
+        return context
+
     def perform_create(self, serializer):
         serializer.save(business_client=self.get_client())
-

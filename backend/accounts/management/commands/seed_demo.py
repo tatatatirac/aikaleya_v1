@@ -102,7 +102,9 @@ class Command(BaseCommand):
         )
 
         self.create_plans()
-        business_plan = Plan.objects.get(code=Plan.CODE_BUSINESS)
+        business_plan = Plan.objects.get(code=Plan.CODE_BUSINESS_PLUS)
+        client.package = Plan.CODE_BUSINESS_PLUS
+        client.save(update_fields=["package", "updated_at"])
         Subscription.objects.update_or_create(
             business_client=client,
             defaults={

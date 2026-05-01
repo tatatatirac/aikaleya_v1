@@ -1,15 +1,17 @@
 import json
+from datetime import date
 
 from django.core.serializers.json import DjangoJSONEncoder
 
 from ai_agent.models import AIIntent, AIToolRun
-from ai_agent.providers import ProviderError, generate_anthropic_reply, synthesize_elevenlabs_speech
+from ai_agent.providers import ProviderError, generate_anthropic_plan, generate_anthropic_reply, synthesize_elevenlabs_speech
 from ai_agent.tools import (
     book_appointment_tool,
     cancel_appointment_tool,
     check_availability_tool,
     reschedule_appointment_tool,
 )
+from staff_services.models import Service, StaffMember
 
 
 INTENT_KEYWORDS = {
@@ -19,6 +21,24 @@ INTENT_KEYWORDS = {
     "support_handoff": ("covek", "čovek", "operater", "support", "human", "agent", "mensch"),
     "book_appointment": ("zakazi", "zakaži", "termin", "appointment", "book", "reserva", "reserver", "prenota", "buchen"),
 }
+
+VALID_INTENTS = set(INTENT_KEYWORDS.keys()) | {"business_info", "unknown"}
+
+PLAN_PAYLOAD_KEYS = (
+    "customer_name",
+    "phone",
+    "email",
+    "appointment_id",
+    "customer_id",
+    "service_id",
+    "service_hint",
+    "staff_member_id",
+    "staff_hint",
+    "date",
+    "time",
+    "duration_minutes",
+    "title",
+)
 
 
 def json_safe(value):
@@ -31,6 +51,74 @@ def detect_intent(text):
         if any(keyword in normalized for keyword in keywords):
             return intent, 0.82
     return "unknown", 0.25
+
+
+def clean_empty_values(payload):
+    cleaned = {}
+    for key, value in (payload or {}).items():
+        if value in ("", None, [], {}):
+            continue
+        cleaned[key] = value
+    return cleaned
+
+
+def safe_float(value, fallback):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return fallback
+
+
+def build_planner_context(business_client):
+    services = list(
+        Service.objects.filter(business_client=business_client, is_active=True)
+        .order_by("category", "name")
+        .values("id", "name", "category", "duration_minutes", "price", "currency")[:30]
+    )
+    staff_members = list(
+        StaffMember.objects.filter(business_client=business_client, is_active=True)
+        .order_by("full_name")
+        .values("id", "full_name", "role_title")[:30]
+    )
+    return {
+        "today": date.today().isoformat(),
+        "business": {
+            "id": business_client.id,
+            "name": business_client.public_name or business_client.name,
+            "language": business_client.interface_language or business_client.language or "en",
+            "timezone": business_client.timezone,
+            "work_start": business_client.work_start.strftime("%H:%M"),
+            "work_end": business_client.work_end.strftime("%H:%M"),
+            "slot_interval_minutes": business_client.slot_interval_minutes,
+        },
+        "services": services,
+        "staff_members": staff_members,
+    }
+
+
+def normalize_ai_plan(plan):
+    if not isinstance(plan, dict):
+        return {}
+
+    normalized = {}
+    for key in PLAN_PAYLOAD_KEYS:
+        value = plan.get(key)
+        if value in ("", None, [], {}):
+            continue
+        if key in {"appointment_id", "customer_id", "service_id", "staff_member_id", "duration_minutes"}:
+            try:
+                normalized[key] = int(value)
+            except (TypeError, ValueError):
+                continue
+        else:
+            normalized[key] = value
+    return normalized
+
+
+def merge_payloads(ai_payload, explicit_payload):
+    merged = clean_empty_values(ai_payload)
+    merged.update(clean_empty_values(explicit_payload))
+    return merged
 
 
 def build_text_response(business_client, intent, tool_output):
@@ -99,6 +187,24 @@ def build_text_response(business_client, intent, tool_output):
             return "Razumem. Prebacujem zahtev support timu."
         return "I understand. I am handing this over to support."
 
+    if intent == "business_info":
+        services = list(Service.objects.filter(business_client=business_client, is_active=True).order_by("name")[:5])
+        service_names = ", ".join(service.name for service in services)
+        if language == "sr":
+            return (
+                f"Radno vreme je od {business_client.work_start.strftime('%H:%M')} do {business_client.work_end.strftime('%H:%M')}. "
+                f"Usluge: {service_names}."
+            ).strip()
+        if language == "de":
+            return (
+                f"Die Arbeitszeit ist von {business_client.work_start.strftime('%H:%M')} bis {business_client.work_end.strftime('%H:%M')}. "
+                f"Leistungen: {service_names}."
+            ).strip()
+        return (
+            f"Working hours are {business_client.work_start.strftime('%H:%M')} to {business_client.work_end.strftime('%H:%M')}. "
+            f"Services: {service_names}."
+        ).strip()
+
     if language == "sr":
         return "Razumem zahtev. Sledeci korak je provera kalendara i potvrda termina."
     return "I understand the request. The next step is checking the calendar and confirming the appointment."
@@ -109,8 +215,11 @@ def build_system_prompt(business_client):
     return (
         "Ti si Kaleya, profesionalna AI sekretarica za zakazivanje termina. "
         "Odgovaraj kratko, jasno i ljubazno. "
-        "Ne izmisljaj termine. Ako dobijes podatke o slobodnim slotovima, koristi samo te podatke. "
-        "Ako korisnik trazi nesto sto ne mozes da potvrdis, reci da ces proveriti ili prebaciti supportu. "
+        "Ne izmisljaj termine. Tool output je jedini izvor istine za kalendar. "
+        "Ako tool output sadrzi free_count, date ili suggested_slots, ne smes reci da ne vidis kalendar ili da nemas datum. "
+        "Ako safe_deterministic_response postoji u kontekstu, koristi ga kao proverenu osnovu i samo ga prirodnije formuliši. "
+        "Ne koristi emoji. "
+        "Ako korisnik trazi nesto sto ne mozes da potvrdis kroz tool output, reci da ces proveriti ili prebaciti supportu. "
         f"Jezik odgovora mora biti: {language}."
     )
 
@@ -125,7 +234,28 @@ def handle_inbound_text(
     use_ai=True,
     include_voice=False,
 ):
+    payload = payload or {}
+    planner_raw_response = {"engine": "keyword-fallback"}
+    planner_payload = {}
     intent_name, confidence = detect_intent(text)
+
+    if use_ai:
+        try:
+            planner = generate_anthropic_plan(
+                business_client,
+                text,
+                context=build_planner_context(business_client),
+            )
+            planned_intent = (planner.get("intent") or "").strip()
+            if planned_intent in VALID_INTENTS:
+                intent_name = planned_intent
+                confidence = safe_float(planner.get("confidence"), 0.86)
+            planner_payload = normalize_ai_plan(planner)
+            planner_raw_response = {"engine": "anthropic-planner", "plan": planner}
+        except ProviderError as exc:
+            planner_raw_response = {"engine": "keyword-fallback", "planner_error": str(exc)}
+
+    payload = merge_payloads(planner_payload, payload)
     intent = AIIntent.objects.create(
         business_client=business_client,
         conversation=conversation,
@@ -134,14 +264,12 @@ def handle_inbound_text(
         confidence=confidence,
         input_text=text or "",
         language=business_client.interface_language or business_client.language or "en",
-        raw_response={"engine": "keyword-fallback"},
+        raw_response=planner_raw_response,
     )
 
     tool_output = {}
     tool_name = "none"
     status = "skipped"
-
-    payload = payload or {}
 
     if intent_name == "check_availability":
         tool_name = "check_availability"
@@ -162,6 +290,15 @@ def handle_inbound_text(
     elif intent_name == "support_handoff":
         tool_name = "handoff_to_support"
         tool_output = {"handoff": True, "channel": channel}
+        status = "success"
+    elif intent_name == "business_info":
+        tool_name = "business_info"
+        tool_output = {
+            "business_name": business_client.public_name or business_client.name,
+            "work_start": business_client.work_start.strftime("%H:%M"),
+            "work_end": business_client.work_end.strftime("%H:%M"),
+            "slot_interval_minutes": business_client.slot_interval_minutes,
+        }
         status = "success"
 
     tool_run = AIToolRun.objects.create(
@@ -191,6 +328,7 @@ def handle_inbound_text(
                     },
                     "detected_intent": intent.intent,
                     "tool_output": tool_output,
+                    "safe_deterministic_response": response_text,
                 },
             ) or response_text
             ai_provider_used = "anthropic"

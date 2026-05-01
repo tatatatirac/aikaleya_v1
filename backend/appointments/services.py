@@ -110,7 +110,7 @@ def availability_for_date(business_client, target_date, duration_minutes=None, s
         date=target_date,
     )
     if staff_member_id:
-        appointments_query = appointments_query.filter(staff_member_id=staff_member_id)
+        appointments_query = appointments_query.filter(Q(staff_member_id=staff_member_id) | Q(staff_member__isnull=True))
     appointments = list(appointments_query.order_by("start_time"))
     active = [appointment for appointment in appointments if appointment.status in ACTIVE_STATUSES]
 
