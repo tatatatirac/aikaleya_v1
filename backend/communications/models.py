@@ -10,6 +10,7 @@ class Conversation(models.Model):
         ("sms", "SMS"),
         ("whatsapp", "WhatsApp"),
         ("viber", "Viber"),
+        ("telegram", "Telegram"),
         ("email", "Email"),
         ("instagram", "Instagram"),
         ("tiktok", "TikTok"),

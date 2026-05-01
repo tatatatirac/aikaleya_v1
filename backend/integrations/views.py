@@ -1,9 +1,12 @@
-from rest_framework import permissions, viewsets
+from rest_framework import permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from accounts.permissions import user_role
 from clients.models import BusinessClient, get_active_client_for_user
 from integrations.models import IntegrationConnection
 from integrations.serializers import IntegrationConnectionSerializer
+from integrations.services import integration_rows_for_client, queue_test_message
 
 
 class IntegrationConnectionViewSet(viewsets.ModelViewSet):
@@ -31,3 +34,36 @@ class IntegrationConnectionViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(business_client=self.get_client())
+
+    @action(detail=False, methods=["get"], url_path="status")
+    def connection_status(self, request):
+        client = self.get_client()
+        if not client:
+            return Response({"detail": "Klijent nije pronadjen."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"business_client": client.id, "integrations": integration_rows_for_client(client)})
+
+    @action(detail=False, methods=["post"], url_path="test-message")
+    def test_message(self, request):
+        client = self.get_client()
+        if not client:
+            return Response({"detail": "Klijent nije pronadjen."}, status=status.HTTP_404_NOT_FOUND)
+
+        provider = request.data.get("provider", "")
+        to_value = request.data.get("to", "")
+        body = request.data.get("body", "")
+        if not to_value:
+            return Response({"to": "Unesite broj telefona, email ili ID primaoca."}, status=status.HTTP_400_BAD_REQUEST)
+        if not body:
+            return Response({"body": "Unesite tekst test poruke."}, status=status.HTTP_400_BAD_REQUEST)
+
+        conversation, message = queue_test_message(client, provider, to_value, body)
+        return Response(
+            {
+                "status": "queued",
+                "delivery_note": "Poruka je upisana u red za slanje. Stvarno slanje se ukljucuje kada se poveze provider nalog.",
+                "conversation_id": conversation.id,
+                "message_id": message.id,
+                "provider": provider,
+            },
+            status=status.HTTP_202_ACCEPTED,
+        )

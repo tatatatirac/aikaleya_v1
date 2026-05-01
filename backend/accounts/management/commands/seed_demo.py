@@ -20,7 +20,12 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         admin_email = os.environ.get("KALEYA_DEMO_ADMIN_EMAIL", "admin@aikaleya.com").strip().lower()
         admin_password = os.environ.get("KALEYA_DEMO_ADMIN_PASSWORD", "admin123")
+        client_email = os.environ.get("KALEYA_DEMO_CLIENT_EMAIL", "administrator@test.com").strip().lower()
+        employee_email = os.environ.get("KALEYA_DEMO_EMPLOYEE_EMAIL", "employee@test.com").strip().lower()
+        employee_username = os.environ.get("KALEYA_DEMO_EMPLOYEE_USERNAME", "employee").strip().lower()
         self.rename_user_email("admin@aikaleya.com", admin_email)
+        self.rename_user_email("klijent@test.com", client_email)
+        self.rename_user_email("empl@test.com", employee_email)
 
         admin = self.create_user(
             email=admin_email,
@@ -31,19 +36,20 @@ class Command(BaseCommand):
             last_name="Admin",
         )
         client_user = self.create_user(
-            email="klijent@test.com",
+            email=client_email,
             password="test123",
             first_name="Demo",
             last_name="Client",
         )
         employee_user = self.create_user(
-            email="empl@test.com",
+            email=employee_email,
             password="emp123",
-            first_name="Ana",
+            first_name="Employee",
             last_name="Employee",
         )
-        if employee_user.username != "ana":
-            employee_user.username = "ana"
+        username_taken = User.objects.filter(username__iexact=employee_username).exclude(id=employee_user.id).exists()
+        if employee_user.username != employee_username and not username_taken:
+            employee_user.username = employee_username
             employee_user.save(update_fields=["username"])
 
         client, _created = BusinessClient.objects.update_or_create(
@@ -126,8 +132,8 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Kaleya demo backend podaci su spremni."))
         self.stdout.write(f"Admin login: {admin_email} / vrednost iz KALEYA_DEMO_ADMIN_PASSWORD")
-        self.stdout.write("Client login: klijent@test.com / test123")
-        self.stdout.write("Employee login: ana / emp123")
+        self.stdout.write(f"Client login: {client_email} / test123")
+        self.stdout.write(f"Employee login: {employee_username} / emp123")
 
     def rename_user_email(self, old_email, new_email):
         if old_email.lower() == new_email.lower():
@@ -327,10 +333,10 @@ class Command(BaseCommand):
         employee_staff = StaffMember.objects.create(
             business_client=client,
             user=employee_user,
-            full_name="Ana Employee",
+            full_name="Employee User",
             role_title="Receptionist",
             phone="+1 555 0177",
-            email="empl@test.com",
+            email=employee_user.email,
             color="#3b82f6",
         )
         services = [

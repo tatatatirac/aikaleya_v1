@@ -448,8 +448,8 @@
                         <button type="submit" class="w-full h-12 rounded-2xl gradient-bg text-white font-semibold shadow-lg shadow-teal-500/20 hover:shadow-xl transition" data-i18n="login_btn">Prijavi se</button>
                     </form>
                     <div class="mt-6 grid grid-cols-1 gap-2">
-                        <button onclick="fillLogin('client')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition">Demo client: klijent@test.com / test123</button>
-                        <button onclick="fillLogin('employee')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition">Demo employee: ana / emp123</button>
+                        <button onclick="fillLogin('client')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition">Demo client: administrator@test.com / test123</button>
+                        <button onclick="fillLogin('employee')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition">Demo employee: employee / emp123</button>
                     </div>
                     <p id="login-error" class="mt-4 text-center text-sm text-red-500 hidden" data-i18n="login_err">Pogrešan email ili lozinka</p>
                 </div>
@@ -599,6 +599,7 @@
                         </span>
                     </div>
                     <p class="mt-2 text-sm text-slate-500" data-i18n="employee_list_desc">Lista kontakata za zaposlene. Vlasnik je uvek na vrhu.</p>
+                    <button data-pwa-install onclick="installKaleyaApp()" class="hidden mt-4 w-full h-11 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold">Install Kaleya</button>
                     <div id="employeeDirectoryList" class="mt-5 space-y-3"></div>
                 </div>
 
@@ -630,6 +631,7 @@
                             <h3 class="font-display font-bold text-lg" data-i18n="cset_t">Podešavanja glasa</h3>
                             <button onclick="closeClientSettings()" class="w-8 h-8 grid place-items-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">✕</button>
                         </div>
+                        <button data-pwa-install onclick="installKaleyaApp()" class="hidden mt-4 w-full h-11 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold">Install Kaleya</button>
                         <div class="mt-6 space-y-5">
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                                 <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="cset_ui_lang">Jezik interfejsa</p>
@@ -873,6 +875,9 @@
                         <label class="mt-5 block text-[12px] text-slate-500"><span data-i18n="search_by_name">Pretraga po imenu</span>
                             <input id="cancelSearchInput" type="search" oninput="renderCancelSearchResults()" placeholder="Unesite ime klijenta" data-i18n-placeholder="client_search_placeholder" class="mt-1 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white">
                         </label>
+                        <label class="mt-3 block text-[12px] text-slate-500"><span>Razlog otkazivanja</span>
+                            <textarea id="cancelReasonInput" rows="2" placeholder="Npr. klijent je zvao i otkazao" class="mt-1 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-900 dark:text-white resize-none"></textarea>
+                        </label>
                         <div id="cancelSearchResults" class="mt-4 space-y-2 max-h-[320px] overflow-auto"></div>
                     </div>
                 </div>
@@ -1020,7 +1025,7 @@
                                         <tr><th class="text-left px-4 py-3">Ime</th><th class="text-left px-4 py-3">Kontakt</th><th class="text-left px-4 py-3">Paket</th><th class="text-left px-4 py-3">AI model</th><th class="text-left px-4 py-3">Status</th><th class="text-left px-4 py-3">Akcije</th></tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                                        <tr><td class="px-4 py-3 font-medium">Marko Petrović</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">klijent@test.com</td><td class="px-4 py-3">Pro</td><td class="px-4 py-3 text-slate-500">Globalni</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[11px]">Aktivan</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Marko Petrović')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po klijentu</button></td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">Marko Petrović</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">administrator@test.com</td><td class="px-4 py-3">Pro</td><td class="px-4 py-3 text-slate-500">Globalni</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[11px]">Aktivan</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Marko Petrović')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po klijentu</button></td></tr>
                                         <tr><td class="px-4 py-3 font-medium">Salon Lepote Bella</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">+381 11 123456</td><td class="px-4 py-3">Business</td><td class="px-4 py-3 text-slate-500">Jači model</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[11px]">Aktivan</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Salon Lepote Bella')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po klijentu</button></td></tr>
                                         <tr><td class="px-4 py-3 font-medium">Ordinacija Dr. Milić</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">+381 21 555888</td><td class="px-4 py-3">Starter</td><td class="px-4 py-3 text-slate-500">Globalni</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[11px]">Pauza</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Ordinacija Dr. Milić')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po klijentu</button></td></tr>
                                     </tbody>
@@ -1203,12 +1208,13 @@
 
 <script>
 // ===== STATE =====
-const KALEYA_APP_VERSION = '2026-05-01-pwa-entitlements-01';
+const KALEYA_APP_VERSION = '2026-05-01-employee-booking-01';
 const savedAppVersion = localStorage.getItem('kaleya_app_version');
 if (savedAppVersion && savedAppVersion !== KALEYA_APP_VERSION) {
     localStorage.removeItem('kaleya_auth_token');
     localStorage.removeItem('kaleya_user_role');
     localStorage.removeItem('kaleya_user_email');
+    localStorage.removeItem('kaleya_user_username');
     sessionStorage.clear();
 }
 localStorage.setItem('kaleya_app_version', KALEYA_APP_VERSION);
@@ -1249,6 +1255,7 @@ let clientBlockedTimes = [];
 let recognition = null;
 let activeClientForApi = '';
 let openStatusMenuId = '';
+let deferredPwaInstallPrompt = null;
 let clientCalendarState = { mode: 'month', monthOffset: 0, selectedDate: clientIsoDate(new Date()) };
 let schedule = [
     { id: 'a1', date: clientDateOffset(0), time: '10:00', duration: 60, nameKey: 'client1', phone: '+38160111222', channel: 'WhatsApp', status: 'confirmed' },
@@ -1738,6 +1745,7 @@ function applyLang() {
     renderSchedule();
     renderClientCalendar();
     updateKaleyaPowerUI();
+    updatePwaInstallButtons();
 }
 
 function setLang(lang) {
@@ -1799,6 +1807,7 @@ function showView(view) {
         loadClientOperationalDataFromBackend();
         loadClientAppointmentsFromBackend();
         updateKaleyaPowerUI();
+        updatePwaInstallButtons();
         switchClientTab('home');
     }
     if (view === 'admin') loadAdminSettings();
@@ -1874,6 +1883,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
             localStorage.setItem('kaleya_auth_token', data.token);
             localStorage.setItem('kaleya_user_role', data.user.role);
             localStorage.setItem('kaleya_user_email', data.user.email);
+            localStorage.setItem('kaleya_user_username', data.user.username || data.user.email || email);
 
             if (data.user.role === 'admin' || data.user.is_staff) {
                 window.location.href = '/admin/';
@@ -1895,13 +1905,15 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
         localStorage.setItem('kaleya_user_role', 'admin');
         localStorage.setItem('kaleya_user_email', email);
         showView('admin');
-    } else if (email === 'klijent@test.com' && pass === 'test123') {
+    } else if (email === 'administrator@test.com' && pass === 'test123') {
         localStorage.setItem('kaleya_user_role', 'client');
         localStorage.setItem('kaleya_user_email', email);
+        localStorage.setItem('kaleya_user_username', email);
         showView('client');
-    } else if ((email === 'empl@test.com' || email.toLowerCase() === 'ana') && pass === 'emp123') {
+    } else if ((email === 'employee@test.com' || email.toLowerCase() === 'employee') && pass === 'emp123') {
         localStorage.setItem('kaleya_user_role', 'employee');
-        localStorage.setItem('kaleya_user_email', email);
+        localStorage.setItem('kaleya_user_email', email.includes('@') ? email : 'employee@test.com');
+        localStorage.setItem('kaleya_user_username', 'employee');
         showView('client');
     } else {
         error.classList.remove('hidden');
@@ -1912,10 +1924,10 @@ function fillLogin(type) {
         document.getElementById('email').value = 'admin@aikaleya.com';
         document.getElementById('password').value = 'admin123';
     } else if (type === 'employee') {
-        document.getElementById('email').value = 'ana';
+        document.getElementById('email').value = 'employee';
         document.getElementById('password').value = 'emp123';
     } else {
-        document.getElementById('email').value = 'klijent@test.com';
+        document.getElementById('email').value = 'administrator@test.com';
         document.getElementById('password').value = 'test123';
     }
 }
@@ -1931,6 +1943,7 @@ async function logout() {
     localStorage.removeItem('kaleya_auth_token');
     localStorage.removeItem('kaleya_user_role');
     localStorage.removeItem('kaleya_user_email');
+    localStorage.removeItem('kaleya_user_username');
     showView('landing');
 }
 
@@ -1945,6 +1958,22 @@ function currentUserRole() {
 
 function isEmployeeUser() {
     return currentUserRole() === 'employee';
+}
+
+function currentUserIdentifiers() {
+    return [
+        localStorage.getItem('kaleya_user_email') || '',
+        localStorage.getItem('kaleya_user_username') || ''
+    ].map(value => value.trim().toLowerCase()).filter(Boolean);
+}
+
+function currentEmployeeStaffMember() {
+    if (!isEmployeeUser()) return null;
+    const identifiers = currentUserIdentifiers();
+    return clientStaffMembers.find(staff => {
+        const values = [staff.user_username, staff.email, staff.full_name].map(value => String(value || '').trim().toLowerCase());
+        return values.some(value => value && identifiers.includes(value));
+    }) || clientStaffMembers.find(staff => String(staff.user_username || '').toLowerCase() === 'employee') || clientStaffMembers[0] || null;
 }
 
 async function kaleyaApi(path, options = {}) {
@@ -2224,6 +2253,7 @@ function appointmentFromBackend(item) {
         phone: item.customer?.phone || '',
         channel: backendChannelToFrontend(item.channel),
         status: item.status || 'confirmed',
+        cancelledReason: item.cancelled_reason || '',
         staffMemberId: item.staff_member || '',
         staffMemberName: item.staff_member_name || '',
         serviceId: item.service || '',
@@ -2249,7 +2279,7 @@ function appointmentPayloadForBackend(payload) {
         service: payload.serviceId ? Number(payload.serviceId) : null,
         channel: frontendChannelToBackend(payload.channel),
         source: 'client_app',
-        notes: ''
+        notes: payload.notes || ''
     };
 }
 
@@ -2281,13 +2311,14 @@ async function saveAppointmentViaAi(payload) {
     return result;
 }
 
-async function cancelAppointmentViaAi(item) {
+async function cancelAppointmentViaAi(item, reason = '') {
     if (!item?.backendId || !getAuthToken() || location.protocol === 'file:') return null;
     const result = await askKaleyaBackend(
         `Cancel appointment ${item.backendId}`,
         false,
         {
             appointment_id: item.backendId,
+            reason,
             channel: frontendChannelToBackend(item.channel || 'web')
         },
         false
@@ -2343,11 +2374,11 @@ async function updateAppointmentStatusBackend(item, status) {
     return appointmentFromBackend(await res.json());
 }
 
-async function cancelAppointmentBackend(item) {
+async function cancelAppointmentBackend(item, reason = '') {
     if (!item?.backendId || !getAuthToken() || location.protocol === 'file:') return null;
     const res = await kaleyaApi(`/api/appointments/appointments/${item.backendId}/cancel/`, {
         method: 'POST',
-        body: JSON.stringify({ reason: 'Cancelled from client app' })
+        body: JSON.stringify({ reason: reason || 'Cancelled from Kaleya app' })
     });
     if (!res.ok) throw new Error(await res.text());
     return appointmentFromBackend(await res.json());
@@ -2531,12 +2562,15 @@ function populateAppointmentStaffServiceFields(selectedServiceId = '', selectedS
     }
     if (staffSelect) {
         const serviceId = serviceSelect?.value || selectedServiceId || '';
+        const employeeStaff = currentEmployeeStaffMember();
         const previous = selectedStaffId || staffSelect.value || '';
-        const staffOptions = clientStaffMembers.filter(staff => staffCanDoService(staff.id, serviceId));
-        staffSelect.innerHTML = `<option value="">${escapeHtml(tr('any_staff'))}</option>` + staffOptions.map(staff => (
+        const staffOptions = (isEmployeeUser() ? (employeeStaff ? [employeeStaff] : []) : clientStaffMembers)
+            .filter(staff => staffCanDoService(staff.id, serviceId));
+        staffSelect.innerHTML = (isEmployeeUser() ? '' : `<option value="">${escapeHtml(tr('any_staff'))}</option>`) + staffOptions.map(staff => (
             `<option value="${staff.id}">${escapeHtml(staff.full_name)}</option>`
         )).join('');
-        staffSelect.value = staffOptions.some(staff => String(staff.id) === String(previous)) ? String(previous) : '';
+        staffSelect.value = staffOptions.some(staff => String(staff.id) === String(previous)) ? String(previous) : (employeeStaff ? String(employeeStaff.id) : '');
+        staffSelect.disabled = isEmployeeUser();
     }
 }
 
@@ -3081,10 +3115,6 @@ document.querySelectorAll('[data-action]').forEach(btn => {
     btn.addEventListener('click', () => handleQuickAction(btn.dataset.action));
 });
 async function handleQuickAction(action) {
-    if (isEmployeeUser() && (action === 'zakazi' || action === 'otkazi')) {
-        showToast('Zaposleni vidi samo svoje termine');
-        return;
-    }
     if (action === 'zakazi') {
         openQuickScheduleModal();
         return;
@@ -3157,7 +3187,7 @@ function openQuickScheduleModal() {
     const freeSlot = firstAvailableSlot(today) || getClientCalendarSettings().start;
     clientCalendarState.selectedDate = today;
     clientCalendarState.mode = 'day';
-    openAppointmentEditor('', today, freeSlot);
+    openAppointmentEditor('', today, freeSlot, isEmployeeUser());
 }
 
 function firstAvailableSlot(dateIso) {
@@ -3225,6 +3255,8 @@ function openCancelAppointmentModal() {
     const modal = document.getElementById('cancelAppointmentModal');
     const input = document.getElementById('cancelSearchInput');
     if (input) input.value = '';
+    const reason = document.getElementById('cancelReasonInput');
+    if (reason) reason.value = '';
     renderCancelSearchResults();
     modal?.classList.remove('hidden');
     setTimeout(() => input?.focus(), 50);
@@ -3265,15 +3297,15 @@ function renderCancelSearchResults() {
 }
 
 async function cancelAppointmentById(id) {
-    if (isEmployeeUser()) {
-        showToast('Zaposleni ne otkazuje termine');
-        return;
-    }
     const item = schedule.find(entry => entry.id === id);
     if (!item) return;
+    const reason = document.getElementById('cancelReasonInput')?.value.trim() || '';
     try {
-        const saved = await cancelAppointmentViaAi(item) || await cancelAppointmentBackend(item);
+        const saved = isEmployeeUser()
+            ? await cancelAppointmentBackend(item, reason)
+            : await cancelAppointmentViaAi(item, reason) || await cancelAppointmentBackend(item, reason);
         item.status = 'cancelled';
+        item.cancelledReason = reason;
         if (saved?.id || saved?.backendId) Object.assign(item, saved);
         if (getAuthToken() && location.protocol !== 'file:') await loadClientAppointmentsFromBackend();
     } catch (e) {
@@ -3677,6 +3709,7 @@ function localizedStatus(status) {
 
 function appointmentDetailText(item) {
     const details = [item.serviceName, item.staffMemberName].filter(Boolean);
+    if (item.status === 'cancelled' && item.cancelledReason) details.push(`Razlog: ${item.cancelledReason}`);
     return details.length ? details.join(' - ') : '';
 }
 
@@ -3839,10 +3872,10 @@ function renderEmployeeDirectory() {
         full_name: currentClientInfo?.owner_name || currentClientInfo?.public_name || currentClientInfo?.name || 'Demo Client',
         role_title: 'Vlasnik',
         phone: currentClientInfo?.owner_phone || '+1 555 0100',
-        email: currentClientInfo?.owner_email || 'klijent@test.com'
+        email: currentClientInfo?.owner_email || 'administrator@test.com'
     };
     const fallbackStaff = [
-        { full_name: 'Ana Employee', role_title: 'Receptionist', phone: '+1 555 0177', email: 'empl@test.com' },
+        { full_name: 'Employee User', role_title: 'Receptionist', phone: '+1 555 0177', email: 'employee@test.com', user_username: 'employee' },
         { full_name: 'Mark Johnson', role_title: 'Senior Specialist', phone: '+1 555 0199', email: 'mark@example.com' }
     ];
     const staffRows = clientStaffMembers.length ? clientStaffMembers : fallbackStaff;
@@ -3873,6 +3906,7 @@ async function openEmployeeDirectory() {
     applyEmployeeModeUI();
     switchClientTab('team');
     renderEmployeeDirectory();
+    updatePwaInstallButtons();
     if (getAuthToken() && location.protocol !== 'file:') {
         await Promise.all([loadClientSettingsFromBackend(), loadClientOperationalDataFromBackend()]);
     }
@@ -4100,13 +4134,14 @@ function renderClientDaySlots() {
     }).join('');
 }
 
-function openAppointmentEditor(id = '', date = '', time = '') {
-    if (isEmployeeUser()) {
+function openAppointmentEditor(id = '', date = '', time = '', employeeQuickAction = false) {
+    if (isEmployeeUser() && (!employeeQuickAction || id)) {
         showToast('Zaposleni vidi samo svoje termine');
         return;
     }
     syncClientCalendarSettingsUI();
     const settings = getClientCalendarSettings();
+    const employeeStaff = currentEmployeeStaffMember();
     const item = schedule.find(entry => entry.id === id) || {
         id: '',
         date: date || clientCalendarState.selectedDate,
@@ -4116,7 +4151,7 @@ function openAppointmentEditor(id = '', date = '', time = '') {
         phone: '+381',
         channel: 'WhatsApp',
         status: 'confirmed',
-        staffMemberId: '',
+        staffMemberId: isEmployeeUser() && employeeStaff ? String(employeeStaff.id) : '',
         serviceId: ''
     };
     populateAppointmentStaffServiceFields(item.serviceId || '', item.staffMemberId || '');
@@ -4142,13 +4177,20 @@ function closeAppointmentEditor() {
 }
 
 async function saveAppointmentEdit() {
-    if (isEmployeeUser()) {
-        showToast('Zaposleni ne menja termine');
+    const id = document.getElementById('apptId').value;
+    if (isEmployeeUser() && id) {
+        showToast('Zaposleni menja samo nove termine iz brzih akcija');
         return;
     }
-    const id = document.getElementById('apptId').value;
     const serviceId = document.getElementById('apptService')?.value || '';
-    const staffMemberId = document.getElementById('apptStaff')?.value || '';
+    const employeeStaff = currentEmployeeStaffMember();
+    const staffMemberId = isEmployeeUser()
+        ? (employeeStaff ? String(employeeStaff.id) : '')
+        : (document.getElementById('apptStaff')?.value || '');
+    if (isEmployeeUser() && !staffMemberId) {
+        showToast('Zaposleni nema povezan staff profil');
+        return;
+    }
     const selectedService = clientServices.find(service => String(service.id) === String(serviceId));
     const selectedStaff = clientStaffMembers.find(staff => String(staff.id) === String(staffMemberId));
     const calendarSettings = getClientCalendarSettings();
@@ -4183,7 +4225,7 @@ async function saveAppointmentEdit() {
         return;
     }
     try {
-        if (!payload.backendId && payload.status === 'confirmed' && getAuthToken() && location.protocol !== 'file:') {
+        if (!isEmployeeUser() && !payload.backendId && payload.status === 'confirmed' && getAuthToken() && location.protocol !== 'file:') {
             await saveAppointmentViaAi(payload);
             await loadClientAppointmentsFromBackend();
             closeAppointmentEditor();
@@ -4245,6 +4287,7 @@ async function openClientSettings() {
     updateElStatus();
     updateClientLangButtons();
     syncClientCalendarSettingsUI();
+    updatePwaInstallButtons();
     await Promise.all([loadClientEntitlementsFromBackend(), loadClientSettingsFromBackend(), loadClientOperationalDataFromBackend()]);
 }
 function closeClientSettings() { document.getElementById('client-settings').classList.add('hidden'); }
@@ -4566,6 +4609,72 @@ function registerKaleyaServiceWorker() {
     });
 }
 
+function pwaInstallLabel() {
+    const labels = {
+        sr: 'Instaliraj Kaleya aplikaciju',
+        en: 'Install Kaleya app',
+        es: 'Instalar Kaleya',
+        pt: 'Instalar Kaleya',
+        ru: 'Ustanovit Kaleya',
+        fr: 'Installer Kaleya',
+        it: 'Installa Kaleya',
+        de: 'Kaleya installieren'
+    };
+    return labels[currentLang] || labels.en;
+}
+
+function pwaInstallManualLabel() {
+    const labels = {
+        sr: 'Ako se dugme ne pojavi, otvorite browser meni i izaberite Install app ili Add to Home Screen.',
+        en: 'If the button is not available, open the browser menu and choose Install app or Add to Home Screen.',
+        es: 'Si el boton no aparece, abra el menu del navegador y elija Install app o Add to Home Screen.',
+        pt: 'Se o botao nao aparecer, abra o menu do navegador e escolha Install app ou Add to Home Screen.',
+        ru: 'Esli knopka nedostupna, otkroyte menyu brauzera i vyberite Install app ili Add to Home Screen.',
+        fr: 'Si le bouton est indisponible, ouvrez le menu du navigateur et choisissez Install app ou Add to Home Screen.',
+        it: 'Se il pulsante non appare, apri il menu del browser e scegli Install app o Add to Home Screen.',
+        de: 'Wenn die Schaltflaeche nicht erscheint, Browser-Menue oeffnen und Install app oder Add to Home Screen waehlen.'
+    };
+    return labels[currentLang] || labels.en;
+}
+
+function isKaleyaStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function updatePwaInstallButtons() {
+    document.querySelectorAll('[data-pwa-install]').forEach(button => {
+        button.textContent = pwaInstallLabel();
+        button.classList.toggle('hidden', !deferredPwaInstallPrompt || isKaleyaStandalone());
+    });
+}
+
+async function installKaleyaApp() {
+    if (isKaleyaStandalone()) {
+        showToast('Kaleya is already installed');
+        updatePwaInstallButtons();
+        return;
+    }
+    if (!deferredPwaInstallPrompt) {
+        showToast(pwaInstallManualLabel());
+        return;
+    }
+    deferredPwaInstallPrompt.prompt();
+    await deferredPwaInstallPrompt.userChoice;
+    deferredPwaInstallPrompt = null;
+    updatePwaInstallButtons();
+}
+
+window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    deferredPwaInstallPrompt = event;
+    updatePwaInstallButtons();
+});
+
+window.addEventListener('appinstalled', () => {
+    deferredPwaInstallPrompt = null;
+    updatePwaInstallButtons();
+});
+
 // ===== INIT =====
 initTheme();
 registerKaleyaServiceWorker();
@@ -4577,6 +4686,7 @@ renderClientOperationalSettings();
 renderSchedule();
 renderClientCalendar();
 updateKaleyaPowerUI();
+updatePwaInstallButtons();
 const savedAuthToken = localStorage.getItem('kaleya_auth_token');
 const savedUserRole = localStorage.getItem('kaleya_user_role');
 if (savedAuthToken && (savedUserRole === 'client' || savedUserRole === 'employee')) {
@@ -4585,6 +4695,7 @@ if (savedAuthToken && (savedUserRole === 'client' || savedUserRole === 'employee
     localStorage.removeItem('kaleya_auth_token');
     localStorage.removeItem('kaleya_user_role');
     localStorage.removeItem('kaleya_user_email');
+    localStorage.removeItem('kaleya_user_username');
     showView('landing');
 } else {
     showView('landing');

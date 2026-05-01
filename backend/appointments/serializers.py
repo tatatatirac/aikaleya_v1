@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
 
+from accounts.permissions import user_role
 from appointments.models import Appointment, Customer
 from staff_services.models import StaffService
 
@@ -70,8 +71,18 @@ class AppointmentSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         business_client = self.context["business_client"]
+        request = self.context.get("request")
         staff_member = attrs.get("staff_member", getattr(self.instance, "staff_member", None))
         service = attrs.get("service", getattr(self.instance, "service", None))
+
+        if request and user_role(request.user) == "employee":
+            employee_staff = getattr(request.user, "staff_member_profile", None)
+            if not employee_staff:
+                raise serializers.ValidationError({"staff_member": "Zaposleni nema povezan staff profil."})
+            if staff_member and staff_member.id != employee_staff.id:
+                raise serializers.ValidationError({"staff_member": "Zaposleni moze da zakazuje samo svoje termine."})
+            attrs["staff_member"] = employee_staff
+            staff_member = employee_staff
 
         if staff_member and staff_member.business_client_id != business_client.id:
             raise serializers.ValidationError({"staff_member": "Zaposleni ne pripada ovom klijentu."})

@@ -1,4 +1,7 @@
+import os
+
 from django.contrib.auth import login as django_login, logout as django_logout
+from django.core.management import call_command
 from rest_framework import permissions, status
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
@@ -51,6 +54,13 @@ class LogoutAPIView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
     def post(self, request):
+        demo_client_email = os.environ.get("KALEYA_DEMO_CLIENT_EMAIL", "administrator@test.com").strip().lower()
+        demo_employee_email = os.environ.get("KALEYA_DEMO_EMPLOYEE_EMAIL", "employee@test.com").strip().lower()
+        demo_employee_username = os.environ.get("KALEYA_DEMO_EMPLOYEE_USERNAME", "employee").strip().lower()
+        user_email = (request.user.email or "").strip().lower()
+        username = (request.user.username or "").strip().lower()
+        if user_email in {demo_client_email, demo_employee_email} or username == demo_employee_username:
+            call_command("seed_demo", verbosity=0)
         Token.objects.filter(user=request.user).delete()
         django_logout(request._request)
         return Response(status=status.HTTP_204_NO_CONTENT)

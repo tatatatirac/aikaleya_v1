@@ -1,4 +1,4 @@
-const KALEYA_SW_VERSION = 'kaleya-pwa-2026-05-01-01';
+const KALEYA_SW_VERSION = 'kaleya-pwa-2026-05-01-03';
 const APP_SHELL = [
   '/',
   '/index.html',

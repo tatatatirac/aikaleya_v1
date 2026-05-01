@@ -25,7 +25,12 @@ class ClientAppointmentPermission(permissions.IsAuthenticated):
             return False
         if request.method in permissions.SAFE_METHODS:
             return True
-        return user_role(request.user) in {"admin", "client"}
+        role = user_role(request.user)
+        if role in {"admin", "client"}:
+            return True
+        if role == "employee" and view.__class__.__name__ == "AppointmentViewSet":
+            return getattr(view, "action", "") in {"create", "cancel"}
+        return False
 
 
 class CustomerViewSet(viewsets.ModelViewSet):
