@@ -174,6 +174,30 @@ KALEYA_OPENAI_MODEL = os.getenv("OPENAI_MODEL", "")
 KALEYA_ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
 KALEYA_ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "")
 
+KALEYA_PAYMENT_PROVIDER = os.getenv("PAYMENT_PROVIDER", "manual").strip().lower()
+KALEYA_PAYMENT_SUCCESS_URL = os.getenv("PAYMENT_SUCCESS_URL", "http://127.0.0.1:8000/?payment=success")
+KALEYA_PAYMENT_CANCEL_URL = os.getenv("PAYMENT_CANCEL_URL", "http://127.0.0.1:8000/?payment=cancel")
+KALEYA_PAYPAL_ENVIRONMENT = os.getenv("PAYPAL_ENVIRONMENT", "sandbox").strip().lower()
+KALEYA_PAYPAL_CLIENT_ID = os.getenv("PAYPAL_CLIENT_ID", "")
+KALEYA_PAYPAL_CLIENT_SECRET = os.getenv("PAYPAL_CLIENT_SECRET", "")
+KALEYA_PAYPAL_WEBHOOK_ID = os.getenv("PAYPAL_WEBHOOK_ID", "")
+KALEYA_PAYPAL_PLAN_IDS = {
+    "basic": os.getenv("PAYPAL_PLAN_BASIC", ""),
+    "pro": os.getenv("PAYPAL_PLAN_PRO", ""),
+    "business": os.getenv("PAYPAL_PLAN_BUSINESS", ""),
+    "business_plus": os.getenv("PAYPAL_PLAN_BUSINESS_PLUS", ""),
+    "business_pro_plus": os.getenv("PAYPAL_PLAN_BUSINESS_PRO_PLUS", ""),
+}
+KALEYA_STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+KALEYA_STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+KALEYA_STRIPE_PRICE_IDS = {
+    "basic": os.getenv("STRIPE_PRICE_BASIC", ""),
+    "pro": os.getenv("STRIPE_PRICE_PRO", ""),
+    "business": os.getenv("STRIPE_PRICE_BUSINESS", ""),
+    "business_plus": os.getenv("STRIPE_PRICE_BUSINESS_PLUS", ""),
+    "business_pro_plus": os.getenv("STRIPE_PRICE_BUSINESS_PRO_PLUS", ""),
+}
+
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "Kaleya <no-reply@aikaleya.com>")
 SERVER_EMAIL = os.getenv("SERVER_EMAIL", DEFAULT_FROM_EMAIL)
 EMAIL_BACKEND = os.getenv(

@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib import admin
 
-from billing.models import Plan, Subscription
+from billing.models import CheckoutSession, Plan, Subscription
 
 
 class PlanAdminForm(forms.ModelForm):
@@ -60,4 +60,34 @@ class SubscriptionAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Pretplata", {"fields": ("business_client", "plan", "status")}),
         ("Period", {"fields": ("trial_ends_at", "current_period_start", "current_period_end")}),
+    )
+
+
+@admin.register(CheckoutSession)
+class CheckoutSessionAdmin(admin.ModelAdmin):
+    list_display = ("plan", "email", "company", "provider", "status", "amount", "currency", "created_at")
+    list_filter = ("provider", "status", "plan", "currency")
+    search_fields = ("email", "company", "full_name", "external_checkout_id")
+    readonly_fields = (
+        "business_client",
+        "plan",
+        "provider",
+        "status",
+        "email",
+        "company",
+        "full_name",
+        "amount",
+        "currency",
+        "trial_days",
+        "checkout_url",
+        "external_checkout_id",
+        "metadata",
+        "created_at",
+        "updated_at",
+    )
+    fieldsets = (
+        ("Zahtev", {"fields": ("plan", "provider", "status", "business_client")}),
+        ("Kontakt", {"fields": ("email", "company", "full_name")}),
+        ("Placanje", {"fields": ("amount", "currency", "trial_days", "checkout_url", "external_checkout_id")}),
+        ("Sistem", {"fields": ("metadata", "created_at", "updated_at")}),
     )

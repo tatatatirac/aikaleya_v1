@@ -47,14 +47,51 @@ ALWAYS_ALLOWED_CHANNELS = {"web", "email", "dashboard", "google_calendar"}
 
 
 def plan_for_client(business_client):
-    subscription = (
+    subscription = subscription_for_client(business_client)
+    if subscription:
+        return subscription.plan
+    return Plan.objects.filter(code=business_client.package, active=True).first()
+
+
+def subscription_for_client(business_client):
+    return (
         Subscription.objects.select_related("plan")
         .filter(business_client=business_client)
         .first()
     )
-    if subscription:
-        return subscription.plan
-    return Plan.objects.filter(code=business_client.package, active=True).first()
+
+
+def subscription_state(subscription):
+    if not subscription:
+        return {
+            "status": "none",
+            "trial_ends_at": None,
+            "trial_is_active": False,
+            "trial_days_left": 0,
+            "is_access_active": True,
+            "current_period_start": None,
+            "current_period_end": None,
+            "plan": None,
+        }
+    return {
+        "status": subscription.status,
+        "trial_ends_at": subscription.trial_ends_at.isoformat() if subscription.trial_ends_at else None,
+        "trial_is_active": subscription.trial_is_active,
+        "trial_days_left": subscription.trial_days_left,
+        "is_access_active": subscription.is_access_active,
+        "current_period_start": (
+            subscription.current_period_start.isoformat() if subscription.current_period_start else None
+        ),
+        "current_period_end": subscription.current_period_end.isoformat() if subscription.current_period_end else None,
+        "plan": {
+            "code": subscription.plan.code,
+            "name": subscription.plan.name,
+        },
+    }
+
+
+def subscription_state_for_client(business_client):
+    return subscription_state(subscription_for_client(business_client))
 
 
 def limits_for_client(business_client):

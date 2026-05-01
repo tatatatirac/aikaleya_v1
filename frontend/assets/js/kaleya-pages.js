@@ -983,6 +983,23 @@ function registrationErrorText(data) {
         .join(' ') || pageText('registration_failed');
 }
 
+async function createCheckoutSession(payload) {
+    const response = await fetch('/api/billing/checkout-sessions/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            plan_code: payload.plan_code,
+            email: payload.email,
+            company: payload.company,
+            full_name: payload.full_name,
+            note: payload.note
+        })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(registrationErrorText(data));
+    return data;
+}
+
 async function submitRegistrationForm(form) {
     const status = document.getElementById('registrationStatus');
     const packageCode = form.querySelector('[name="package"]')?.value || 'basic';
@@ -1011,6 +1028,12 @@ async function submitRegistrationForm(form) {
     };
 
     try {
+        const checkout = await createCheckoutSession(payload);
+        if (checkout.checkout_url) {
+            window.location.href = checkout.checkout_url;
+            return;
+        }
+
         const response = await fetch('/api/auth/register-client/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

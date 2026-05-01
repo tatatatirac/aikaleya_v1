@@ -494,6 +494,13 @@
                         <p class="text-xs uppercase tracking-widest text-slate-500 font-semibold" data-i18n="client_greet">Dobro jutro, Marko</p>
                         <h2 class="mt-2 font-display text-[28px] font-bold leading-tight" data-i18n="client_how">Kako mogu pomoći danas?</h2>
                     </div>
+                    <div id="clientSubscriptionCard" class="mt-4 rounded-2xl border border-teal-100 dark:border-teal-900/60 bg-teal-50/70 dark:bg-teal-950/20 p-3 text-left">
+                        <div class="flex items-center justify-between gap-3">
+                            <span id="clientPlanName" class="text-[12px] font-semibold text-slate-700 dark:text-slate-200">Business+</span>
+                            <span id="clientSubscriptionBadge" class="px-2.5 py-1 rounded-full bg-teal-600 text-white text-[10px] font-bold uppercase tracking-wide">Trial</span>
+                        </div>
+                        <p id="clientTrialText" class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Trial: 14 days left</p>
+                    </div>
 
                     <!-- Mic -->
                     <div class="mt-12 flex flex-col items-center">
@@ -1212,7 +1219,7 @@
 
 <script>
 // ===== STATE =====
-const KALEYA_APP_VERSION = '2026-05-01-home-audio-login-01';
+const KALEYA_APP_VERSION = '2026-05-01-billing-trial-01';
 const savedAppVersion = localStorage.getItem('kaleya_app_version');
 if (savedAppVersion && savedAppVersion !== KALEYA_APP_VERSION) {
     localStorage.removeItem('kaleya_auth_token');
@@ -1238,6 +1245,12 @@ let currentClientInfo = null;
 let clientEntitlements = {
     package: 'business_plus',
     plan: { name: 'Business+' },
+    subscription: {
+        status: 'trial',
+        trial_is_active: true,
+        trial_days_left: 14,
+        is_access_active: true
+    },
     entitlements: {
         max_staff_members: 15,
         allow_whatsapp: true,
@@ -2070,12 +2083,146 @@ function setPackageStatusBadge(id, allowed) {
     el.className = `${allowed ? 'text-green-600' : 'text-slate-500'} font-semibold`;
 }
 
+const SUBSCRIPTION_COPY = {
+    sr: {
+        plan: 'Paket',
+        trial: 'Probni period',
+        active: 'Aktivno',
+        expired: 'Isteklo',
+        none: 'Nema pretplate',
+        daysLeft: (days) => `Probni period: ${days} dana preostalo`,
+        activeText: 'Pretplata je aktivna.',
+        expiredText: 'Potrebna je aktivacija paketa.'
+    },
+    en: {
+        plan: 'Plan',
+        trial: 'Trial',
+        active: 'Active',
+        expired: 'Expired',
+        none: 'No subscription',
+        daysLeft: (days) => `Trial: ${days} days left`,
+        activeText: 'Subscription is active.',
+        expiredText: 'Package activation is required.'
+    },
+    es: {
+        plan: 'Paquete',
+        trial: 'Prueba',
+        active: 'Activo',
+        expired: 'Vencido',
+        none: 'Sin suscripcion',
+        daysLeft: (days) => `Prueba: quedan ${days} dias`,
+        activeText: 'La suscripcion esta activa.',
+        expiredText: 'Se requiere activar el paquete.'
+    },
+    pt: {
+        plan: 'Pacote',
+        trial: 'Teste',
+        active: 'Ativo',
+        expired: 'Expirado',
+        none: 'Sem assinatura',
+        daysLeft: (days) => `Teste: ${days} dias restantes`,
+        activeText: 'A assinatura esta ativa.',
+        expiredText: 'E necessario ativar o pacote.'
+    },
+    ru: {
+        plan: 'Пакет',
+        trial: 'Пробный период',
+        active: 'Активно',
+        expired: 'Истекло',
+        none: 'Нет подписки',
+        daysLeft: (days) => `Пробный период: осталось ${days} дней`,
+        activeText: 'Подписка активна.',
+        expiredText: 'Нужно активировать пакет.'
+    },
+    fr: {
+        plan: 'Forfait',
+        trial: 'Essai',
+        active: 'Actif',
+        expired: 'Expire',
+        none: 'Aucun abonnement',
+        daysLeft: (days) => `Essai: ${days} jours restants`,
+        activeText: 'L abonnement est actif.',
+        expiredText: 'Activation du forfait requise.'
+    },
+    it: {
+        plan: 'Pacchetto',
+        trial: 'Prova',
+        active: 'Attivo',
+        expired: 'Scaduto',
+        none: 'Nessun abbonamento',
+        daysLeft: (days) => `Prova: ${days} giorni rimasti`,
+        activeText: 'L abbonamento e attivo.',
+        expiredText: 'Serve attivare il pacchetto.'
+    },
+    de: {
+        plan: 'Paket',
+        trial: 'Testphase',
+        active: 'Aktiv',
+        expired: 'Abgelaufen',
+        none: 'Kein Abo',
+        daysLeft: (days) => `Testphase: ${days} Tage uebrig`,
+        activeText: 'Das Abo ist aktiv.',
+        expiredText: 'Paketaktivierung ist erforderlich.'
+    }
+};
+
+function subscriptionCopy(key) {
+    return (SUBSCRIPTION_COPY[currentLang] && SUBSCRIPTION_COPY[currentLang][key]) || SUBSCRIPTION_COPY.en[key] || key;
+}
+
+function renderClientSubscriptionStatus() {
+    const card = document.getElementById('clientSubscriptionCard');
+    const planName = document.getElementById('clientPlanName');
+    const badge = document.getElementById('clientSubscriptionBadge');
+    const text = document.getElementById('clientTrialText');
+    if (!card || !planName || !badge || !text) return;
+
+    const subscription = clientEntitlements?.subscription || {};
+    const plan = clientEntitlements?.plan || subscription.plan || {};
+    const daysLeft = Number(subscription.trial_days_left || 0);
+    const accessActive = subscription.is_access_active !== false;
+    const trialActive = subscription.trial_is_active === true;
+    const status = subscription.status || 'none';
+
+    planName.textContent = `${subscriptionCopy('plan')}: ${plan.name || clientEntitlements?.package || 'Business+'}`;
+
+    if (!accessActive) {
+        badge.textContent = subscriptionCopy('expired');
+        text.textContent = subscriptionCopy('expiredText');
+        badge.className = 'px-2.5 py-1 rounded-full bg-red-600 text-white text-[10px] font-bold uppercase tracking-wide';
+        card.className = 'mt-4 rounded-2xl border border-red-200 dark:border-red-900/70 bg-red-50/80 dark:bg-red-950/20 p-3 text-left';
+        return;
+    }
+
+    if (trialActive || status === 'trial') {
+        badge.textContent = subscriptionCopy('trial');
+        text.textContent = subscriptionCopy('daysLeft')(daysLeft);
+        badge.className = 'px-2.5 py-1 rounded-full bg-teal-600 text-white text-[10px] font-bold uppercase tracking-wide';
+        card.className = 'mt-4 rounded-2xl border border-teal-100 dark:border-teal-900/60 bg-teal-50/70 dark:bg-teal-950/20 p-3 text-left';
+        return;
+    }
+
+    if (status === 'active') {
+        badge.textContent = subscriptionCopy('active');
+        text.textContent = subscriptionCopy('activeText');
+        badge.className = 'px-2.5 py-1 rounded-full bg-green-600 text-white text-[10px] font-bold uppercase tracking-wide';
+        card.className = 'mt-4 rounded-2xl border border-green-100 dark:border-green-900/60 bg-green-50/70 dark:bg-green-950/20 p-3 text-left';
+        return;
+    }
+
+    badge.textContent = subscriptionCopy('none');
+    text.textContent = subscriptionCopy('expiredText');
+    badge.className = 'px-2.5 py-1 rounded-full bg-slate-600 text-white text-[10px] font-bold uppercase tracking-wide';
+    card.className = 'mt-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 p-3 text-left';
+}
+
 function applyClientEntitlementsUI() {
     const ent = clientEntitlements?.entitlements || {};
     setPackageStatusBadge('channelWhatsappStatus', ent.allow_whatsapp !== false);
     setPackageStatusBadge('channelViberStatus', ent.allow_viber !== false);
     setPackageStatusBadge('channelTelegramStatus', ent.allow_telegram !== false);
     setPackageStatusBadge('channelSmsPhoneStatus', !!ent.allow_sms || !!ent.allow_phone_calls);
+    renderClientSubscriptionStatus();
     populateAppointmentChannelOptions();
 }
 

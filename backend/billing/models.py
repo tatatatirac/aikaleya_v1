@@ -1,4 +1,7 @@
+from math import ceil
+
 from django.db import models
+from django.utils import timezone
 
 from clients.models import BusinessClient
 
@@ -75,3 +78,82 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f"{self.business_client} - {self.plan}"
+
+    @property
+    def trial_is_active(self):
+        if self.status != self.STATUS_TRIAL:
+            return False
+        if not self.trial_ends_at:
+            return True
+        return self.trial_ends_at >= timezone.now()
+
+    @property
+    def trial_days_left(self):
+        if self.status != self.STATUS_TRIAL or not self.trial_ends_at:
+            return 0
+        remaining = self.trial_ends_at - timezone.now()
+        if remaining.total_seconds() <= 0:
+            return 0
+        return ceil(remaining.total_seconds() / 86400)
+
+    @property
+    def is_access_active(self):
+        if self.status == self.STATUS_ACTIVE:
+            return True
+        return self.trial_is_active
+
+
+class CheckoutSession(models.Model):
+    STATUS_DRAFT = "draft"
+    STATUS_PROVIDER_PENDING = "provider_pending"
+    STATUS_MANUAL_CONTACT = "manual_contact"
+    STATUS_PAID = "paid"
+    STATUS_EXPIRED = "expired"
+    STATUS_CANCELLED = "cancelled"
+
+    STATUS_CHOICES = (
+        (STATUS_DRAFT, "Draft"),
+        (STATUS_PROVIDER_PENDING, "Provider pending"),
+        (STATUS_MANUAL_CONTACT, "Manual contact"),
+        (STATUS_PAID, "Paid"),
+        (STATUS_EXPIRED, "Expired"),
+        (STATUS_CANCELLED, "Cancelled"),
+    )
+
+    PROVIDER_MANUAL = "manual"
+    PROVIDER_STRIPE = "stripe"
+    PROVIDER_PAYPAL = "paypal"
+
+    PROVIDER_CHOICES = (
+        (PROVIDER_MANUAL, "Manual"),
+        (PROVIDER_PAYPAL, "PayPal"),
+        (PROVIDER_STRIPE, "Stripe"),
+    )
+
+    business_client = models.ForeignKey(
+        BusinessClient,
+        on_delete=models.SET_NULL,
+        related_name="checkout_sessions",
+        null=True,
+        blank=True,
+    )
+    plan = models.ForeignKey(Plan, on_delete=models.PROTECT, related_name="checkout_sessions")
+    provider = models.CharField(max_length=40, choices=PROVIDER_CHOICES, default=PROVIDER_MANUAL)
+    status = models.CharField(max_length=40, choices=STATUS_CHOICES, default=STATUS_DRAFT)
+    email = models.EmailField(blank=True)
+    company = models.CharField(max_length=160, blank=True)
+    full_name = models.CharField(max_length=160, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    currency = models.CharField(max_length=10, default="USD")
+    trial_days = models.PositiveIntegerField(default=14)
+    checkout_url = models.URLField(blank=True)
+    external_checkout_id = models.CharField(max_length=180, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self):
+        return f"{self.plan} - {self.email or self.company or self.status}"
