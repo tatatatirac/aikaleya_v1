@@ -68,6 +68,7 @@ class CheckoutSessionSerializer(serializers.ModelSerializer):
         model = CheckoutSession
         fields = (
             "id",
+            "public_id",
             "business_client",
             "plan",
             "provider",
@@ -92,4 +93,7 @@ class CheckoutSessionCreateSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False, allow_blank=True)
     company = serializers.CharField(required=False, allow_blank=True, max_length=160)
     full_name = serializers.CharField(required=False, allow_blank=True, max_length=160)
+    password = serializers.CharField(required=False, allow_blank=True, min_length=8, trim_whitespace=False, write_only=True)
+    phone = serializers.CharField(required=False, allow_blank=True, max_length=40)
+    country = serializers.CharField(required=False, allow_blank=True, max_length=80)
     note = serializers.CharField(required=False, allow_blank=True, max_length=500)

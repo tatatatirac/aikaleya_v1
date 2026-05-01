@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib import admin
 
-from billing.models import CheckoutSession, Plan, Subscription
+from billing.models import CheckoutSession, PendingCheckoutRegistration, Plan, Subscription
 
 
 class PlanAdminForm(forms.ModelForm):
@@ -90,4 +90,27 @@ class CheckoutSessionAdmin(admin.ModelAdmin):
         ("Kontakt", {"fields": ("email", "company", "full_name")}),
         ("Placanje", {"fields": ("amount", "currency", "trial_days", "checkout_url", "external_checkout_id")}),
         ("Sistem", {"fields": ("metadata", "created_at", "updated_at")}),
+    )
+
+
+@admin.register(PendingCheckoutRegistration)
+class PendingCheckoutRegistrationAdmin(admin.ModelAdmin):
+    list_display = ("email", "company", "checkout", "activated_at", "created_at")
+    list_filter = ("activated_at", "created_at")
+    search_fields = ("email", "company", "full_name", "checkout__external_checkout_id")
+    readonly_fields = (
+        "checkout",
+        "email",
+        "company",
+        "full_name",
+        "phone",
+        "country",
+        "password_hash",
+        "activated_at",
+        "created_at",
+        "updated_at",
+    )
+    fieldsets = (
+        ("Registracija", {"fields": ("checkout", "email", "company", "full_name", "phone", "country")}),
+        ("Sistem", {"fields": ("password_hash", "activated_at", "created_at", "updated_at")}),
     )

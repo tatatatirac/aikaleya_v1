@@ -72,6 +72,13 @@ def dashboard(request):
         elif section == "integrations":
             update_integrations(request, selected_client)
             messages.success(request, "Integracije su sačuvane.")
+        elif section == "delete_client" and is_admin_user(request.user):
+            client_name = str(selected_client)
+            selected_client.delete()
+            messages.success(request, f"Klijent {client_name} je obrisan.")
+            return redirect(f"{reverse('dashboard')}#clients")
+        elif section == "delete_client":
+            messages.error(request, "Samo admin moze da obrise klijenta.")
         else:
             messages.error(request, "Nije moguće sačuvati ovu sekciju.")
 

@@ -1,3 +1,4 @@
+import uuid
 from math import ceil
 
 from django.db import models
@@ -123,13 +124,16 @@ class CheckoutSession(models.Model):
     PROVIDER_MANUAL = "manual"
     PROVIDER_STRIPE = "stripe"
     PROVIDER_PAYPAL = "paypal"
+    PROVIDER_LEMONSQUEEZY = "lemonsqueezy"
 
     PROVIDER_CHOICES = (
         (PROVIDER_MANUAL, "Manual"),
+        (PROVIDER_LEMONSQUEEZY, "Lemon Squeezy"),
         (PROVIDER_PAYPAL, "PayPal"),
         (PROVIDER_STRIPE, "Stripe"),
     )
 
+    public_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False, db_index=True)
     business_client = models.ForeignKey(
         BusinessClient,
         on_delete=models.SET_NULL,
@@ -157,3 +161,26 @@ class CheckoutSession(models.Model):
 
     def __str__(self):
         return f"{self.plan} - {self.email or self.company or self.status}"
+
+
+class PendingCheckoutRegistration(models.Model):
+    checkout = models.OneToOneField(
+        CheckoutSession,
+        on_delete=models.CASCADE,
+        related_name="pending_registration",
+    )
+    email = models.EmailField()
+    company = models.CharField(max_length=160)
+    full_name = models.CharField(max_length=160)
+    password_hash = models.CharField(max_length=256)
+    phone = models.CharField(max_length=40, blank=True)
+    country = models.CharField(max_length=80, blank=True)
+    activated_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self):
+        return f"Pending registration: {self.email}"

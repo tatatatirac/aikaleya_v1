@@ -7,7 +7,7 @@ PLAN_CATALOG = [
     {
         "code": Plan.CODE_BASIC,
         "name": "Basic",
-        "monthly_price": 49,
+        "monthly_price": 59,
         "currency": "USD",
         "trial_days": 14,
         "sort_order": 1,

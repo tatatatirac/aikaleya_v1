@@ -41,11 +41,31 @@ const PAGE_LANGS = {
         country: 'Država',
         note: 'Napomena',
         start_trial: 'Probaj 14 dana',
-        registration_creating: 'Kreiram Kaleya nalog...',
+        continue_checkout: 'Probaj 14 dana - nastavi na checkout',
+        registration_creating: 'Pripremam Kaleya checkout...',
         registration_success: 'Nalog je kreiran. Otvaram Kaleya app...',
         registration_failed: 'Registracija nije uspela.',
         contact_custom: 'BusinessPro+ je custom paket. Posaljite zahtev, pa se dogovaramo oko integracija, cene i roka.',
         payment_note: 'Za produkciju ovde se povezuje payment provider, backend registracija, email potvrda i webhook za aktivaciju paketa.',
+        checkout_badge: 'Sigurna naplata',
+        checkout_title: 'Kaleya checkout',
+        checkout_lead: 'Karticna naplata za Kaleya pakete kroz sigurnu obradu placanja.',
+        checkout_package: 'Paket',
+        checkout_amount: 'Iznos',
+        checkout_today: 'Danas',
+        checkout_after_trial: 'Posle probnog perioda',
+        checkout_trial: 'Probni period',
+        checkout_card: 'Placanje karticom',
+        checkout_card_ready: 'Sigurna polja za karticu pojavice se ovde kada je payment sandbox podesen.',
+        checkout_button: 'Nastavi na sigurnu karticnu naplatu',
+        checkout_button_pending: 'Karticna polja su sledeca integracija',
+        checkout_checking: 'Proveravam payment sandbox podesavanja...',
+        checkout_ready: 'Payment sandbox je spreman za karticnu naplatu.',
+        checkout_not_ready: 'Payment sandbox jos nije kompletno podesen u .env fajlu.',
+        checkout_file_mode: 'Checkout radi preko backend adrese: http://127.0.0.1:8000/checkout.html',
+        checkout_next_step: 'Sledeci korak je povezivanje sigurnih karticnih polja za stvarni unos kartice.',
+        checkout_card_fields_pending: 'Payment planovi su spremni. Sledece povezujemo sigurna karticna polja na Kaleya strani, bez slanja korisnika na login stranu procesora.',
+        checkout_trial_note: 'Danas je 0$. Posle 14 dana automatski se naplacuje izabrani paket, osim ako se otkaze pre kraja probnog perioda.',
         god_badge: 'Buy All',
         god_title: 'GOD MODE paket',
         god_lead: 'Kupovina kompletnog Kaleya projekta sa frontendom, backendom, hosting pripremom, domenom i deploy dokumentacijom.',
@@ -99,11 +119,31 @@ const PAGE_LANGS = {
         country: 'Country',
         note: 'Note',
         start_trial: 'Try 14 days',
-        registration_creating: 'Creating your Kaleya account...',
+        continue_checkout: 'Try 14 days - continue to checkout',
+        registration_creating: 'Preparing Kaleya checkout...',
         registration_success: 'Account created. Opening Kaleya app...',
         registration_failed: 'Registration failed.',
         contact_custom: 'BusinessPro+ is a custom package. Send the request and we will agree on integrations, price and timeline.',
         payment_note: 'In production this connects to a payment provider, backend registration, email confirmation and activation webhook.',
+        checkout_badge: 'Secure checkout',
+        checkout_title: 'Kaleya checkout',
+        checkout_lead: 'Card-first checkout for Kaleya packages through secure payment processing.',
+        checkout_package: 'Package',
+        checkout_amount: 'Amount',
+        checkout_today: 'Today',
+        checkout_after_trial: 'After trial',
+        checkout_trial: 'Trial',
+        checkout_card: 'Card payment',
+        checkout_card_ready: 'Secure card fields will appear here when payment sandbox is configured.',
+        checkout_button: 'Continue to secure card checkout',
+        checkout_button_pending: 'Card fields are the next integration',
+        checkout_checking: 'Checking payment sandbox configuration...',
+        checkout_ready: 'Payment sandbox is ready for card checkout.',
+        checkout_not_ready: 'Payment sandbox is not fully configured in the .env file yet.',
+        checkout_file_mode: 'Checkout works through the backend address: http://127.0.0.1:8000/checkout.html',
+        checkout_next_step: 'Next step is wiring secure card fields for real card entry.',
+        checkout_card_fields_pending: 'Payment plans are ready. Next we connect secure card fields on the Kaleya page, without sending the customer to a processor login page.',
+        checkout_trial_note: 'Today is $0. After 14 days the selected package is automatically billed unless cancelled before the trial ends.',
         god_badge: 'Buy All',
         god_title: 'GOD MODE package',
         god_lead: 'Purchase the complete Kaleya project with frontend, backend, hosting preparation, domain and deployment documentation.',
@@ -727,6 +767,7 @@ function applyPageLang() {
     renderHomeLists();
     renderDemoCalendars();
     renderLegalPage();
+    renderRegistrationPaymentSummaries();
 }
 
 function setPageLang(lang) {
@@ -974,6 +1015,138 @@ function renderLegalPage() {
     holder.innerHTML = content.map(([title, body]) => `<h2>${title}</h2><p>${body}</p>`).join('');
 }
 
+const CHECKOUT_PLAN_DETAILS = {
+    basic: { name: 'Basic', price: '$59 / month', trial: '14 days' },
+    pro: { name: 'Pro', price: '$119 / month', trial: '14 days' },
+    business: { name: 'Business', price: '$349 / month', trial: '14 days' },
+    business_plus: { name: 'Business+', price: '$579 / month', trial: '14 days' },
+    business_pro_plus: { name: 'BusinessPro+', price: 'Custom', trial: 'By agreement' }
+};
+
+function checkoutPlanCode() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('plan') || params.get('package') || 'basic';
+}
+
+function checkoutMoney(currency, amount) {
+    const value = Number(amount || 0);
+    const rounded = Number.isInteger(value) ? String(value) : value.toFixed(2);
+    if (currency === 'USD') return `$${rounded}`;
+    if (currency === 'EUR') return `€${rounded}`;
+    return `${currency} ${rounded}`;
+}
+
+function renderRegistrationPaymentSummaries() {
+    document.querySelectorAll('[data-payment-summary]').forEach((summary) => {
+        const planCode = summary.dataset.paymentSummary || 'basic';
+        const plan = CHECKOUT_PLAN_DETAILS[planCode] || CHECKOUT_PLAN_DETAILS.basic;
+        summary.innerHTML = `
+            <div><span>${pageText('checkout_today')}</span><strong>$0</strong></div>
+            <div><span>${pageText('checkout_after_trial')}</span><strong>${plan.price}</strong></div>
+            <p>${pageText('checkout_trial_note')}</p>
+        `;
+    });
+}
+
+async function loadPaymentPublicConfig() {
+    const response = await fetch('/api/billing/payment/public-config/');
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.detail || pageText('checkout_not_ready'));
+    return data;
+}
+
+async function loadCheckoutSession(publicId) {
+    const response = await fetch(`/api/billing/checkout-sessions/public/${publicId}/`);
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.detail || pageText('checkout_not_ready'));
+    return data;
+}
+
+async function initKaleyaCheckoutPage() {
+    const button = document.getElementById('paymentCheckoutBtn');
+    if (!button) return;
+
+    const status = document.getElementById('checkoutStatus');
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session');
+    const planCode = checkoutPlanCode();
+    const plan = CHECKOUT_PLAN_DETAILS[planCode] || CHECKOUT_PLAN_DETAILS.basic;
+    const planLabel = document.getElementById('checkoutPlan');
+    const amountLabel = document.getElementById('checkoutAmount');
+    const todayLabel = document.getElementById('checkoutToday');
+    const trialLabel = document.getElementById('checkoutTrial');
+
+    if (planLabel) planLabel.textContent = plan.name;
+    if (amountLabel) amountLabel.textContent = plan.price;
+    if (todayLabel) todayLabel.textContent = '$0';
+    if (trialLabel) trialLabel.textContent = plan.trial;
+
+    if (window.location.protocol === 'file:') {
+        if (status) status.textContent = pageText('checkout_file_mode');
+        button.disabled = true;
+        return;
+    }
+
+    try {
+        if (sessionId) {
+            const checkout = await loadCheckoutSession(sessionId);
+            if (planLabel) planLabel.textContent = checkout.plan?.name || plan.name;
+            if (amountLabel) amountLabel.textContent = `${checkoutMoney(checkout.currency, checkout.amount)} / month`;
+            if (todayLabel) todayLabel.textContent = checkoutMoney(checkout.currency, 0);
+            if (trialLabel) trialLabel.textContent = `${checkout.trial_days || 14} days`;
+            if (checkout.payment_ready && checkout.provider_checkout_url) {
+                if (checkout.provider === 'lemonsqueezy') {
+                    button.disabled = false;
+                    button.dataset.checkoutReady = '1';
+                    button.dataset.providerCheckoutUrl = checkout.provider_checkout_url;
+                    button.textContent = pageText('checkout_button');
+                    if (status) status.textContent = pageText('checkout_ready');
+                    return;
+                }
+                button.disabled = true;
+                button.dataset.checkoutReady = '0';
+                button.dataset.providerCheckoutUrl = '';
+                button.textContent = pageText('checkout_button_pending');
+                if (status) status.textContent = pageText('checkout_card_fields_pending');
+                return;
+            }
+            button.disabled = true;
+            button.dataset.checkoutReady = '0';
+            if (status) status.textContent = pageText('checkout_not_ready');
+            return;
+        }
+
+        const config = await loadPaymentPublicConfig();
+        if (config.ready && config.client_id_configured) {
+            button.disabled = false;
+            button.dataset.checkoutReady = '1';
+            if (status) status.textContent = `${pageText('checkout_ready')} (${config.environment})`;
+            return;
+        }
+        button.disabled = true;
+        button.dataset.checkoutReady = '0';
+        if (status) status.textContent = pageText('checkout_not_ready');
+    } catch (error) {
+        button.disabled = true;
+        button.dataset.checkoutReady = '0';
+        if (status) status.textContent = error.message || pageText('checkout_not_ready');
+    }
+}
+
+function startKaleyaCardCheckout() {
+    const button = document.getElementById('paymentCheckoutBtn');
+    const status = document.getElementById('checkoutStatus');
+    if (!button || button.dataset.checkoutReady !== '1') {
+        if (status) status.textContent = pageText('checkout_not_ready');
+        return;
+    }
+    if (button.dataset.providerCheckoutUrl) {
+        window.location.href = button.dataset.providerCheckoutUrl;
+        return;
+    }
+    if (status) status.textContent = pageText('checkout_next_step');
+}
+
 function registrationErrorText(data) {
     if (!data || typeof data !== 'object') return pageText('registration_failed');
     if (data.detail) return data.detail;
@@ -992,6 +1165,9 @@ async function createCheckoutSession(payload) {
             email: payload.email,
             company: payload.company,
             full_name: payload.full_name,
+            password: payload.password,
+            phone: payload.phone,
+            country: payload.country,
             note: payload.note
         })
     });
@@ -1029,6 +1205,10 @@ async function submitRegistrationForm(form) {
 
     try {
         const checkout = await createCheckoutSession(payload);
+        if (checkout.local_checkout_url) {
+            window.location.href = checkout.local_checkout_url;
+            return;
+        }
         if (checkout.checkout_url) {
             window.location.href = checkout.checkout_url;
             return;
@@ -1066,4 +1246,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initPageTheme();
     applyPageLang();
     initRegistrationForms();
+    initKaleyaCheckoutPage();
+    renderRegistrationPaymentSummaries();
 });

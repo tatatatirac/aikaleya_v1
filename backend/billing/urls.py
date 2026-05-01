@@ -1,7 +1,15 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path
 
-from billing.views import CheckoutSessionViewSet, PayPalWebhookView, PlanViewSet, SubscriptionViewSet
+from billing.views import (
+    CheckoutPublicDetailView,
+    CheckoutSessionViewSet,
+    LemonSqueezyWebhookView,
+    PayPalPublicConfigView,
+    PayPalWebhookView,
+    PlanViewSet,
+    SubscriptionViewSet,
+)
 
 
 router = DefaultRouter()
@@ -10,7 +18,11 @@ router.register("subscriptions", SubscriptionViewSet, basename="subscription")
 router.register("checkout-sessions", CheckoutSessionViewSet, basename="checkout-session")
 
 urlpatterns = [
+    path("checkout-sessions/public/<uuid:public_id>/", CheckoutPublicDetailView.as_view(), name="checkout-public-detail"),
+    path("payment/public-config/", PayPalPublicConfigView.as_view(), name="payment-public-config"),
+    path("paypal/public-config/", PayPalPublicConfigView.as_view(), name="paypal-public-config"),
     path("paypal/webhook/", PayPalWebhookView.as_view(), name="paypal-webhook"),
+    path("lemonsqueezy/webhook/", LemonSqueezyWebhookView.as_view(), name="lemonsqueezy-webhook"),
 ]
 
 urlpatterns += router.urls

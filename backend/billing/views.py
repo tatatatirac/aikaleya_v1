@@ -1,19 +1,30 @@
 import base64
+import hashlib
+import hmac
 import json
 import urllib.error
 import urllib.parse
 import urllib.request
 
 from django.conf import settings
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import User
 from rest_framework import permissions, status, viewsets
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from accounts.permissions import IsAdminRole, user_role
-from billing.models import CheckoutSession, Plan, Subscription
+from billing.models import CheckoutSession, PendingCheckoutRegistration, Plan, Subscription
 from billing.serializers import CheckoutSessionCreateSerializer, CheckoutSessionSerializer, PlanSerializer, SubscriptionSerializer
-from billing.services import entitlements_for_client, plan_for_client, subscription_state_for_client
+from billing.services import (
+    activate_checkout_subscription,
+    cancel_checkout_subscription,
+    entitlements_for_client,
+    mark_checkout_subscription_past_due,
+    plan_for_client,
+    subscription_state_for_client,
+)
 from clients.models import BusinessClient, get_active_client_for_user
 
 
@@ -30,6 +41,22 @@ PAYPAL_CANCELLED_EVENTS = {
     "PAYMENT.SALE.DENIED",
     "PAYMENT.SALE.REFUNDED",
     "PAYMENT.SALE.REVERSED",
+}
+
+LEMONSQUEEZY_ACTIVE_EVENTS = {
+    "subscription_created",
+    "subscription_resumed",
+    "subscription_payment_success",
+}
+
+LEMONSQUEEZY_PAST_DUE_EVENTS = {
+    "subscription_payment_failed",
+}
+
+LEMONSQUEEZY_CANCELLED_EVENTS = {
+    "subscription_cancelled",
+    "subscription_expired",
+    "subscription_paused",
 }
 
 
@@ -123,6 +150,11 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
         plan = Plan.objects.filter(code=payload["plan_code"], active=True).first()
         if not plan:
             return Response({"detail": "Paket nije pronadjen."}, status=status.HTTP_400_BAD_REQUEST)
+        if payload.get("password") and (
+            User.objects.filter(email__iexact=payload.get("email", "")).exists()
+            or User.objects.filter(username__iexact=payload.get("email", "")).exists()
+        ):
+            return Response({"email": ["Nalog sa ovim emailom vec postoji."]}, status=status.HTTP_400_BAD_REQUEST)
 
         metadata = {
             "plan_code": plan.code,
@@ -141,12 +173,52 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
             trial_days=plan.trial_days,
             metadata=metadata,
         )
+        if payload.get("password"):
+            PendingCheckoutRegistration.objects.update_or_create(
+                checkout=checkout,
+                defaults={
+                    "email": payload.get("email", "").strip().lower(),
+                    "company": payload.get("company", "").strip(),
+                    "full_name": payload.get("full_name", "").strip(),
+                    "password_hash": make_password(payload.get("password")),
+                    "phone": payload.get("phone", "").strip(),
+                    "country": payload.get("country", "").strip(),
+                },
+            )
 
         payment_provider_configured = self._payment_provider_is_configured(plan)
         message = "Payment provider jos nije povezan. Zahtev je sacuvan za rucni kontakt."
 
         if plan.is_contact_only:
             message = "Ovaj paket ide kroz direktan kontakt i dogovor."
+        elif settings.KALEYA_PAYMENT_PROVIDER == CheckoutSession.PROVIDER_LEMONSQUEEZY:
+            if payment_provider_configured:
+                lemon_session, lemon_message = self._create_lemonsqueezy_checkout(plan, payload, metadata, checkout)
+                if lemon_session:
+                    checkout.provider = CheckoutSession.PROVIDER_LEMONSQUEEZY
+                    checkout.status = CheckoutSession.STATUS_PROVIDER_PENDING
+                    checkout.checkout_url = lemon_session["checkout_url"]
+                    checkout.external_checkout_id = lemon_session["id"]
+                    checkout.metadata = {
+                        **checkout.metadata,
+                        "checkout_public_id": str(checkout.public_id),
+                        "lemonsqueezy_variant_id": settings.KALEYA_LEMONSQUEEZY_VARIANT_IDS.get(plan.code, ""),
+                    }
+                    checkout.save(
+                        update_fields=[
+                            "provider",
+                            "status",
+                            "checkout_url",
+                            "external_checkout_id",
+                            "metadata",
+                            "updated_at",
+                        ]
+                    )
+                    message = "Lemon Squeezy checkout je kreiran."
+                else:
+                    message = lemon_message
+            else:
+                message = "Lemon Squeezy jos nije podesen. Zahtev je sacuvan za rucni kontakt."
         elif settings.KALEYA_PAYMENT_PROVIDER == CheckoutSession.PROVIDER_PAYPAL:
             if payment_provider_configured:
                 paypal_session, paypal_message = self._create_paypal_checkout(plan, payload, metadata)
@@ -176,14 +248,119 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
         data = dict(CheckoutSessionSerializer(checkout).data)
         data["message"] = message
         data["payment_provider_configured"] = payment_provider_configured
+        data["local_checkout_url"] = f"/checkout.html?session={checkout.public_id}" if not plan.is_contact_only else ""
         return Response(data, status=status.HTTP_201_CREATED)
 
     def _payment_provider_is_configured(self, plan):
+        if settings.KALEYA_PAYMENT_PROVIDER == CheckoutSession.PROVIDER_LEMONSQUEEZY:
+            return self._lemonsqueezy_is_configured(plan)
         if settings.KALEYA_PAYMENT_PROVIDER == CheckoutSession.PROVIDER_PAYPAL:
             return self._paypal_is_configured(plan)
         if settings.KALEYA_PAYMENT_PROVIDER == CheckoutSession.PROVIDER_STRIPE:
             return self._stripe_is_configured(plan)
         return False
+
+    def _lemonsqueezy_is_configured(self, plan):
+        return bool(
+            settings.KALEYA_LEMONSQUEEZY_API_KEY
+            and settings.KALEYA_LEMONSQUEEZY_STORE_ID
+            and settings.KALEYA_LEMONSQUEEZY_VARIANT_IDS.get(plan.code)
+        )
+
+    def _lemonsqueezy_json_request(self, url, payload):
+        request = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {settings.KALEYA_LEMONSQUEEZY_API_KEY}",
+                "Content-Type": "application/vnd.api+json",
+                "Accept": "application/vnd.api+json",
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(request, timeout=25) as response:
+            return json.loads(response.read().decode("utf-8"))
+
+    def _lemonsqueezy_error_message(self, exc):
+        if isinstance(exc, urllib.error.HTTPError):
+            try:
+                body = exc.read().decode("utf-8")
+            except Exception:
+                body = ""
+            return f"Lemon Squeezy greska {exc.code}: {body or exc.reason}"
+        return f"Lemon Squeezy greska: {exc}"
+
+    def _create_lemonsqueezy_checkout(self, plan, payload, metadata, checkout):
+        variant_id = settings.KALEYA_LEMONSQUEEZY_VARIANT_IDS.get(plan.code, "")
+        custom_data = {
+            "checkout_public_id": str(checkout.public_id),
+            "plan_code": plan.code,
+            "source": "kaleya_frontend",
+        }
+        note = metadata.get("note")
+        if note:
+            custom_data["note"] = str(note)
+
+        checkout_data = {"custom": custom_data}
+        if payload.get("email"):
+            checkout_data["email"] = payload["email"]
+        if payload.get("full_name"):
+            checkout_data["name"] = payload["full_name"]
+
+        lemon_payload = {
+            "data": {
+                "type": "checkouts",
+                "attributes": {
+                    "product_options": {
+                        "name": f"Kaleya {plan.name}",
+                        "description": f"{plan.trial_days} days trial, then {plan.monthly_price} {plan.currency} per month.",
+                        "redirect_url": settings.KALEYA_PAYMENT_SUCCESS_URL,
+                        "receipt_button_text": "Open Kaleya",
+                        "receipt_link_url": settings.KALEYA_PAYMENT_SUCCESS_URL,
+                        "enabled_variants": [int(variant_id)] if str(variant_id).isdigit() else [variant_id],
+                    },
+                    "checkout_options": {
+                        "embed": False,
+                        "media": False,
+                        "logo": False,
+                        "desc": False,
+                        "discount": False,
+                        "dark": True,
+                    },
+                    "checkout_data": checkout_data,
+                    "test_mode": settings.KALEYA_LEMONSQUEEZY_TEST_MODE,
+                },
+                "relationships": {
+                    "store": {
+                        "data": {
+                            "type": "stores",
+                            "id": str(settings.KALEYA_LEMONSQUEEZY_STORE_ID),
+                        }
+                    },
+                    "variant": {
+                        "data": {
+                            "type": "variants",
+                            "id": str(variant_id),
+                        }
+                    },
+                },
+            }
+        }
+
+        try:
+            lemon_data = self._lemonsqueezy_json_request(
+                f"{settings.KALEYA_LEMONSQUEEZY_API_BASE}/v1/checkouts",
+                lemon_payload,
+            )
+        except Exception as exc:
+            return None, self._lemonsqueezy_error_message(exc)
+
+        data = lemon_data.get("data") or {}
+        attributes = data.get("attributes") or {}
+        checkout_url = attributes.get("url", "")
+        if not checkout_url:
+            return None, "Lemon Squeezy nije vratio checkout link."
+        return {"id": str(data.get("id", "")), "checkout_url": checkout_url}, ""
 
     def _paypal_is_configured(self, plan):
         return bool(
@@ -329,6 +506,223 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
         return session, ""
 
 
+class PayPalPublicConfigView(APIView):
+    authentication_classes = ()
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request):
+        provider = settings.KALEYA_PAYMENT_PROVIDER
+        if provider == CheckoutSession.PROVIDER_LEMONSQUEEZY:
+            plans_configured = {
+                code: bool(variant_id)
+                for code, variant_id in settings.KALEYA_LEMONSQUEEZY_VARIANT_IDS.items()
+            }
+            provider_configured = bool(
+                settings.KALEYA_LEMONSQUEEZY_API_KEY
+                and settings.KALEYA_LEMONSQUEEZY_STORE_ID
+            )
+            ready = bool(
+                provider_configured
+                and any(plans_configured.values())
+            )
+            environment = "test" if settings.KALEYA_LEMONSQUEEZY_TEST_MODE else "live"
+            return Response(
+                {
+                    "provider": provider,
+                    "environment": environment,
+                    "client_id": "",
+                    "client_id_configured": provider_configured,
+                    "webhook_configured": bool(settings.KALEYA_LEMONSQUEEZY_WEBHOOK_SECRET),
+                    "plans_configured": plans_configured,
+                    "ready": ready,
+                }
+            )
+
+        if provider == CheckoutSession.PROVIDER_PAYPAL:
+            plans_configured = {
+                code: bool(plan_id)
+                for code, plan_id in settings.KALEYA_PAYPAL_PLAN_IDS.items()
+            }
+            client_id = settings.KALEYA_PAYPAL_CLIENT_ID
+            ready = bool(
+                provider == CheckoutSession.PROVIDER_PAYPAL
+                and client_id
+                and settings.KALEYA_PAYPAL_CLIENT_SECRET
+                and any(plans_configured.values())
+            )
+            return Response(
+                {
+                    "provider": provider,
+                    "environment": settings.KALEYA_PAYPAL_ENVIRONMENT,
+                    "client_id": client_id if client_id else "",
+                    "client_id_configured": bool(client_id),
+                    "webhook_configured": bool(settings.KALEYA_PAYPAL_WEBHOOK_ID),
+                    "plans_configured": plans_configured,
+                    "ready": ready,
+                }
+            )
+
+        plans_configured = {
+            code: bool(price_id)
+            for code, price_id in settings.KALEYA_STRIPE_PRICE_IDS.items()
+        }
+        ready = bool(
+            provider == CheckoutSession.PROVIDER_STRIPE
+            and settings.KALEYA_STRIPE_SECRET_KEY
+            and any(plans_configured.values())
+        )
+        return Response(
+            {
+                "provider": provider,
+                "environment": "manual" if provider == CheckoutSession.PROVIDER_MANUAL else "live",
+                "client_id": "",
+                "client_id_configured": False,
+                "webhook_configured": bool(settings.KALEYA_STRIPE_WEBHOOK_SECRET),
+                "plans_configured": plans_configured,
+                "ready": ready,
+            }
+        )
+
+
+class CheckoutPublicDetailView(APIView):
+    authentication_classes = ()
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request, public_id):
+        checkout = (
+            CheckoutSession.objects.select_related("plan")
+            .filter(public_id=public_id)
+            .first()
+        )
+        if not checkout:
+            return Response({"detail": "Checkout sesija nije pronadjena."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {
+                "public_id": str(checkout.public_id),
+                "provider": checkout.provider,
+                "status": checkout.status,
+                "plan": {
+                    "code": checkout.plan.code,
+                    "name": checkout.plan.name,
+                    "trial_days": checkout.plan.trial_days,
+                },
+                "amount": checkout.amount,
+                "currency": checkout.currency,
+                "trial_days": checkout.trial_days,
+                "provider_checkout_url": checkout.checkout_url
+                if checkout.status == CheckoutSession.STATUS_PROVIDER_PENDING
+                else "",
+                "payment_ready": bool(
+                    checkout.checkout_url
+                    and checkout.status == CheckoutSession.STATUS_PROVIDER_PENDING
+                ),
+            }
+        )
+
+
+class LemonSqueezyWebhookView(APIView):
+    authentication_classes = ()
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request):
+        raw_body = getattr(getattr(request, "_request", request), "body", b"")
+        try:
+            event = json.loads(raw_body.decode("utf-8")) if raw_body else request.data
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            return Response({"detail": "Neispravan Lemon Squeezy webhook JSON."}, status=status.HTTP_400_BAD_REQUEST)
+        if not isinstance(event, dict):
+            return Response({"detail": "Lemon Squeezy webhook mora biti JSON objekat."}, status=status.HTTP_400_BAD_REQUEST)
+
+        verified, verify_error = self._verify_lemonsqueezy_signature(request, raw_body)
+        if not verified:
+            return Response({"detail": verify_error}, status=status.HTTP_400_BAD_REQUEST)
+
+        meta = event.get("meta") or {}
+        data = event.get("data") or {}
+        attributes = data.get("attributes") or {}
+        event_name = meta.get("event_name", "")
+        external_id = str(data.get("id") or attributes.get("subscription_id") or "")
+        checkout = self._checkout_for_event(meta, external_id)
+
+        if checkout and event_name in LEMONSQUEEZY_ACTIVE_EVENTS:
+            checkout.status = CheckoutSession.STATUS_PAID
+            checkout.external_checkout_id = external_id or checkout.external_checkout_id
+            checkout.metadata = {**checkout.metadata, "last_lemonsqueezy_event": event_name}
+            checkout.save(update_fields=["status", "external_checkout_id", "metadata", "updated_at"])
+            self._activate_subscription(checkout, attributes)
+        elif checkout and event_name in LEMONSQUEEZY_PAST_DUE_EVENTS:
+            checkout.metadata = {**checkout.metadata, "last_lemonsqueezy_event": event_name}
+            checkout.save(update_fields=["metadata", "updated_at"])
+            self._mark_subscription_past_due(checkout, attributes)
+        elif checkout and event_name in LEMONSQUEEZY_CANCELLED_EVENTS:
+            checkout.status = CheckoutSession.STATUS_CANCELLED
+            checkout.external_checkout_id = external_id or checkout.external_checkout_id
+            checkout.metadata = {**checkout.metadata, "last_lemonsqueezy_event": event_name}
+            checkout.save(update_fields=["status", "external_checkout_id", "metadata", "updated_at"])
+            self._cancel_subscription(checkout, attributes)
+
+        return Response(
+            {
+                "received": True,
+                "verified": True,
+                "event_name": event_name,
+                "external_subscription_id": external_id,
+                "checkout_found": bool(checkout),
+            }
+        )
+
+    def _verify_lemonsqueezy_signature(self, request, raw_body):
+        secret = settings.KALEYA_LEMONSQUEEZY_WEBHOOK_SECRET
+        if settings.DEBUG and not secret:
+            return True, ""
+        if not secret:
+            return False, "LEMONSQUEEZY_WEBHOOK_SECRET nije podesen u .env fajlu."
+        signature = request.headers.get("X-Signature", "")
+        if not signature:
+            return False, "Lemon Squeezy webhook potpis nedostaje."
+        expected = hmac.new(secret.encode("utf-8"), raw_body, hashlib.sha256).hexdigest()
+        if hmac.compare_digest(expected, signature):
+            return True, ""
+        return False, "Lemon Squeezy webhook potpis nije validan."
+
+    def _checkout_for_event(self, meta, external_id):
+        custom_data = meta.get("custom_data") or {}
+        checkout_public_id = (
+            custom_data.get("checkout_public_id")
+            or custom_data.get("checkout_session_public_id")
+            or custom_data.get("checkout")
+        )
+        query = CheckoutSession.objects.select_related("plan", "business_client")
+        if checkout_public_id:
+            checkout = query.filter(public_id=checkout_public_id).first()
+            if checkout:
+                return checkout
+        if external_id:
+            return query.filter(external_checkout_id=external_id).first()
+        return None
+
+    def _activate_subscription(self, checkout, attributes):
+        return activate_checkout_subscription(
+            checkout,
+            external_customer_id=str(attributes.get("customer_id") or ""),
+            external_subscription_id=checkout.external_checkout_id,
+        )
+
+    def _mark_subscription_past_due(self, checkout, attributes):
+        return mark_checkout_subscription_past_due(
+            checkout,
+            external_customer_id=str(attributes.get("customer_id") or ""),
+            external_subscription_id=checkout.external_checkout_id,
+        )
+
+    def _cancel_subscription(self, checkout, attributes):
+        return cancel_checkout_subscription(
+            checkout,
+            external_customer_id=str(attributes.get("customer_id") or ""),
+            external_subscription_id=checkout.external_checkout_id,
+        )
+
+
 class PayPalWebhookView(APIView):
     authentication_classes = ()
     permission_classes = (permissions.AllowAny,)
@@ -392,22 +786,14 @@ class PayPalWebhookView(APIView):
         )
 
     def _activate_subscription(self, checkout):
-        if not checkout.business_client:
-            return
-        Subscription.objects.update_or_create(
-            business_client=checkout.business_client,
-            defaults={
-                "plan": checkout.plan,
-                "status": Subscription.STATUS_ACTIVE,
-                "external_subscription_id": checkout.external_checkout_id,
-            },
+        return activate_checkout_subscription(
+            checkout,
+            external_subscription_id=checkout.external_checkout_id,
         )
 
     def _cancel_subscription(self, checkout):
-        if not checkout.business_client:
-            return
-        Subscription.objects.filter(business_client=checkout.business_client).update(
-            status=Subscription.STATUS_CANCELLED,
+        return cancel_checkout_subscription(
+            checkout,
             external_subscription_id=checkout.external_checkout_id,
         )
 

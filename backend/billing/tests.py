@@ -1,11 +1,12 @@
 from datetime import time, timedelta
 
+from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import User
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
 
-from billing.models import CheckoutSession, Plan, Subscription
+from billing.models import CheckoutSession, PendingCheckoutRegistration, Plan, Subscription
 from billing.views import CheckoutSessionViewSet
 from clients.models import BusinessClient
 
@@ -212,6 +213,7 @@ class PackageLimitTests(TestCase):
         self.assertFalse(response.data["subscription"]["is_access_active"])
         self.assertEqual(response.data["subscription"]["trial_days_left"], 0)
 
+    @override_settings(KALEYA_PAYMENT_PROVIDER=CheckoutSession.PROVIDER_MANUAL)
     def test_checkout_session_endpoint_creates_manual_request_without_payment_provider(self):
         self.make_plan(Plan.CODE_BASIC, 0)
         api = APIClient()
@@ -230,7 +232,35 @@ class PackageLimitTests(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.data["status"], CheckoutSession.STATUS_MANUAL_CONTACT)
         self.assertFalse(response.data["payment_provider_configured"])
+        self.assertTrue(response.data["local_checkout_url"].startswith("/checkout.html?session="))
         self.assertEqual(CheckoutSession.objects.count(), 1)
+
+    @override_settings(KALEYA_PAYMENT_PROVIDER=CheckoutSession.PROVIDER_MANUAL)
+    def test_checkout_session_stores_pending_registration_with_hashed_password(self):
+        self.make_plan(Plan.CODE_BASIC, 0)
+        api = APIClient()
+
+        response = api.post(
+            "/api/billing/checkout-sessions/",
+            {
+                "plan_code": Plan.CODE_BASIC,
+                "email": "pending-client@example.com",
+                "company": "Pending Company",
+                "full_name": "Pending Owner",
+                "password": "strongpass123",
+                "phone": "+381600001",
+                "country": "Serbia",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        pending = PendingCheckoutRegistration.objects.get(email="pending-client@example.com")
+        self.assertTrue(check_password("strongpass123", pending.password_hash))
+        self.assertNotEqual(pending.password_hash, "strongpass123")
+        self.assertEqual(pending.phone, "+381600001")
+        self.assertNotIn("strongpass123", str(response.data))
+        self.assertNotIn(pending.password_hash, str(response.data))
 
     def test_checkout_session_contact_only_plan_stays_manual(self):
         Plan.objects.create(
@@ -257,6 +287,31 @@ class PackageLimitTests(TestCase):
         self.assertEqual(response.data["status"], CheckoutSession.STATUS_MANUAL_CONTACT)
         self.assertIn("direktan kontakt", response.data["message"])
 
+    def test_checkout_public_detail_returns_safe_payment_data(self):
+        plan = self.make_plan(Plan.CODE_BASIC, 0)
+        checkout = CheckoutSession.objects.create(
+            plan=plan,
+            provider=CheckoutSession.PROVIDER_PAYPAL,
+            status=CheckoutSession.STATUS_PROVIDER_PENDING,
+            checkout_url="https://www.sandbox.paypal.com/checkoutnow?token=I-123",
+            email="private@example.com",
+            company="Private Company",
+            full_name="Private Owner",
+            amount=plan.monthly_price,
+            currency=plan.currency,
+        )
+        api = APIClient()
+
+        response = api.get(f"/api/billing/checkout-sessions/public/{checkout.public_id}/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["plan"]["code"], Plan.CODE_BASIC)
+        self.assertTrue(response.data["payment_ready"])
+        self.assertEqual(response.data["provider_checkout_url"], checkout.checkout_url)
+        self.assertNotIn("private@example.com", str(response.data))
+        self.assertNotIn("Private Company", str(response.data))
+        self.assertNotIn("Private Owner", str(response.data))
+
     @override_settings(
         KALEYA_PAYMENT_PROVIDER=CheckoutSession.PROVIDER_PAYPAL,
         KALEYA_PAYPAL_CLIENT_ID="client-id",
@@ -267,6 +322,157 @@ class PackageLimitTests(TestCase):
         plan = self.make_plan(Plan.CODE_BASIC, 0)
 
         self.assertTrue(CheckoutSessionViewSet()._paypal_is_configured(plan))
+
+    @override_settings(
+        KALEYA_PAYMENT_PROVIDER=CheckoutSession.PROVIDER_PAYPAL,
+        KALEYA_PAYPAL_CLIENT_ID="public-client-id",
+        KALEYA_PAYPAL_CLIENT_SECRET="private-client-secret",
+        KALEYA_PAYPAL_WEBHOOK_ID="WH-123",
+        KALEYA_PAYPAL_PLAN_IDS={Plan.CODE_BASIC: "P-BASIC", Plan.CODE_PRO: ""},
+    )
+    def test_paypal_public_config_endpoint_returns_safe_readiness(self):
+        api = APIClient()
+
+        response = api.get("/api/billing/paypal/public-config/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["provider"], CheckoutSession.PROVIDER_PAYPAL)
+        self.assertEqual(response.data["client_id"], "public-client-id")
+        self.assertTrue(response.data["client_id_configured"])
+        self.assertTrue(response.data["webhook_configured"])
+        self.assertTrue(response.data["plans_configured"][Plan.CODE_BASIC])
+        self.assertFalse(response.data["plans_configured"][Plan.CODE_PRO])
+        self.assertTrue(response.data["ready"])
+        self.assertNotIn("private-client-secret", str(response.data))
+
+    @override_settings(
+        KALEYA_PAYMENT_PROVIDER=CheckoutSession.PROVIDER_LEMONSQUEEZY,
+        KALEYA_LEMONSQUEEZY_API_KEY="private-api-key",
+        KALEYA_LEMONSQUEEZY_STORE_ID="12345",
+        KALEYA_LEMONSQUEEZY_VARIANT_IDS={Plan.CODE_BASIC: "67890"},
+    )
+    def test_lemonsqueezy_configuration_detection(self):
+        plan = self.make_plan(Plan.CODE_BASIC, 0)
+
+        self.assertTrue(CheckoutSessionViewSet()._lemonsqueezy_is_configured(plan))
+
+    @override_settings(
+        KALEYA_PAYMENT_PROVIDER=CheckoutSession.PROVIDER_LEMONSQUEEZY,
+        KALEYA_LEMONSQUEEZY_API_KEY="private-api-key",
+        KALEYA_LEMONSQUEEZY_STORE_ID="12345",
+        KALEYA_LEMONSQUEEZY_WEBHOOK_SECRET="private-webhook-secret",
+        KALEYA_LEMONSQUEEZY_TEST_MODE=True,
+        KALEYA_LEMONSQUEEZY_VARIANT_IDS={Plan.CODE_BASIC: "67890", Plan.CODE_PRO: ""},
+    )
+    def test_lemonsqueezy_public_config_endpoint_returns_safe_readiness(self):
+        api = APIClient()
+
+        response = api.get("/api/billing/payment/public-config/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["provider"], CheckoutSession.PROVIDER_LEMONSQUEEZY)
+        self.assertEqual(response.data["environment"], "test")
+        self.assertTrue(response.data["client_id_configured"])
+        self.assertTrue(response.data["webhook_configured"])
+        self.assertTrue(response.data["plans_configured"][Plan.CODE_BASIC])
+        self.assertFalse(response.data["plans_configured"][Plan.CODE_PRO])
+        self.assertTrue(response.data["ready"])
+        self.assertNotIn("private-api-key", str(response.data))
+        self.assertNotIn("private-webhook-secret", str(response.data))
+
+    @override_settings(DEBUG=True, KALEYA_LEMONSQUEEZY_WEBHOOK_SECRET="")
+    def test_lemonsqueezy_webhook_marks_checkout_paid_and_subscription_active_in_debug(self):
+        plan = self.make_plan(Plan.CODE_BASIC, 0)
+        subscription = Subscription.objects.create(
+            business_client=self.client_profile,
+            plan=plan,
+            status=Subscription.STATUS_TRIAL,
+            trial_ends_at=timezone.now() + timedelta(days=14),
+        )
+        checkout = CheckoutSession.objects.create(
+            business_client=self.client_profile,
+            plan=plan,
+            provider=CheckoutSession.PROVIDER_LEMONSQUEEZY,
+            status=CheckoutSession.STATUS_PROVIDER_PENDING,
+            external_checkout_id="checkout_123",
+            email="owner@example.com",
+            amount=plan.monthly_price,
+            currency=plan.currency,
+        )
+        api = APIClient()
+
+        response = api.post(
+            "/api/billing/lemonsqueezy/webhook/",
+            {
+                "meta": {
+                    "event_name": "subscription_created",
+                    "custom_data": {"checkout_public_id": str(checkout.public_id)},
+                },
+                "data": {
+                    "id": "subscription_123",
+                    "attributes": {"customer_id": "customer_123"},
+                },
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        checkout.refresh_from_db()
+        subscription.refresh_from_db()
+        self.assertEqual(checkout.status, CheckoutSession.STATUS_PAID)
+        self.assertEqual(checkout.external_checkout_id, "subscription_123")
+        self.assertEqual(subscription.status, Subscription.STATUS_ACTIVE)
+        self.assertEqual(subscription.external_subscription_id, "subscription_123")
+
+    @override_settings(DEBUG=True, KALEYA_LEMONSQUEEZY_WEBHOOK_SECRET="")
+    def test_lemonsqueezy_webhook_activates_pending_registration(self):
+        plan = self.make_plan(Plan.CODE_PRO, 1)
+        checkout = CheckoutSession.objects.create(
+            plan=plan,
+            provider=CheckoutSession.PROVIDER_LEMONSQUEEZY,
+            status=CheckoutSession.STATUS_PROVIDER_PENDING,
+            external_checkout_id="checkout_pending",
+            email="paid-client@example.com",
+            company="Paid Company",
+            full_name="Paid Owner",
+            amount=plan.monthly_price,
+            currency=plan.currency,
+        )
+        PendingCheckoutRegistration.objects.create(
+            checkout=checkout,
+            email="paid-client@example.com",
+            company="Paid Company",
+            full_name="Paid Owner",
+            password_hash=make_password("paidpass123"),
+            phone="+381600002",
+            country="Serbia",
+        )
+        api = APIClient()
+
+        response = api.post(
+            "/api/billing/lemonsqueezy/webhook/",
+            {
+                "meta": {
+                    "event_name": "subscription_created",
+                    "custom_data": {"checkout_public_id": str(checkout.public_id)},
+                },
+                "data": {
+                    "id": "subscription_pending",
+                    "attributes": {"customer_id": "customer_pending"},
+                },
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        checkout.refresh_from_db()
+        self.assertIsNotNone(checkout.business_client)
+        self.assertEqual(checkout.business_client.package, Plan.CODE_PRO)
+        self.assertTrue(User.objects.filter(email="paid-client@example.com").exists())
+        subscription = Subscription.objects.get(business_client=checkout.business_client)
+        self.assertEqual(subscription.status, Subscription.STATUS_ACTIVE)
+        self.assertEqual(subscription.external_customer_id, "customer_pending")
+        self.assertEqual(subscription.external_subscription_id, "subscription_pending")
 
     @override_settings(DEBUG=True, KALEYA_PAYPAL_WEBHOOK_ID="")
     def test_paypal_webhook_marks_checkout_paid_and_subscription_active_in_debug(self):

@@ -1,8 +1,13 @@
 from dataclasses import dataclass
+from datetime import timedelta
 
+from django.contrib.auth.models import User
+from django.db import transaction
+from django.utils import timezone
 from rest_framework import serializers
 
 from billing.models import Plan, Subscription
+from clients.models import BusinessClient, ClientApiSettings
 from staff_services.models import StaffMember
 
 
@@ -216,3 +221,110 @@ def enforce_staff_limit(business_client, adding=1):
                 )
             }
         )
+
+
+def activate_pending_registration_for_checkout(checkout):
+    if checkout.business_client:
+        return checkout.business_client
+
+    pending = getattr(checkout, "pending_registration", None)
+    if not pending or not pending.email or not pending.password_hash:
+        return None
+
+    existing_user = (
+        User.objects.filter(email__iexact=pending.email).first()
+        or User.objects.filter(username__iexact=pending.email).first()
+    )
+    if existing_user:
+        existing_client = BusinessClient.objects.filter(owner=existing_user).first()
+        if existing_client:
+            checkout.business_client = existing_client
+            checkout.save(update_fields=["business_client", "updated_at"])
+            return existing_client
+        return None
+
+    with transaction.atomic():
+        full_name = pending.full_name.strip()
+        first_name, _, last_name = full_name.partition(" ")
+        user = User.objects.create(
+            username=pending.email,
+            email=pending.email,
+            first_name=first_name,
+            last_name=last_name,
+            password=pending.password_hash,
+        )
+        user.profile.role = "client"
+        user.profile.phone = pending.phone
+        user.profile.save(update_fields=["role", "phone", "updated_at"])
+
+        client = BusinessClient.objects.create(
+            owner=user,
+            name=pending.company,
+            public_name=pending.company,
+            package=checkout.plan.code,
+            language="en",
+            interface_language="en",
+            voice_language="en",
+            timezone="Europe/Belgrade",
+            kaleya_enabled=True,
+        )
+        user.profile.business_client = client
+        user.profile.save(update_fields=["business_client", "updated_at"])
+
+        ClientApiSettings.objects.get_or_create(
+            business_client=client,
+            defaults={
+                "ai_provider": "anthropic",
+                "ai_model": "claude-haiku-4-5-20251001",
+                "voice_provider": "elevenlabs",
+                "voice_model": "eleven_multilingual_v2",
+            },
+        )
+
+        checkout.business_client = client
+        checkout.save(update_fields=["business_client", "updated_at"])
+        pending.activated_at = timezone.now()
+        pending.save(update_fields=["activated_at", "updated_at"])
+        return client
+
+
+def activate_checkout_subscription(checkout, external_customer_id="", external_subscription_id=""):
+    business_client = activate_pending_registration_for_checkout(checkout)
+    if not business_client:
+        return None
+
+    subscription, _created = Subscription.objects.update_or_create(
+        business_client=business_client,
+        defaults={
+            "plan": checkout.plan,
+            "status": Subscription.STATUS_ACTIVE,
+            "trial_ends_at": timezone.now() + timedelta(days=checkout.plan.trial_days),
+            "external_customer_id": external_customer_id,
+            "external_subscription_id": external_subscription_id or checkout.external_checkout_id,
+        },
+    )
+    business_client.package = checkout.plan.code
+    business_client.save(update_fields=["package", "updated_at"])
+    return subscription
+
+
+def mark_checkout_subscription_past_due(checkout, external_customer_id="", external_subscription_id=""):
+    business_client = checkout.business_client
+    if not business_client:
+        return None
+    return Subscription.objects.filter(business_client=business_client).update(
+        status=Subscription.STATUS_PAST_DUE,
+        external_customer_id=external_customer_id,
+        external_subscription_id=external_subscription_id or checkout.external_checkout_id,
+    )
+
+
+def cancel_checkout_subscription(checkout, external_customer_id="", external_subscription_id=""):
+    business_client = checkout.business_client
+    if not business_client:
+        return None
+    return Subscription.objects.filter(business_client=business_client).update(
+        status=Subscription.STATUS_CANCELLED,
+        external_customer_id=external_customer_id,
+        external_subscription_id=external_subscription_id or checkout.external_checkout_id,
+    )
