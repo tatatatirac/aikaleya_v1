@@ -12,6 +12,7 @@ class BusinessClientAdminForm(forms.ModelForm):
             "name",
             "public_name",
             "package",
+            "is_demo",
             "kaleya_enabled",
             "work_start",
             "work_end",
@@ -93,11 +94,11 @@ class ClientApiSettingsAdminForm(forms.ModelForm):
 @admin.register(BusinessClient)
 class BusinessClientAdmin(admin.ModelAdmin):
     form = BusinessClientAdminForm
-    list_display = ("display_name", "owner", "package", "kaleya_status", "work_time")
-    list_filter = ("package", "kaleya_enabled", "interface_language")
+    list_display = ("display_name", "owner", "package", "is_demo", "kaleya_status", "work_time")
+    list_filter = ("package", "is_demo", "kaleya_enabled", "interface_language")
     search_fields = ("name", "public_name", "owner__email", "owner__username")
     fieldsets = (
-        ("Klijent", {"fields": ("owner", "name", "public_name", "package", "kaleya_enabled")}),
+        ("Klijent", {"fields": ("owner", "name", "public_name", "package", "is_demo", "kaleya_enabled")}),
         ("Radno vreme i jezik", {"fields": ("work_start", "work_end", "slot_interval_minutes", "interface_language", "voice_language", "time_format", "date_format", "week_start")}),
         ("Kanali", {"fields": ("allow_phone_calls", "allow_sms", "allow_whatsapp", "allow_viber", "allow_telegram")}),
     )

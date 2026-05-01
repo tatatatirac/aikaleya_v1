@@ -44,6 +44,7 @@ class InboundTextAPIView(APIView):
         if not client:
             return Response({"detail": "Klijent nije pronadjen."}, status=404)
         enforce_channel_allowed(client, serializer.validated_data.get("channel", "web"))
+        is_demo = bool(getattr(client, "is_demo", False))
 
         conversation = None
         customer = None
@@ -83,9 +84,13 @@ class InboundTextAPIView(APIView):
                 )
                 if key in serializer.validated_data
             },
-            use_ai=serializer.validated_data.get("use_ai", True),
-            include_voice=serializer.validated_data.get("include_voice", False),
+            use_ai=False if is_demo else serializer.validated_data.get("use_ai", True),
+            include_voice=False if is_demo else serializer.validated_data.get("include_voice", False),
         )
+        if is_demo:
+            result["demo_mode"] = True
+            result["ai_provider"] = "demo-fallback"
+            result["voice"] = None
         return Response(result)
 
 
@@ -98,6 +103,11 @@ class TextToSpeechAPIView(APIView):
         client = client_for_request(request)
         if not client:
             return Response({"detail": "Klijent nije pronadjen."}, status=404)
+        if getattr(client, "is_demo", False):
+            return Response(
+                {"detail": "Demo nalog ne koristi stvarni ElevenLabs TTS."},
+                status=403,
+            )
         enforce_elevenlabs_voice_allowed(client)
 
         try:
@@ -113,6 +123,18 @@ class VoiceStatusAPIView(APIView):
         client = client_for_request(request)
         if not client:
             return Response({"detail": "Klijent nije pronadjen."}, status=404)
+        if getattr(client, "is_demo", False):
+            return Response(
+                {
+                    "provider": "elevenlabs",
+                    "connected": False,
+                    "package_allows_voice": False,
+                    "api_key_set": False,
+                    "voice_id_set": False,
+                    "model_id": "",
+                    "demo_mode": True,
+                }
+            )
 
         config = get_client_voice_config(client)
         api_key_set = bool(config.get("api_key"))
@@ -142,6 +164,19 @@ class ProviderStatusAPIView(APIView):
         client = client_for_request(request)
         if not client:
             return Response({"detail": "Klijent nije pronadjen."}, status=404)
+        if getattr(client, "is_demo", False):
+            return Response(
+                {
+                    "ai": {"provider": "demo", "model": "keyword-fallback", "connected": False},
+                    "voice": {
+                        "provider": "elevenlabs",
+                        "model_id": "",
+                        "connected": False,
+                        "package_allows_voice": False,
+                    },
+                    "demo_mode": True,
+                }
+            )
 
         ai_config = get_client_ai_config(client)
         voice_config = get_client_voice_config(client)

@@ -213,6 +213,37 @@ class PackageLimitTests(TestCase):
         self.assertFalse(response.data["subscription"]["is_access_active"])
         self.assertEqual(response.data["subscription"]["trial_days_left"], 0)
 
+    def test_demo_client_inbound_ai_uses_fallback_without_voice(self):
+        self.client_profile.is_demo = True
+        self.client_profile.package = Plan.CODE_BUSINESS_PLUS
+        self.client_profile.save(update_fields=["is_demo", "package", "updated_at"])
+
+        response = self.api.post(
+            "/api/ai-agent/inbound-text/",
+            {"text": "check available slots today", "channel": "web", "use_ai": True, "include_voice": True},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["demo_mode"])
+        self.assertEqual(response.data["ai_provider"], "demo-fallback")
+        self.assertIsNone(response.data["voice"])
+
+    def test_demo_client_blocks_real_tts_and_integration_test_messages(self):
+        self.client_profile.is_demo = True
+        self.client_profile.package = Plan.CODE_BUSINESS_PLUS
+        self.client_profile.save(update_fields=["is_demo", "package", "updated_at"])
+
+        tts = self.api.post("/api/ai-agent/tts/", {"text": "Hello"}, format="json")
+        message = self.api.post(
+            "/api/integrations/connections/test-message/",
+            {"provider": "whatsapp", "to": "+381600000", "body": "Test"},
+            format="json",
+        )
+
+        self.assertEqual(tts.status_code, 403)
+        self.assertEqual(message.status_code, 403)
+
     @override_settings(KALEYA_PAYMENT_PROVIDER=CheckoutSession.PROVIDER_MANUAL)
     def test_checkout_session_endpoint_creates_manual_request_without_payment_provider(self):
         self.make_plan(Plan.CODE_BASIC, 0)

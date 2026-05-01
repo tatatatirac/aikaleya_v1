@@ -62,6 +62,7 @@ class Command(BaseCommand):
                 "interface_language": "en",
                 "voice_language": "en",
                 "timezone": "Europe/Belgrade",
+                "is_demo": True,
                 "kaleya_enabled": True,
                 "work_start": time(9, 0),
                 "work_end": time(16, 0),
@@ -178,7 +179,7 @@ class Command(BaseCommand):
             {
                 "code": Plan.CODE_BASIC,
                 "name": "Basic",
-                "monthly_price": 49,
+                "monthly_price": 59,
                 "currency": "USD",
                 "sort_order": 1,
                 "max_staff_members": 0,

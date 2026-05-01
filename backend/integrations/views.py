@@ -47,6 +47,11 @@ class IntegrationConnectionViewSet(viewsets.ModelViewSet):
         client = self.get_client()
         if not client:
             return Response({"detail": "Klijent nije pronadjen."}, status=status.HTTP_404_NOT_FOUND)
+        if getattr(client, "is_demo", False):
+            return Response(
+                {"detail": "Demo nalog ne salje stvarne test poruke niti koristi spoljne integracije."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         provider = request.data.get("provider", "")
         to_value = request.data.get("to", "")

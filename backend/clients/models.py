@@ -54,6 +54,7 @@ class BusinessClient(models.Model):
     interface_language = models.CharField(max_length=10, choices=LANGUAGE_CHOICES, default="en")
     voice_language = models.CharField(max_length=10, choices=LANGUAGE_CHOICES, default="en")
     timezone = models.CharField(max_length=80, default="Europe/Belgrade")
+    is_demo = models.BooleanField(default=False)
     kaleya_enabled = models.BooleanField(default=True)
     work_start = models.TimeField(default="09:00")
     work_end = models.TimeField(default="16:00")

@@ -74,6 +74,7 @@ class BusinessClientSerializer(serializers.ModelSerializer):
             "interface_language",
             "voice_language",
             "timezone",
+            "is_demo",
             "kaleya_enabled",
             "work_start",
             "work_end",
@@ -90,7 +91,7 @@ class BusinessClientSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "created_at", "updated_at", "api_settings")
+        read_only_fields = ("id", "created_at", "updated_at", "api_settings", "is_demo")
 
     def get_owner_name(self, obj):
         full_name = f"{obj.owner.first_name} {obj.owner.last_name}".strip()
