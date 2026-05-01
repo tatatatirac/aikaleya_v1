@@ -95,7 +95,7 @@
                     </div>
                     <nav class="hidden md:flex items-center gap-8 text-[14px] font-medium text-slate-600 dark:text-slate-300">
                         <a href="#features" data-i18n="nav_features" class="hover:text-slate-900 dark:hover:text-white transition">Funkcije</a>
-                        <a href="demo.html" data-i18n="nav_how" class="hover:text-slate-900 dark:hover:text-white transition">Kako radi</a>
+                        <a href="#login" onclick="event.preventDefault(); showView('login')" data-i18n="nav_how" class="hover:text-slate-900 dark:hover:text-white transition">Kako radi</a>
                         <a href="#pricing" data-i18n="nav_pricing" class="hover:text-slate-900 dark:hover:text-white transition">Cene</a>
                     </nav>
                     <div class="flex items-center gap-2">
@@ -148,7 +148,7 @@
                                 </p>
                                 <div class="mt-8 flex flex-col sm:flex-row gap-3">
                                     <button onclick="showView('login'); setDemoClient()" class="h-12 px-7 rounded-full gradient-bg text-white font-semibold shadow-lg shadow-teal-500/20 hover:shadow-xl hover:shadow-teal-500/30 transition-all" data-i18n="hero_cta_demo">Isprobaj besplatno</button>
-                                    <a href="demo.html" class="h-12 px-7 rounded-full border border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 transition inline-flex items-center justify-center" data-i18n="hero_cta_how">Pogledaj kako radi</a>
+                                    <button type="button" onclick="showView('login')" class="h-12 px-7 rounded-full border border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 transition inline-flex items-center justify-center" data-i18n="hero_cta_how">Pogledaj kako radi</button>
                                 </div>
                                 <div class="mt-8 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                                     <span class="text-xs text-slate-500 mr-1" data-i18n="integrates_with">Integracije:</span>
@@ -301,10 +301,10 @@
                                         </div>
                                     </div>
                                     <div class="space-y-3 font-mono text-[13px]">
-                                        <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800"><span class="text-slate-500">Klijent:</span> Zdravo, treba mi termin za sutra</div>
-                                        <div class="p-3 rounded-xl gradient-bg text-white"><span class="opacity-80">Kaleya:</span> Izvolite. Za koju uslugu?</div>
-                                        <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800"><span class="text-slate-500">Klijent:</span> Šišanje, oko 17h</div>
-                                        <div class="p-3 rounded-xl gradient-bg text-white"><span class="opacity-80">Kaleya:</span> Imam slobodno u 17:00 i 17:30. Koje vam odgovara?</div>
+                                        <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800"><span class="text-slate-500" data-i18n="chat_client">Klijent:</span> <span data-i18n="how_chat_c1">Zdravo, treba mi termin za sutra</span></div>
+                                        <div class="p-3 rounded-xl gradient-bg text-white"><span class="opacity-80" data-i18n="chat_kaleya">Kaleya:</span> <span data-i18n="how_chat_k1">Izvolite. Za koju uslugu?</span></div>
+                                        <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-800"><span class="text-slate-500" data-i18n="chat_client">Klijent:</span> <span data-i18n="how_chat_c2">Šišanje, oko 17h</span></div>
+                                        <div class="p-3 rounded-xl gradient-bg text-white"><span class="opacity-80" data-i18n="chat_kaleya">Kaleya:</span> <span data-i18n="how_chat_k2">Imam slobodno u 17:00 i 17:30. Koje vam odgovara?</span></div>
                                     </div>
                                 </div>
                             </div>
@@ -321,11 +321,11 @@
                         </div>
                         <div class="mt-12 grid md:grid-cols-2 xl:grid-cols-5 gap-5 max-w-7xl mx-auto">
                             <div class="p-[1px] rounded-[28px] bg-slate-200 dark:bg-slate-800">
-                                <div class="h-full rounded-[27px] bg-white dark:bg-slate-950 p-8">
+                                <div class="h-full rounded-[27px] bg-white dark:bg-slate-950 p-8 flex flex-col">
                                     <h3 class="font-display font-bold text-xl">Basic</h3>
                                     <p class="mt-1 text-sm text-slate-500" data-i18n="p_basic_d">Za vlasnika/firmu</p>
                                     <div class="mt-6"><span class="text-4xl font-bold">$49</span><span class="text-slate-500">/mes</span></div>
-                                    <ul class="mt-6 space-y-3 text-sm">
+                                    <ul class="mt-6 space-y-3 text-sm flex-1">
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_basic_f1">AI Kaleya zakazivanja</span></li>
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_basic_f2">Vlasnik/firma Kaleya APP</span></li>
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_basic_f3">Vlasnik zakazivanja</span></li>
@@ -337,12 +337,12 @@
                                 </div>
                             </div>
                             <div class="p-[1px] rounded-[28px] gradient-bg shadow-xl shadow-teal-500/20 scale-[1.02]">
-                                <div class="h-full rounded-[27px] bg-white dark:bg-slate-950 p-8 relative">
+                                <div class="h-full rounded-[27px] bg-white dark:bg-slate-950 p-8 relative flex flex-col">
                                     <div class="absolute -top-3 right-6 px-2.5 py-1 rounded-full text-[11px] font-bold bg-slate-900 text-white dark:bg-white dark:text-slate-900" data-i18n="popular">NAJPOPULARNIJE</div>
                                     <h3 class="font-display font-bold text-xl">Pro</h3>
                                     <p class="mt-1 text-sm text-slate-500" data-i18n="p_pro_d">Vlasnik + 1 radnik</p>
                                     <div class="mt-6"><span class="text-4xl font-bold">$119</span><span class="text-slate-500">/mes</span></div>
-                                    <ul class="mt-6 space-y-3 text-sm">
+                                    <ul class="mt-6 space-y-3 text-sm flex-1">
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_pro_f1">Sve iz Basic</span></li>
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_pro_f2">1 radnik</span></li>
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_pro_f3">Radnik zakazivanja</span></li>
@@ -354,11 +354,11 @@
                                 </div>
                             </div>
                             <div class="p-[1px] rounded-[28px] bg-slate-200 dark:bg-slate-800">
-                                <div class="h-full rounded-[27px] bg-white dark:bg-slate-950 p-8">
+                                <div class="h-full rounded-[27px] bg-white dark:bg-slate-950 p-8 flex flex-col">
                                     <h3 class="font-display font-bold text-xl">Business</h3>
                                     <p class="mt-1 text-sm text-slate-500" data-i18n="p_business_d">Do 5 radnika</p>
                                     <div class="mt-6"><span class="text-4xl font-bold">$349</span><span class="text-slate-500">/mes</span></div>
-                                    <ul class="mt-6 space-y-3 text-sm">
+                                    <ul class="mt-6 space-y-3 text-sm flex-1">
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_f1">Sve iz Basic + Pro</span></li>
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_f2">Do 5 radnika</span></li>
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_f3">Radnik Kaleya APP</span></li>
@@ -369,11 +369,11 @@
                                 </div>
                             </div>
                             <div class="p-[1px] rounded-[28px] bg-slate-200 dark:bg-slate-800">
-                                <div class="h-full rounded-[27px] bg-white dark:bg-slate-950 p-8">
+                                <div class="h-full rounded-[27px] bg-white dark:bg-slate-950 p-8 flex flex-col">
                                     <h3 class="font-display font-bold text-xl">Business+</h3>
                                     <p class="mt-1 text-sm text-slate-500" data-i18n="p_business_plus_d">Do 15 radnika</p>
                                     <div class="mt-6"><span class="text-4xl font-bold">$579</span><span class="text-slate-500">/mes</span></div>
-                                    <ul class="mt-6 space-y-3 text-sm">
+                                    <ul class="mt-6 space-y-3 text-sm flex-1">
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_plus_f1">Sve iz Basic + Pro + Business</span></li>
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_plus_f2">Do 15 radnika</span></li>
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_plus_f3">Telefonski pozivi i SMS</span></li>
@@ -383,11 +383,11 @@
                                 </div>
                             </div>
                             <div class="p-[1px] rounded-[28px] bg-slate-900 dark:bg-white">
-                                <div class="h-full rounded-[27px] bg-slate-950 dark:bg-slate-950 p-8 text-white">
+                                <div class="h-full rounded-[27px] bg-slate-950 dark:bg-slate-950 p-8 text-white flex flex-col">
                                     <h3 class="font-display font-bold text-xl">BusinessPro+</h3>
                                     <p class="mt-1 text-sm text-slate-300" data-i18n="p_business_pro_d">15+ radnika</p>
                                     <div class="mt-6"><span class="text-4xl font-bold" data-i18n="custom_price">Custom</span></div>
-                                    <ul class="mt-6 space-y-3 text-sm text-slate-300">
+                                    <ul class="mt-6 space-y-3 text-sm text-slate-300 flex-1">
                                         <li class="flex gap-2"><span class="text-teal-400">✓</span> <span data-i18n="p_business_pro_f1">Sve iz Basic + Pro + Business + Business+</span></li>
                                         <li class="flex gap-2"><span class="text-teal-400">✓</span> <span data-i18n="p_business_pro_f2">15+ radnika</span></li>
                                         <li class="flex gap-2"><span class="text-teal-400">✓</span> <span data-i18n="p_business_pro_f3">Custom integracije</span></li>
@@ -447,9 +447,13 @@
                         </div>
                         <button type="submit" class="w-full h-12 rounded-2xl gradient-bg text-white font-semibold shadow-lg shadow-teal-500/20 hover:shadow-xl transition" data-i18n="login_btn">Prijavi se</button>
                     </form>
-                    <div class="mt-6 grid grid-cols-1 gap-2">
-                        <button onclick="fillLogin('client')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition">Demo client: administrator@test.com / test123</button>
-                        <button onclick="fillLogin('employee')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition">Demo employee: employee / emp123</button>
+                    <div class="mt-6 rounded-2xl border border-teal-100 dark:border-teal-900/60 bg-teal-50/70 dark:bg-teal-950/20 p-4 text-left">
+                        <p class="text-xs font-bold text-teal-700 dark:text-teal-300" data-i18n="login_demo_title">Test pristup</p>
+                        <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400" data-i18n="login_demo_help">Za probu kliknite administratora ili radnika ispod, podaci ce se sami upisati, pa zatim pritisnite prijavu.</p>
+                    </div>
+                    <div class="mt-3 grid grid-cols-1 gap-2">
+                        <button onclick="fillLogin('client')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition" data-i18n="login_demo_admin">Demo client: administrator@test.com / test123</button>
+                        <button onclick="fillLogin('employee')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition" data-i18n="login_demo_employee">Demo employee: employee / emp123</button>
                     </div>
                     <p id="login-error" class="mt-4 text-center text-sm text-red-500 hidden" data-i18n="login_err">Pogrešan email ili lozinka</p>
                 </div>
@@ -1208,7 +1212,7 @@
 
 <script>
 // ===== STATE =====
-const KALEYA_APP_VERSION = '2026-05-01-employee-booking-01';
+const KALEYA_APP_VERSION = '2026-05-01-home-audio-login-01';
 const savedAppVersion = localStorage.getItem('kaleya_app_version');
 if (savedAppVersion && savedAppVersion !== KALEYA_APP_VERSION) {
     localStorage.removeItem('kaleya_auth_token');
@@ -1701,6 +1705,45 @@ const UI_RUNTIME_TRANSLATIONS = {
 };
 
 Object.entries(UI_RUNTIME_TRANSLATIONS).forEach(([lang, values]) => {
+    T[lang] = { ...(T[lang] || T.en), ...values };
+});
+
+const PUBLIC_DEMO_TRANSLATIONS = {
+    sr: {
+        chat_client: "Klijent:", chat_kaleya: "Kaleya:", how_chat_c1: "Zdravo, treba mi termin za sutra", how_chat_k1: "Izvolite. Za koju uslugu?", how_chat_c2: "Šišanje, oko 17h", how_chat_k2: "Imam slobodno u 17:00 i 17:30. Koje vam odgovara?",
+        login_demo_title: "Test pristup", login_demo_help: "Za probu kliknite administratora ili radnika ispod, podaci ce se sami upisati, pa zatim pritisnite prijavu.", login_demo_admin: "Demo administrator: administrator@test.com / test123", login_demo_employee: "Demo radnik: employee / emp123"
+    },
+    en: {
+        chat_client: "Client:", chat_kaleya: "Kaleya:", how_chat_c1: "Hi, I need an appointment for tomorrow", how_chat_k1: "Of course. Which service do you need?", how_chat_c2: "Haircut, around 5 PM", how_chat_k2: "I have 5:00 PM and 5:30 PM available. Which works for you?",
+        login_demo_title: "Test access", login_demo_help: "To try Kaleya, click the administrator or employee account below, the credentials will fill in automatically, then press sign in.", login_demo_admin: "Demo administrator: administrator@test.com / test123", login_demo_employee: "Demo employee: employee / emp123"
+    },
+    es: {
+        chat_client: "Cliente:", chat_kaleya: "Kaleya:", how_chat_c1: "Hola, necesito una cita para mañana", how_chat_k1: "Claro. ¿Para que servicio?", how_chat_c2: "Corte de pelo, sobre las 17:00", how_chat_k2: "Tengo libre a las 17:00 y 17:30. ¿Cual le conviene?",
+        login_demo_title: "Acceso de prueba", login_demo_help: "Para probar Kaleya, haga clic en administrador o empleado; los datos se rellenan automaticamente y luego pulse iniciar sesion.", login_demo_admin: "Demo administrador: administrator@test.com / test123", login_demo_employee: "Demo empleado: employee / emp123"
+    },
+    pt: {
+        chat_client: "Cliente:", chat_kaleya: "Kaleya:", how_chat_c1: "Ola, preciso de um horario para amanha", how_chat_k1: "Claro. Para qual servico?", how_chat_c2: "Corte de cabelo, por volta das 17:00", how_chat_k2: "Tenho 17:00 e 17:30 disponiveis. Qual prefere?",
+        login_demo_title: "Acesso de teste", login_demo_help: "Para testar Kaleya, clique na conta de administrador ou funcionario; os dados entram automaticamente, depois pressione entrar.", login_demo_admin: "Demo administrador: administrator@test.com / test123", login_demo_employee: "Demo funcionario: employee / emp123"
+    },
+    ru: {
+        chat_client: "Клиент:", chat_kaleya: "Kaleya:", how_chat_c1: "Здравствуйте, мне нужна запись на завтра", how_chat_k1: "Конечно. Какая услуга вам нужна?", how_chat_c2: "Стрижка, примерно в 17:00", how_chat_k2: "Свободно в 17:00 и 17:30. Какое время вам подходит?",
+        login_demo_title: "Тестовый доступ", login_demo_help: "Для теста нажмите аккаунт администратора или сотрудника ниже, данные заполнятся автоматически, затем нажмите вход.", login_demo_admin: "Demo administrator: administrator@test.com / test123", login_demo_employee: "Demo employee: employee / emp123"
+    },
+    fr: {
+        chat_client: "Client:", chat_kaleya: "Kaleya:", how_chat_c1: "Bonjour, il me faut un rendez-vous pour demain", how_chat_k1: "Bien sur. Pour quel service ?", how_chat_c2: "Coupe de cheveux, vers 17 h", how_chat_k2: "J ai 17 h et 17 h 30 disponibles. Quel horaire vous convient ?",
+        login_demo_title: "Acces de test", login_demo_help: "Pour tester Kaleya, cliquez sur le compte administrateur ou employe ci-dessous, les identifiants se rempliront automatiquement, puis connectez-vous.", login_demo_admin: "Demo administrateur: administrator@test.com / test123", login_demo_employee: "Demo employe: employee / emp123"
+    },
+    it: {
+        chat_client: "Cliente:", chat_kaleya: "Kaleya:", how_chat_c1: "Ciao, mi serve un appuntamento per domani", how_chat_k1: "Certo. Per quale servizio?", how_chat_c2: "Taglio capelli, verso le 17:00", how_chat_k2: "Ho libero alle 17:00 e alle 17:30. Quale preferisci?",
+        login_demo_title: "Accesso di prova", login_demo_help: "Per provare Kaleya, clicca su amministratore o dipendente sotto, i dati si inseriranno automaticamente, poi premi accedi.", login_demo_admin: "Demo amministratore: administrator@test.com / test123", login_demo_employee: "Demo dipendente: employee / emp123"
+    },
+    de: {
+        chat_client: "Kunde:", chat_kaleya: "Kaleya:", how_chat_c1: "Hallo, ich brauche einen Termin fuer morgen", how_chat_k1: "Gerne. Fuer welche Leistung?", how_chat_c2: "Haarschnitt, gegen 17:00 Uhr", how_chat_k2: "Ich habe 17:00 und 17:30 Uhr frei. Welche Zeit passt Ihnen?",
+        login_demo_title: "Testzugang", login_demo_help: "Zum Testen klicken Sie unten auf Administrator oder Mitarbeiter, die Zugangsdaten werden automatisch eingetragen, danach anmelden.", login_demo_admin: "Demo Administrator: administrator@test.com / test123", login_demo_employee: "Demo Mitarbeiter: employee / emp123"
+    }
+};
+
+Object.entries(PUBLIC_DEMO_TRANSLATIONS).forEach(([lang, values]) => {
     T[lang] = { ...(T[lang] || T.en), ...values };
 });
 
