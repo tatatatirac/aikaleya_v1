@@ -1,4 +1,5 @@
 import re
+import unicodedata
 from datetime import date as date_cls
 from datetime import datetime, timedelta
 
@@ -23,16 +24,32 @@ DATE_KEYWORDS = {
 }
 
 
+PHONE_PATTERN = re.compile(r"(?<!\w)(\+?\d[\d\s().-]{6,}\d)(?!\w)")
+EMAIL_PATTERN = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.IGNORECASE)
+CUSTOMER_NAME_PATTERNS = (
+    re.compile(
+        r"\b(?:for|za|para|pour|per|fur|für)\s+([^\d+@,.;:]{2,70})",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\b(?:client|customer|klijent|musterija|mušterija|cliente|kunde)\s+([^\d+@,.;:]{2,70})",
+        re.IGNORECASE,
+    ),
+)
+
+
 def parse_requested_date(text, explicit_date=None):
     if explicit_date:
         if isinstance(explicit_date, date_cls):
             return explicit_date
         return datetime.strptime(str(explicit_date), "%Y-%m-%d").date()
 
-    normalized = (text or "").lower()
-    if any(keyword in normalized for keyword in DATE_KEYWORDS["today"]):
+    normalized = normalize_lookup(text)
+    today_keywords = DATE_KEYWORDS["today"] + ("сегодня",)
+    tomorrow_keywords = DATE_KEYWORDS["tomorrow"] + ("mañana", "amanhã", "завтра")
+    if any(normalize_lookup(keyword) in normalized for keyword in today_keywords):
         return date_cls.today()
-    if any(keyword in normalized for keyword in DATE_KEYWORDS["tomorrow"]):
+    if any(normalize_lookup(keyword) in normalized for keyword in tomorrow_keywords):
         return date_cls.today() + timedelta(days=1)
 
     iso_match = re.search(r"\b(20\d{2})-(\d{2})-(\d{2})\b", normalized)
@@ -56,14 +73,18 @@ def parse_requested_time(text, explicit_time=None):
     if match:
         return f"{int(match.group(1)):02d}:{int(match.group(2)):02d}"
 
-    ampm = re.search(r"\b([1-9]|1[0-2])\s*(am|pm)\b", normalized)
+    ampm = re.search(r"\b([1-9]|1[0-2])\s*([ap])\.?\s*m\.?\b", normalized)
     if ampm:
         hour = int(ampm.group(1))
-        if ampm.group(2) == "pm" and hour != 12:
+        if ampm.group(2) == "p" and hour != 12:
             hour += 12
-        if ampm.group(2) == "am" and hour == 12:
+        if ampm.group(2) == "a" and hour == 12:
             hour = 0
         return f"{hour:02d}:00"
+
+    hour_suffix = re.search(r"\b([01]?\d|2[0-3])\s*(?:h|ч|час)\b", normalized)
+    if hour_suffix:
+        return f"{int(hour_suffix.group(1)):02d}:00"
 
     prefixed = re.search(r"\b(?:u|at|um|alle|a las|às|a)\s+([01]?\d|2[0-3])\b", normalized)
     if prefixed:
@@ -99,6 +120,151 @@ def scoped_service(business_client, service_id):
     if not service_id:
         return None
     return Service.objects.filter(id=service_id, business_client=business_client, is_active=True).first()
+
+
+def normalize_lookup(value):
+    value = unicodedata.normalize("NFKD", str(value or ""))
+    value = "".join(ch for ch in value if not unicodedata.combining(ch))
+    return re.sub(r"\s+", " ", value.lower()).strip()
+
+
+def text_contains_phrase(text, phrase):
+    normalized_text = f" {normalize_lookup(text)} "
+    normalized_phrase = normalize_lookup(phrase)
+    if not normalized_phrase:
+        return False
+    return f" {normalized_phrase} " in normalized_text or normalized_phrase in normalized_text
+
+
+def extract_phone(text):
+    match = PHONE_PATTERN.search(text or "")
+    if not match:
+        return ""
+    return re.sub(r"\s+", " ", match.group(1)).strip()
+
+
+def extract_email(text):
+    match = EMAIL_PATTERN.search(text or "")
+    return match.group(0).strip() if match else ""
+
+
+def clean_customer_name_candidate(candidate):
+    parts = re.split(r"\b(?:for|za|para|pour|per|fur|für)\b", candidate or "", flags=re.IGNORECASE)
+    if len(parts) > 1:
+        candidate = parts[-1]
+    candidate = re.split(
+        r"\b(?:phone|telefon|tel|email|mail|at|u|tomorrow|today|sutra|danas|service|usluga|on|na|za termin)\b",
+        candidate or "",
+        maxsplit=1,
+        flags=re.IGNORECASE,
+    )[0]
+    candidate = re.sub(r"[\d+@].*$", "", candidate).strip(" ,.;:-")
+    words = [word for word in re.split(r"\s+", candidate) if word]
+    return " ".join(words[:4]).strip()
+
+
+def looks_like_business_term(candidate, service=None, staff_member=None):
+    normalized = normalize_lookup(candidate)
+    if not normalized:
+        return True
+    if service and (
+        text_contains_phrase(normalized, service.name)
+        or text_contains_phrase(normalized, service.category)
+    ):
+        return True
+    if staff_member and (
+        text_contains_phrase(normalized, staff_member.full_name)
+        or text_contains_phrase(normalized, staff_member.role_title)
+    ):
+        return True
+    return normalized in {"termin", "appointment", "cita", "agendamento", "rendez", "service", "usluga"}
+
+
+def infer_service_from_text(business_client, text):
+    ranked = []
+    for service in Service.objects.filter(business_client=business_client, is_active=True).order_by("name"):
+        score = 0
+        for phrase in (service.name, service.category, service.description):
+            if phrase and text_contains_phrase(text, phrase):
+                score += len(normalize_lookup(phrase))
+        if score:
+            ranked.append((score, service))
+    ranked.sort(key=lambda item: item[0], reverse=True)
+    return ranked[0][1] if ranked else None
+
+
+def infer_staff_from_text(business_client, text):
+    ranked = []
+    for staff_member in StaffMember.objects.filter(business_client=business_client, is_active=True).order_by("full_name"):
+        score = 0
+        for phrase in (staff_member.full_name, staff_member.role_title):
+            if phrase and text_contains_phrase(text, phrase):
+                score += len(normalize_lookup(phrase))
+        if score:
+            ranked.append((score, staff_member))
+    ranked.sort(key=lambda item: item[0], reverse=True)
+    return ranked[0][1] if ranked else None
+
+
+def extract_customer_name(text, service=None, staff_member=None):
+    for pattern in CUSTOMER_NAME_PATTERNS:
+        for match in pattern.finditer(text or ""):
+            candidate = clean_customer_name_candidate(match.group(1))
+            if len(candidate) >= 2 and not looks_like_business_term(candidate, service=service, staff_member=staff_member):
+                return candidate
+    return ""
+
+
+def infer_payload_from_text(business_client, text, payload=None):
+    inferred = dict(payload or {})
+    service = scoped_service(business_client, inferred.get("service_id")) or resolve_service_by_hint(
+        business_client,
+        inferred.get("service_hint"),
+    )
+    staff_member = scoped_staff_member(business_client, inferred.get("staff_member_id")) or resolve_staff_member_by_hint(
+        business_client,
+        inferred.get("staff_hint"),
+    )
+
+    if not service and not inferred.get("service_hint"):
+        service = infer_service_from_text(business_client, text)
+        if service:
+            inferred["service_id"] = service.id
+            inferred["service_hint"] = service.name
+
+    if not staff_member and not inferred.get("staff_hint"):
+        staff_member = infer_staff_from_text(business_client, text)
+        if staff_member:
+            inferred["staff_member_id"] = staff_member.id
+            inferred["staff_hint"] = staff_member.full_name
+
+    if not inferred.get("phone"):
+        phone = extract_phone(text)
+        if phone:
+            inferred["phone"] = phone
+
+    if not inferred.get("email"):
+        email = extract_email(text)
+        if email:
+            inferred["email"] = email
+
+    if not inferred.get("customer_name"):
+        customer_name = extract_customer_name(text, service=service, staff_member=staff_member)
+        if customer_name:
+            inferred["customer_name"] = customer_name
+
+    if not inferred.get("time"):
+        parsed_time = parse_requested_time(text)
+        if parsed_time:
+            inferred["time"] = parsed_time
+
+    if not inferred.get("date") and any(
+        keyword in normalize_lookup(text)
+        for keyword in ("danas", "today", "hoy", "hoje", "sutra", "tomorrow", "mañana", "demain", "morgen")
+    ):
+        inferred["date"] = parse_requested_date(text)
+
+    return inferred
 
 
 def eligible_staff_members(business_client, service=None, preferred_staff_member=None):
@@ -228,7 +394,7 @@ def ensure_customer(business_client, customer=None, payload=None):
 
 
 def check_availability_tool(business_client, text="", payload=None):
-    payload = payload or {}
+    payload = infer_payload_from_text(business_client, text, payload)
     target_date = parse_requested_date(text, payload.get("date"))
     service = scoped_service(business_client, payload.get("service_id")) or resolve_service_by_hint(business_client, payload.get("service_hint"))
     staff_member = scoped_staff_member(business_client, payload.get("staff_member_id")) or resolve_staff_member_by_hint(business_client, payload.get("staff_hint"))
@@ -252,7 +418,7 @@ def check_availability_tool(business_client, text="", payload=None):
 
 
 def book_appointment_tool(business_client, text="", customer=None, channel="web", payload=None):
-    payload = payload or {}
+    payload = infer_payload_from_text(business_client, text, payload)
     target_date = parse_requested_date(text, payload.get("date"))
     requested_time = parse_requested_time(text, payload.get("time"))
     service = scoped_service(business_client, payload.get("service_id")) or resolve_service_by_hint(business_client, payload.get("service_hint"))
@@ -341,36 +507,62 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
 
 
 def find_target_appointment(business_client, customer=None, payload=None, text=""):
-    payload = payload or {}
+    payload = infer_payload_from_text(business_client, text, payload)
     appointment_id = payload.get("appointment_id")
     queryset = Appointment.objects.select_related("customer", "staff_member", "service").filter(
         business_client=business_client,
         status__in=ACTIVE_STATUSES,
     )
+    if payload.get("staff_member_id"):
+        queryset = queryset.filter(staff_member_id=payload["staff_member_id"])
     if appointment_id:
         return queryset.filter(id=appointment_id).first()
     if customer:
         return queryset.filter(customer=customer).order_by("date", "start_time").first()
 
-    query = (payload.get("customer_name") or payload.get("phone") or text or "").strip()
+    if payload.get("date"):
+        queryset = queryset.filter(date=parse_requested_date(text, payload.get("date")))
+    if payload.get("time"):
+        queryset = queryset.filter(start_time=as_time(payload.get("time")))
+    if payload.get("phone"):
+        phone_digits = re.sub(r"\D+", "", payload["phone"])
+        phone_query = phone_digits[-6:] if len(phone_digits) >= 6 else payload["phone"]
+        queryset = queryset.filter(customer__phone__icontains=phone_query)
+    if payload.get("email"):
+        queryset = queryset.filter(customer__email__iexact=payload["email"])
+
+    query = (payload.get("customer_name") or "").strip()
     if query:
-        return (
-            queryset.filter(
-                customer__first_name__icontains=query
-            ).order_by("date", "start_time").first()
-            or queryset.filter(customer__last_name__icontains=query).order_by("date", "start_time").first()
-            or queryset.filter(customer__phone__icontains=query).order_by("date", "start_time").first()
-            or queryset.filter(title__icontains=query).order_by("date", "start_time").first()
-        )
-    return None
+        tokens = [token for token in re.findall(r"[\wÀ-žА-Яа-я]+", query) if len(token) >= 2]
+        if tokens:
+            name_filter = Q()
+            for token in tokens:
+                name_filter |= Q(customer__first_name__icontains=token) | Q(customer__last_name__icontains=token) | Q(title__icontains=token)
+            match = queryset.filter(name_filter).order_by("date", "start_time").first()
+            if match:
+                return match
+
+    text_tokens = [token for token in re.findall(r"[\wÀ-žА-Яа-я]+", text or "") if len(token) >= 3]
+    if text_tokens:
+        loose_filter = Q()
+        for token in text_tokens[:12]:
+            loose_filter |= (
+                Q(customer__first_name__icontains=token)
+                | Q(customer__last_name__icontains=token)
+                | Q(customer__phone__icontains=token)
+                | Q(title__icontains=token)
+            )
+        return queryset.filter(loose_filter).order_by("date", "start_time").first()
+    return queryset.order_by("date", "start_time").first()
 
 
 def cancel_appointment_tool(business_client, text="", customer=None, payload=None):
+    payload = payload or {}
     appointment = find_target_appointment(business_client, customer=customer, payload=payload, text=text)
     if not appointment:
         return {"status": "needs_target", "message": "appointment_not_found"}
     appointment.status = Appointment.STATUS_CANCELLED
-    appointment.cancelled_reason = "Cancelled by Kaleya AI"
+    appointment.cancelled_reason = payload.get("reason") or payload.get("cancelled_reason") or "Cancelled by Kaleya AI"
     appointment.save(update_fields=["status", "cancelled_reason", "updated_at"])
     return {
         "status": "cancelled",
@@ -382,7 +574,7 @@ def cancel_appointment_tool(business_client, text="", customer=None, payload=Non
 
 
 def reschedule_appointment_tool(business_client, text="", customer=None, channel="web", payload=None):
-    payload = payload or {}
+    payload = infer_payload_from_text(business_client, text, payload)
     appointment = find_target_appointment(business_client, customer=customer, payload=payload, text=text)
     if not appointment:
         return {"status": "needs_target", "message": "appointment_not_found"}

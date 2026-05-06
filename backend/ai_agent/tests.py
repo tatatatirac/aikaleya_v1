@@ -14,6 +14,7 @@ from clients.models import BusinessClient, BusinessKnowledgeEntry
 from communications.models import Conversation, Message
 from notifications.models import NotificationJob
 from staff_services.models import Service, StaffMember
+from support.models import SupportTicket
 
 
 class AIAppointmentToolTests(TestCase):
@@ -200,6 +201,11 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["intent"], "support_handoff")
         self.assertEqual(conversation.status, "handoff")
         self.assertTrue(result["tool_output"]["handoff"])
+        self.assertTrue(result["tool_output"]["support_ticket_id"])
+        ticket = SupportTicket.objects.get(id=result["tool_output"]["support_ticket_id"])
+        self.assertEqual(ticket.business_client, self.client)
+        self.assertEqual(ticket.status, SupportTicket.STATUS_OPEN)
+        self.assertEqual(ticket.metadata["conversation_id"], conversation.id)
 
     def test_ai_writes_tool_audit_log(self):
         result = handle_inbound_text(
@@ -239,6 +245,85 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["tool_output"]["status"], "needs_more_details")
         self.assertIn("service", result["decision"]["missing_fields"])
         self.assertEqual(Appointment.objects.count(), 0)
+
+    def test_ai_fallback_extracts_service_customer_phone_date_and_time_from_text(self):
+        Service.objects.create(
+            business_client=self.client,
+            name="Haircut",
+            duration_minutes=45,
+            price=30,
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Book Haircut for Emily Carter tomorrow at 10:00. Phone +15550177",
+            channel="web",
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "book_appointment")
+        self.assertEqual(result["tool_output"]["status"], "booked")
+        appointment = Appointment.objects.get()
+        self.assertEqual(appointment.customer.full_name, "Emily Carter")
+        self.assertEqual(appointment.customer.phone, "+15550177")
+        self.assertEqual(appointment.service.name, "Haircut")
+        self.assertEqual(appointment.duration_minutes, 45)
+        self.assertEqual(appointment.start_time, time(10, 0))
+
+    def test_ai_fallback_understands_hour_suffix_and_diacritic_service(self):
+        self.client.work_end = time(18, 0)
+        self.client.save(update_fields=["work_end", "updated_at"])
+        Service.objects.create(
+            business_client=self.client,
+            name="Šišanje",
+            duration_minutes=30,
+            price=25,
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Termin za šišanje za Marka Markovića sutra u 17h telefon +38160123456",
+            channel="web",
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "book_appointment")
+        self.assertEqual(result["tool_output"]["status"], "booked")
+        appointment = Appointment.objects.get()
+        self.assertEqual(appointment.customer.full_name, "Marka Markovića")
+        self.assertEqual(appointment.service.name, "Šišanje")
+        self.assertEqual(appointment.start_time, time(17, 0))
+
+    def test_ai_fallback_cancels_by_name_inside_message_and_records_reason(self):
+        customer = self.client.customers.create(
+            first_name="Emily",
+            last_name="Carter",
+            phone="+15550177",
+        )
+        appointment = Appointment.objects.create(
+            business_client=self.client,
+            customer=customer,
+            title="Haircut",
+            status=Appointment.STATUS_CONFIRMED,
+            date=date.today(),
+            start_time=time(11, 0),
+            duration_minutes=30,
+            channel="web",
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Please cancel Emily Carter appointment",
+            channel="web",
+            payload={"reason": "Client requested cancellation"},
+            use_ai=False,
+        )
+
+        appointment.refresh_from_db()
+        self.assertEqual(result["intent"], "cancel_appointment")
+        self.assertEqual(result["tool_output"]["status"], "cancelled")
+        self.assertEqual(appointment.status, Appointment.STATUS_CANCELLED)
+        self.assertEqual(appointment.cancelled_reason, "Client requested cancellation")
 
     def test_ai_reuses_external_thread_and_records_messages(self):
         first = handle_inbound_text(
@@ -371,6 +456,48 @@ class AIAppointmentToolTests(TestCase):
 
         appointment.refresh_from_db()
         self.assertEqual(result["intent"], "support_handoff")
+        self.assertEqual(appointment.status, Appointment.STATUS_CONFIRMED)
+
+    def test_employee_ai_cannot_cancel_other_staff_appointment_by_customer_name(self):
+        employee_user = User.objects.create_user(username="employee3", email="employee3@example.com", password="emp123")
+        employee_user.profile.role = Profile.ROLE_EMPLOYEE
+        employee_user.profile.business_client = self.client
+        employee_user.profile.save(update_fields=["role", "business_client", "updated_at"])
+        StaffMember.objects.create(
+            business_client=self.client,
+            user=employee_user,
+            full_name="Employee Three",
+            role_title="Stylist",
+        )
+        other_staff = StaffMember.objects.create(business_client=self.client, full_name="Other Three", role_title="Stylist")
+        customer = self.client.customers.create(
+            first_name="Emily",
+            last_name="Carter",
+            phone="+15550999",
+        )
+        appointment = Appointment.objects.create(
+            business_client=self.client,
+            customer=customer,
+            staff_member=other_staff,
+            title="Other staff booking",
+            status=Appointment.STATUS_CONFIRMED,
+            date=date.today(),
+            start_time=time(11, 0),
+            duration_minutes=30,
+            channel="web",
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Cancel Emily Carter appointment",
+            channel="web",
+            use_ai=False,
+            actor=employee_user,
+        )
+
+        appointment.refresh_from_db()
+        self.assertEqual(result["intent"], "cancel_appointment")
+        self.assertEqual(result["tool_output"]["status"], "needs_target")
         self.assertEqual(appointment.status, Appointment.STATUS_CONFIRMED)
 
 

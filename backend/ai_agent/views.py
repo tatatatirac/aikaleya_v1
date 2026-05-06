@@ -113,6 +113,8 @@ class InboundTextAPIView(APIView):
                     "time",
                     "duration_minutes",
                     "title",
+                    "reason",
+                    "cancelled_reason",
                 )
                 if key in serializer.validated_data
             },

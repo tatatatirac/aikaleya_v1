@@ -11,6 +11,7 @@ from ai_agent.tools import (
     book_appointment_tool,
     cancel_appointment_tool,
     check_availability_tool,
+    infer_payload_from_text,
     parse_requested_date,
     parse_requested_time,
     reschedule_appointment_tool,
@@ -21,6 +22,7 @@ from clients.models import BusinessKnowledgeEntry
 from communications.models import Conversation, Message
 from notifications.services import queue_notification_jobs_for_event
 from staff_services.models import Service, StaffMember
+from support.models import SupportTicket
 
 
 INTENT_KEYWORDS = {
@@ -87,6 +89,8 @@ PLAN_PAYLOAD_KEYS = (
     "time",
     "duration_minutes",
     "title",
+    "reason",
+    "cancelled_reason",
 )
 
 WORKFLOW_STEPS = (
@@ -283,16 +287,13 @@ def workflow_missing_fields(business_client, intent_name, text, payload, custome
         return missing
     if intent_name == "reschedule_appointment":
         missing = []
-        if not payload.get("appointment_id") and not customer_identity_present(customer, payload):
-            missing.append("appointment_target")
         if not payload.get("date") and not text_has_date_hint(text):
             missing.append("new_date")
         if not payload.get("time") and not parse_requested_time(text):
             missing.append("new_time")
         return missing
     if intent_name == "cancel_appointment":
-        if not payload.get("appointment_id") and not customer_identity_present(customer, payload):
-            return ["appointment_target"]
+        return []
     return []
 
 
@@ -543,6 +544,52 @@ def queue_ai_follow_up_jobs(business_client, intent_name, tool_output, language)
     )
 
 
+def support_priority_from_text(text):
+    lowered = (text or "").lower()
+    urgent_words = ("hitno", "urgent", "emergency", "zalba", "complaint", "angry", "problem")
+    return SupportTicket.PRIORITY_URGENT if any(word in lowered for word in urgent_words) else SupportTicket.PRIORITY_NORMAL
+
+
+def create_support_ticket_for_handoff(business_client, conversation, text, channel, language, preprocess, planner_raw_response):
+    existing = None
+    if conversation:
+        existing = (
+            SupportTicket.objects.filter(
+                business_client=business_client,
+                metadata__conversation_id=conversation.id,
+                status__in=(SupportTicket.STATUS_OPEN, SupportTicket.STATUS_IN_PROGRESS),
+            )
+            .order_by("-created_at")
+            .first()
+        )
+    if existing:
+        return existing
+
+    subject = f"Kaleya support handoff - {channel or 'web'}"
+    message = (
+        "Kaleya nije mogla samostalno da zavrsi zahtev.\n\n"
+        f"Kanal: {channel or 'web'}\n"
+        f"Jezik: {language or 'en'}\n"
+        f"Poruka korisnika: {text or ''}"
+    )
+    return SupportTicket.objects.create(
+        business_client=business_client,
+        subject=subject[:180],
+        message=message,
+        priority=support_priority_from_text(text),
+        status=SupportTicket.STATUS_OPEN,
+        metadata={
+            "source": "ai_agent",
+            "conversation_id": conversation.id if conversation else None,
+            "channel": channel,
+            "language": language,
+            "input_text": text,
+            "preprocess": json_safe(preprocess),
+            "planner": json_safe(planner_raw_response),
+        },
+    )
+
+
 def actor_scope_for_ai(actor):
     if user_role(actor) != "employee":
         return {"role": user_role(actor) or "", "staff_member": None}
@@ -558,7 +605,7 @@ def apply_actor_scope_to_payload(business_client, actor, intent_name, payload):
         return payload, "employee_staff_missing"
 
     payload = {**(payload or {})}
-    if intent_name in {"book_appointment", "check_availability", "reschedule_appointment"}:
+    if intent_name in {"book_appointment", "check_availability", "reschedule_appointment", "cancel_appointment"}:
         payload["staff_member_id"] = staff_member.id
     if intent_name == "cancel_appointment" and payload.get("appointment_id"):
         allowed = business_client.appointments.filter(
@@ -799,6 +846,7 @@ def handle_inbound_text(
             planner_raw_response = {"engine": "keyword-fallback", "planner_error": str(exc)}
 
     payload = merge_payloads(planner_payload, payload)
+    payload = infer_payload_from_text(business_client, text, payload)
     preprocess = build_preprocess_context(business_client, text, customer=customer, payload=payload, channel=channel)
     language = preprocess["language"]
     matched_knowledge = match_knowledge_entry(business_client, text, language)
@@ -892,6 +940,19 @@ def handle_inbound_text(
         input_payload=json_safe({"text": text, "channel": channel, "payload": payload}),
         output_payload=json_safe(tool_output),
     )
+    if intent_name == "support_handoff":
+        support_ticket = create_support_ticket_for_handoff(
+            business_client,
+            conversation,
+            text,
+            channel,
+            language,
+            preprocess,
+            planner_raw_response,
+        )
+        tool_output["support_ticket_id"] = support_ticket.id
+        tool_run.output_payload = json_safe(tool_output)
+        tool_run.save(update_fields=["output_payload"])
     conversation_state = save_conversation_ai_state(
         conversation,
         intent_name,

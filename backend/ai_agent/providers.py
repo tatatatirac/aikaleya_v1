@@ -141,7 +141,7 @@ def generate_anthropic_plan(business_client, user_text, context=None):
         "If the user asks for the first available slot, leave staff_member_id null and set staff_hint to null. "
         "If the user mentions a service or employee by name, put that text in service_hint or staff_hint. "
         "Return keys: intent, confidence, date, time, duration_minutes, customer_name, phone, email, "
-        "appointment_id, service_id, service_hint, staff_member_id, staff_hint, title, needs_human_support."
+        "appointment_id, service_id, service_hint, staff_member_id, staff_hint, title, reason, cancelled_reason, needs_human_support."
     )
     payload = {
         "model": config["model"],

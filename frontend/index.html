@@ -452,7 +452,7 @@
                         <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400" data-i18n="login_demo_help">Za probu kliknite administratora ili radnika ispod, podaci ce se sami upisati, pa zatim pritisnite prijavu.</p>
                     </div>
                     <div class="mt-3 grid grid-cols-1 gap-2">
-                        <button onclick="fillLogin('client')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition" data-i18n="login_demo_admin">Demo client: administrator@test.com / test123</button>
+                        <button onclick="fillLogin('client')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition" data-i18n="login_demo_admin">Demo administrator: administrator@test.com / test123</button>
                         <button onclick="fillLogin('employee')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition" data-i18n="login_demo_employee">Demo employee: employee / emp123</button>
                     </div>
                     <p id="login-error" class="mt-4 text-center text-sm text-red-500 hidden" data-i18n="login_err">Pogrešan email ili lozinka</p>
@@ -866,6 +866,53 @@
                                     <button id="clientKnowledgeCancelBtn" onclick="resetClientKnowledgeForm()" class="hidden h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="cancel_btn">Odustani</button>
                                 </div>
                             </div>
+
+                            <div id="clientAiTestPanel" class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-600 dark:text-slate-300" data-i18n="ai_test_title">Privatni AI test</p>
+                                        <p class="mt-1 text-[10px] text-slate-500" data-i18n="ai_test_desc">Posaljite poruku kao da je stigla od klijenta i proverite sta bi Kaleya uradila.</p>
+                                    </div>
+                                    <span class="shrink-0 px-2 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 text-[10px] font-semibold">Haiku</span>
+                                </div>
+                                <div class="mt-4 grid grid-cols-[1fr_auto] gap-2">
+                                    <select id="clientAiTestChannel" class="h-10 px-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px]">
+                                        <option value="web">Web</option>
+                                        <option value="whatsapp">WhatsApp</option>
+                                        <option value="viber">Viber</option>
+                                        <option value="telegram">Telegram</option>
+                                        <option value="sms">SMS</option>
+                                        <option value="phone">Phone</option>
+                                    </select>
+                                    <button id="clientAiTestRunBtn" onclick="runPrivateAiTest()" class="h-10 px-4 rounded-xl gradient-bg text-white text-[12px] font-semibold" data-i18n="ai_test_run">Testiraj</button>
+                                </div>
+                                <textarea id="clientAiTestInput" rows="4" data-i18n-placeholder="ai_test_input_placeholder" placeholder="Npr. Klijent Marko zeli sisanje sutra u 15:00, telefon +381..." class="mt-2 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none resize-none"></textarea>
+                                <p id="clientAiTestNote" class="mt-2 text-[10px] text-slate-500" data-i18n="ai_test_real_note">Pravi nalozi koriste AI model iz backenda. Demo nalog koristi sigurni fallback bez trosenja API kredita.</p>
+                                <div id="clientAiTestResult" class="hidden mt-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 p-3 text-[12px]">
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <div><span class="block text-[10px] text-slate-500" data-i18n="ai_test_provider">Provider</span><span id="clientAiTestProvider" class="font-semibold">-</span></div>
+                                        <div><span class="block text-[10px] text-slate-500" data-i18n="ai_test_intent">Namera</span><span id="clientAiTestIntent" class="font-semibold">-</span></div>
+                                        <div><span class="block text-[10px] text-slate-500" data-i18n="ai_test_status">Status</span><span id="clientAiTestStatus" class="font-semibold">-</span></div>
+                                    </div>
+                                    <p class="mt-3 text-[10px] uppercase tracking-wide text-slate-500" data-i18n="ai_test_response">Odgovor Kaleye</p>
+                                    <p id="clientAiTestResponse" class="mt-1 leading-relaxed text-slate-700 dark:text-slate-200"></p>
+                                    <details class="mt-3">
+                                        <summary class="cursor-pointer text-[11px] font-semibold text-slate-500" data-i18n="ai_test_details">Detalji odluke</summary>
+                                        <pre id="clientAiTestDetails" class="mt-2 max-h-44 overflow-auto whitespace-pre-wrap text-[10px] leading-relaxed text-slate-600 dark:text-slate-300"></pre>
+                                    </details>
+                                </div>
+                            </div>
+
+                            <div id="clientSupportInboxPanel" class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-600 dark:text-slate-300" data-i18n="support_inbox_title">Human support inbox</p>
+                                        <p class="mt-1 text-[10px] text-slate-500" data-i18n="support_inbox_desc">Zahtevi koje Kaleya nije mogla sama da zavrsi.</p>
+                                    </div>
+                                    <button onclick="loadClientSupportTicketsFromBackend()" class="shrink-0 h-8 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[10px] font-semibold" data-i18n="refresh_btn">Osvezi</button>
+                                </div>
+                                <div id="clientSupportTicketList" class="mt-4 space-y-2"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1258,7 +1305,7 @@
 
 <script>
 // ===== STATE =====
-const KALEYA_APP_VERSION = '2026-05-06-demo-static-voice-01';
+const KALEYA_APP_VERSION = '2026-05-06-support-inbox-01';
 const savedAppVersion = localStorage.getItem('kaleya_app_version');
 if (savedAppVersion && savedAppVersion !== KALEYA_APP_VERSION) {
     localStorage.removeItem('kaleya_auth_token');
@@ -1312,6 +1359,7 @@ let clientServices = [];
 let clientStaffServiceLinks = [];
 let clientBlockedTimes = [];
 let clientKnowledgeEntries = [];
+let clientSupportTickets = [];
 let recognition = null;
 let activeClientForApi = '';
 let openStatusMenuId = '';
@@ -1849,6 +1897,292 @@ Object.entries(KNOWLEDGE_RUNTIME_TRANSLATIONS).forEach(([lang, values]) => {
     T[lang] = { ...(T[lang] || T.en), ...values };
 });
 
+const PRIVATE_AI_TEST_TRANSLATIONS = {
+    sr: {
+        ai_test_title: 'Privatni AI test',
+        ai_test_desc: 'Posaljite poruku kao da je stigla od klijenta i proverite sta bi Kaleya uradila.',
+        ai_test_input_placeholder: 'Npr. Klijent Marko zeli sisanje sutra u 15:00, telefon +381...',
+        ai_test_run: 'Testiraj',
+        ai_test_running: 'Kaleya proverava...',
+        ai_test_response: 'Odgovor Kaleye',
+        ai_test_provider: 'Provider',
+        ai_test_intent: 'Namera',
+        ai_test_status: 'Status',
+        ai_test_details: 'Detalji odluke',
+        ai_test_empty: 'Unesite test poruku za Kaleyu',
+        ai_test_failed: 'AI test nije uspeo',
+        ai_test_real_note: 'Pravi nalozi koriste AI model iz backenda. Demo nalog koristi sigurni fallback bez trosenja API kredita.',
+        ai_test_demo_note: 'Demo nalog je izolovan i ne trosi AI kredit.'
+    },
+    en: {
+        ai_test_title: 'Private AI test',
+        ai_test_desc: 'Send a message as if it came from a customer and check what Kaleya would do.',
+        ai_test_input_placeholder: 'Example: Customer Mark wants a haircut tomorrow at 3 PM, phone +1...',
+        ai_test_run: 'Test',
+        ai_test_running: 'Kaleya is checking...',
+        ai_test_response: 'Kaleya reply',
+        ai_test_provider: 'Provider',
+        ai_test_intent: 'Intent',
+        ai_test_status: 'Status',
+        ai_test_details: 'Decision details',
+        ai_test_empty: 'Enter a test message for Kaleya',
+        ai_test_failed: 'AI test failed',
+        ai_test_real_note: 'Real accounts use the backend AI model. Demo accounts use a safe fallback without spending API credit.',
+        ai_test_demo_note: 'Demo account is isolated and does not spend AI credit.'
+    },
+    es: {
+        ai_test_title: 'Prueba privada de IA',
+        ai_test_desc: 'Envie un mensaje como si viniera de un cliente y revise que haria Kaleya.',
+        ai_test_input_placeholder: 'Ejemplo: Cliente Maria quiere corte manana a las 15:00, telefono +34...',
+        ai_test_run: 'Probar',
+        ai_test_running: 'Kaleya esta revisando...',
+        ai_test_response: 'Respuesta de Kaleya',
+        ai_test_provider: 'Proveedor',
+        ai_test_intent: 'Intencion',
+        ai_test_status: 'Estado',
+        ai_test_details: 'Detalles de decision',
+        ai_test_empty: 'Escriba un mensaje de prueba para Kaleya',
+        ai_test_failed: 'La prueba de IA fallo',
+        ai_test_real_note: 'Las cuentas reales usan el modelo IA del backend. Las demo usan fallback seguro sin gastar credito API.',
+        ai_test_demo_note: 'La cuenta demo esta aislada y no gasta credito IA.'
+    },
+    pt: {
+        ai_test_title: 'Teste privado de IA',
+        ai_test_desc: 'Envie uma mensagem como se viesse de um cliente e veja o que Kaleya faria.',
+        ai_test_input_placeholder: 'Exemplo: Cliente Ana quer corte amanha as 15:00, telefone +351...',
+        ai_test_run: 'Testar',
+        ai_test_running: 'Kaleya esta verificando...',
+        ai_test_response: 'Resposta da Kaleya',
+        ai_test_provider: 'Provider',
+        ai_test_intent: 'Intencao',
+        ai_test_status: 'Status',
+        ai_test_details: 'Detalhes da decisao',
+        ai_test_empty: 'Digite uma mensagem de teste para Kaleya',
+        ai_test_failed: 'O teste de IA falhou',
+        ai_test_real_note: 'Contas reais usam o modelo de IA do backend. Contas demo usam fallback seguro sem gastar credito API.',
+        ai_test_demo_note: 'A conta demo e isolada e nao gasta credito IA.'
+    },
+    ru: {
+        ai_test_title: 'Privatnyy AI test',
+        ai_test_desc: 'Otpravte soobshchenie kak ot klienta i proverite, chto sdelala by Kaleya.',
+        ai_test_input_placeholder: 'Primer: Klient Ivan hochet strizhku zavtra v 15:00, telefon +7...',
+        ai_test_run: 'Test',
+        ai_test_running: 'Kaleya proveryaet...',
+        ai_test_response: 'Otvet Kaleya',
+        ai_test_provider: 'Provider',
+        ai_test_intent: 'Namerennie',
+        ai_test_status: 'Status',
+        ai_test_details: 'Detali resheniya',
+        ai_test_empty: 'Vvedite testovoe soobshchenie dlya Kaleya',
+        ai_test_failed: 'AI test ne udalsya',
+        ai_test_real_note: 'Realnye akkaunty ispolzuyut AI model backend. Demo ispolzuet bezopasnyy fallback bez API kredita.',
+        ai_test_demo_note: 'Demo akkaunt izolirovan i ne tratit AI kredit.'
+    },
+    fr: {
+        ai_test_title: 'Test IA prive',
+        ai_test_desc: 'Envoyez un message comme s il venait d un client et verifiez ce que Kaleya ferait.',
+        ai_test_input_placeholder: 'Exemple: Client Jean veut une coupe demain a 15:00, telephone +33...',
+        ai_test_run: 'Tester',
+        ai_test_running: 'Kaleya verifie...',
+        ai_test_response: 'Reponse Kaleya',
+        ai_test_provider: 'Provider',
+        ai_test_intent: 'Intention',
+        ai_test_status: 'Statut',
+        ai_test_details: 'Details decision',
+        ai_test_empty: 'Saisissez un message de test pour Kaleya',
+        ai_test_failed: 'Le test IA a echoue',
+        ai_test_real_note: 'Les comptes reels utilisent le modele IA backend. Les demos utilisent un fallback sans depenser de credit API.',
+        ai_test_demo_note: 'Le compte demo est isole et ne depense pas de credit IA.'
+    },
+    it: {
+        ai_test_title: 'Test AI privato',
+        ai_test_desc: 'Invia un messaggio come se arrivasse da un cliente e controlla cosa farebbe Kaleya.',
+        ai_test_input_placeholder: 'Esempio: Cliente Luca vuole taglio domani alle 15:00, telefono +39...',
+        ai_test_run: 'Testa',
+        ai_test_running: 'Kaleya controlla...',
+        ai_test_response: 'Risposta Kaleya',
+        ai_test_provider: 'Provider',
+        ai_test_intent: 'Intento',
+        ai_test_status: 'Stato',
+        ai_test_details: 'Dettagli decisione',
+        ai_test_empty: 'Inserisci un messaggio di test per Kaleya',
+        ai_test_failed: 'Test AI non riuscito',
+        ai_test_real_note: 'Gli account reali usano il modello AI backend. Le demo usano fallback sicuro senza credito API.',
+        ai_test_demo_note: 'L account demo e isolato e non consuma credito AI.'
+    },
+    de: {
+        ai_test_title: 'Privater AI Test',
+        ai_test_desc: 'Senden Sie eine Nachricht wie von einem Kunden und pruefen Sie, was Kaleya tun wuerde.',
+        ai_test_input_placeholder: 'Beispiel: Kunde Max moechte morgen um 15:00 einen Haarschnitt, Telefon +49...',
+        ai_test_run: 'Testen',
+        ai_test_running: 'Kaleya prueft...',
+        ai_test_response: 'Kaleya Antwort',
+        ai_test_provider: 'Provider',
+        ai_test_intent: 'Absicht',
+        ai_test_status: 'Status',
+        ai_test_details: 'Entscheidungsdetails',
+        ai_test_empty: 'Testnachricht fuer Kaleya eingeben',
+        ai_test_failed: 'AI Test fehlgeschlagen',
+        ai_test_real_note: 'Echte Konten nutzen das Backend AI Modell. Demo-Konten nutzen sicheren Fallback ohne API Kredit.',
+        ai_test_demo_note: 'Das Demo-Konto ist isoliert und verbraucht keinen AI Kredit.'
+    }
+};
+
+Object.entries(PRIVATE_AI_TEST_TRANSLATIONS).forEach(([lang, values]) => {
+    T[lang] = { ...(T[lang] || T.en), ...values };
+});
+
+const SUPPORT_INBOX_TRANSLATIONS = {
+    sr: {
+        support_inbox_title: 'Human support inbox',
+        support_inbox_desc: 'Zahtevi koje Kaleya nije mogla sama da zavrsi.',
+        support_empty: 'Nema support zahteva.',
+        support_priority_urgent: 'Hitno',
+        support_priority_normal: 'Normalno',
+        support_status_open: 'Otvoreno',
+        support_status_in_progress: 'U radu',
+        support_status_resolved: 'Reseno',
+        support_status_closed: 'Zatvoreno',
+        support_mark_progress: 'U rad',
+        support_mark_resolved: 'Reseno',
+        support_mark_closed: 'Zatvori',
+        support_updated: 'Support zahtev je azuriran',
+        support_not_updated: 'Support zahtev nije azuriran',
+        support_not_loaded: 'Support inbox nije ucitan',
+        refresh_btn: 'Osvezi'
+    },
+    en: {
+        support_inbox_title: 'Human support inbox',
+        support_inbox_desc: 'Requests Kaleya could not finish alone.',
+        support_empty: 'No support requests.',
+        support_priority_urgent: 'Urgent',
+        support_priority_normal: 'Normal',
+        support_status_open: 'Open',
+        support_status_in_progress: 'In progress',
+        support_status_resolved: 'Resolved',
+        support_status_closed: 'Closed',
+        support_mark_progress: 'Start',
+        support_mark_resolved: 'Resolved',
+        support_mark_closed: 'Close',
+        support_updated: 'Support request updated',
+        support_not_updated: 'Support request was not updated',
+        support_not_loaded: 'Support inbox was not loaded',
+        refresh_btn: 'Refresh'
+    },
+    es: {
+        support_inbox_title: 'Bandeja de soporte humano',
+        support_inbox_desc: 'Solicitudes que Kaleya no pudo terminar sola.',
+        support_empty: 'No hay solicitudes de soporte.',
+        support_priority_urgent: 'Urgente',
+        support_priority_normal: 'Normal',
+        support_status_open: 'Abierto',
+        support_status_in_progress: 'En proceso',
+        support_status_resolved: 'Resuelto',
+        support_status_closed: 'Cerrado',
+        support_mark_progress: 'Iniciar',
+        support_mark_resolved: 'Resuelto',
+        support_mark_closed: 'Cerrar',
+        support_updated: 'Solicitud de soporte actualizada',
+        support_not_updated: 'La solicitud no se actualizo',
+        support_not_loaded: 'La bandeja de soporte no cargo',
+        refresh_btn: 'Actualizar'
+    },
+    pt: {
+        support_inbox_title: 'Caixa de suporte humano',
+        support_inbox_desc: 'Pedidos que Kaleya nao conseguiu terminar sozinha.',
+        support_empty: 'Nenhum pedido de suporte.',
+        support_priority_urgent: 'Urgente',
+        support_priority_normal: 'Normal',
+        support_status_open: 'Aberto',
+        support_status_in_progress: 'Em andamento',
+        support_status_resolved: 'Resolvido',
+        support_status_closed: 'Fechado',
+        support_mark_progress: 'Iniciar',
+        support_mark_resolved: 'Resolvido',
+        support_mark_closed: 'Fechar',
+        support_updated: 'Pedido de suporte atualizado',
+        support_not_updated: 'O pedido nao foi atualizado',
+        support_not_loaded: 'A caixa de suporte nao carregou',
+        refresh_btn: 'Atualizar'
+    },
+    ru: {
+        support_inbox_title: 'Human support inbox',
+        support_inbox_desc: 'Zaprosy, kotorye Kaleya ne smogla zavershit sama.',
+        support_empty: 'Net support zaprosov.',
+        support_priority_urgent: 'Srochno',
+        support_priority_normal: 'Normalno',
+        support_status_open: 'Otkryto',
+        support_status_in_progress: 'V rabote',
+        support_status_resolved: 'Resheno',
+        support_status_closed: 'Zakryto',
+        support_mark_progress: 'V rabotu',
+        support_mark_resolved: 'Resheno',
+        support_mark_closed: 'Zakryt',
+        support_updated: 'Support zapros obnovlen',
+        support_not_updated: 'Support zapros ne obnovlen',
+        support_not_loaded: 'Support inbox ne zagruzhen',
+        refresh_btn: 'Obnovit'
+    },
+    fr: {
+        support_inbox_title: 'Boite support humain',
+        support_inbox_desc: 'Demandes que Kaleya ne pouvait pas terminer seule.',
+        support_empty: 'Aucune demande support.',
+        support_priority_urgent: 'Urgent',
+        support_priority_normal: 'Normal',
+        support_status_open: 'Ouvert',
+        support_status_in_progress: 'En cours',
+        support_status_resolved: 'Resolu',
+        support_status_closed: 'Ferme',
+        support_mark_progress: 'Demarrer',
+        support_mark_resolved: 'Resolu',
+        support_mark_closed: 'Fermer',
+        support_updated: 'Demande support mise a jour',
+        support_not_updated: 'La demande support n a pas ete mise a jour',
+        support_not_loaded: 'La boite support n a pas charge',
+        refresh_btn: 'Actualiser'
+    },
+    it: {
+        support_inbox_title: 'Inbox supporto umano',
+        support_inbox_desc: 'Richieste che Kaleya non poteva completare da sola.',
+        support_empty: 'Nessuna richiesta di supporto.',
+        support_priority_urgent: 'Urgente',
+        support_priority_normal: 'Normale',
+        support_status_open: 'Aperto',
+        support_status_in_progress: 'In lavorazione',
+        support_status_resolved: 'Risolto',
+        support_status_closed: 'Chiuso',
+        support_mark_progress: 'Avvia',
+        support_mark_resolved: 'Risolto',
+        support_mark_closed: 'Chiudi',
+        support_updated: 'Richiesta supporto aggiornata',
+        support_not_updated: 'Richiesta supporto non aggiornata',
+        support_not_loaded: 'Inbox supporto non caricata',
+        refresh_btn: 'Aggiorna'
+    },
+    de: {
+        support_inbox_title: 'Human Support Inbox',
+        support_inbox_desc: 'Anfragen, die Kaleya nicht allein abschliessen konnte.',
+        support_empty: 'Keine Support-Anfragen.',
+        support_priority_urgent: 'Dringend',
+        support_priority_normal: 'Normal',
+        support_status_open: 'Offen',
+        support_status_in_progress: 'In Arbeit',
+        support_status_resolved: 'Geloest',
+        support_status_closed: 'Geschlossen',
+        support_mark_progress: 'Starten',
+        support_mark_resolved: 'Geloest',
+        support_mark_closed: 'Schliessen',
+        support_updated: 'Support-Anfrage aktualisiert',
+        support_not_updated: 'Support-Anfrage wurde nicht aktualisiert',
+        support_not_loaded: 'Support Inbox wurde nicht geladen',
+        refresh_btn: 'Aktualisieren'
+    }
+};
+
+Object.entries(SUPPORT_INBOX_TRANSLATIONS).forEach(([lang, values]) => {
+    T[lang] = { ...(T[lang] || T.en), ...values };
+});
+
 function tr(key) {
     return (T[currentLang] && T[currentLang][key]) || T.en[key] || T.sr[key] || key;
 }
@@ -1886,6 +2220,7 @@ function setLang(lang) {
     if (!localStorage.getItem('kaleya_voice_lang')) currentVoiceLang = lang;
     applyLang();
     renderClientKnowledgeSettings();
+    renderClientSupportInbox();
     saveClientSettingsToBackend({ interface_language: lang, language: lang }).catch(error => {
         console.warn('Kaleya language save failed', error);
     });
@@ -1947,7 +2282,7 @@ function showView(view) {
 function goDemo(type) {
     fillLogin(type === 'admin' ? 'admin' : 'client');
     showView('login');
-    showToast(type === 'admin' ? 'Laptop demo: admin podaci su spremni' : 'Mobilni demo: klijentski podaci su spremni');
+    showToast(type === 'admin' ? 'God Mode demo podaci su spremni' : 'Demo administrator podaci su spremni');
 }
 
 async function logoTap() {
@@ -2534,6 +2869,110 @@ async function askKaleyaBackend(text, includeVoice = true, payload = {}, useAi =
     return res.json();
 }
 
+function compactAiDecision(result) {
+    return {
+        decision: result?.decision || {},
+        tool_output: result?.tool_output || {},
+        preprocess: result?.preprocess || {},
+        workflow_trace: result?.workflow_trace || [],
+        conversation_state: result?.conversation_state || {},
+        follow_up_jobs: result?.follow_up_jobs || []
+    };
+}
+
+function renderPrivateAiTestResult(result) {
+    const resultBox = document.getElementById('clientAiTestResult');
+    const provider = document.getElementById('clientAiTestProvider');
+    const intent = document.getElementById('clientAiTestIntent');
+    const status = document.getElementById('clientAiTestStatus');
+    const response = document.getElementById('clientAiTestResponse');
+    const details = document.getElementById('clientAiTestDetails');
+    const note = document.getElementById('clientAiTestNote');
+    if (!resultBox) return;
+
+    if (provider) provider.textContent = result?.demo_mode ? 'demo-fallback' : (result?.ai_provider || '-');
+    if (intent) intent.textContent = result?.intent || '-';
+    if (status) status.textContent = result?.decision?.status || result?.tool_output?.status || '-';
+    if (response) response.textContent = aiResultText(result, '-');
+    if (details) details.textContent = JSON.stringify(compactAiDecision(result), null, 2);
+    if (note) note.textContent = result?.demo_mode ? tr('ai_test_demo_note') : tr('ai_test_real_note');
+    resultBox.classList.remove('hidden');
+}
+
+async function refreshAppointmentsAfterAiDecision(result) {
+    const tool = result?.decision?.tool_name || '';
+    const status = result?.decision?.status || result?.tool_output?.status || '';
+    const changed = ['book_appointment', 'cancel_appointment', 'reschedule_appointment'].some(name => tool.includes(name))
+        || ['booked', 'cancelled', 'rescheduled'].includes(status);
+    if (!changed) return;
+    try {
+        await loadClientAppointmentsFromBackend();
+        renderSchedule();
+        renderClientCalendar();
+    } catch (error) {
+        console.warn('Kaleya appointment refresh after AI test failed', error);
+    }
+}
+
+async function runPrivateAiTest() {
+    const input = document.getElementById('clientAiTestInput');
+    const channelSelect = document.getElementById('clientAiTestChannel');
+    const button = document.getElementById('clientAiTestRunBtn');
+    const resultBox = document.getElementById('clientAiTestResult');
+    const response = document.getElementById('clientAiTestResponse');
+    const details = document.getElementById('clientAiTestDetails');
+    const text = (input?.value || '').trim();
+    if (!text) {
+        showToast(tr('ai_test_empty'));
+        input?.focus();
+        return;
+    }
+    if (!getAuthToken() || location.protocol === 'file:') {
+        showToast(tr('login_err'));
+        return;
+    }
+
+    const originalText = button?.textContent || tr('ai_test_run');
+    if (button) {
+        button.disabled = true;
+        button.textContent = tr('ai_test_running');
+        button.classList.add('opacity-70');
+    }
+    if (resultBox) resultBox.classList.remove('hidden');
+    if (response) response.textContent = tr('ai_test_running');
+    if (details) details.textContent = '';
+
+    try {
+        const channel = channelSelect?.value || 'web';
+        const result = await askKaleyaBackend(
+            text,
+            false,
+            {
+                channel,
+                external_thread_id: kaleyaWorkflowThreadId(`private-ai-${channel}`)
+            },
+            true
+        );
+        renderPrivateAiTestResult(result);
+        await refreshAppointmentsAfterAiDecision(result);
+        if (result?.tool_output?.support_ticket_id || result?.intent === 'support_handoff') {
+            await loadClientSupportTicketsFromBackend();
+        }
+        showKaleyaAiResult(result, tr('ai_test_response'));
+    } catch (error) {
+        console.warn('Kaleya private AI test failed', error);
+        if (response) response.textContent = tr('ai_test_failed');
+        if (details) details.textContent = String(error?.message || error);
+        showToast(tr('ai_test_failed'));
+    } finally {
+        if (button) {
+            button.disabled = false;
+            button.textContent = originalText;
+            button.classList.remove('opacity-70');
+        }
+    }
+}
+
 function normalizeClientTime(value, fallback) {
     return String(value || fallback).slice(0, 5);
 }
@@ -3111,6 +3550,109 @@ async function deleteClientKnowledgeEntry(entryId) {
     } catch (error) {
         console.warn('Kaleya knowledge delete failed', error);
         showToast(tr('knowledge_not_deleted'));
+    }
+}
+
+function supportStatusLabel(status = 'open') {
+    return tr(`support_status_${status}`) || status;
+}
+
+function supportPriorityLabel(priority = 'normal') {
+    return tr(`support_priority_${priority}`) || priority;
+}
+
+function supportStatusClass(status = 'open') {
+    if (status === 'resolved' || status === 'closed') return 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300';
+    if (status === 'in_progress') return 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300';
+    return 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300';
+}
+
+function supportPriorityClass(priority = 'normal') {
+    return priority === 'urgent'
+        ? 'bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-300'
+        : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300';
+}
+
+function supportTicketDateLabel(ticket) {
+    const value = ticket?.created_at || ticket?.updated_at;
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return `${formatClientDate(clientIsoDate(date))} ${formatClientTime(`${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`)}`;
+}
+
+function renderClientSupportInbox() {
+    const list = document.getElementById('clientSupportTicketList');
+    if (!list) return;
+    const tickets = clientSupportTickets.slice().sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+    list.innerHTML = tickets.length
+        ? tickets.map(ticket => {
+            const closed = ['resolved', 'closed'].includes(ticket.status);
+            return `
+                <div class="px-3 py-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="px-2 py-0.5 rounded-full ${supportStatusClass(ticket.status)} text-[9px] font-semibold">${escapeHtml(supportStatusLabel(ticket.status))}</span>
+                                <span class="px-2 py-0.5 rounded-full ${supportPriorityClass(ticket.priority)} text-[9px] font-semibold">${escapeHtml(supportPriorityLabel(ticket.priority))}</span>
+                            </div>
+                            <p class="mt-1 text-[12px] font-semibold truncate">${escapeHtml(ticket.subject || 'Kaleya support')}</p>
+                            <p class="mt-0.5 text-[10px] text-slate-500 line-clamp-3 whitespace-pre-line">${escapeHtml(ticket.message || '')}</p>
+                            <p class="mt-1 text-[9px] text-slate-400">${escapeHtml(supportTicketDateLabel(ticket))}</p>
+                        </div>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-1.5">
+                        <button onclick="updateSupportTicketStatus('${ticket.id}', 'in_progress')" class="h-7 px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-semibold ${ticket.status === 'in_progress' || closed ? 'opacity-40 pointer-events-none' : ''}">${escapeHtml(tr('support_mark_progress'))}</button>
+                        <button onclick="updateSupportTicketStatus('${ticket.id}', 'resolved')" class="h-7 px-2.5 rounded-lg border border-green-200 dark:border-green-900 text-green-700 dark:text-green-300 text-[10px] font-semibold ${ticket.status === 'resolved' ? 'opacity-40 pointer-events-none' : ''}">${escapeHtml(tr('support_mark_resolved'))}</button>
+                        <button onclick="updateSupportTicketStatus('${ticket.id}', 'closed')" class="h-7 px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-semibold ${ticket.status === 'closed' ? 'opacity-40 pointer-events-none' : ''}">${escapeHtml(tr('support_mark_closed'))}</button>
+                    </div>
+                </div>
+            `;
+        }).join('')
+        : `<p class="text-[12px] text-slate-500">${escapeHtml(tr('support_empty'))}</p>`;
+}
+
+async function loadClientSupportTicketsFromBackend() {
+    if (!getAuthToken() || location.protocol === 'file:' || isEmployeeUser()) {
+        renderClientSupportInbox();
+        return clientSupportTickets;
+    }
+    try {
+        const res = await kaleyaApi('/api/support/tickets/', { method: 'GET' });
+        if (!res.ok) throw new Error(await res.text());
+        clientSupportTickets = unpackApiRows(await res.json());
+        renderClientSupportInbox();
+        return clientSupportTickets;
+    } catch (error) {
+        console.warn('Kaleya support inbox load failed', error);
+        renderClientSupportInbox();
+        showToast(tr('support_not_loaded'));
+        return clientSupportTickets;
+    }
+}
+
+async function updateSupportTicketStatus(ticketId, status) {
+    const ticket = clientSupportTickets.find(item => String(item.id) === String(ticketId));
+    if (!ticket) return;
+    if (!getAuthToken() || location.protocol === 'file:') {
+        clientSupportTickets = clientSupportTickets.map(item => String(item.id) === String(ticketId) ? { ...item, status } : item);
+        renderClientSupportInbox();
+        showToast(tr('support_updated'));
+        return;
+    }
+    try {
+        const res = await kaleyaApi(`/api/support/tickets/${ticketId}/`, {
+            method: 'PATCH',
+            body: JSON.stringify({ status })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const updated = await res.json();
+        clientSupportTickets = clientSupportTickets.map(item => String(item.id) === String(ticketId) ? updated : item);
+        renderClientSupportInbox();
+        showToast(tr('support_updated'));
+    } catch (error) {
+        console.warn('Kaleya support ticket update failed', error);
+        showToast(tr('support_not_updated'));
     }
 }
 
@@ -4444,7 +4986,7 @@ function renderEmployeeDirectory() {
     const list = document.getElementById('employeeDirectoryList');
     if (!list) return;
     const owner = {
-        full_name: currentClientInfo?.owner_name || currentClientInfo?.public_name || currentClientInfo?.name || 'Demo Client',
+        full_name: currentClientInfo?.owner_name || currentClientInfo?.public_name || currentClientInfo?.name || 'Demo Administrator',
         role_title: 'Vlasnik',
         phone: currentClientInfo?.owner_phone || '+1 555 0100',
         email: currentClientInfo?.owner_email || 'administrator@test.com'
@@ -4863,7 +5405,7 @@ async function openClientSettings() {
     updateClientLangButtons();
     syncClientCalendarSettingsUI();
     updatePwaInstallButtons();
-    await Promise.all([loadClientEntitlementsFromBackend(), loadClientSettingsFromBackend(), loadClientOperationalDataFromBackend()]);
+    await Promise.all([loadClientEntitlementsFromBackend(), loadClientSettingsFromBackend(), loadClientOperationalDataFromBackend(), loadClientSupportTicketsFromBackend()]);
 }
 function closeClientSettings() { document.getElementById('client-settings').classList.add('hidden'); }
 function updateElStatus() {
@@ -5252,6 +5794,7 @@ applyLang();
 syncClientCalendarSettingsUI();
 renderClientOperationalSettings();
 renderClientKnowledgeSettings();
+renderClientSupportInbox();
 renderSchedule();
 renderClientCalendar();
 updateKaleyaPowerUI();

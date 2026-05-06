@@ -54,6 +54,8 @@ class InboundTextSerializer(serializers.Serializer):
     time = serializers.TimeField(required=False, allow_null=True)
     duration_minutes = serializers.IntegerField(required=False, min_value=5, max_value=720)
     title = serializers.CharField(required=False, allow_blank=True)
+    reason = serializers.CharField(required=False, allow_blank=True)
+    cancelled_reason = serializers.CharField(required=False, allow_blank=True)
     use_ai = serializers.BooleanField(required=False, default=True)
     include_voice = serializers.BooleanField(required=False, default=False)
 

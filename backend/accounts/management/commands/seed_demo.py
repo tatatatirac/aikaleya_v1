@@ -54,9 +54,9 @@ class Command(BaseCommand):
 
         client, _created = BusinessClient.objects.update_or_create(
             owner=client_user,
-            name="Demo Client",
+            name="Demo Administrator",
             defaults={
-                "public_name": "Kaleya Demo Client",
+                "public_name": "Kaleya Demo Administrator",
                 "package": BusinessClient.PACKAGE_BUSINESS,
                 "language": "en",
                 "interface_language": "en",
@@ -133,7 +133,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS("Kaleya demo backend podaci su spremni."))
         self.stdout.write(f"Admin login: {admin_email} / vrednost iz KALEYA_DEMO_ADMIN_PASSWORD")
-        self.stdout.write(f"Client login: {client_email} / test123")
+        self.stdout.write(f"Administrator app login: {client_email} / test123")
         self.stdout.write(f"Employee login: {employee_username} / emp123")
 
     def rename_user_email(self, old_email, new_email):
