@@ -1,3 +1,4 @@
+import hashlib
 import json
 from pathlib import Path
 from urllib import error, parse, request
@@ -183,6 +184,17 @@ def synthesize_elevenlabs_speech(business_client, text):
     if not text.strip():
         raise ProviderError("Tekst za glas je prazan.")
 
+    digest_source = f"{config['voice_id']}|{config['model_id']}|{text[:2500]}"
+    digest = hashlib.sha256(digest_source.encode("utf-8")).hexdigest()[:32]
+    filename = f"voice/tts/{business_client.id}/kaleya-{digest}.mp3"
+    if default_storage.exists(filename):
+        return {
+            "audio_path": filename,
+            "audio_url": settings.MEDIA_URL + Path(filename).as_posix(),
+            "bytes": default_storage.size(filename),
+            "cached": True,
+        }
+
     query = parse.urlencode({"output_format": "mp3_44100_128"})
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{config['voice_id']}?{query}"
     payload = {
@@ -202,10 +214,10 @@ def synthesize_elevenlabs_speech(business_client, text):
         },
     )
 
-    filename = f"voice/tts/{business_client.id}/kaleya-{abs(hash(text))}.mp3"
     saved_path = default_storage.save(filename, ContentFile(audio_bytes))
     return {
         "audio_path": saved_path,
         "audio_url": settings.MEDIA_URL + Path(saved_path).as_posix(),
         "bytes": len(audio_bytes),
+        "cached": False,
     }

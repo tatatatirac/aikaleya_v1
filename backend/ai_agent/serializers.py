@@ -39,6 +39,7 @@ class AIToolRunSerializer(serializers.ModelSerializer):
 class InboundTextSerializer(serializers.Serializer):
     text = serializers.CharField()
     channel = serializers.CharField(required=False, default="web")
+    external_thread_id = serializers.CharField(required=False, allow_blank=True)
     conversation_id = serializers.IntegerField(required=False, allow_null=True)
     customer_id = serializers.IntegerField(required=False, allow_null=True)
     customer_name = serializers.CharField(required=False, allow_blank=True)

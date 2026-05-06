@@ -6,6 +6,7 @@ from ai_agent.views import (
     AIToolRunViewSet,
     InboundTextAPIView,
     ProviderStatusAPIView,
+    PublicIntroSpeechAPIView,
     TextToSpeechAPIView,
     VoiceStatusAPIView,
 )
@@ -17,6 +18,7 @@ router.register("tool-runs", AIToolRunViewSet, basename="ai-tool-run")
 
 urlpatterns = [
     path("inbound-text/", InboundTextAPIView.as_view(), name="ai-agent-inbound-text"),
+    path("public-intro-tts/", PublicIntroSpeechAPIView.as_view(), name="ai-agent-public-intro-tts"),
     path("tts/", TextToSpeechAPIView.as_view(), name="ai-agent-tts"),
     path("voice-status/", VoiceStatusAPIView.as_view(), name="ai-agent-voice-status"),
     path("provider-status/", ProviderStatusAPIView.as_view(), name="ai-agent-provider-status"),

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from billing.services import enforce_channel_allowed, enforce_client_api_override_allowed, enforce_elevenlabs_voice_allowed
-from clients.models import BusinessClient, ClientApiSettings
+from clients.models import BusinessClient, BusinessKnowledgeEntry, ClientApiSettings
 
 
 class ClientApiSettingsSerializer(serializers.ModelSerializer):
@@ -119,3 +119,20 @@ class BusinessClientSerializer(serializers.ModelSerializer):
                 if attrs.get(field) is True:
                     enforce_channel_allowed(business_client, channel)
         return attrs
+
+
+class BusinessKnowledgeEntrySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BusinessKnowledgeEntry
+        fields = (
+            "id",
+            "category",
+            "language",
+            "title",
+            "answer",
+            "keywords",
+            "is_active",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = ("id", "created_at", "updated_at")

@@ -1,7 +1,9 @@
 import json
+import re
 from datetime import date
 
 from django.core.serializers.json import DjangoJSONEncoder
+from django.utils import timezone
 
 from ai_agent.models import AIIntent, AIToolRun
 from ai_agent.providers import ProviderError, generate_anthropic_plan, generate_anthropic_reply, synthesize_elevenlabs_speech
@@ -9,8 +11,15 @@ from ai_agent.tools import (
     book_appointment_tool,
     cancel_appointment_tool,
     check_availability_tool,
+    parse_requested_date,
+    parse_requested_time,
     reschedule_appointment_tool,
 )
+from accounts.permissions import user_role
+from audit_log.services import write_audit_log
+from clients.models import BusinessKnowledgeEntry
+from communications.models import Conversation, Message
+from notifications.services import queue_notification_jobs_for_event
 from staff_services.models import Service, StaffMember
 
 
@@ -23,6 +32,46 @@ INTENT_KEYWORDS = {
 }
 
 VALID_INTENTS = set(INTENT_KEYWORDS.keys()) | {"business_info", "unknown"}
+INTENT_KEYWORDS.update(
+    {
+        "cancel_appointment": ("otkazi", "otkaz", "cancel", "cancela", "annuler", "annulla", "absagen", "stornieren"),
+        "business_info": ("cena", "price", "cost", "radno vreme", "working hours", "address", "adresa", "usluge", "services"),
+        "support_handoff": ("covek", "operater", "support", "human", "agent", "mensch", "zalba", "problem", "complaint"),
+        "book_appointment": ("zakazi", "zakaz", "termin", "appointment", "book", "reserva", "reserver", "prenota", "buchen"),
+    }
+)
+VALID_INTENTS = set(INTENT_KEYWORDS.keys()) | {"unknown"}
+LOW_CONFIDENCE_THRESHOLD = 0.45
+MAX_UNKNOWN_BEFORE_HANDOFF = 2
+
+DATE_HINT_PATTERN = re.compile(r"\b(20\d{2}-\d{2}-\d{2}|\d{1,2}[.\-/]\d{1,2}[.\-/]20\d{2})\b")
+DATE_HINT_WORDS = (
+    "danas",
+    "sutra",
+    "today",
+    "tomorrow",
+    "hoy",
+    "manana",
+    "mañana",
+    "hoje",
+    "amanha",
+    "amanhã",
+    "demain",
+    "oggi",
+    "morgen",
+    "heute",
+)
+
+LANGUAGE_HINTS = (
+    ("sr", ("zakaz", "termin", "sutra", "danas", "otkaz", "pomeri", "usluga", "radno vreme")),
+    ("en", ("appointment", "book", "cancel", "reschedule", "available", "today", "tomorrow")),
+    ("es", ("cita", "reserva", "cancelar", "disponible", "mañana", "hoy")),
+    ("pt", ("marcar", "consulta", "cancelar", "disponivel", "amanha", "hoje")),
+    ("fr", ("rendez", "annuler", "disponible", "demain", "aujourd")),
+    ("it", ("appuntamento", "prenota", "annulla", "disponibile", "domani")),
+    ("de", ("termin", "buchen", "absagen", "frei", "morgen", "heute")),
+    ("ru", ("запис", "сегодня", "завтра", "отмен", "свобод")),
+)
 
 PLAN_PAYLOAD_KEYS = (
     "customer_name",
@@ -38,6 +87,16 @@ PLAN_PAYLOAD_KEYS = (
     "time",
     "duration_minutes",
     "title",
+)
+
+WORKFLOW_STEPS = (
+    "preprocess",
+    "understand",
+    "route",
+    "collect_missing_data",
+    "execute_backend_tool",
+    "respond",
+    "audit",
 )
 
 
@@ -69,6 +128,448 @@ def safe_float(value, fallback):
         return fallback
 
 
+def text_has_date_hint(text):
+    normalized = (text or "").strip().lower()
+    return bool(DATE_HINT_PATTERN.search(normalized) or any(word in normalized for word in DATE_HINT_WORDS))
+
+
+def detect_message_language(text, fallback="en"):
+    normalized = (text or "").strip().lower()
+    if not normalized:
+        return fallback or "en"
+    for language, hints in LANGUAGE_HINTS:
+        if any(hint in normalized for hint in hints):
+            return language
+    if re.search(r"[а-яА-Я]", text or ""):
+        return "ru"
+    return fallback or "en"
+
+
+def customer_identity_present(customer=None, payload=None):
+    payload = payload or {}
+    return bool(
+        customer
+        or payload.get("customer_id")
+        or payload.get("phone")
+        or payload.get("email")
+        or payload.get("customer_name")
+    )
+
+
+def ensure_workflow_conversation(business_client, conversation=None, customer=None, channel="web", external_thread_id="", language="en"):
+    if conversation:
+        return conversation
+
+    query = Conversation.objects.filter(business_client=business_client, channel=channel)
+    if external_thread_id:
+        existing = query.filter(external_thread_id=external_thread_id).order_by("-updated_at").first()
+        if existing:
+            if customer and existing.customer_id != customer.id:
+                existing.customer = customer
+                existing.save(update_fields=["customer", "updated_at"])
+            return existing
+
+    if customer:
+        existing = query.filter(customer=customer, status__in=["open", "waiting", "handoff"]).order_by("-updated_at").first()
+        if existing:
+            return existing
+
+    return Conversation.objects.create(
+        business_client=business_client,
+        customer=customer,
+        channel=channel,
+        external_thread_id=external_thread_id or "",
+        language=language,
+        last_message_at=timezone.now(),
+    )
+
+
+def write_workflow_message(conversation, direction, body, sender_label="", raw_payload=None):
+    if not conversation:
+        return None
+    message = Message.objects.create(
+        conversation=conversation,
+        direction=direction,
+        message_type="text",
+        sender_label=sender_label,
+        body=body or "",
+        raw_payload=raw_payload or {},
+    )
+    Conversation.objects.filter(id=conversation.id).update(last_message_at=timezone.now())
+    return message
+
+
+def get_conversation_ai_state(conversation):
+    if not conversation:
+        return {}
+    metadata = conversation.metadata or {}
+    state = metadata.get("ai_state") or {}
+    return state if isinstance(state, dict) else {}
+
+
+def merge_conversation_payload(conversation, payload):
+    state = get_conversation_ai_state(conversation)
+    pending_payload = state.get("pending_payload") or {}
+    if not isinstance(pending_payload, dict):
+        pending_payload = {}
+    return merge_payloads(pending_payload, payload)
+
+
+def build_preprocess_context(business_client, text, customer=None, payload=None, channel="web"):
+    payload = payload or {}
+    language = detect_message_language(text, business_client.interface_language or business_client.language or "en")
+    requested_date = parse_requested_date(text, payload.get("date"))
+    requested_time = parse_requested_time(text, payload.get("time"))
+    customer_filter = None
+    if customer:
+        customer_filter = {"customer": customer}
+    elif payload.get("phone"):
+        customer_filter = {"customer__phone__icontains": payload["phone"]}
+    elif payload.get("email"):
+        customer_filter = {"customer__email__iexact": payload["email"]}
+
+    total_appointments = 0
+    cancelled_appointments = 0
+    if customer_filter:
+        appointments = business_client.appointments.filter(**customer_filter)
+        total_appointments = appointments.count()
+        cancelled_appointments = appointments.filter(status="cancelled").count()
+
+    no_show_risk = "low"
+    if total_appointments >= 3 and cancelled_appointments / max(total_appointments, 1) >= 0.5:
+        no_show_risk = "high"
+    elif cancelled_appointments:
+        no_show_risk = "medium"
+
+    return json_safe(
+        {
+            "channel": channel,
+            "language": language,
+            "customer_identified": customer_identity_present(customer, payload),
+            "date_hint_present": bool(payload.get("date") or text_has_date_hint(text)),
+            "time_hint_present": bool(payload.get("time") or requested_time),
+            "requested_date": requested_date,
+            "requested_time": requested_time,
+            "no_show_risk": no_show_risk,
+            "history": {
+                "total_appointments": total_appointments,
+                "cancelled_appointments": cancelled_appointments,
+            },
+            "workflow_steps": WORKFLOW_STEPS,
+        }
+    )
+
+
+def service_choice_missing(business_client, payload):
+    if payload.get("service_id") or payload.get("service_hint"):
+        return False
+    return Service.objects.filter(business_client=business_client, is_active=True).exists()
+
+
+def booking_missing_fields(text, payload, customer=None):
+    missing = []
+    if not payload.get("date") and not text_has_date_hint(text):
+        missing.append("date")
+    if not customer_identity_present(customer, payload):
+        missing.append("customer_contact")
+    return missing
+
+
+def workflow_missing_fields(business_client, intent_name, text, payload, customer=None):
+    if intent_name == "book_appointment":
+        missing = booking_missing_fields(text, payload, customer=customer)
+        if service_choice_missing(business_client, payload):
+            missing.append("service")
+        return missing
+    if intent_name == "reschedule_appointment":
+        missing = []
+        if not payload.get("appointment_id") and not customer_identity_present(customer, payload):
+            missing.append("appointment_target")
+        if not payload.get("date") and not text_has_date_hint(text):
+            missing.append("new_date")
+        if not payload.get("time") and not parse_requested_time(text):
+            missing.append("new_time")
+        return missing
+    if intent_name == "cancel_appointment":
+        if not payload.get("appointment_id") and not customer_identity_present(customer, payload):
+            return ["appointment_target"]
+    return []
+
+
+def build_clarifying_response(business_client, intent, missing_fields, tool_output=None):
+    tool_output = tool_output or {}
+    language = tool_output.get("response_language") or business_client.interface_language or business_client.language or "en"
+    missing = set(missing_fields or [])
+    suggestions = ", ".join(tool_output.get("suggested_slots", [])[:3])
+
+    if language == "sr":
+        if "date" in missing and "customer_contact" in missing:
+            return "Mogu da pomognem. Treba mi datum termina i ime ili telefon klijenta."
+        if "date" in missing:
+            return "Za koji datum zelite termin?"
+        if "customer_contact" in missing:
+            return "Treba mi ime ili telefon klijenta da bih mogla bezbedno da zakazem termin."
+        if "service" in missing:
+            return "Za koju uslugu zelite termin?"
+        if "appointment_target" in missing:
+            return "Treba mi ime, telefon ili tacan termin da bih pronasla rezervaciju."
+        if "new_date" in missing and "new_time" in missing:
+            return "Na koji datum i u koje vreme zelite da pomerim termin?"
+        if "new_date" in missing:
+            return "Na koji datum zelite da pomerim termin?"
+        if "new_time" in missing:
+            return "U koje vreme zelite novi termin?"
+        if "intent" in missing:
+            return "Mozete li napisati da li zelite zakazivanje, otkazivanje, pomeranje ili proveru termina?"
+        if suggestions:
+            return f"Mogu da ponudim ove termine: {suggestions}. Koji vam odgovara?"
+        return "Treba mi jos jedan podatak da bih nastavila."
+
+    if language == "de":
+        if "date" in missing and "customer_contact" in missing:
+            return "Ich kann helfen. Ich brauche Datum und Name oder Telefonnummer des Kunden."
+        if "date" in missing:
+            return "Fuer welches Datum moechten Sie den Termin?"
+        if "customer_contact" in missing:
+            return "Ich brauche Name oder Telefonnummer des Kunden, um den Termin sicher zu buchen."
+        if "service" in missing:
+            return "Fuer welche Leistung moechten Sie den Termin?"
+        if "appointment_target" in missing:
+            return "Ich brauche Name, Telefon oder den genauen Termin, um die Buchung zu finden."
+        if "new_date" in missing and "new_time" in missing:
+            return "Auf welches Datum und welche Uhrzeit moechten Sie den Termin verschieben?"
+        if "new_date" in missing:
+            return "Auf welches Datum moechten Sie den Termin verschieben?"
+        if "new_time" in missing:
+            return "Zu welcher Uhrzeit soll der neue Termin sein?"
+        if "intent" in missing:
+            return "Bitte schreiben Sie, ob Sie buchen, absagen, verschieben oder einen Termin pruefen moechten."
+        if suggestions:
+            return f"Ich kann diese Termine anbieten: {suggestions}. Welcher passt?"
+        return "Ich brauche noch eine Angabe, um fortzufahren."
+
+    if "date" in missing and "customer_contact" in missing:
+        return "I can help. I need the appointment date and the customer's name or phone number."
+    if "date" in missing:
+        return "Which date would you like for the appointment?"
+    if "customer_contact" in missing:
+        return "I need the customer's name or phone number before I can safely book the appointment."
+    if "service" in missing:
+        return "Which service would you like to book?"
+    if "appointment_target" in missing:
+        return "I need the name, phone number or exact appointment so I can find the booking."
+    if "new_date" in missing and "new_time" in missing:
+        return "Which date and time should I move the appointment to?"
+    if "new_date" in missing:
+        return "Which date should I move the appointment to?"
+    if "new_time" in missing:
+        return "What time should the new appointment be?"
+    if "intent" in missing:
+        return "Please tell me whether you want to book, cancel, reschedule or check an appointment."
+    if suggestions:
+        return f"I can offer these available times: {suggestions}. Which one works for you?"
+    return "I need one more detail before I can continue."
+
+
+def save_conversation_ai_state(conversation, intent_name, payload, tool_output, missing_fields, language, confidence):
+    if not conversation:
+        return {}
+
+    metadata = conversation.metadata or {}
+    previous_state = metadata.get("ai_state") or {}
+    if not isinstance(previous_state, dict):
+        previous_state = {}
+
+    unknown_count = 0
+    if intent_name == "unknown":
+        unknown_count = int(previous_state.get("unknown_count") or 0) + 1
+    elif intent_name == "support_handoff":
+        unknown_count = int(previous_state.get("unknown_count") or 0)
+
+    tool_status = (tool_output or {}).get("status", "")
+    waiting_statuses = {"needs_more_details", "needs_time", "needs_target", "time_unavailable", "failed"}
+    state_status = "handoff" if intent_name == "support_handoff" else "open"
+    if missing_fields or tool_status in waiting_statuses:
+        state_status = "waiting_for_customer"
+    if tool_status in {"booked", "cancelled", "rescheduled"}:
+        state_status = "completed"
+
+    pending_payload = payload if state_status == "waiting_for_customer" else {}
+    state = {
+        "status": state_status,
+        "last_intent": intent_name,
+        "last_confidence": float(confidence),
+        "missing_fields": missing_fields or [],
+        "pending_payload": json_safe(pending_payload),
+        "last_tool_status": tool_status,
+        "unknown_count": unknown_count,
+    }
+    metadata["ai_state"] = state
+    conversation.metadata = metadata
+    conversation.language = language
+    conversation.last_message_at = timezone.now()
+    if state_status == "handoff":
+        conversation.status = "handoff"
+    elif state_status == "waiting_for_customer":
+        conversation.status = "waiting"
+    elif conversation.status != "closed":
+        conversation.status = "open"
+    conversation.save(update_fields=["metadata", "language", "last_message_at", "status", "updated_at"])
+    return state
+
+
+def write_ai_tool_audit(business_client, tool_run, channel, intent_name, confidence, tool_output, preprocess):
+    try:
+        write_audit_log(
+            "ai_agent.tool_run",
+            business_client=business_client,
+            object_type="AIToolRun",
+            object_id=tool_run.id,
+            channel=channel,
+            metadata=json_safe(
+                {
+                    "intent": intent_name,
+                    "confidence": float(confidence),
+                    "tool_name": tool_run.tool_name,
+                    "status": tool_run.status,
+                    "tool_output_status": (tool_output or {}).get("status", ""),
+                    "preprocess": preprocess,
+                }
+            ),
+        )
+    except Exception:
+        return None
+    return True
+
+
+def build_workflow_trace(intent_name, tool_name, status, missing_fields, preprocess, tool_output):
+    return json_safe(
+        {
+            "steps": {
+                "preprocess": {
+                    "language": preprocess.get("language"),
+                    "customer_identified": preprocess.get("customer_identified"),
+                    "no_show_risk": preprocess.get("no_show_risk"),
+                    "date_hint_present": preprocess.get("date_hint_present"),
+                    "time_hint_present": preprocess.get("time_hint_present"),
+                },
+                "understand": {"intent": intent_name},
+                "route": {"tool_name": tool_name},
+                "collect_missing_data": {"missing_fields": missing_fields or []},
+                "execute_backend_tool": {
+                    "status": status,
+                    "tool_output_status": (tool_output or {}).get("status", ""),
+                },
+                "respond": {"response_language": (tool_output or {}).get("response_language")},
+                "audit": {"enabled": True},
+            }
+        }
+    )
+
+
+def knowledge_entries_for_client(business_client, language):
+    return list(
+        BusinessKnowledgeEntry.objects.filter(
+            business_client=business_client,
+            is_active=True,
+            language__in=[language, business_client.interface_language or business_client.language or "en", "en"],
+        )
+        .order_by("category", "title")
+        .values("id", "category", "language", "title", "answer", "keywords")[:50]
+    )
+
+
+def score_knowledge_entry(text, entry):
+    normalized = (text or "").lower()
+    haystack = " ".join(
+        str(entry.get(key) or "").lower()
+        for key in ("title", "keywords", "category")
+    )
+    score = 0
+    for token in re.findall(r"\w+", normalized):
+        if len(token) < 3:
+            continue
+        if token in haystack:
+            score += 1
+    return score
+
+
+def match_knowledge_entry(business_client, text, language):
+    candidates = knowledge_entries_for_client(business_client, language)
+    ranked = sorted(
+        ((score_knowledge_entry(text, entry), entry) for entry in candidates),
+        key=lambda item: item[0],
+        reverse=True,
+    )
+    if ranked and ranked[0][0] > 0:
+        return ranked[0][1]
+    return None
+
+
+def queue_ai_follow_up_jobs(business_client, intent_name, tool_output, language):
+    event_by_status = {
+        "booked": "appointment_created",
+        "rescheduled": "appointment_changed",
+        "cancelled": "appointment_cancelled",
+        "handoff": "support_needed",
+    }
+    tool_status = (tool_output or {}).get("status", "")
+    event = event_by_status.get(tool_status)
+    if intent_name == "support_handoff":
+        event = "support_needed"
+    if not event:
+        return []
+
+    appointment = None
+    appointment_id = (tool_output or {}).get("appointment_id")
+    if appointment_id:
+        appointment = business_client.appointments.filter(id=appointment_id).select_related("customer").first()
+
+    customer = appointment.customer if appointment and appointment.customer_id else None
+    return queue_notification_jobs_for_event(
+        business_client,
+        event,
+        appointment=appointment,
+        customer=customer,
+        language=language,
+        payload={
+            "intent": intent_name,
+            "tool_status": tool_status,
+            "appointment_id": appointment_id,
+            "customer": (tool_output or {}).get("customer", ""),
+            "date": (tool_output or {}).get("date", ""),
+            "time": (tool_output or {}).get("time", ""),
+        },
+    )
+
+
+def actor_scope_for_ai(actor):
+    if user_role(actor) != "employee":
+        return {"role": user_role(actor) or "", "staff_member": None}
+    return {"role": "employee", "staff_member": getattr(actor, "staff_member_profile", None)}
+
+
+def apply_actor_scope_to_payload(business_client, actor, intent_name, payload):
+    scope = actor_scope_for_ai(actor)
+    staff_member = scope["staff_member"]
+    if scope["role"] != "employee":
+        return payload, ""
+    if not staff_member or staff_member.business_client_id != business_client.id:
+        return payload, "employee_staff_missing"
+
+    payload = {**(payload or {})}
+    if intent_name in {"book_appointment", "check_availability", "reschedule_appointment"}:
+        payload["staff_member_id"] = staff_member.id
+    if intent_name == "cancel_appointment" and payload.get("appointment_id"):
+        allowed = business_client.appointments.filter(
+            id=payload["appointment_id"],
+            staff_member_id=staff_member.id,
+        ).exists()
+        if not allowed:
+            return payload, "employee_forbidden_appointment"
+    return payload, ""
+
+
 def build_planner_context(business_client):
     services = list(
         Service.objects.filter(business_client=business_client, is_active=True)
@@ -80,12 +581,13 @@ def build_planner_context(business_client):
         .order_by("full_name")
         .values("id", "full_name", "role_title")[:30]
     )
+    language = business_client.interface_language or business_client.language or "en"
     return {
         "today": date.today().isoformat(),
         "business": {
             "id": business_client.id,
             "name": business_client.public_name or business_client.name,
-            "language": business_client.interface_language or business_client.language or "en",
+            "language": language,
             "timezone": business_client.timezone,
             "work_start": business_client.work_start.strftime("%H:%M"),
             "work_end": business_client.work_end.strftime("%H:%M"),
@@ -93,6 +595,7 @@ def build_planner_context(business_client):
         },
         "services": services,
         "staff_members": staff_members,
+        "knowledge_entries": knowledge_entries_for_client(business_client, language)[:20],
     }
 
 
@@ -122,7 +625,10 @@ def merge_payloads(ai_payload, explicit_payload):
 
 
 def build_text_response(business_client, intent, tool_output):
-    language = business_client.interface_language or business_client.language or "en"
+    language = tool_output.get("response_language") or business_client.interface_language or business_client.language or "en"
+
+    if tool_output.get("status") == "needs_more_details":
+        return build_clarifying_response(business_client, intent, tool_output.get("missing_fields", []), tool_output)
 
     if intent == "check_availability":
         count = tool_output.get("free_count", 0)
@@ -185,9 +691,14 @@ def build_text_response(business_client, intent, tool_output):
     if intent == "support_handoff":
         if language == "sr":
             return "Razumem. Prebacujem zahtev support timu."
+        if language == "de":
+            return "Ich verstehe. Ich uebergebe die Anfrage an das Support-Team."
         return "I understand. I am handing this over to support."
 
     if intent == "business_info":
+        matched_knowledge = tool_output.get("matched_knowledge") or {}
+        if matched_knowledge.get("answer"):
+            return matched_knowledge["answer"]
         services = list(Service.objects.filter(business_client=business_client, is_active=True).order_by("name")[:5])
         service_names = ", ".join(service.name for service in services)
         if language == "sr":
@@ -204,6 +715,13 @@ def build_text_response(business_client, intent, tool_output):
             f"Working hours are {business_client.work_start.strftime('%H:%M')} to {business_client.work_end.strftime('%H:%M')}. "
             f"Services: {service_names}."
         ).strip()
+
+    if intent == "unknown":
+        if language == "sr":
+            return "Nisam sigurna da sam dobro razumela. Mozete li napisati da li zelite zakazivanje, otkazivanje, pomeranje ili proveru termina?"
+        if language == "de":
+            return "Ich bin nicht sicher, ob ich richtig verstanden habe. Geht es um Buchen, Absagen, Verschieben oder Pruefen eines Termins?"
+        return "I am not fully sure I understood. Do you want to book, cancel, reschedule or check an appointment?"
 
     if language == "sr":
         return "Razumem zahtev. Sledeci korak je provera kalendara i potvrda termina."
@@ -233,11 +751,36 @@ def handle_inbound_text(
     payload=None,
     use_ai=True,
     include_voice=False,
+    external_thread_id="",
+    record_messages=True,
+    actor=None,
 ):
     payload = payload or {}
     planner_raw_response = {"engine": "keyword-fallback"}
     planner_payload = {}
     intent_name, confidence = detect_intent(text)
+    initial_language = detect_message_language(text, business_client.interface_language or business_client.language or "en")
+    conversation = ensure_workflow_conversation(
+        business_client,
+        conversation=conversation,
+        customer=customer,
+        channel=channel,
+        external_thread_id=external_thread_id,
+        language=initial_language,
+    )
+    if not customer and conversation and conversation.customer:
+        customer = conversation.customer
+    payload = merge_conversation_payload(conversation, payload)
+    previous_state = get_conversation_ai_state(conversation)
+    inbound_message = None
+    if record_messages:
+        inbound_message = write_workflow_message(
+            conversation,
+            "inbound",
+            text,
+            sender_label="Customer",
+            raw_payload={"channel": channel, "payload": json_safe(payload), "external_thread_id": external_thread_id},
+        )
 
     if use_ai:
         try:
@@ -256,6 +799,31 @@ def handle_inbound_text(
             planner_raw_response = {"engine": "keyword-fallback", "planner_error": str(exc)}
 
     payload = merge_payloads(planner_payload, payload)
+    preprocess = build_preprocess_context(business_client, text, customer=customer, payload=payload, channel=channel)
+    language = preprocess["language"]
+    matched_knowledge = match_knowledge_entry(business_client, text, language)
+    if intent_name == "unknown" and matched_knowledge:
+        intent_name = "business_info"
+        confidence = max(confidence, 0.78)
+        planner_raw_response["knowledge_match"] = matched_knowledge
+
+    payload, scope_error = apply_actor_scope_to_payload(business_client, actor, intent_name, payload)
+    if scope_error:
+        intent_name = "support_handoff"
+        confidence = max(confidence, 0.7)
+        planner_raw_response["scope_error"] = scope_error
+
+    unknown_count = int(previous_state.get("unknown_count") or 0)
+    if confidence < LOW_CONFIDENCE_THRESHOLD and intent_name == "unknown" and unknown_count + 1 >= MAX_UNKNOWN_BEFORE_HANDOFF:
+        intent_name = "support_handoff"
+        confidence = max(confidence, LOW_CONFIDENCE_THRESHOLD)
+        planner_raw_response["handoff_reason"] = "low_confidence_repeated"
+
+    missing_fields = []
+    missing_fields = workflow_missing_fields(business_client, intent_name, text, payload, customer=customer)
+    if intent_name == "unknown":
+        missing_fields = ["intent"]
+
     intent = AIIntent.objects.create(
         business_client=business_client,
         conversation=conversation,
@@ -263,15 +831,23 @@ def handle_inbound_text(
         intent=intent_name,
         confidence=confidence,
         input_text=text or "",
-        language=business_client.interface_language or business_client.language or "en",
-        raw_response=planner_raw_response,
+        language=language,
+        raw_response=json_safe({**planner_raw_response, "preprocess": preprocess}),
     )
 
     tool_output = {}
     tool_name = "none"
     status = "skipped"
 
-    if intent_name == "check_availability":
+    if missing_fields:
+        tool_name = "clarify_missing_data"
+        tool_output = {
+            "status": "needs_more_details",
+            "missing_fields": missing_fields,
+            "pending_payload": json_safe(payload),
+        }
+        status = "planned"
+    elif intent_name == "check_availability":
         tool_name = "check_availability"
         tool_output = check_availability_tool(business_client, text, payload)
         status = "success"
@@ -289,7 +865,7 @@ def handle_inbound_text(
         status = "success" if tool_output.get("status") == "rescheduled" else "planned"
     elif intent_name == "support_handoff":
         tool_name = "handoff_to_support"
-        tool_output = {"handoff": True, "channel": channel}
+        tool_output = {"status": "handoff", "handoff": True, "channel": channel}
         status = "success"
     elif intent_name == "business_info":
         tool_name = "business_info"
@@ -298,8 +874,15 @@ def handle_inbound_text(
             "work_start": business_client.work_start.strftime("%H:%M"),
             "work_end": business_client.work_end.strftime("%H:%M"),
             "slot_interval_minutes": business_client.slot_interval_minutes,
+            "matched_knowledge": matched_knowledge or {},
         }
         status = "success"
+    elif intent_name == "unknown":
+        tool_name = "clarify_intent"
+        tool_output = {"status": "needs_more_details", "missing_fields": ["intent"]}
+        status = "planned"
+
+    tool_output.setdefault("response_language", language)
 
     tool_run = AIToolRun.objects.create(
         business_client=business_client,
@@ -309,6 +892,18 @@ def handle_inbound_text(
         input_payload=json_safe({"text": text, "channel": channel, "payload": payload}),
         output_payload=json_safe(tool_output),
     )
+    conversation_state = save_conversation_ai_state(
+        conversation,
+        intent_name,
+        payload,
+        tool_output,
+        missing_fields,
+        language,
+        confidence,
+    )
+    write_ai_tool_audit(business_client, tool_run, channel, intent_name, confidence, tool_output, preprocess)
+    follow_up_jobs = queue_ai_follow_up_jobs(business_client, intent_name, tool_output, language)
+    workflow_trace = build_workflow_trace(intent_name, tool_name, status, missing_fields, preprocess, tool_output)
 
     response_text = build_text_response(business_client, intent.intent, tool_output)
     ai_provider_used = "fallback"
@@ -327,6 +922,14 @@ def handle_inbound_text(
                         "slot_interval_minutes": business_client.slot_interval_minutes,
                     },
                     "detected_intent": intent.intent,
+                    "decision": {
+                        "tool_name": tool_name,
+                        "status": status,
+                        "missing_fields": missing_fields,
+                        "conversation_state": conversation_state,
+                        "follow_up_job_count": len(follow_up_jobs),
+                    },
+                    "preprocess": preprocess,
                     "tool_output": tool_output,
                     "safe_deterministic_response": response_text,
                 },
@@ -344,6 +947,21 @@ def handle_inbound_text(
         except ProviderError as exc:
             voice = {"error": str(exc)}
 
+    outbound_message = None
+    if record_messages:
+        outbound_message = write_workflow_message(
+            conversation,
+            "outbound",
+            response_text,
+            sender_label="Kaleya",
+            raw_payload={
+                "intent_id": intent.id,
+                "tool_run_id": tool_run.id,
+                "tool_output": json_safe(tool_output),
+                "workflow_trace": workflow_trace,
+            },
+        )
+
     return {
         "intent": intent.intent,
         "confidence": float(intent.confidence),
@@ -351,4 +969,18 @@ def handle_inbound_text(
         "ai_provider": ai_provider_used,
         "voice": voice,
         "tool_output": tool_output,
+        "decision": {
+            "tool_name": tool_name,
+            "status": status,
+            "missing_fields": missing_fields,
+        },
+        "preprocess": preprocess,
+        "conversation_state": conversation_state,
+        "workflow_trace": workflow_trace,
+        "conversation_id": conversation.id if conversation else None,
+        "follow_up_jobs": [job.id for job in follow_up_jobs],
+        "messages": {
+            "inbound_id": inbound_message.id if inbound_message else None,
+            "outbound_id": outbound_message.id if outbound_message else None,
+        },
     }

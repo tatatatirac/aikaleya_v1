@@ -12,6 +12,38 @@ from clients.utils import client_for_request
 from communications.models import Conversation
 
 
+PUBLIC_INTRO_TEXT = {
+    "sr": "Zdravo, ja sam Kaleya, AI sekretarica koja odgovara na pozive, zakazuje termine i obavestava vas tim.",
+    "en": "Hello, I am Kaleya, an AI receptionist that answers calls, schedules appointments and alerts your team.",
+    "es": "Hola, soy Kaleya, una recepcionista de IA que atiende llamadas, agenda citas y avisa a tu equipo.",
+    "pt": "Ola, eu sou Kaleya, uma recepcionista de IA que atende chamadas, agenda horarios e avisa sua equipe.",
+    "ru": "Здравствуйте, я Kaleya, AI администратор, который отвечает на звонки, записывает клиентов и уведомляет команду.",
+    "fr": "Bonjour, je suis Kaleya, une receptionniste IA qui repond aux appels, planifie les rendez-vous et informe votre equipe.",
+    "it": "Ciao, sono Kaleya, una receptionist AI che risponde alle chiamate, organizza appuntamenti e avvisa il tuo team.",
+    "de": "Hallo, ich bin Kaleya, ein AI Empfang, der Anrufe beantwortet, Termine plant und Ihr Team benachrichtigt.",
+}
+
+PUBLIC_CLIENT_GREETING_TEXT = {
+    "sr": "Izvolite, ovde Kaleya. Kako mogu da pomognem?",
+    "en": "Hello, this is Kaleya. How can I help?",
+    "es": "Hola, soy Kaleya. Como puedo ayudar?",
+    "pt": "Ola, aqui e Kaleya. Como posso ajudar?",
+    "ru": "Здравствуйте, это Kaleya. Чем могу помочь?",
+    "fr": "Bonjour, ici Kaleya. Comment puis-je aider ?",
+    "it": "Ciao, sono Kaleya. Come posso aiutare?",
+    "de": "Hallo, hier ist Kaleya. Wie kann ich helfen?",
+}
+
+PUBLIC_VOICE_PRESETS = {
+    "intro": PUBLIC_INTRO_TEXT,
+    "client_greeting": PUBLIC_CLIENT_GREETING_TEXT,
+}
+
+
+class PublicVoiceClient:
+    id = "public"
+
+
 class AIIntentViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AIIntentSerializer
     permission_classes = (permissions.IsAuthenticated,)
@@ -86,6 +118,8 @@ class InboundTextAPIView(APIView):
             },
             use_ai=False if is_demo else serializer.validated_data.get("use_ai", True),
             include_voice=False if is_demo else serializer.validated_data.get("include_voice", False),
+            external_thread_id=serializer.validated_data.get("external_thread_id", ""),
+            actor=request.user,
         )
         if is_demo:
             result["demo_mode"] = True
@@ -114,6 +148,27 @@ class TextToSpeechAPIView(APIView):
             return Response(synthesize_elevenlabs_speech(client, serializer.validated_data["text"]))
         except ProviderError as exc:
             return Response({"detail": str(exc)}, status=400)
+
+
+class PublicIntroSpeechAPIView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request):
+        preset = (request.query_params.get("preset") or "intro").strip().lower()
+        preset_texts = PUBLIC_VOICE_PRESETS.get(preset)
+        if preset_texts is None:
+            return Response({"detail": "Nepoznat voice preset."}, status=404)
+
+        language = (request.query_params.get("lang") or "en").strip().lower()
+        if language not in preset_texts:
+            language = "en"
+        text = preset_texts[language]
+
+        try:
+            voice = synthesize_elevenlabs_speech(PublicVoiceClient(), text)
+            return Response({"preset": preset, "language": language, "text": text, **voice})
+        except ProviderError as exc:
+            return Response({"detail": str(exc), "preset": preset, "language": language}, status=400)
 
 
 class VoiceStatusAPIView(APIView):

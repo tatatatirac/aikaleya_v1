@@ -98,6 +98,43 @@ class ClientApiSettings(models.Model):
         return f"API settings: {self.business_client}"
 
 
+class BusinessKnowledgeEntry(models.Model):
+    CATEGORY_FAQ = "faq"
+    CATEGORY_POLICY = "policy"
+    CATEGORY_PRICING = "pricing"
+    CATEGORY_LOCATION = "location"
+    CATEGORY_PREPARATION = "preparation"
+    CATEGORY_CUSTOM = "custom"
+
+    CATEGORY_CHOICES = (
+        (CATEGORY_FAQ, "FAQ"),
+        (CATEGORY_POLICY, "Policy"),
+        (CATEGORY_PRICING, "Pricing"),
+        (CATEGORY_LOCATION, "Location"),
+        (CATEGORY_PREPARATION, "Preparation"),
+        (CATEGORY_CUSTOM, "Custom"),
+    )
+
+    business_client = models.ForeignKey(BusinessClient, on_delete=models.CASCADE, related_name="knowledge_entries")
+    category = models.CharField(max_length=40, choices=CATEGORY_CHOICES, default=CATEGORY_FAQ)
+    language = models.CharField(max_length=10, choices=BusinessClient.LANGUAGE_CHOICES, default="en")
+    title = models.CharField(max_length=180)
+    answer = models.TextField()
+    keywords = models.CharField(max_length=300, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("category", "title")
+        indexes = [
+            models.Index(fields=("business_client", "language", "category", "is_active")),
+        ]
+
+    def __str__(self):
+        return f"{self.business_client} - {self.title}"
+
+
 def get_active_client_for_user(user):
     if not user or not user.is_authenticated:
         return None

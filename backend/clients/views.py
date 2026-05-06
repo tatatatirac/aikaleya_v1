@@ -1,10 +1,11 @@
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.response import Response
 
 from accounts.permissions import IsAdminRole, user_role
-from clients.models import BusinessClient, ClientApiSettings
-from clients.serializers import BusinessClientSerializer, ClientApiSettingsSerializer
+from clients.models import BusinessClient, BusinessKnowledgeEntry, ClientApiSettings
+from clients.serializers import BusinessClientSerializer, BusinessKnowledgeEntrySerializer, ClientApiSettingsSerializer
 from clients.utils import client_for_request
 
 
@@ -56,3 +57,37 @@ class ClientApiSettingsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return ClientApiSettings.objects.select_related("business_client").all()
+
+
+class BusinessKnowledgeEntryViewSet(viewsets.ModelViewSet):
+    serializer_class = BusinessKnowledgeEntrySerializer
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        client = client_for_request(self.request)
+        if not client:
+            return BusinessKnowledgeEntry.objects.none()
+        return BusinessKnowledgeEntry.objects.filter(business_client=client)
+
+    def _client_for_write(self):
+        client = client_for_request(self.request)
+        if client is None:
+            raise ValidationError({"detail": "Klijent nije pronadjen."})
+
+        role = user_role(self.request.user)
+        if role == "employee":
+            raise PermissionDenied("Zaposleni ne moze da menja bazu znanja firme.")
+        if role != "admin" and client.owner_id != self.request.user.id:
+            raise PermissionDenied("Samo vlasnik firme moze da menja bazu znanja.")
+        return client
+
+    def perform_create(self, serializer):
+        serializer.save(business_client=self._client_for_write())
+
+    def perform_update(self, serializer):
+        self._client_for_write()
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        self._client_for_write()
+        instance.delete()

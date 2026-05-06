@@ -827,6 +827,45 @@
                                     <button onclick="createClientBlockedTime()" class="mt-2 w-full h-10 rounded-xl bg-amber-500 text-white text-[12px] font-semibold" data-i18n="add_block">Dodaj blokadu</button>
                                 </div>
                             </div>
+
+                            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                                <div class="flex items-start justify-between gap-3 mb-3">
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-600 dark:text-slate-300" data-i18n="knowledge_title">Kaleya baza znanja</p>
+                                        <p class="mt-1 text-[10px] text-slate-500" data-i18n="knowledge_desc">Proverene informacije koje Kaleya sme da koristi u odgovorima.</p>
+                                    </div>
+                                    <span class="shrink-0 px-2 py-1 rounded-full bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 text-[10px] font-semibold">AI</span>
+                                </div>
+                                <div id="clientKnowledgeList" class="space-y-2"></div>
+                                <input id="editingKnowledgeId" type="hidden">
+                                <div class="mt-4 grid grid-cols-2 gap-2">
+                                    <select id="knowledgeCategory" class="h-10 px-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px]">
+                                        <option value="faq" data-i18n="knowledge_cat_faq">FAQ</option>
+                                        <option value="pricing" data-i18n="knowledge_cat_pricing">Cene</option>
+                                        <option value="policy" data-i18n="knowledge_cat_policy">Pravila</option>
+                                        <option value="location" data-i18n="knowledge_cat_location">Parking / lokacija</option>
+                                        <option value="preparation" data-i18n="knowledge_cat_preparation">Priprema</option>
+                                        <option value="custom" data-i18n="knowledge_cat_custom">Posebno</option>
+                                    </select>
+                                    <select id="knowledgeLanguage" class="h-10 px-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px]">
+                                        <option value="en">English</option>
+                                        <option value="sr">Srpski</option>
+                                        <option value="es">Espanol</option>
+                                        <option value="pt">Portugues</option>
+                                        <option value="ru">Russkiy</option>
+                                        <option value="fr">Francais</option>
+                                        <option value="it">Italiano</option>
+                                        <option value="de">Deutsch</option>
+                                    </select>
+                                </div>
+                                <input id="knowledgeTitleInput" type="text" placeholder="Naslov pravila" data-i18n-placeholder="knowledge_title_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                <input id="knowledgeKeywordsInput" type="text" placeholder="Kljucne reci" data-i18n-placeholder="knowledge_keywords_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                <textarea id="knowledgeAnswerInput" rows="4" placeholder="Odgovor koji Kaleya koristi" data-i18n-placeholder="knowledge_answer_placeholder" class="mt-2 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none resize-none"></textarea>
+                                <div class="mt-2 grid grid-cols-[1fr_auto] gap-2">
+                                    <button id="clientKnowledgeSaveBtn" onclick="saveClientKnowledgeEntry()" class="h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12px] font-semibold" data-i18n="knowledge_save">Sacuvaj pravilo</button>
+                                    <button id="clientKnowledgeCancelBtn" onclick="resetClientKnowledgeForm()" class="hidden h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="cancel_btn">Odustani</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1219,7 +1258,7 @@
 
 <script>
 // ===== STATE =====
-const KALEYA_APP_VERSION = '2026-05-01-billing-trial-01';
+const KALEYA_APP_VERSION = '2026-05-06-demo-static-voice-01';
 const savedAppVersion = localStorage.getItem('kaleya_app_version');
 if (savedAppVersion && savedAppVersion !== KALEYA_APP_VERSION) {
     localStorage.removeItem('kaleya_auth_token');
@@ -1242,6 +1281,9 @@ let kaleyaActive = false;
 let kaleyaEnabled = localStorage.getItem('kaleya_enabled') !== 'off';
 let clientSettingsCache = null;
 let currentClientInfo = null;
+let voiceStatusCache = null;
+let voiceStatusCacheToken = '';
+let voiceStatusPromise = null;
 let clientEntitlements = {
     package: 'business_plus',
     plan: { name: 'Business+' },
@@ -1269,6 +1311,7 @@ let clientStaffMembers = [];
 let clientServices = [];
 let clientStaffServiceLinks = [];
 let clientBlockedTimes = [];
+let clientKnowledgeEntries = [];
 let recognition = null;
 let activeClientForApi = '';
 let openStatusMenuId = '';
@@ -1775,6 +1818,37 @@ Object.entries(FORM_RUNTIME_TRANSLATIONS).forEach(([lang, values]) => {
     T[lang] = { ...(T[lang] || T.en), ...values };
 });
 
+const KNOWLEDGE_RUNTIME_TRANSLATIONS = {
+    sr: {
+        knowledge_title: 'Kaleya baza znanja', knowledge_desc: 'Proverene informacije koje Kaleya sme da koristi u odgovorima.', knowledge_cat_faq: 'FAQ', knowledge_cat_policy: 'Pravila', knowledge_cat_pricing: 'Cene', knowledge_cat_location: 'Parking / lokacija', knowledge_cat_preparation: 'Priprema', knowledge_cat_custom: 'Posebno', knowledge_title_placeholder: 'Naslov pravila', knowledge_keywords_placeholder: 'Kljucne reci, npr. parking, cena, otkazivanje', knowledge_answer_placeholder: 'Odgovor koji Kaleya koristi', knowledge_save: 'Sacuvaj pravilo', knowledge_empty: 'Nema dodatih pravila firme.', knowledge_saved: 'Pravilo je sacuvano', knowledge_not_saved: 'Pravilo nije sacuvano', knowledge_deleted: 'Pravilo je obrisano', knowledge_not_deleted: 'Pravilo nije obrisano', knowledge_delete_confirm: 'Obrisati pravilo?', knowledge_need_title: 'Unesi naslov pravila', knowledge_need_answer: 'Unesi odgovor za Kaleyu'
+    },
+    en: {
+        knowledge_title: 'Kaleya knowledge base', knowledge_desc: 'Verified business information Kaleya can use in replies.', knowledge_cat_faq: 'FAQ', knowledge_cat_policy: 'Rules', knowledge_cat_pricing: 'Pricing', knowledge_cat_location: 'Parking / location', knowledge_cat_preparation: 'Preparation', knowledge_cat_custom: 'Custom', knowledge_title_placeholder: 'Rule title', knowledge_keywords_placeholder: 'Keywords, e.g. parking, price, cancellation', knowledge_answer_placeholder: 'Answer Kaleya should use', knowledge_save: 'Save rule', knowledge_empty: 'No business rules added.', knowledge_saved: 'Rule saved', knowledge_not_saved: 'Rule was not saved', knowledge_deleted: 'Rule deleted', knowledge_not_deleted: 'Rule was not deleted', knowledge_delete_confirm: 'Delete this rule?', knowledge_need_title: 'Enter rule title', knowledge_need_answer: 'Enter Kaleya answer'
+    },
+    es: {
+        knowledge_title: 'Base de conocimiento Kaleya', knowledge_desc: 'Informacion verificada que Kaleya puede usar al responder.', knowledge_cat_faq: 'FAQ', knowledge_cat_policy: 'Reglas', knowledge_cat_pricing: 'Precios', knowledge_cat_location: 'Parking / ubicacion', knowledge_cat_preparation: 'Preparacion', knowledge_cat_custom: 'Especial', knowledge_title_placeholder: 'Titulo de regla', knowledge_keywords_placeholder: 'Palabras clave, p. ej. parking, precio, cancelacion', knowledge_answer_placeholder: 'Respuesta que Kaleya debe usar', knowledge_save: 'Guardar regla', knowledge_empty: 'No hay reglas de empresa.', knowledge_saved: 'Regla guardada', knowledge_not_saved: 'La regla no se guardo', knowledge_deleted: 'Regla borrada', knowledge_not_deleted: 'La regla no se borro', knowledge_delete_confirm: 'Borrar esta regla?', knowledge_need_title: 'Escriba el titulo', knowledge_need_answer: 'Escriba la respuesta'
+    },
+    pt: {
+        knowledge_title: 'Base de conhecimento Kaleya', knowledge_desc: 'Informacoes verificadas que Kaleya pode usar nas respostas.', knowledge_cat_faq: 'FAQ', knowledge_cat_policy: 'Regras', knowledge_cat_pricing: 'Precos', knowledge_cat_location: 'Estacionamento / localizacao', knowledge_cat_preparation: 'Preparacao', knowledge_cat_custom: 'Especial', knowledge_title_placeholder: 'Titulo da regra', knowledge_keywords_placeholder: 'Palavras-chave, ex. estacionamento, preco, cancelamento', knowledge_answer_placeholder: 'Resposta que Kaleya deve usar', knowledge_save: 'Salvar regra', knowledge_empty: 'Nenhuma regra da empresa.', knowledge_saved: 'Regra salva', knowledge_not_saved: 'A regra nao foi salva', knowledge_deleted: 'Regra apagada', knowledge_not_deleted: 'A regra nao foi apagada', knowledge_delete_confirm: 'Apagar esta regra?', knowledge_need_title: 'Informe o titulo', knowledge_need_answer: 'Informe a resposta'
+    },
+    ru: {
+        knowledge_title: 'Baza znaniy Kaleya', knowledge_desc: 'Proverennaya informaciya kompanii dlya otvetov Kaleya.', knowledge_cat_faq: 'FAQ', knowledge_cat_policy: 'Pravila', knowledge_cat_pricing: 'Ceny', knowledge_cat_location: 'Parking / lokaciya', knowledge_cat_preparation: 'Podgotovka', knowledge_cat_custom: 'Osoboe', knowledge_title_placeholder: 'Nazvanie pravila', knowledge_keywords_placeholder: 'Klyuchevye slova, napr. parking, cena, otmena', knowledge_answer_placeholder: 'Otvet dlya Kaleya', knowledge_save: 'Sohranit pravilo', knowledge_empty: 'Pravila kompanii ne dobavleny.', knowledge_saved: 'Pravilo sohraneno', knowledge_not_saved: 'Pravilo ne sohraneno', knowledge_deleted: 'Pravilo udaleno', knowledge_not_deleted: 'Pravilo ne udaleno', knowledge_delete_confirm: 'Udalit pravilo?', knowledge_need_title: 'Vvedite nazvanie', knowledge_need_answer: 'Vvedite otvet'
+    },
+    fr: {
+        knowledge_title: 'Base de connaissances Kaleya', knowledge_desc: 'Informations verifiees que Kaleya peut utiliser dans ses reponses.', knowledge_cat_faq: 'FAQ', knowledge_cat_policy: 'Regles', knowledge_cat_pricing: 'Prix', knowledge_cat_location: 'Parking / lieu', knowledge_cat_preparation: 'Preparation', knowledge_cat_custom: 'Special', knowledge_title_placeholder: 'Titre de la regle', knowledge_keywords_placeholder: 'Mots cles, ex. parking, prix, annulation', knowledge_answer_placeholder: 'Reponse que Kaleya doit utiliser', knowledge_save: 'Enregistrer regle', knowledge_empty: 'Aucune regle entreprise ajoutee.', knowledge_saved: 'Regle enregistree', knowledge_not_saved: 'La regle n a pas ete enregistree', knowledge_deleted: 'Regle supprimee', knowledge_not_deleted: 'La regle n a pas ete supprimee', knowledge_delete_confirm: 'Supprimer cette regle?', knowledge_need_title: 'Saisir le titre', knowledge_need_answer: 'Saisir la reponse'
+    },
+    it: {
+        knowledge_title: 'Base conoscenza Kaleya', knowledge_desc: 'Informazioni verificate che Kaleya puo usare nelle risposte.', knowledge_cat_faq: 'FAQ', knowledge_cat_policy: 'Regole', knowledge_cat_pricing: 'Prezzi', knowledge_cat_location: 'Parcheggio / posizione', knowledge_cat_preparation: 'Preparazione', knowledge_cat_custom: 'Speciale', knowledge_title_placeholder: 'Titolo regola', knowledge_keywords_placeholder: 'Parole chiave, es. parcheggio, prezzo, cancellazione', knowledge_answer_placeholder: 'Risposta che Kaleya deve usare', knowledge_save: 'Salva regola', knowledge_empty: 'Nessuna regola aziendale.', knowledge_saved: 'Regola salvata', knowledge_not_saved: 'Regola non salvata', knowledge_deleted: 'Regola eliminata', knowledge_not_deleted: 'Regola non eliminata', knowledge_delete_confirm: 'Eliminare questa regola?', knowledge_need_title: 'Inserisci titolo', knowledge_need_answer: 'Inserisci risposta'
+    },
+    de: {
+        knowledge_title: 'Kaleya Wissensbasis', knowledge_desc: 'Gepruefte Firmeninformationen, die Kaleya in Antworten nutzen darf.', knowledge_cat_faq: 'FAQ', knowledge_cat_policy: 'Regeln', knowledge_cat_pricing: 'Preise', knowledge_cat_location: 'Parken / Standort', knowledge_cat_preparation: 'Vorbereitung', knowledge_cat_custom: 'Spezial', knowledge_title_placeholder: 'Regeltitel', knowledge_keywords_placeholder: 'Schluesselwoerter, z.B. Parken, Preis, Storno', knowledge_answer_placeholder: 'Antwort, die Kaleya verwenden soll', knowledge_save: 'Regel speichern', knowledge_empty: 'Keine Firmenregeln hinzugefuegt.', knowledge_saved: 'Regel gespeichert', knowledge_not_saved: 'Regel wurde nicht gespeichert', knowledge_deleted: 'Regel geloescht', knowledge_not_deleted: 'Regel wurde nicht geloescht', knowledge_delete_confirm: 'Diese Regel loeschen?', knowledge_need_title: 'Regeltitel eingeben', knowledge_need_answer: 'Antwort eingeben'
+    }
+};
+
+Object.entries(KNOWLEDGE_RUNTIME_TRANSLATIONS).forEach(([lang, values]) => {
+    T[lang] = { ...(T[lang] || T.en), ...values };
+});
+
 function tr(key) {
     return (T[currentLang] && T[currentLang][key]) || T.en[key] || T.sr[key] || key;
 }
@@ -1811,6 +1885,7 @@ function setLang(lang) {
     localStorage.setItem('kaleya_lang_user_set', '1');
     if (!localStorage.getItem('kaleya_voice_lang')) currentVoiceLang = lang;
     applyLang();
+    renderClientKnowledgeSettings();
     saveClientSettingsToBackend({ interface_language: lang, language: lang }).catch(error => {
         console.warn('Kaleya language save failed', error);
     });
@@ -1888,12 +1963,20 @@ async function logoTap() {
     };
     const audioLang = ['sr', 'en', 'es', 'pt', 'ru', 'fr', 'it', 'de'].includes(currentLang) ? currentLang : 'en';
     try {
-        await playAudioUrl(`assets/audio/kaleya-demo-${audioLang}.mp3?v=${KALEYA_APP_VERSION}`);
-        return;
+        if (await playStaticVoicePreset('intro', audioLang)) return;
     } catch (error) {
         console.warn('Kaleya public intro audio failed', error);
-        showToast('Kaleya audio nije ucitan. Osvezi stranu sa Ctrl + F5.');
     }
+    try {
+        const voice = await requestPublicIntroVoice(audioLang);
+        if (voice?.audio_url) {
+            await playAudioUrl(voice.audio_url);
+            return;
+        }
+    } catch (error) {
+        console.warn('Kaleya public ElevenLabs intro failed', error);
+    }
+    browserSpeak(intro[audioLang] || intro.en, audioLang);
 }
 
 // ===== LOGIN =====
@@ -1936,6 +2019,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     if (isBackendServed()) {
         try {
             const data = await backendLogin(email, pass);
+            clearVoiceStatusCache();
             localStorage.setItem('kaleya_auth_token', data.token);
             localStorage.setItem('kaleya_user_role', data.user.role);
             localStorage.setItem('kaleya_user_email', data.user.email);
@@ -1996,6 +2080,7 @@ async function logout() {
             console.warn('Kaleya logout failed', error);
         }
     }
+    clearVoiceStatusCache();
     localStorage.removeItem('kaleya_auth_token');
     localStorage.removeItem('kaleya_user_role');
     localStorage.removeItem('kaleya_user_email');
@@ -2021,6 +2106,32 @@ function currentUserIdentifiers() {
         localStorage.getItem('kaleya_user_email') || '',
         localStorage.getItem('kaleya_user_username') || ''
     ].map(value => value.trim().toLowerCase()).filter(Boolean);
+}
+
+function kaleyaWorkflowThreadId(channel = 'web') {
+    const userKey = currentUserIdentifiers()[0] || 'local';
+    const storageKey = `kaleya_ai_thread_${channel}_${userKey}`;
+    let threadId = localStorage.getItem(storageKey);
+    if (!threadId) {
+        threadId = `${channel}-${userKey}-${Date.now()}`;
+        localStorage.setItem(storageKey, threadId);
+    }
+    return threadId;
+}
+
+function aiResultText(result, fallback = '') {
+    return result?.response_text || result?.tool_output?.message || fallback || '';
+}
+
+function showKaleyaAiResult(result, fallback = '') {
+    const text = aiResultText(result, fallback);
+    const status = document.getElementById('kaleyaStatus');
+    if (status && text) status.textContent = text;
+    if (result?.conversation_id) {
+        localStorage.setItem('kaleya_last_conversation_id', String(result.conversation_id));
+    }
+    if (text) showToast(text);
+    return text;
 }
 
 function currentEmployeeStaffMember() {
@@ -2261,6 +2372,103 @@ async function playAudioUrl(audioUrl) {
     return true;
 }
 
+function staticVoiceAudioUrl(preset, langOverride) {
+    const supported = ['sr', 'en', 'es', 'pt', 'ru', 'fr', 'it', 'de'];
+    const lang = supported.includes(langOverride) ? langOverride : 'en';
+    const files = {
+        intro: `assets/audio/kaleya-demo-${lang}.mp3?v=${KALEYA_APP_VERSION}`,
+        client_greeting: `assets/audio/kaleya-greeting-${lang}.mp3?v=${KALEYA_APP_VERSION}`
+    };
+    return files[preset] || '';
+}
+
+async function playStaticVoicePreset(preset, langOverride) {
+    const audioUrl = staticVoiceAudioUrl(preset, langOverride);
+    if (!audioUrl) return false;
+    await playAudioUrl(audioUrl);
+    return true;
+}
+
+async function requestPublicIntroVoice(language, preset = 'intro') {
+    if (!isBackendServed() || location.protocol === 'file:') return null;
+    const params = new URLSearchParams({
+        lang: language || currentLang || 'en',
+        preset
+    });
+    const res = await fetch(`/api/ai-agent/public-intro-tts/?${params.toString()}`, {
+        method: 'GET',
+        headers: { Accept: 'application/json' }
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+}
+
+function clearVoiceStatusCache() {
+    voiceStatusCache = null;
+    voiceStatusCacheToken = '';
+    voiceStatusPromise = null;
+}
+
+async function getBackendVoiceStatus(force = false) {
+    const token = getAuthToken();
+    if (!token || location.protocol === 'file:') {
+        return { connected: false, package_allows_voice: false, demo_mode: false };
+    }
+    if (!force && voiceStatusCache && voiceStatusCacheToken === token) return voiceStatusCache;
+    if (!force && voiceStatusPromise && voiceStatusCacheToken === token) return voiceStatusPromise;
+
+    voiceStatusCacheToken = token;
+    voiceStatusPromise = kaleyaApi('/api/ai-agent/voice-status/', { method: 'GET' })
+        .then(async (res) => {
+            if (!res.ok) throw new Error(await res.text());
+            const data = await res.json();
+            voiceStatusCache = data;
+            return data;
+        })
+        .catch((error) => {
+            console.warn('Kaleya voice status failed', error);
+            voiceStatusCache = { connected: false, package_allows_voice: false, demo_mode: false };
+            return voiceStatusCache;
+        })
+        .finally(() => {
+            voiceStatusPromise = null;
+        });
+    return voiceStatusPromise;
+}
+
+function canUseBackendVoice(status) {
+    return !!status?.connected && status.package_allows_voice !== false && status.demo_mode !== true;
+}
+
+async function speakPreset(preset, fallbackText, langOverride) {
+    const lang = langOverride || currentVoiceLang || currentLang;
+    let voiceStatus = null;
+    if (getAuthToken() && location.protocol !== 'file:') {
+        voiceStatus = await getBackendVoiceStatus();
+        if (canUseBackendVoice(voiceStatus)) {
+            await speak(fallbackText, lang);
+            return;
+        }
+    }
+    try {
+        if (await playStaticVoicePreset(preset, lang)) return;
+    } catch (error) {
+        console.warn('Kaleya static preset voice failed', error);
+    }
+    if (!voiceStatus?.demo_mode) {
+        try {
+            const voice = await requestPublicIntroVoice(lang, preset);
+            if (voice?.audio_url) {
+                await playAudioUrl(voice.audio_url);
+                return;
+            }
+        } catch (error) {
+            console.warn('Kaleya preset voice failed, fallback to browser', error);
+        }
+    }
+    browserSpeak(fallbackText, lang);
+}
+
 function browserSpeak(text, langOverride) {
     const lang = langOverride || currentVoiceLang || currentLang;
     if (!('speechSynthesis' in window)) return;
@@ -2274,14 +2482,18 @@ function browserSpeak(text, langOverride) {
 async function speak(text, langOverride) {
     if (getAuthToken() && location.protocol !== 'file:') {
         try {
-            const res = await kaleyaApi('/api/ai-agent/tts/', {
-                method: 'POST',
-                body: JSON.stringify({ text })
-            });
-            if (res.ok) {
-                const data = await res.json();
-                await playAudioUrl(data.audio_url);
-                return;
+            const voiceStatus = await getBackendVoiceStatus();
+            if (canUseBackendVoice(voiceStatus)) {
+                const res = await kaleyaApi('/api/ai-agent/tts/', {
+                    method: 'POST',
+                    body: JSON.stringify({ text })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    await playAudioUrl(data.audio_url);
+                    return;
+                }
+                if (res.status === 403) clearVoiceStatusCache();
             }
         } catch (e) {
             console.warn('Kaleya backend TTS failed, fallback to browser', e);
@@ -2306,11 +2518,13 @@ function availabilityPrompt() {
 
 async function askKaleyaBackend(text, includeVoice = true, payload = {}, useAi = true) {
     if (!getAuthToken() || location.protocol === 'file:') return null;
+    const channel = payload.channel || 'web';
     const res = await kaleyaApi('/api/ai-agent/inbound-text/', {
         method: 'POST',
         body: JSON.stringify({
             text,
-            channel: payload.channel || 'web',
+            channel,
+            external_thread_id: payload.external_thread_id || kaleyaWorkflowThreadId(channel),
             use_ai: useAi,
             include_voice: includeVoice,
             ...payload
@@ -2498,6 +2712,7 @@ async function saveAppointmentViaAi(payload) {
     if (result?.tool_output?.status !== 'booked') {
         throw new Error(result?.response_text || tr('appointment_not_saved'));
     }
+    showKaleyaAiResult(result, tr('appointment_saved'));
     return result;
 }
 
@@ -2516,6 +2731,7 @@ async function cancelAppointmentViaAi(item, reason = '') {
     if (result?.tool_output?.status !== 'cancelled') {
         throw new Error(result?.response_text || tr('appointment_not_cancelled'));
     }
+    showKaleyaAiResult(result, tr('appointment_cancelled_free'));
     return result;
 }
 
@@ -2587,28 +2803,33 @@ function unpackApiRows(data) {
 async function loadClientOperationalDataFromBackend() {
     if (!getAuthToken() || location.protocol === 'file:') {
         renderClientOperationalSettings();
+        renderClientKnowledgeSettings();
         renderEmployeeDirectory();
         populateAppointmentStaffServiceFields();
         populateBlockedStaffSelect();
         return;
     }
     try {
-        const [staffRes, serviceRes, linkRes, blockedRes] = await Promise.all([
+        const [staffRes, serviceRes, linkRes, blockedRes, knowledgeRes] = await Promise.all([
             kaleyaApi('/api/staff-services/staff/', { method: 'GET' }),
             kaleyaApi('/api/staff-services/services/', { method: 'GET' }),
             kaleyaApi('/api/staff-services/staff-services/', { method: 'GET' }),
-            kaleyaApi('/api/staff-services/blocked-times/', { method: 'GET' })
+            kaleyaApi('/api/staff-services/blocked-times/', { method: 'GET' }),
+            kaleyaApi('/api/clients/knowledge/', { method: 'GET' })
         ]);
         if (!staffRes.ok) throw new Error(await staffRes.text());
         if (!serviceRes.ok) throw new Error(await serviceRes.text());
         if (!linkRes.ok) throw new Error(await linkRes.text());
         if (!blockedRes.ok) throw new Error(await blockedRes.text());
+        if (!knowledgeRes.ok) throw new Error(await knowledgeRes.text());
 
         clientStaffMembers = unpackApiRows(await staffRes.json()).filter(item => item.is_active !== false);
         clientServices = unpackApiRows(await serviceRes.json()).filter(item => item.is_active !== false);
         clientStaffServiceLinks = unpackApiRows(await linkRes.json()).filter(item => item.is_active !== false);
         clientBlockedTimes = unpackApiRows(await blockedRes.json());
+        clientKnowledgeEntries = unpackApiRows(await knowledgeRes.json()).filter(item => item.is_active !== false);
         renderClientOperationalSettings();
+        renderClientKnowledgeSettings();
         renderEmployeeDirectory();
         populateAppointmentStaffServiceFields();
         populateBlockedStaffSelect();
@@ -2724,6 +2945,172 @@ function renderClientOperationalSettings() {
                     `;
                 }).join('')
             : `<p class="text-[12px] text-slate-500">${escapeHtml(tr('no_blocked_time'))}</p>`;
+    }
+}
+
+function knowledgeCategoryLabel(category = 'faq') {
+    return tr(`knowledge_cat_${category}`) || category;
+}
+
+function knowledgeLanguageLabel(language = currentLang) {
+    const labels = {
+        en: 'English',
+        sr: 'Srpski',
+        es: 'Espanol',
+        pt: 'Portugues',
+        ru: 'Russkiy',
+        fr: 'Francais',
+        it: 'Italiano',
+        de: 'Deutsch'
+    };
+    return labels[language] || language.toUpperCase();
+}
+
+function renderClientKnowledgeSettings() {
+    const list = document.getElementById('clientKnowledgeList');
+    if (!list) return;
+    const entries = clientKnowledgeEntries.filter(entry => entry.is_active !== false);
+    list.innerHTML = entries.length
+        ? entries
+            .slice()
+            .sort((a, b) => `${a.category}-${a.title}`.localeCompare(`${b.category}-${b.title}`))
+            .map(entry => `
+                <div class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="px-2 py-0.5 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[9px] font-semibold text-slate-500">${escapeHtml(knowledgeCategoryLabel(entry.category))}</span>
+                                <span class="px-2 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 text-[9px] font-semibold">${escapeHtml(knowledgeLanguageLabel(entry.language))}</span>
+                            </div>
+                            <p class="mt-1 text-[12px] font-semibold truncate">${escapeHtml(entry.title)}</p>
+                            <p class="mt-0.5 text-[10px] text-slate-500 line-clamp-2">${escapeHtml(entry.answer)}</p>
+                            ${entry.keywords ? `<p class="mt-1 text-[9px] text-slate-400 truncate">${escapeHtml(entry.keywords)}</p>` : ''}
+                        </div>
+                        <div class="shrink-0 flex items-center gap-1">
+                            <button onclick="startEditClientKnowledgeEntry('${entry.id}')" class="h-7 px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-semibold">${escapeHtml(tr('edit_btn'))}</button>
+                            <button onclick="deleteClientKnowledgeEntry('${entry.id}')" class="h-7 px-2.5 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-[10px] font-semibold">${escapeHtml(tr('delete_btn'))}</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('')
+        : `<p class="text-[12px] text-slate-500">${escapeHtml(tr('knowledge_empty'))}</p>`;
+}
+
+function resetClientKnowledgeForm() {
+    const id = document.getElementById('editingKnowledgeId');
+    const category = document.getElementById('knowledgeCategory');
+    const language = document.getElementById('knowledgeLanguage');
+    const title = document.getElementById('knowledgeTitleInput');
+    const keywords = document.getElementById('knowledgeKeywordsInput');
+    const answer = document.getElementById('knowledgeAnswerInput');
+    const saveBtn = document.getElementById('clientKnowledgeSaveBtn');
+    const cancelBtn = document.getElementById('clientKnowledgeCancelBtn');
+    if (id) id.value = '';
+    if (category) category.value = 'faq';
+    if (language) language.value = ['en', 'sr', 'es', 'pt', 'ru', 'fr', 'it', 'de'].includes(currentLang) ? currentLang : 'en';
+    if (title) title.value = '';
+    if (keywords) keywords.value = '';
+    if (answer) answer.value = '';
+    if (saveBtn) saveBtn.textContent = tr('knowledge_save');
+    cancelBtn?.classList.add('hidden');
+}
+
+function startEditClientKnowledgeEntry(entryId) {
+    const entry = clientKnowledgeEntries.find(item => String(item.id) === String(entryId));
+    if (!entry) return;
+    document.getElementById('editingKnowledgeId').value = entry.id;
+    document.getElementById('knowledgeCategory').value = entry.category || 'faq';
+    document.getElementById('knowledgeLanguage').value = entry.language || currentLang || 'en';
+    document.getElementById('knowledgeTitleInput').value = entry.title || '';
+    document.getElementById('knowledgeKeywordsInput').value = entry.keywords || '';
+    document.getElementById('knowledgeAnswerInput').value = entry.answer || '';
+    document.getElementById('clientKnowledgeSaveBtn').textContent = tr('save_changes');
+    document.getElementById('clientKnowledgeCancelBtn')?.classList.remove('hidden');
+    document.getElementById('knowledgeTitleInput')?.focus();
+}
+
+function clientKnowledgePayloadFromForm() {
+    const title = document.getElementById('knowledgeTitleInput')?.value.trim() || '';
+    const answer = document.getElementById('knowledgeAnswerInput')?.value.trim() || '';
+    if (!title) {
+        showToast(tr('knowledge_need_title'));
+        return null;
+    }
+    if (!answer) {
+        showToast(tr('knowledge_need_answer'));
+        return null;
+    }
+    return {
+        category: document.getElementById('knowledgeCategory')?.value || 'faq',
+        language: document.getElementById('knowledgeLanguage')?.value || currentLang || 'en',
+        title,
+        keywords: document.getElementById('knowledgeKeywordsInput')?.value.trim() || '',
+        answer,
+        is_active: true
+    };
+}
+
+async function saveClientKnowledgeEntry() {
+    const payload = clientKnowledgePayloadFromForm();
+    if (!payload) return;
+    const editingId = document.getElementById('editingKnowledgeId')?.value || '';
+
+    if (!getAuthToken() || location.protocol === 'file:') {
+        if (editingId) {
+            clientKnowledgeEntries = clientKnowledgeEntries.map(entry => String(entry.id) === String(editingId) ? { ...entry, ...payload } : entry);
+        } else {
+            clientKnowledgeEntries.push({ id: `local-knowledge-${Date.now()}`, ...payload });
+        }
+        resetClientKnowledgeForm();
+        renderClientKnowledgeSettings();
+        showToast(tr('knowledge_saved'));
+        return;
+    }
+
+    try {
+        const res = await kaleyaApi(editingId ? `/api/clients/knowledge/${editingId}/` : '/api/clients/knowledge/', {
+            method: editingId ? 'PATCH' : 'POST',
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const saved = await res.json();
+        if (editingId) {
+            clientKnowledgeEntries = clientKnowledgeEntries.map(entry => String(entry.id) === String(editingId) ? saved : entry);
+        } else {
+            clientKnowledgeEntries.push(saved);
+        }
+        resetClientKnowledgeForm();
+        renderClientKnowledgeSettings();
+        showToast(tr('knowledge_saved'));
+    } catch (error) {
+        console.warn('Kaleya knowledge save failed', error);
+        showToast(tr('knowledge_not_saved'));
+    }
+}
+
+async function deleteClientKnowledgeEntry(entryId) {
+    const entry = clientKnowledgeEntries.find(item => String(item.id) === String(entryId));
+    if (!entry) return;
+    if (!window.confirm(tr('knowledge_delete_confirm'))) return;
+
+    if (!getAuthToken() || location.protocol === 'file:') {
+        clientKnowledgeEntries = clientKnowledgeEntries.filter(item => String(item.id) !== String(entryId));
+        if (document.getElementById('editingKnowledgeId')?.value === String(entryId)) resetClientKnowledgeForm();
+        renderClientKnowledgeSettings();
+        showToast(tr('knowledge_deleted'));
+        return;
+    }
+
+    try {
+        const res = await kaleyaApi(`/api/clients/knowledge/${entryId}/`, { method: 'DELETE' });
+        if (!res.ok && res.status !== 204) throw new Error(await res.text());
+        clientKnowledgeEntries = clientKnowledgeEntries.filter(item => String(item.id) !== String(entryId));
+        if (document.getElementById('editingKnowledgeId')?.value === String(entryId)) resetClientKnowledgeForm();
+        renderClientKnowledgeSettings();
+        showToast(tr('knowledge_deleted'));
+    } catch (error) {
+        console.warn('Kaleya knowledge delete failed', error);
+        showToast(tr('knowledge_not_deleted'));
     }
 }
 
@@ -3223,7 +3610,7 @@ async function toggleKaleya() {
             it: 'Ciao, come posso aiutare?',
             de: 'Hallo, wie kann ich helfen?'
         };
-        await speak(greeting[currentVoiceLang] || greeting.en, currentVoiceLang);
+        await speakPreset('client_greeting', greeting[currentVoiceLang] || greeting.en, currentVoiceLang);
         document.getElementById('kaleyaStatus').textContent = tr('listening');
         startListening();
         setTimeout(() => { if(kaleyaActive) toggleKaleya(); }, 8000);
@@ -3322,6 +3709,7 @@ async function handleQuickAction(action) {
             } else if (result?.response_text) {
                 msg = result.response_text;
             }
+            showKaleyaAiResult(result, msg);
             if (result?.voice?.audio_url) {
                 await playAudioUrl(result.voice.audio_url);
             } else {
@@ -3331,7 +3719,6 @@ async function handleQuickAction(action) {
             console.warn('Kaleya availability backend failed, fallback to local demo', e);
             await speak(msg, currentVoiceLang);
         }
-        showToast(msg);
         return;
     }
     const messages = {
@@ -3491,9 +3878,7 @@ async function cancelAppointmentById(id) {
     if (!item) return;
     const reason = document.getElementById('cancelReasonInput')?.value.trim() || '';
     try {
-        const saved = isEmployeeUser()
-            ? await cancelAppointmentBackend(item, reason)
-            : await cancelAppointmentViaAi(item, reason) || await cancelAppointmentBackend(item, reason);
+        const saved = await cancelAppointmentViaAi(item, reason) || await cancelAppointmentBackend(item, reason);
         item.status = 'cancelled';
         item.cancelledReason = reason;
         if (saved?.id || saved?.backendId) Object.assign(item, saved);
@@ -4415,7 +4800,7 @@ async function saveAppointmentEdit() {
         return;
     }
     try {
-        if (!isEmployeeUser() && !payload.backendId && payload.status === 'confirmed' && getAuthToken() && location.protocol !== 'file:') {
+        if (!payload.backendId && payload.status === 'confirmed' && getAuthToken() && location.protocol !== 'file:') {
             await saveAppointmentViaAi(payload);
             await loadClientAppointmentsFromBackend();
             closeAppointmentEditor();
@@ -4515,15 +4900,8 @@ async function updateElStatus() {
         return;
     }
     setVoiceStatusBadge(false, true);
-    try {
-        const res = await kaleyaApi('/api/ai-agent/voice-status/', { method: 'GET' });
-        if (!res.ok) throw new Error(await res.text());
-        const data = await res.json();
-        setVoiceStatusBadge(!!data.connected, false, data.package_allows_voice !== false);
-    } catch (e) {
-        console.warn('Kaleya voice status failed', e);
-        setVoiceStatusBadge(false);
-    }
+    const data = await getBackendVoiceStatus(true);
+    setVoiceStatusBadge(!!data.connected, false, data.package_allows_voice !== false);
 }
 
 async function saveClientVoiceLang() {
@@ -4551,7 +4929,7 @@ async function testVoice() {
         it: 'Ciao, sono Kaleya. Come posso aiutare?',
         de: 'Hallo, hier ist Kaleya. Wie kann ich helfen?'
     };
-    await speak(text[currentVoiceLang] || text.en, currentVoiceLang);
+    await speakPreset('client_greeting', text[currentVoiceLang] || text.en, currentVoiceLang);
 }
 
 // ===== ADMIN =====
@@ -4873,6 +5251,7 @@ if (!T[currentVoiceLang]) currentVoiceLang = currentLang;
 applyLang();
 syncClientCalendarSettingsUI();
 renderClientOperationalSettings();
+renderClientKnowledgeSettings();
 renderSchedule();
 renderClientCalendar();
 updateKaleyaPowerUI();

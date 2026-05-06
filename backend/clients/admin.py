@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib import admin
 
-from clients.models import BusinessClient, ClientApiSettings
+from clients.models import BusinessClient, BusinessKnowledgeEntry, ClientApiSettings
 
 
 class BusinessClientAdminForm(forms.ModelForm):
@@ -129,3 +129,14 @@ class ClientApiSettingsAdmin(admin.ModelAdmin):
     @admin.display(description="Voice ID")
     def has_voice_id(self, obj):
         return "Unet" if obj.voice_id else "Nije unet"
+
+
+@admin.register(BusinessKnowledgeEntry)
+class BusinessKnowledgeEntryAdmin(admin.ModelAdmin):
+    list_display = ("business_client", "title", "category", "language", "is_active")
+    list_filter = ("category", "language", "is_active")
+    search_fields = ("business_client__name", "business_client__public_name", "title", "answer", "keywords")
+    fieldsets = (
+        ("Klijent", {"fields": ("business_client", "category", "language", "is_active")}),
+        ("Sadrzaj", {"fields": ("title", "answer", "keywords")}),
+    )
