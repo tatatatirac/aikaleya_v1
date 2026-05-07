@@ -204,6 +204,8 @@
 
         .panel { display: none; }
         .panel.active { display: block; }
+        body:has(.panel:target) .panel.active { display: none; }
+        body:has(.panel:target) .panel:target { display: block; }
 
         .section-head {
             display: flex;
@@ -749,32 +751,32 @@
             </a>
 
             <nav class="nav" aria-label="Admin navigacija">
-                <button class="nav-btn active" type="button" data-tab="overview" data-title="Kontrolna tabla">
+                <a class="nav-btn active" href="#overview" data-tab="overview" data-title="Kontrolna tabla">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
                     Kontrolna tabla
-                </button>
-                <button class="nav-btn" type="button" data-tab="clients" data-title="Klijenti">
+                </a>
+                <a class="nav-btn" href="#clients" data-tab="clients" data-title="Klijenti">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M3 21a7 7 0 0 1 14 0"/><path d="M21 21a5 5 0 0 0-4-4.9"/></svg>
                     Klijenti
-                </button>
-                <button class="nav-btn" type="button" data-tab="alarms" data-title="Alarmi">
+                </a>
+                <a class="nav-btn" href="#alarms" data-tab="alarms" data-title="Alarmi">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
                     Alarmi
-                </button>
-                <button class="nav-btn" type="button" data-tab="integrations" data-title="Integracije">
+                </a>
+                <a class="nav-btn" href="#integrations" data-tab="integrations" data-title="Integracije">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1-1"/></svg>
                     Integracije
-                </button>
+                </a>
                 {% if is_admin_user %}
-                    <button class="nav-btn" type="button" data-tab="payments" data-title="Plaćanja">
+                    <a class="nav-btn" href="#payments" data-tab="payments" data-title="Plaćanja">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>
                         Plaćanja
-                    </button>
+                    </a>
                 {% endif %}
-                <button class="nav-btn" type="button" data-tab="settings" data-title="Podešavanja">
+                <a class="nav-btn" href="#settings" data-tab="settings" data-title="Podešavanja">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V22h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 0 1 4.2 18l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.3 8A2 2 0 0 1 7.1 5.2l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V4h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 0 1 19.8 8l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
                     Podešavanja
-                </button>
+                </a>
             </nav>
 
             <form class="logout" method="post" action="/admin/logout/">
@@ -1654,7 +1656,7 @@
         const tabs = Array.from(document.querySelectorAll("[data-tab]"));
         const panels = Array.from(document.querySelectorAll(".panel[id]"));
 
-        function activate(tab) {
+        function activate(tab, updateUrl = true) {
             const requestedTab = panels.some((panel) => panel.id === tab) ? tab : "overview";
             const parentTab = requestedTab === "client-detail" ? "clients" : requestedTab;
             const button = tabs.find((item) => item.dataset.tab === parentTab) || tabs[0];
@@ -1662,23 +1664,33 @@
 
             tabs.forEach((item) => item.classList.toggle("active", item.dataset.tab === parentTab));
             panels.forEach((panel) => panel.classList.toggle("active", panel.id === requestedTab));
-            title.textContent = requestedTab === "client-detail" ? "Detalji klijenta" : button.dataset.title || "Kontrolna tabla";
+            if (title) {
+                title.textContent = requestedTab === "client-detail" ? "Detalji klijenta" : button.dataset.title || "Kontrolna tabla";
+            }
 
-            if (history.replaceState) {
+            if (updateUrl && history.replaceState) {
                 history.replaceState(null, "", "#" + requestedTab);
             }
         }
+        window.activate = activate;
 
         tabs.forEach((button) => {
-            button.addEventListener("click", () => activate(button.dataset.tab));
+            button.addEventListener("click", (event) => {
+                event.preventDefault();
+                activate(button.dataset.tab);
+            });
         });
 
         document.querySelectorAll("[data-jump]").forEach((button) => {
             button.addEventListener("click", () => activate(button.dataset.jump));
         });
 
+        window.addEventListener("hashchange", () => {
+            activate(window.location.hash.replace("#", "") || "overview", false);
+        });
+
         const start = window.location.hash.replace("#", "") || "overview";
-        activate(start);
+        activate(start, false);
     </script>
 </body>
 </html>
