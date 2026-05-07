@@ -706,6 +706,9 @@ class LemonSqueezyWebhookView(APIView):
             checkout,
             external_customer_id=str(attributes.get("customer_id") or ""),
             external_subscription_id=checkout.external_checkout_id,
+            trial_ends_at=attributes.get("trial_ends_at"),
+            current_period_start=attributes.get("created_at"),
+            current_period_end=attributes.get("renews_at") or attributes.get("ends_at"),
         )
 
     def _mark_subscription_past_due(self, checkout, attributes):

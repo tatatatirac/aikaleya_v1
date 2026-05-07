@@ -10,8 +10,8 @@ class Profile(models.Model):
     ROLE_EMPLOYEE = "employee"
 
     ROLE_CHOICES = (
-        (ROLE_ADMIN, "Admin"),
-        (ROLE_CLIENT, "Client"),
+        (ROLE_ADMIN, "God Mode admin"),
+        (ROLE_CLIENT, "Administrator / company"),
         (ROLE_EMPLOYEE, "Employee"),
     )
 

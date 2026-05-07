@@ -479,6 +479,8 @@ class PackageLimitTests(TestCase):
             country="Serbia",
         )
         api = APIClient()
+        provider_trial_end = timezone.now() + timedelta(days=14)
+        provider_period_end = timezone.now() + timedelta(days=44)
 
         response = api.post(
             "/api/billing/lemonsqueezy/webhook/",
@@ -489,7 +491,11 @@ class PackageLimitTests(TestCase):
                 },
                 "data": {
                     "id": "subscription_pending",
-                    "attributes": {"customer_id": "customer_pending"},
+                    "attributes": {
+                        "customer_id": "customer_pending",
+                        "trial_ends_at": provider_trial_end.isoformat(),
+                        "renews_at": provider_period_end.isoformat(),
+                    },
                 },
             },
             format="json",
@@ -504,6 +510,8 @@ class PackageLimitTests(TestCase):
         self.assertEqual(subscription.status, Subscription.STATUS_ACTIVE)
         self.assertEqual(subscription.external_customer_id, "customer_pending")
         self.assertEqual(subscription.external_subscription_id, "subscription_pending")
+        self.assertEqual(subscription.trial_ends_at.date(), provider_trial_end.date())
+        self.assertEqual(subscription.current_period_end.date(), provider_period_end.date())
 
     @override_settings(DEBUG=True, KALEYA_PAYPAL_WEBHOOK_ID="")
     def test_paypal_webhook_marks_checkout_paid_and_subscription_active_in_debug(self):

@@ -325,6 +325,52 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(appointment.status, Appointment.STATUS_CANCELLED)
         self.assertEqual(appointment.cancelled_reason, "Client requested cancellation")
 
+    def test_ai_asks_for_target_before_cancel_without_identity(self):
+        Appointment.objects.create(
+            business_client=self.client,
+            title="Unknown customer booking",
+            status=Appointment.STATUS_CONFIRMED,
+            date=date.today(),
+            start_time=time(11, 0),
+            duration_minutes=30,
+            channel="web",
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Cancel appointment",
+            channel="web",
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "cancel_appointment")
+        self.assertEqual(result["tool_output"]["status"], "needs_more_details")
+        self.assertIn("appointment_target", result["decision"]["missing_fields"])
+        self.assertEqual(Appointment.objects.filter(status=Appointment.STATUS_CANCELLED).count(), 0)
+
+    def test_ai_asks_for_target_before_reschedule_without_identity(self):
+        Appointment.objects.create(
+            business_client=self.client,
+            title="Unknown customer booking",
+            status=Appointment.STATUS_CONFIRMED,
+            date=date.today(),
+            start_time=time(11, 0),
+            duration_minutes=30,
+            channel="web",
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Move appointment to tomorrow at 10:00",
+            channel="web",
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "reschedule_appointment")
+        self.assertEqual(result["tool_output"]["status"], "needs_more_details")
+        self.assertIn("appointment_target", result["decision"]["missing_fields"])
+        self.assertEqual(Appointment.objects.filter(status=Appointment.STATUS_MOVED).count(), 0)
+
     def test_ai_reuses_external_thread_and_records_messages(self):
         first = handle_inbound_text(
             self.client,

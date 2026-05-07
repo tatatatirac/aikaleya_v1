@@ -363,7 +363,7 @@
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_f2">Do 5 radnika</span></li>
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_f3">Radnik Kaleya APP</span></li>
                                         <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_f4">Više jezika po dogovoru</span></li>
-                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_f5">API po klijentu</span></li>
+                                        <li class="flex gap-2"><span class="text-teal-500">✓</span> <span data-i18n="p_business_f5">API po firmi</span></li>
                                     </ul>
                                     <a href="register-business.html" class="mt-8 w-full h-11 rounded-full border border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 inline-flex items-center justify-center" data-i18n="trial_btn">Probaj 14 dana</a>
                                 </div>
@@ -677,7 +677,7 @@
                                     <option value="de">Deutsch</option>
                                 </select>
                                 <button onclick="testVoice()" class="mt-3 w-full h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium" data-i18n="cset_test">Testiraj glas Kaleye</button>
-                                <p class="mt-2 text-[11px] text-slate-500" data-i18n="cset_note">API ključ podešava administrator; klijent bira samo jezik i ponašanje.</p>
+                                <p class="mt-2 text-[11px] text-slate-500" data-i18n="cset_note">API ključ podešava Kaleya admin; administrator firme bira jezik i ponašanje.</p>
                             </div>
 
                             <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50">
@@ -1000,7 +1000,7 @@
                         </button>
                         <button data-admin-tab="clients" class="admin-tab w-full flex items-center gap-3 px-3 h-10 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900 text-[14px] text-slate-600 dark:text-slate-300">
                             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            <span data-i18n="ad_clients">Klijenti</span>
+                            <span data-i18n="ad_clients">Administratori / firme</span>
                         </button>
                         <button data-admin-tab="alarms" class="admin-tab w-full flex items-center gap-3 px-3 h-10 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900 text-[14px] text-slate-600 dark:text-slate-300">
                             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8a6 6 0 00-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
@@ -1043,7 +1043,7 @@
                     <div id="mobileAdminNav" class="lg:hidden hidden border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-2">
                         <div class="grid grid-cols-5 gap-2">
                             <button data-admin-tab="dash" class="admin-tab h-9 rounded-lg bg-slate-900 text-white text-xs font-medium">Tabla</button>
-                            <button data-admin-tab="clients" class="admin-tab h-9 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 text-xs">Klijenti</button>
+                            <button data-admin-tab="clients" class="admin-tab h-9 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 text-xs">Administratori / firme</button>
                             <button data-admin-tab="alarms" class="admin-tab h-9 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 text-xs">Alarmi</button>
                             <button data-admin-tab="integrations" class="admin-tab h-9 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 text-xs">Integr.</button>
                             <button data-admin-tab="settings" class="admin-tab h-9 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-900 text-xs">API</button>
@@ -1111,10 +1111,10 @@
                         <div id="admin-clients" class="admin-pane hidden">
                             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                                 <div>
-                                    <h2 class="font-display text-xl font-bold" data-i18n="ad_clients">Klijenti</h2>
-                                    <p class="text-sm text-slate-600 dark:text-slate-400" data-i18n="ad_clients_sub">API i model mogu biti globalni ili posebni po klijentu.</p>
+                                    <h2 class="font-display text-xl font-bold" data-i18n="ad_clients">Administratori / firme</h2>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400" data-i18n="ad_clients_sub">API i model mogu biti globalni ili posebni po firmi.</p>
                                 </div>
-                                <button class="h-9 px-3 rounded-xl gradient-bg text-white text-[13px] font-medium">+ Novi klijent</button>
+                                <button class="h-9 px-3 rounded-xl gradient-bg text-white text-[13px] font-medium">+ Nova firma</button>
                             </div>
                             <div class="overflow-x-auto rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                                 <table class="w-full min-w-[760px] text-[13px]">
@@ -1122,9 +1122,9 @@
                                         <tr><th class="text-left px-4 py-3">Ime</th><th class="text-left px-4 py-3">Kontakt</th><th class="text-left px-4 py-3">Paket</th><th class="text-left px-4 py-3">AI model</th><th class="text-left px-4 py-3">Status</th><th class="text-left px-4 py-3">Akcije</th></tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                                        <tr><td class="px-4 py-3 font-medium">Marko Petrović</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">administrator@test.com</td><td class="px-4 py-3">Pro</td><td class="px-4 py-3 text-slate-500">Globalni</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[11px]">Aktivan</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Marko Petrović')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po klijentu</button></td></tr>
-                                        <tr><td class="px-4 py-3 font-medium">Salon Lepote Bella</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">+381 11 123456</td><td class="px-4 py-3">Business</td><td class="px-4 py-3 text-slate-500">Jači model</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[11px]">Aktivan</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Salon Lepote Bella')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po klijentu</button></td></tr>
-                                        <tr><td class="px-4 py-3 font-medium">Ordinacija Dr. Milić</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">+381 21 555888</td><td class="px-4 py-3">Starter</td><td class="px-4 py-3 text-slate-500">Globalni</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[11px]">Pauza</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Ordinacija Dr. Milić')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po klijentu</button></td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">Marko Petrović</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">administrator@test.com</td><td class="px-4 py-3">Pro</td><td class="px-4 py-3 text-slate-500">Globalni</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[11px]">Aktivan</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Marko Petrović')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po firmi</button></td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">Salon Lepote Bella</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">+381 11 123456</td><td class="px-4 py-3">Business</td><td class="px-4 py-3 text-slate-500">Jači model</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[11px]">Aktivan</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Salon Lepote Bella')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po firmi</button></td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">Ordinacija Dr. Milić</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">+381 21 555888</td><td class="px-4 py-3">Starter</td><td class="px-4 py-3 text-slate-500">Globalni</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[11px]">Pauza</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Ordinacija Dr. Milić')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po firmi</button></td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -1134,26 +1134,26 @@
                                 <div class="absolute inset-x-4 top-16 mx-auto max-w-[560px] rounded-[24px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl p-6">
                                     <div class="flex items-start justify-between gap-4">
                                         <div>
-                                            <h3 class="font-display text-lg font-bold" data-i18n="client_api_title">API po klijentu</h3>
-                                            <p id="clientApiModalName" class="text-sm text-slate-500 mt-1">Klijent</p>
+                                            <h3 class="font-display text-lg font-bold" data-i18n="client_api_title">API po firmi</h3>
+                                            <p id="clientApiModalName" class="text-sm text-slate-500 mt-1">Firma</p>
                                         </div>
                                         <button onclick="closeClientApiModal()" class="w-8 h-8 grid place-items-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">✕</button>
                                     </div>
                                     <div class="mt-5 grid gap-3 text-[13px]">
                                         <div class="rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3">
-                                            <p class="font-semibold">Poseban API po klijentu</p>
+                                            <p class="font-semibold">Poseban API po firmi</p>
                                             <p class="mt-1 text-[12px] text-slate-500">Ova podesavanja se cuvaju u backend bazi i nikada u browseru.</p>
                                         </div>
-                                        <div class="rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 px-4 py-3 text-[12px] text-amber-800 dark:text-amber-200">Sledeci korak je lep backend ekran za izmenu AI modela i glasa po klijentu.</div>
+                                        <div class="rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 px-4 py-3 text-[12px] text-amber-800 dark:text-amber-200">Sledeci korak je lep backend ekran za izmenu AI modela i glasa po firmi.</div>
                                     </div>
                                     <div class="mt-5 space-y-4 hidden">
                                         <div>
                                             <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">AI API Key</label>
-                                            <input id="clientApiKeyInput" type="password" placeholder="Samo ako klijent koristi poseban API" class="mt-1.5 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px] font-mono">
+                                            <input id="clientApiKeyInput" type="password" placeholder="Samo ako firma koristi poseban API" class="mt-1.5 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px] font-mono">
                                         </div>
                                         <div>
                                             <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">ElevenLabs API Key</label>
-                                            <input id="clientElKeyInput" type="password" placeholder="Poseban ElevenLabs ključ za ovog klijenta" class="mt-1.5 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px] font-mono">
+                                            <input id="clientElKeyInput" type="password" placeholder="Poseban ElevenLabs ključ za ovu firmu" class="mt-1.5 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px] font-mono">
                                         </div>
                                         <div>
                                             <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">Nivo AI modela</label>
@@ -1165,7 +1165,7 @@
                                             </select>
                                         </div>
                                         <div class="rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 p-3 text-[12px] text-amber-800 dark:text-amber-200" data-i18n="api_security_note">Produkcijski API ključevi se čuvaju u backendu i .env fajlu. Ovaj ekran je UI model za admin kontrolu.</div>
-                                        <button onclick="saveClientApiKey()" class="w-full h-11 rounded-xl gradient-bg text-white font-medium" data-i18n="save_client_api">Sačuvaj za klijenta</button>
+                                        <button onclick="saveClientApiKey()" class="w-full h-11 rounded-xl gradient-bg text-white font-medium" data-i18n="save_client_api">Sačuvaj za firmu</button>
                                     </div>
                                 </div>
                             </div>
@@ -1183,7 +1183,7 @@
                                         <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8a6 6 0 00-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
                                     </div>
                                     <h3 class="mt-4 font-semibold" data-i18n="support_alarm_future">Human support alarm dolazi kasnije</h3>
-                                    <p class="mt-2 max-w-md text-sm text-slate-500" data-i18n="support_alarm_desc">Ovaj tab će služiti kada AI ne može da završi zahtev klijenta koji je kupio paket i treba povezivanje sa podrškom.</p>
+                                    <p class="mt-2 max-w-md text-sm text-slate-500" data-i18n="support_alarm_desc">Ovaj tab će služiti kada AI ne može da završi zahtev firme koja je kupila paket i treba povezivanje sa podrškom.</p>
                                 </div>
                             </div>
                         </div>
@@ -1212,7 +1212,7 @@
                             <div class="grid lg:grid-cols-2 gap-5">
                                 <div class="p-6 rounded-[24px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                                     <h3 class="font-semibold" data-i18n="global_ai_settings">Globalni AI API</h3>
-                                    <p class="text-[13px] text-slate-600 dark:text-slate-400 mt-1" data-i18n="global_ai_desc">Ovaj API koristi se za sve klijente koji nemaju posebno podešavanje.</p>
+                                    <p class="text-[13px] text-slate-600 dark:text-slate-400 mt-1" data-i18n="global_ai_desc">Ovaj API koristi se za sve firme koje nemaju posebno podešavanje.</p>
                                     <div class="mt-5 grid gap-3 text-[13px]">
                                         <div class="flex justify-between gap-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3"><span class="text-slate-500">Provider</span><span id="adminAiProvider" class="font-semibold">Anthropic</span></div>
                                         <div class="flex justify-between gap-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3"><span class="text-slate-500">Model</span><span id="adminAiModel" class="font-semibold">claude-haiku-4-5</span></div>
@@ -1409,7 +1409,7 @@ const T = {
         f3_t: 'Prirodan glas', f3_d: 'ElevenLabs glas za prirodnije razgovore.',
         f_alarm_t: 'Alarmi za osoblje', f_alarm_d: 'Najava sledećeg klijenta i hitan poziv za razgovor.',
         f_msg_t: 'Kanali za poruke', f_msg_d: 'WhatsApp, Viber, Telegram, SMS i telefonski poziv.',
-        f6_t: 'Admin kontrola', f6_d: 'Globalni API i posebna podešavanja po klijentu.',
+        f6_t: 'Admin kontrola', f6_d: 'Globalni API i posebna podešavanja po firmi.',
         how_t: 'Kaleya uči vaš posao za 1 dan', how1_t: 'Poveži kanal', how1_d: 'Telefon, WhatsApp, Telegram, Viber ili SMS.',
         how2_t: 'Nauči Kaleyu', how2_d: 'Upiši radno vreme, usluge i pravila zakazivanja.',
         how3_t: 'Izaberi jezik i glas', how3_d: 'Kaleya govori jezikom koji klijent izabere.',
@@ -1426,18 +1426,18 @@ const T = {
         qa1: 'Zakaži', qa1_s: 'Novi termin', qa2: 'Otkaži', qa2_s: 'Sastanak', qa3: 'Proveri', qa3_s: 'Termine',
         today: 'Danas', nav_home: 'Početna', nav_cal: 'Kalendar', nav_set: 'Podeš.',
         cset_t: 'Podešavanja', cset_ui_lang: 'Jezik interfejsa', cset_voice_lang: 'Jezik glasa Kaleye',
-        cset_el_desc: 'Prirodan glas preko ElevenLabs sistema', cset_test: 'Testiraj glas Kaleye', cset_note: 'API ključ podešava administrator; klijent bira samo jezik i ponašanje.',
+        cset_el_desc: 'Prirodan glas preko ElevenLabs sistema', cset_test: 'Testiraj glas Kaleye', cset_note: 'API ključ podešava Kaleya admin; administrator firme bira jezik i ponašanje.',
         cset_integrations: 'Zakazivanje putem kanala', cset_alarm: 'Alarmi za osoblje', active: 'Aktivno', pending: 'U pripremi',
         queue_alarm: 'Alarm za sledećeg klijenta', emergency_alarm: 'Hitni alarm', voice_alarm: 'Uključi glasovnu najavu', test_queue: 'Test sledeći', test_emergency: 'Test hitno',
-        ad_dash: 'Kontrolna tabla', ad_clients: 'Klijenti', ad_clients_sub: 'API i model mogu biti globalni ili posebni po klijentu.',
+        ad_dash: 'Kontrolna tabla', ad_clients: 'Administratori / firme', ad_clients_sub: 'API i model mogu biti globalni ili posebni po firmi.',
         ad_alarms: 'Alarmi', ad_alarms_sub: 'Rezervisano za buduću human support eskalaciju.',
-        support_alarm_future: 'Human support alarm dolazi kasnije', support_alarm_desc: 'Ovaj tab će služiti kada AI ne može da završi zahtev klijenta koji je kupio paket i treba povezivanje sa podrškom.',
+        support_alarm_future: 'Human support alarm dolazi kasnije', support_alarm_desc: 'Ovaj tab će služiti kada AI ne može da završi zahtev firme koja je kupila paket i treba povezivanje sa podrškom.',
         ad_integrations: 'Integracije', ad_integrations_sub: 'Kanali preko kojih Kaleya može da prima zahteve i zakazuje termine.',
         ad_set: 'Podešavanja', logout: 'Odjava', demo_queue: 'Demo sledeći', demo_emergency: 'Demo hitno',
         ad_s1: 'Aktivni pozivi', ad_s2: 'Zakazano danas', ad_s3: 'Propušteni', ad_s4: 'Zadovoljstvo', ad_recent: 'Poslednji pozivi Kaleye',
         ad_set_sub: 'Globalni AI, ElevenLabs glas i produkciona pravila za API.', global_ai_settings: 'Globalni AI API',
-        global_ai_desc: 'Ovaj API koristi se za sve klijente koji nemaju posebno podešavanje.', save_global_api: 'Sačuvaj globalni API',
-        client_api_title: 'API po klijentu', save_client_api: 'Sačuvaj za klijenta', api_security_note: 'Produkcijski API ključevi se čuvaju u backendu i .env fajlu. Ovaj ekran je UI model za admin kontrolu.',
+        global_ai_desc: 'Ovaj API koristi se za sve firme koje nemaju posebno podešavanje.', save_global_api: 'Sačuvaj globalni API',
+        client_api_title: 'API po firmi', save_client_api: 'Sačuvaj za firmu', api_security_note: 'Produkcijski API ključevi se čuvaju u backendu i .env fajlu. Ovaj ekran je UI model za admin kontrolu.',
         alarm_queue_desc: 'Kaleya izgovara: klijent [ime] je sledeći na redu.', alarm_emerg_desc: 'Kaleya izgovara: klijent [ime] želi da razgovara sa vama.',
         alarm_log_title: 'Dnevnik alarma', alarm_log_empty: 'Još nema aktiviranih alarma.'
     },
@@ -1470,18 +1470,18 @@ const T = {
         qa1: 'Schedule', qa1_s: 'New slot', qa2: 'Cancel', qa2_s: 'Meeting', qa3: 'Check', qa3_s: 'Slots',
         today: 'Today', nav_home: 'Home', nav_cal: 'Calendar', nav_set: 'Settings',
         cset_t: 'Settings', cset_ui_lang: 'Interface language', cset_voice_lang: 'Kaleya voice language',
-        cset_el_desc: 'Natural voice through ElevenLabs', cset_test: 'Test Kaleya voice', cset_note: 'The administrator sets the API key; the client chooses language and behavior.',
+        cset_el_desc: 'Natural voice through ElevenLabs', cset_test: 'Test Kaleya voice', cset_note: 'The Kaleya admin sets the API key; the company administrator chooses language and behavior.',
         cset_integrations: 'Scheduling channels', cset_alarm: 'Staff alarms', active: 'Active', pending: 'Pending',
         queue_alarm: 'Next-client alarm', emergency_alarm: 'Urgent alarm', voice_alarm: 'Enable voice announcement', test_queue: 'Test next', test_emergency: 'Test urgent',
-        ad_dash: 'Dashboard', ad_clients: 'Clients', ad_clients_sub: 'API and model can be global or client-specific.',
+        ad_dash: 'Dashboard', ad_clients: 'Administrators / companies', ad_clients_sub: 'API and model can be global or company-specific.',
         ad_alarms: 'Alarms', ad_alarms_sub: 'Reserved for future human support escalation.',
         support_alarm_future: 'Human support alarm comes later', support_alarm_desc: 'This tab will be used when AI cannot complete a package client request and needs to connect with support.',
         ad_integrations: 'Integrations', ad_integrations_sub: 'Channels Kaleya can use to receive requests and schedule appointments.',
         ad_set: 'Settings', logout: 'Logout', demo_queue: 'Demo next', demo_emergency: 'Demo urgent',
         ad_s1: 'Active calls', ad_s2: 'Scheduled today', ad_s3: 'Missed', ad_s4: 'Satisfaction', ad_recent: 'Recent Kaleya calls',
         ad_set_sub: 'Global AI, ElevenLabs voice and production API rules.', global_ai_settings: 'Global AI API',
-        global_ai_desc: 'This API is used for all clients without separate settings.', save_global_api: 'Save global API',
-        client_api_title: 'Client API', save_client_api: 'Save for client', api_security_note: 'Production API keys belong in the backend and .env file. This screen is an admin UI model.',
+        global_ai_desc: 'This API is used for all companies without separate settings.', save_global_api: 'Save global API',
+        client_api_title: 'Company API', save_client_api: 'Save for company', api_security_note: 'Production API keys belong in the backend and .env file. This screen is an admin UI model.',
         alarm_queue_desc: 'Kaleya says: client [name] is next in line.', alarm_emerg_desc: 'Kaleya says: client [name] wants to speak with you.',
         alarm_log_title: 'Alarm log', alarm_log_empty: 'No alarms have been triggered yet.'
     },
@@ -1514,18 +1514,18 @@ const T = {
         qa1: 'Agendar', qa1_s: 'Nueva cita', qa2: 'Cancelar', qa2_s: 'Reunión', qa3: 'Revisar', qa3_s: 'Horarios',
         today: 'Hoy', nav_home: 'Inicio', nav_cal: 'Calendario', nav_set: 'Ajustes',
         cset_t: 'Ajustes', cset_ui_lang: 'Idioma de interfaz', cset_voice_lang: 'Idioma de voz de Kaleya',
-        cset_el_desc: 'Voz natural mediante ElevenLabs', cset_test: 'Probar voz de Kaleya', cset_note: 'El administrador configura la API; el cliente elige idioma y comportamiento.',
+        cset_el_desc: 'Voz natural mediante ElevenLabs', cset_test: 'Probar voz de Kaleya', cset_note: 'El admin de Kaleya configura la API; el administrador de la empresa elige idioma y comportamiento.',
         cset_integrations: 'Canales de agenda', cset_alarm: 'Alarmas para el equipo', active: 'Activo', pending: 'Pendiente',
         queue_alarm: 'Alarma de siguiente cliente', emergency_alarm: 'Alarma urgente', voice_alarm: 'Activar anuncio de voz', test_queue: 'Probar siguiente', test_emergency: 'Probar urgente',
-        ad_dash: 'Panel', ad_clients: 'Clientes', ad_clients_sub: 'La API y el modelo pueden ser globales o por cliente.',
+        ad_dash: 'Panel', ad_clients: 'Administradores / empresas', ad_clients_sub: 'La API y el modelo pueden ser globales o por empresa.',
         ad_alarms: 'Alarmas', ad_alarms_sub: 'Reservado para futura escalación a soporte humano.',
         support_alarm_future: 'La alarma de soporte humano llegará después', support_alarm_desc: 'Este tab se usará cuando la IA no pueda completar la solicitud de un cliente con paquete y necesite conectar con soporte.',
         ad_integrations: 'Integraciones', ad_integrations_sub: 'Canales que Kaleya usa para recibir solicitudes y agendar.',
         ad_set: 'Ajustes', logout: 'Salir', demo_queue: 'Demo siguiente', demo_emergency: 'Demo urgente',
         ad_s1: 'Llamadas activas', ad_s2: 'Agendado hoy', ad_s3: 'Perdidas', ad_s4: 'Satisfacción', ad_recent: 'Llamadas recientes de Kaleya',
         ad_set_sub: 'AI global, voz ElevenLabs y reglas de API en producción.', global_ai_settings: 'API global de IA',
-        global_ai_desc: 'Esta API se usa para clientes sin configuración separada.', save_global_api: 'Guardar API global',
-        client_api_title: 'API por cliente', save_client_api: 'Guardar para cliente', api_security_note: 'Las claves de producción se guardan en backend y .env. Esta pantalla es un modelo UI de administración.',
+        global_ai_desc: 'Esta API se usa para empresas sin configuración separada.', save_global_api: 'Guardar API global',
+        client_api_title: 'API por empresa', save_client_api: 'Guardar para empresa', api_security_note: 'Las claves de producción se guardan en backend y .env. Esta pantalla es un modelo UI de administración.',
         alarm_queue_desc: 'Kaleya dice: el cliente [nombre] es el siguiente.', alarm_emerg_desc: 'Kaleya dice: el cliente [nombre] quiere hablar con usted.',
         alarm_log_title: 'Registro de alarmas', alarm_log_empty: 'Aún no hay alarmas activadas.'
     },
@@ -1558,18 +1558,18 @@ const T = {
         qa1: 'Agendar', qa1_s: 'Novo horário', qa2: 'Cancelar', qa2_s: 'Reunião', qa3: 'Verificar', qa3_s: 'Horários',
         today: 'Hoje', nav_home: 'Início', nav_cal: 'Calendário', nav_set: 'Ajustes',
         cset_t: 'Ajustes', cset_ui_lang: 'Idioma da interface', cset_voice_lang: 'Idioma da voz da Kaleya',
-        cset_el_desc: 'Voz natural via ElevenLabs', cset_test: 'Testar voz da Kaleya', cset_note: 'O administrador configura a API; o cliente escolhe idioma e comportamento.',
+        cset_el_desc: 'Voz natural via ElevenLabs', cset_test: 'Testar voz da Kaleya', cset_note: 'O admin da Kaleya configura a API; o administrador da empresa escolhe idioma e comportamento.',
         cset_integrations: 'Canais de agendamento', cset_alarm: 'Alarmes para equipe', active: 'Ativo', pending: 'Pendente',
         queue_alarm: 'Alarme do próximo cliente', emergency_alarm: 'Alarme urgente', voice_alarm: 'Ativar anúncio por voz', test_queue: 'Testar próximo', test_emergency: 'Testar urgente',
-        ad_dash: 'Painel', ad_clients: 'Clientes', ad_clients_sub: 'API e modelo podem ser globais ou por cliente.',
+        ad_dash: 'Painel', ad_clients: 'Administradores / empresas', ad_clients_sub: 'API e modelo podem ser globais ou por empresa.',
         ad_alarms: 'Alarmes', ad_alarms_sub: 'Reservado para futura escalação ao suporte humano.',
         support_alarm_future: 'O alarme de suporte humano vem depois', support_alarm_desc: 'Este tab será usado quando a IA não conseguir concluir a solicitação de um cliente com pacote e precisar conectar com o suporte.',
         ad_integrations: 'Integrações', ad_integrations_sub: 'Canais que Kaleya usa para receber pedidos e agendar.',
         ad_set: 'Ajustes', logout: 'Sair', demo_queue: 'Demo próximo', demo_emergency: 'Demo urgente',
         ad_s1: 'Chamadas ativas', ad_s2: 'Agendado hoje', ad_s3: 'Perdidas', ad_s4: 'Satisfação', ad_recent: 'Chamadas recentes da Kaleya',
         ad_set_sub: 'IA global, voz ElevenLabs e regras de API em produção.', global_ai_settings: 'API global de IA',
-        global_ai_desc: 'Esta API é usada para clientes sem configuração separada.', save_global_api: 'Salvar API global',
-        client_api_title: 'API por cliente', save_client_api: 'Salvar para cliente', api_security_note: 'Chaves de produção ficam no backend e no arquivo .env. Esta tela é um modelo UI admin.',
+        global_ai_desc: 'Esta API é usada para empresas sem configuração separada.', save_global_api: 'Salvar API global',
+        client_api_title: 'API por empresa', save_client_api: 'Salvar para empresa', api_security_note: 'Chaves de produção ficam no backend e no arquivo .env. Esta tela é um modelo UI admin.',
         alarm_queue_desc: 'Kaleya diz: o cliente [nome] é o próximo.', alarm_emerg_desc: 'Kaleya diz: o cliente [nome] quer falar com você.',
         alarm_log_title: 'Registro de alarmes', alarm_log_empty: 'Nenhum alarme foi ativado ainda.'
     },
@@ -1602,18 +1602,18 @@ const T = {
         qa1: 'Записать', qa1_s: 'Новый слот', qa2: 'Отменить', qa2_s: 'Встреча', qa3: 'Проверить', qa3_s: 'Время',
         today: 'Сегодня', nav_home: 'Главная', nav_cal: 'Календарь', nav_set: 'Настр.',
         cset_t: 'Настройки', cset_ui_lang: 'Язык интерфейса', cset_voice_lang: 'Язык голоса Kaleya',
-        cset_el_desc: 'Естественный голос через ElevenLabs', cset_test: 'Проверить голос Kaleya', cset_note: 'API ключ задает администратор; клиент выбирает язык и поведение.',
+        cset_el_desc: 'Естественный голос через ElevenLabs', cset_test: 'Проверить голос Kaleya', cset_note: 'API ключ задает Kaleya admin; администратор компании выбирает язык и поведение.',
         cset_integrations: 'Каналы записи', cset_alarm: 'Оповещения персонала', active: 'Активно', pending: 'В подготовке',
         queue_alarm: 'Следующий клиент', emergency_alarm: 'Срочный сигнал', voice_alarm: 'Включить голосовое объявление', test_queue: 'Тест следующий', test_emergency: 'Тест срочно',
-        ad_dash: 'Панель', ad_clients: 'Клиенты', ad_clients_sub: 'API и модель могут быть глобальными или отдельными по клиенту.',
+        ad_dash: 'Панель', ad_clients: 'Администраторы / компании', ad_clients_sub: 'API и модель могут быть глобальными или отдельными по компании.',
         ad_alarms: 'Оповещения', ad_alarms_sub: 'Зарезервировано для будущей эскалации в human support.',
         support_alarm_future: 'Оповещение human support появится позже', support_alarm_desc: 'Этот раздел будет использоваться, когда AI не сможет выполнить запрос клиента с пакетом и потребуется подключение поддержки.',
         ad_integrations: 'Интеграции', ad_integrations_sub: 'Каналы, через которые Kaleya принимает заявки и записывает клиентов.',
         ad_set: 'Настройки', logout: 'Выход', demo_queue: 'Демо следующий', demo_emergency: 'Демо срочно',
         ad_s1: 'Активные звонки', ad_s2: 'Записано сегодня', ad_s3: 'Пропущено', ad_s4: 'Оценка', ad_recent: 'Последние звонки Kaleya',
         ad_set_sub: 'Глобальный AI, голос ElevenLabs и правила API для продакшена.', global_ai_settings: 'Глобальный AI API',
-        global_ai_desc: 'Этот API используется для клиентов без отдельной настройки.', save_global_api: 'Сохранить глобальный API',
-        client_api_title: 'API по клиенту', save_client_api: 'Сохранить для клиента', api_security_note: 'Продакшн ключи хранятся в backend и .env. Этот экран является UI моделью админ контроля.',
+        global_ai_desc: 'Этот API используется для компаний без отдельной настройки.', save_global_api: 'Сохранить глобальный API',
+        client_api_title: 'API по компании', save_client_api: 'Сохранить для компании', api_security_note: 'Продакшн ключи хранятся в backend и .env. Этот экран является UI моделью админ контроля.',
         alarm_queue_desc: 'Kaleya говорит: клиент [имя] следующий в очереди.', alarm_emerg_desc: 'Kaleya говорит: клиент [имя] хочет поговорить с вами.',
         alarm_log_title: 'Журнал оповещений', alarm_log_empty: 'Оповещений пока нет.'
     }
@@ -1642,12 +1642,12 @@ T.fr = {
     qa1: 'Planifier', qa1_s: 'Nouveau creneau', qa2: 'Annuler', qa2_s: 'Rendez-vous', qa3: 'Verifier', qa3_s: 'Creneaux',
     today: 'Aujourd hui', nav_home: 'Accueil', nav_cal: 'Calendrier', nav_set: 'Reglages',
     cset_t: 'Reglages', cset_ui_lang: 'Langue interface', cset_voice_lang: 'Langue de la voix Kaleya',
-    cset_el_desc: 'Voix naturelle via ElevenLabs', cset_test: 'Tester la voix Kaleya', cset_note: 'L administrateur regle la cle API; le client choisit seulement la langue et le comportement.',
+    cset_el_desc: 'Voix naturelle via ElevenLabs', cset_test: 'Tester la voix Kaleya', cset_note: 'L admin Kaleya regle la cle API; l administrateur de l entreprise choisit la langue et le comportement.',
     cset_integrations: 'Canaux de planification', cset_alarm: 'Alertes equipe', active: 'Actif', pending: 'En attente',
     queue_alarm: 'Alerte prochain client', emergency_alarm: 'Alerte urgente', voice_alarm: 'Activer l annonce vocale',
-    ad_dash: 'Tableau de bord', ad_clients: 'Clients', ad_alarms: 'Alertes', ad_integrations: 'Integrations', ad_set: 'Reglages', logout: 'Deconnexion',
+    ad_dash: 'Tableau de bord', ad_clients: 'Administrateurs / entreprises', ad_alarms: 'Alertes', ad_integrations: 'Integrations', ad_set: 'Reglages', logout: 'Deconnexion',
     support_alarm_future: 'Alerte support humain plus tard', support_alarm_desc: 'Cet onglet servira quand l IA ne peut pas terminer une demande et doit connecter le client au support.',
-    global_ai_settings: 'API IA globale', save_global_api: 'Sauvegarder API globale', client_api_title: 'API par client', save_client_api: 'Sauvegarder pour client',
+    global_ai_settings: 'API IA globale', save_global_api: 'Sauvegarder API globale', client_api_title: 'API par entreprise', save_client_api: 'Sauvegarder pour entreprise',
     alarm_log_title: 'Journal des alertes', alarm_log_empty: 'Aucune alerte activee.'
 };
 
@@ -1674,12 +1674,12 @@ T.it = {
     qa1: 'Prenota', qa1_s: 'Nuovo slot', qa2: 'Annulla', qa2_s: 'Riunione', qa3: 'Controlla', qa3_s: 'Slot',
     today: 'Oggi', nav_home: 'Home', nav_cal: 'Calendario', nav_set: 'Impost.',
     cset_t: 'Impostazioni', cset_ui_lang: 'Lingua interfaccia', cset_voice_lang: 'Lingua voce Kaleya',
-    cset_el_desc: 'Voce naturale tramite ElevenLabs', cset_test: 'Testa voce Kaleya', cset_note: 'L amministratore imposta la API key; il cliente sceglie solo lingua e comportamento.',
+    cset_el_desc: 'Voce naturale tramite ElevenLabs', cset_test: 'Testa voce Kaleya', cset_note: 'L admin Kaleya imposta la API key; l amministratore aziendale sceglie lingua e comportamento.',
     cset_integrations: 'Canali prenotazione', cset_alarm: 'Allarmi team', active: 'Attivo', pending: 'In attesa',
     queue_alarm: 'Allarme prossimo cliente', emergency_alarm: 'Allarme urgente', voice_alarm: 'Abilita annuncio vocale',
-    ad_dash: 'Dashboard', ad_clients: 'Clienti', ad_alarms: 'Allarmi', ad_integrations: 'Integrazioni', ad_set: 'Impostazioni', logout: 'Logout',
+    ad_dash: 'Dashboard', ad_clients: 'Amministratori / aziende', ad_alarms: 'Allarmi', ad_integrations: 'Integrazioni', ad_set: 'Impostazioni', logout: 'Logout',
     support_alarm_future: 'Allarme supporto umano piu avanti', support_alarm_desc: 'Questo tab servira quando l AI non riesce a completare una richiesta e deve collegare il cliente al supporto.',
-    global_ai_settings: 'API AI globale', save_global_api: 'Salva API globale', client_api_title: 'API per cliente', save_client_api: 'Salva per cliente',
+    global_ai_settings: 'API AI globale', save_global_api: 'Salva API globale', client_api_title: 'API per azienda', save_client_api: 'Salva per azienda',
     alarm_log_title: 'Registro allarmi', alarm_log_empty: 'Nessun allarme attivato.'
 };
 
@@ -1688,7 +1688,7 @@ const EXTRA_TRANSLATIONS = {
         f_lang_t: '8 jezika', f_lang_d: 'Srpski, English, španski, portugalski, ruski, francuski, italijanski i nemački sa ručnim izborom.',
         p_basic_d: 'Za vlasnika/firmu', p_basic_f1: 'AI Kaleya zakazivanja', p_basic_f2: 'Vlasnik/firma Kaleya APP', p_basic_f3: 'Vlasnik zakazivanja', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'AI voice', p_basic_f6: 'Alarmi i obaveštenja',
         p_pro_d: 'Vlasnik + 1 radnik', p_pro_f1: 'Sve iz Basic', p_pro_f2: '1 radnik', p_pro_f3: 'Radnik zakazivanja', p_pro_f4: 'Radnik Kaleya APP', p_pro_f5: 'Blokiranje termina po satu/danu/višednevno', p_pro_f6: 'Instagram DM + TikTok DM',
-        p_business_d: 'Do 5 radnika', p_business_f1: 'Sve iz Basic + Pro', p_business_f2: 'Do 5 radnika', p_business_f3: 'Radnik Kaleya APP', p_business_f4: 'Više jezika po dogovoru', p_business_f5: 'API po klijentu',
+        p_business_d: 'Do 5 radnika', p_business_f1: 'Sve iz Basic + Pro', p_business_f2: 'Do 5 radnika', p_business_f3: 'Radnik Kaleya APP', p_business_f4: 'Više jezika po dogovoru', p_business_f5: 'API po firmi',
         p_business_plus_d: 'Do 15 radnika', p_business_plus_f1: 'Sve iz Basic + Pro + Business', p_business_plus_f2: 'Do 15 radnika', p_business_plus_f3: 'Telefonski pozivi i SMS', p_business_plus_f4: 'ElevenLabs AI voice',
         p_business_pro_d: '15+ radnika', p_business_pro_f1: 'Sve iz Basic + Pro + Business + Business+', p_business_pro_f2: '15+ radnika', p_business_pro_f3: 'Custom integracije', p_business_pro_f4: 'Napredna arhitektura po dogovoru', custom_price: 'Custom',
         team_label: 'Tim', employee_list_title: 'Zaposleni', employee_list_desc: 'Lista kontakata za zaposlene. Vlasnik je uvek na vrhu.', calendar_settings: 'Podešavanja kalendara', work_from: 'Rad od', work_to: 'Rad do', interval_label: 'Interval', time_label: 'Vreme', date_label: 'Datum', first_day_label: 'Prvi dan',
@@ -1698,7 +1698,7 @@ const EXTRA_TRANSLATIONS = {
         f_lang_t: '8 languages', f_lang_d: 'Serbian, English, Spanish, Portuguese, Russian, French, Italian and German with manual selection.',
         p_basic_d: 'For owner/company', p_basic_f1: 'AI Kaleya scheduling', p_basic_f2: 'Owner/company Kaleya APP', p_basic_f3: 'Owner scheduling', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'AI voice', p_basic_f6: 'Alarms and notifications',
         p_pro_d: 'Owner + 1 employee', p_pro_f1: 'Everything in Basic', p_pro_f2: '1 employee', p_pro_f3: 'Employee scheduling', p_pro_f4: 'Employee Kaleya APP', p_pro_f5: 'Blocking by hour/day/multiple days', p_pro_f6: 'Instagram DM + TikTok DM',
-        p_business_d: 'Up to 5 employees', p_business_f1: 'Everything in Basic + Pro', p_business_f2: 'Up to 5 employees', p_business_f3: 'Employee Kaleya APP', p_business_f4: 'More languages by agreement', p_business_f5: 'Client-specific API',
+        p_business_d: 'Up to 5 employees', p_business_f1: 'Everything in Basic + Pro', p_business_f2: 'Up to 5 employees', p_business_f3: 'Employee Kaleya APP', p_business_f4: 'More languages by agreement', p_business_f5: 'Company-specific API',
         p_business_plus_d: 'Up to 15 employees', p_business_plus_f1: 'Everything in Basic + Pro + Business', p_business_plus_f2: 'Up to 15 employees', p_business_plus_f3: 'Phone calls and SMS', p_business_plus_f4: 'ElevenLabs AI voice',
         p_business_pro_d: '15+ employees', p_business_pro_f1: 'Everything in Basic + Pro + Business + Business+', p_business_pro_f2: '15+ employees', p_business_pro_f3: 'Custom integrations', p_business_pro_f4: 'Advanced architecture by agreement', custom_price: 'Custom',
         team_label: 'Team', employee_list_title: 'Employees', employee_list_desc: 'Employee contact list. The owner is always at the top.', calendar_settings: 'Calendar settings', work_from: 'Work from', work_to: 'Work until', interval_label: 'Interval', time_label: 'Time', date_label: 'Date', first_day_label: 'First day',
@@ -1708,7 +1708,7 @@ const EXTRA_TRANSLATIONS = {
         f_lang_t: '8 idiomas', f_lang_d: 'Serbio, English, español, portugués, ruso, francés, italiano y alemán con selección manual.',
         p_basic_d: 'Para propietario/empresa', p_basic_f1: 'Agenda AI Kaleya', p_basic_f2: 'APP Kaleya propietario/empresa', p_basic_f3: 'Agenda del propietario', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'Voz AI', p_basic_f6: 'Alarmas y notificaciones',
         p_pro_d: 'Propietario + 1 empleado', p_pro_f1: 'Todo de Basic', p_pro_f2: '1 empleado', p_pro_f3: 'Agenda del empleado', p_pro_f4: 'APP Kaleya del empleado', p_pro_f5: 'Bloqueo por hora/día/varios días', p_pro_f6: 'Instagram DM + TikTok DM',
-        p_business_d: 'Hasta 5 empleados', p_business_f1: 'Todo de Basic + Pro', p_business_f2: 'Hasta 5 empleados', p_business_f3: 'APP Kaleya del empleado', p_business_f4: 'Más idiomas por acuerdo', p_business_f5: 'API por cliente',
+        p_business_d: 'Hasta 5 empleados', p_business_f1: 'Todo de Basic + Pro', p_business_f2: 'Hasta 5 empleados', p_business_f3: 'APP Kaleya del empleado', p_business_f4: 'Más idiomas por acuerdo', p_business_f5: 'API por empresa',
         p_business_plus_d: 'Hasta 15 empleados', p_business_plus_f1: 'Todo de Basic + Pro + Business', p_business_plus_f2: 'Hasta 15 empleados', p_business_plus_f3: 'Llamadas telefónicas y SMS', p_business_plus_f4: 'Voz AI ElevenLabs',
         p_business_pro_d: '15+ empleados', p_business_pro_f1: 'Todo de Basic + Pro + Business + Business+', p_business_pro_f2: '15+ empleados', p_business_pro_f3: 'Integraciones custom', p_business_pro_f4: 'Arquitectura avanzada por acuerdo', custom_price: 'Custom',
         team_label: 'Equipo', employee_list_title: 'Empleados', employee_list_desc: 'Lista de contactos de empleados. El propietario siempre está arriba.', calendar_settings: 'Ajustes del calendario', work_from: 'Trabajo desde', work_to: 'Trabajo hasta', interval_label: 'Intervalo', time_label: 'Hora', date_label: 'Fecha', first_day_label: 'Primer día',
@@ -1718,7 +1718,7 @@ const EXTRA_TRANSLATIONS = {
         f_lang_t: '8 idiomas', f_lang_d: 'Sérvio, English, espanhol, português, russo, francês, italiano e alemão com seleção manual.',
         p_basic_d: 'Para dono/empresa', p_basic_f1: 'Agendamento AI Kaleya', p_basic_f2: 'APP Kaleya do dono/empresa', p_basic_f3: 'Agendamento do dono', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'Voz AI', p_basic_f6: 'Alarmes e notificações',
         p_pro_d: 'Dono + 1 funcionário', p_pro_f1: 'Tudo do Basic', p_pro_f2: '1 funcionário', p_pro_f3: 'Agendamento do funcionário', p_pro_f4: 'APP Kaleya do funcionário', p_pro_f5: 'Bloqueio por hora/dia/vários dias', p_pro_f6: 'Instagram DM + TikTok DM',
-        p_business_d: 'Até 5 funcionários', p_business_f1: 'Tudo do Basic + Pro', p_business_f2: 'Até 5 funcionários', p_business_f3: 'APP Kaleya do funcionário', p_business_f4: 'Mais idiomas por acordo', p_business_f5: 'API por cliente',
+        p_business_d: 'Até 5 funcionários', p_business_f1: 'Tudo do Basic + Pro', p_business_f2: 'Até 5 funcionários', p_business_f3: 'APP Kaleya do funcionário', p_business_f4: 'Mais idiomas por acordo', p_business_f5: 'API por empresa',
         p_business_plus_d: 'Até 15 funcionários', p_business_plus_f1: 'Tudo do Basic + Pro + Business', p_business_plus_f2: 'Até 15 funcionários', p_business_plus_f3: 'Chamadas telefônicas e SMS', p_business_plus_f4: 'Voz AI ElevenLabs',
         p_business_pro_d: '15+ funcionários', p_business_pro_f1: 'Tudo do Basic + Pro + Business + Business+', p_business_pro_f2: '15+ funcionários', p_business_pro_f3: 'Integrações custom', p_business_pro_f4: 'Arquitetura avançada por acordo', custom_price: 'Custom',
         team_label: 'Equipe', employee_list_title: 'Funcionários', employee_list_desc: 'Lista de contatos dos funcionários. O dono fica sempre no topo.', calendar_settings: 'Configurações do calendário', work_from: 'Trabalho de', work_to: 'Trabalho até', interval_label: 'Intervalo', time_label: 'Hora', date_label: 'Data', first_day_label: 'Primeiro dia',
@@ -1728,7 +1728,7 @@ const EXTRA_TRANSLATIONS = {
         f_lang_t: '8 языков', f_lang_d: 'Сербский, English, испанский, португальский, русский, французский, итальянский и немецкий с ручным выбором.',
         p_basic_d: 'Для владельца/компании', p_basic_f1: 'AI запись Kaleya', p_basic_f2: 'Kaleya APP владельца/компании', p_basic_f3: 'Запись владельца', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'AI голос', p_basic_f6: 'Оповещения и уведомления',
         p_pro_d: 'Владелец + 1 сотрудник', p_pro_f1: 'Все из Basic', p_pro_f2: '1 сотрудник', p_pro_f3: 'Запись сотрудника', p_pro_f4: 'Kaleya APP сотрудника', p_pro_f5: 'Блокировка по часу/дню/нескольким дням', p_pro_f6: 'Instagram DM + TikTok DM',
-        p_business_d: 'До 5 сотрудников', p_business_f1: 'Все из Basic + Pro', p_business_f2: 'До 5 сотрудников', p_business_f3: 'Kaleya APP сотрудника', p_business_f4: 'Больше языков по договоренности', p_business_f5: 'API по клиенту',
+        p_business_d: 'До 5 сотрудников', p_business_f1: 'Все из Basic + Pro', p_business_f2: 'До 5 сотрудников', p_business_f3: 'Kaleya APP сотрудника', p_business_f4: 'Больше языков по договоренности', p_business_f5: 'API по компании',
         p_business_plus_d: 'До 15 сотрудников', p_business_plus_f1: 'Все из Basic + Pro + Business', p_business_plus_f2: 'До 15 сотрудников', p_business_plus_f3: 'Телефонные звонки и SMS', p_business_plus_f4: 'AI голос ElevenLabs',
         p_business_pro_d: '15+ сотрудников', p_business_pro_f1: 'Все из Basic + Pro + Business + Business+', p_business_pro_f2: '15+ сотрудников', p_business_pro_f3: 'Custom интеграции', p_business_pro_f4: 'Продвинутая архитектура по договоренности', custom_price: 'Custom',
         team_label: 'Команда', employee_list_title: 'Сотрудники', employee_list_desc: 'Список контактов сотрудников. Владелец всегда сверху.', calendar_settings: 'Настройки календаря', work_from: 'Работа с', work_to: 'Работа до', interval_label: 'Интервал', time_label: 'Время', date_label: 'Дата', first_day_label: 'Первый день',
@@ -1738,7 +1738,7 @@ const EXTRA_TRANSLATIONS = {
         f_lang_t: '8 langues', f_lang_d: 'Serbe, English, espagnol, portugais, russe, francais, italien et allemand avec choix manuel.',
         p_basic_d: 'Pour proprietaire/entreprise', p_basic_f1: 'Planification AI Kaleya', p_basic_f2: 'APP Kaleya proprietaire/entreprise', p_basic_f3: 'Planification proprietaire', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'Voix AI', p_basic_f6: 'Alertes et notifications',
         p_pro_d: 'Proprietaire + 1 employe', p_pro_f1: 'Tout Basic', p_pro_f2: '1 employe', p_pro_f3: 'Planification employe', p_pro_f4: 'APP Kaleya employe', p_pro_f5: 'Blocage par heure/jour/plusieurs jours', p_pro_f6: 'Instagram DM + TikTok DM',
-        p_business_d: 'Jusqu a 5 employes', p_business_f1: 'Tout Basic + Pro', p_business_f2: 'Jusqu a 5 employes', p_business_f3: 'APP Kaleya employe', p_business_f4: 'Plus de langues sur accord', p_business_f5: 'API par client',
+        p_business_d: 'Jusqu a 5 employes', p_business_f1: 'Tout Basic + Pro', p_business_f2: 'Jusqu a 5 employes', p_business_f3: 'APP Kaleya employe', p_business_f4: 'Plus de langues sur accord', p_business_f5: 'API par entreprise',
         p_business_plus_d: 'Jusqu a 15 employes', p_business_plus_f1: 'Tout Basic + Pro + Business', p_business_plus_f2: 'Jusqu a 15 employes', p_business_plus_f3: 'Appels telephoniques et SMS', p_business_plus_f4: 'Voix AI ElevenLabs',
         p_business_pro_d: '15+ employes', p_business_pro_f1: 'Tout Basic + Pro + Business + Business+', p_business_pro_f2: '15+ employes', p_business_pro_f3: 'Integrations custom', p_business_pro_f4: 'Architecture avancee sur accord', custom_price: 'Custom',
         team_label: 'Equipe', employee_list_title: 'Employes', employee_list_desc: 'Liste de contacts des employes. Le proprietaire reste toujours en haut.', calendar_settings: 'Reglages calendrier', work_from: 'Travail de', work_to: 'Travail jusqu a', interval_label: 'Intervalle', time_label: 'Heure', date_label: 'Date', first_day_label: 'Premier jour',
@@ -1748,7 +1748,7 @@ const EXTRA_TRANSLATIONS = {
         f_lang_t: '8 lingue', f_lang_d: 'Serbo, English, spagnolo, portoghese, russo, francese, italiano e tedesco con scelta manuale.',
         p_basic_d: 'Per titolare/azienda', p_basic_f1: 'Prenotazioni AI Kaleya', p_basic_f2: 'APP Kaleya titolare/azienda', p_basic_f3: 'Prenotazioni titolare', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'Voce AI', p_basic_f6: 'Allarmi e notifiche',
         p_pro_d: 'Titolare + 1 dipendente', p_pro_f1: 'Tutto Basic', p_pro_f2: '1 dipendente', p_pro_f3: 'Prenotazioni dipendente', p_pro_f4: 'APP Kaleya dipendente', p_pro_f5: 'Blocco per ora/giorno/piu giorni', p_pro_f6: 'Instagram DM + TikTok DM',
-        p_business_d: 'Fino a 5 dipendenti', p_business_f1: 'Tutto Basic + Pro', p_business_f2: 'Fino a 5 dipendenti', p_business_f3: 'APP Kaleya dipendente', p_business_f4: 'Piu lingue su accordo', p_business_f5: 'API per cliente',
+        p_business_d: 'Fino a 5 dipendenti', p_business_f1: 'Tutto Basic + Pro', p_business_f2: 'Fino a 5 dipendenti', p_business_f3: 'APP Kaleya dipendente', p_business_f4: 'Piu lingue su accordo', p_business_f5: 'API per azienda',
         p_business_plus_d: 'Fino a 15 dipendenti', p_business_plus_f1: 'Tutto Basic + Pro + Business', p_business_plus_f2: 'Fino a 15 dipendenti', p_business_plus_f3: 'Chiamate telefoniche e SMS', p_business_plus_f4: 'Voce AI ElevenLabs',
         p_business_pro_d: '15+ dipendenti', p_business_pro_f1: 'Tutto Basic + Pro + Business + Business+', p_business_pro_f2: '15+ dipendenti', p_business_pro_f3: 'Integrazioni custom', p_business_pro_f4: 'Architettura avanzata su accordo', custom_price: 'Custom',
         team_label: 'Team', employee_list_title: 'Dipendenti', employee_list_desc: 'Lista contatti dei dipendenti. Il titolare resta sempre in alto.', calendar_settings: 'Impostazioni calendario', work_from: 'Lavora da', work_to: 'Lavora fino a', interval_label: 'Intervallo', time_label: 'Ora', date_label: 'Data', first_day_label: 'Primo giorno',
@@ -1760,20 +1760,20 @@ const EXTRA_TRANSLATIONS = {
         hero_badge: 'AI Empfang · 24/7 aktiv', hero_title_1: 'Kaleya', hero_title_2: 'AI Empfang 24/7', hero_sub: 'Kaleya beantwortet Anrufe, bucht, storniert und benachrichtigt das Team mit natürlicher Stimme. Funktioniert mit Anrufen, WhatsApp, Viber, Telegram und SMS.',
         hero_cta_demo: 'Kostenlos testen', hero_cta_how: 'So funktioniert es', hero_social: '500+ zufriedene Unternehmen', hero_tap: 'Logo antippen', hero_intro_hint: 'Kaleya stellt sich vor', hero_demo_msg: '"Hallo, wie kann ich helfen?"', integrates_with: 'Integrationen:',
         feat_title: 'Alles, was eine echte Rezeption macht, nur besser', feat_sub: 'Kaleya versteht Kunden, merkt sich Regeln und arbeitet in der gewählten Sprache.', f_lang_t: '8 Sprachen', f_lang_d: 'Serbisch, English, Spanisch, Portugiesisch, Russisch, Französisch, Italienisch und Deutsch mit manueller Auswahl.',
-        f2_t: 'Intelligente Terminplanung', f2_d: 'Prüft den Kalender und schlägt freie Termine vor.', f3_t: 'Natürliche Stimme', f3_d: 'ElevenLabs Stimme für natürlichere Gespräche.', f_alarm_t: 'Team-Alarme', f_alarm_d: 'Ansage des nächsten Kunden und dringende Gesprächsanfrage.', f_msg_t: 'Nachrichtenkanäle', f_msg_d: 'WhatsApp, Viber, Telegram, SMS und Telefonanruf.', f6_t: 'Admin-Kontrolle', f6_d: 'Globale API und separate Einstellungen pro Kunde.',
+        f2_t: 'Intelligente Terminplanung', f2_d: 'Prüft den Kalender und schlägt freie Termine vor.', f3_t: 'Natürliche Stimme', f3_d: 'ElevenLabs Stimme für natürlichere Gespräche.', f_alarm_t: 'Team-Alarme', f_alarm_d: 'Ansage des nächsten Kunden und dringende Gesprächsanfrage.', f_msg_t: 'Nachrichtenkanäle', f_msg_d: 'WhatsApp, Viber, Telegram, SMS und Telefonanruf.', f6_t: 'Admin-Kontrolle', f6_d: 'Globale API und separate Einstellungen pro Firma.',
         how_t: 'Kaleya lernt Ihr Geschäft an 1 Tag', how1_t: 'Kanal verbinden', how1_d: 'Telefon, WhatsApp, Telegram, Viber oder SMS.', how2_t: 'Kaleya trainieren', how2_d: 'Arbeitszeiten, Services und Buchungsregeln eintragen.', how3_t: 'Sprache und Stimme wählen', how3_d: 'Kaleya spricht die Sprache, die der Kunde auswählt.',
         price_t: 'Einfache Preise', price_s: 'Fünf Pakete für verschiedene Automatisierungsstufen.', popular: 'BELIEBT', trial_btn: '14 Tage testen', price_contact: 'Kontakt',
         p_basic_d: 'Fuer Inhaber/Firma', p_basic_f1: 'AI Kaleya Terminplanung', p_basic_f2: 'Inhaber/Firma Kaleya APP', p_basic_f3: 'Inhaber Terminplanung', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'AI voice', p_basic_f6: 'Alarme und Benachrichtigungen',
         p_pro_d: 'Inhaber + 1 Mitarbeiter', p_pro_f1: 'Alles aus Basic', p_pro_f2: '1 Mitarbeiter', p_pro_f3: 'Mitarbeiter Terminplanung', p_pro_f4: 'Mitarbeiter Kaleya APP', p_pro_f5: 'Blockierung nach Stunde/Tag/mehreren Tagen', p_pro_f6: 'Instagram DM + TikTok DM',
-        p_business_d: 'Bis zu 5 Mitarbeiter', p_business_f1: 'Alles aus Basic + Pro', p_business_f2: 'Bis zu 5 Mitarbeiter', p_business_f3: 'Mitarbeiter Kaleya APP', p_business_f4: 'Mehr Sprachen nach Vereinbarung', p_business_f5: 'API pro Kunde',
+        p_business_d: 'Bis zu 5 Mitarbeiter', p_business_f1: 'Alles aus Basic + Pro', p_business_f2: 'Bis zu 5 Mitarbeiter', p_business_f3: 'Mitarbeiter Kaleya APP', p_business_f4: 'Mehr Sprachen nach Vereinbarung', p_business_f5: 'API pro Firma',
         p_business_plus_d: 'Bis zu 15 Mitarbeiter', p_business_plus_f1: 'Alles aus Basic + Pro + Business', p_business_plus_f2: 'Bis zu 15 Mitarbeiter', p_business_plus_f3: 'Telefonanrufe und SMS', p_business_plus_f4: 'ElevenLabs AI voice',
         p_business_pro_d: '15+ Mitarbeiter', p_business_pro_f1: 'Alles aus Basic + Pro + Business + Business+', p_business_pro_f2: '15+ Mitarbeiter', p_business_pro_f3: 'Custom Integrationen', p_business_pro_f4: 'Erweiterte Architektur nach Vereinbarung', custom_price: 'Custom',
         footer_privacy: 'Datenschutz', footer_terms: 'Bedingungen', back_home: 'Zurück', login_title: 'Willkommen zurück', login_sub: 'Bei Kaleya anmelden', password: 'Passwort', login_btn: 'Anmelden', login_err: 'Falsche E-Mail oder falsches Passwort',
         client_active: 'online', client_greet: 'Guten Morgen, Marko', client_how: 'Wie kann ich heute helfen?', say_wake: 'Sagen Sie "hey Kaleya"', tap_to_talk: 'Zum Sprechen tippen', listening: 'Ich höre zu...', quick: 'Schnellaktionen', qa1: 'Buchen', qa1_s: 'Neuer Termin', qa2: 'Stornieren', qa2_s: 'Termin', qa3: 'Prüfen', qa3_s: 'Slots', today: 'Heute', nav_home: 'Start', nav_cal: 'Kalender', nav_set: 'Einst.',
-        cset_t: 'Einstellungen', cset_ui_lang: 'Sprache der Oberfläche', cset_voice_lang: 'Kaleya Sprachstimme', cset_el_desc: 'Natürliche Stimme über ElevenLabs', cset_test: 'Kaleya Stimme testen', cset_note: 'Der Administrator setzt den API-Schlüssel; der Kunde wählt Sprache und Verhalten.', cset_integrations: 'Buchungskanäle', cset_alarm: 'Team-Alarme', active: 'Aktiv', pending: 'In Vorbereitung',
+        cset_t: 'Einstellungen', cset_ui_lang: 'Sprache der Oberfläche', cset_voice_lang: 'Kaleya Sprachstimme', cset_el_desc: 'Natürliche Stimme über ElevenLabs', cset_test: 'Kaleya Stimme testen', cset_note: 'Der Kaleya Admin setzt den API-Schlüssel; der Firmenadministrator wählt Sprache und Verhalten.', cset_integrations: 'Buchungskanäle', cset_alarm: 'Team-Alarme', active: 'Aktiv', pending: 'In Vorbereitung',
         team_label: 'Team', employee_list_title: 'Mitarbeiter', employee_list_desc: 'Kontaktliste fuer Mitarbeiter. Der Inhaber steht immer oben.', calendar_settings: 'Kalender Einstellungen', work_from: 'Arbeit von', work_to: 'Arbeit bis', interval_label: 'Intervall', time_label: 'Zeit', date_label: 'Datum', first_day_label: 'Erster Tag',
         staff_services_title: 'Team und Services', blocked_time_title: 'Blockierte Zeit / Pausen', one_day: 'Ein Tag', multi_day: 'Mehrere Tage', all_staff: 'Alle Mitarbeiter', add_block: 'Blockierung hinzufuegen', appointment_title: 'Termin', name_service_label: 'Name und Service', service_label: 'Service', staff_label: 'Team', no_service: 'Kein Service', any_staff: 'Jeder', channel_label: 'Kanal', status_label: 'Status', status_confirmed: 'Gebucht', status_moved: 'Verschoben', status_cancelled: 'Abgesagt', status_pending: 'Ausstehend', duration_label: 'Termindauer',
-        ad_dash: 'Dashboard', ad_clients: 'Kunden', ad_alarms: 'Alarme', ad_integrations: 'Integrationen', ad_set: 'Einstellungen', logout: 'Abmelden', global_ai_settings: 'Globale AI API', save_global_api: 'Globale API speichern', client_api_title: 'API pro Kunde', save_client_api: 'Für Kunden speichern', api_security_note: 'Produktions-API-Schlüssel werden im Backend und in der .env Datei gespeichert.'
+        ad_dash: 'Dashboard', ad_clients: 'Administratoren / Firmen', ad_alarms: 'Alarme', ad_integrations: 'Integrationen', ad_set: 'Einstellungen', logout: 'Abmelden', global_ai_settings: 'Globale AI API', save_global_api: 'Globale API speichern', client_api_title: 'API pro Firma', save_client_api: 'Für Firma speichern', api_security_note: 'Produktions-API-Schlüssel werden im Backend und in der .env Datei gespeichert.'
     }
 };
 
@@ -5590,7 +5590,7 @@ function closeClientApiModal() {
 function saveClientApiKey() {
     if (!activeClientForApi) return;
     closeClientApiModal();
-    showToast('API podešavanja za klijenta su sačuvana');
+    showToast('API podešavanja za firmu su sačuvana');
 }
 
 function playAlarmSound(type) {

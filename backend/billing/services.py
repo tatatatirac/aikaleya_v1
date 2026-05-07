@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from django.contrib.auth.models import User
 from django.db import transaction
+from django.utils.dateparse import parse_datetime
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -288,17 +289,39 @@ def activate_pending_registration_for_checkout(checkout):
         return client
 
 
-def activate_checkout_subscription(checkout, external_customer_id="", external_subscription_id=""):
+def provider_datetime(value):
+    if not value:
+        return None
+    parsed = parse_datetime(str(value))
+    if not parsed:
+        return None
+    if timezone.is_naive(parsed):
+        return timezone.make_aware(parsed, timezone.get_current_timezone())
+    return parsed
+
+
+def activate_checkout_subscription(
+    checkout,
+    external_customer_id="",
+    external_subscription_id="",
+    trial_ends_at=None,
+    current_period_start=None,
+    current_period_end=None,
+):
     business_client = activate_pending_registration_for_checkout(checkout)
     if not business_client:
         return None
 
+    now = timezone.now()
+    trial_end = provider_datetime(trial_ends_at) or now + timedelta(days=checkout.plan.trial_days)
     subscription, _created = Subscription.objects.update_or_create(
         business_client=business_client,
         defaults={
             "plan": checkout.plan,
             "status": Subscription.STATUS_ACTIVE,
-            "trial_ends_at": timezone.now() + timedelta(days=checkout.plan.trial_days),
+            "trial_ends_at": trial_end,
+            "current_period_start": provider_datetime(current_period_start) or now,
+            "current_period_end": provider_datetime(current_period_end),
             "external_customer_id": external_customer_id,
             "external_subscription_id": external_subscription_id or checkout.external_checkout_id,
         },

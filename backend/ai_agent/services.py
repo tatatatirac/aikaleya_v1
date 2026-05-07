@@ -64,6 +64,32 @@ DATE_HINT_WORDS = (
     "heute",
 )
 
+APPOINTMENT_TARGET_STOP_WORDS = {
+    "please",
+    "cancel",
+    "appointment",
+    "booking",
+    "reschedule",
+    "move",
+    "otkazi",
+    "otkaz",
+    "pomeri",
+    "promeni",
+    "termin",
+    "zakazivanje",
+    "cita",
+    "reserva",
+    "annuler",
+    "rendez",
+    "termin",
+    "absagen",
+    "buchen",
+    "today",
+    "tomorrow",
+    "danas",
+    "sutra",
+}
+
 LANGUAGE_HINTS = (
     ("sr", ("zakaz", "termin", "sutra", "danas", "otkaz", "pomeri", "usluga", "radno vreme")),
     ("en", ("appointment", "book", "cancel", "reschedule", "available", "today", "tomorrow")),
@@ -158,6 +184,39 @@ def customer_identity_present(customer=None, payload=None):
         or payload.get("email")
         or payload.get("customer_name")
     )
+
+
+def appointment_identity_present(customer=None, payload=None):
+    payload = payload or {}
+    return bool(
+        customer
+        or payload.get("appointment_id")
+        or payload.get("customer_id")
+        or payload.get("phone")
+        or payload.get("email")
+        or payload.get("customer_name")
+    )
+
+
+def text_has_possible_appointment_target(text):
+    tokens = [
+        token.lower()
+        for token in re.findall(r"[A-Za-zÀ-žА-Яа-я0-9]+", text or "")
+        if len(token) >= 3
+    ]
+    useful_tokens = [token for token in tokens if token not in APPOINTMENT_TARGET_STOP_WORDS]
+    return bool(useful_tokens)
+
+
+def cancel_target_present(text, payload=None, customer=None):
+    payload = payload or {}
+    if appointment_identity_present(customer=customer, payload=payload):
+        return True
+    if text_has_possible_appointment_target(text):
+        return True
+    if (payload.get("date") or text_has_date_hint(text)) and (payload.get("time") or parse_requested_time(text)):
+        return True
+    return False
 
 
 def ensure_workflow_conversation(business_client, conversation=None, customer=None, channel="web", external_thread_id="", language="en"):
@@ -287,12 +346,16 @@ def workflow_missing_fields(business_client, intent_name, text, payload, custome
         return missing
     if intent_name == "reschedule_appointment":
         missing = []
+        if not appointment_identity_present(customer=customer, payload=payload):
+            missing.append("appointment_target")
         if not payload.get("date") and not text_has_date_hint(text):
             missing.append("new_date")
         if not payload.get("time") and not parse_requested_time(text):
             missing.append("new_time")
         return missing
     if intent_name == "cancel_appointment":
+        if not cancel_target_present(text, payload=payload, customer=customer):
+            return ["appointment_target"]
         return []
     return []
 
