@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /django-admin/
+Disallow: /api/
+
+Sitemap: https://aikaleya.com/sitemap.xml

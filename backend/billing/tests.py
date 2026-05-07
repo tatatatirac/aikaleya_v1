@@ -1,4 +1,5 @@
 from datetime import time, timedelta
+from unittest import mock
 
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import User
@@ -17,7 +18,7 @@ from billing.models import (
 from billing.views import CheckoutSessionViewSet
 from clients.models import BusinessClient
 from integrations.models import IntegrationConnection
-from staff_services.models import Service, StaffMember
+from staff_services.models import BlockedTime, Service, StaffMember, WorkingHours
 
 
 class PackageLimitTests(TestCase):
@@ -301,6 +302,97 @@ class PackageLimitTests(TestCase):
         self.assertEqual(pending.phone, "+381600001")
         self.assertNotIn("strongpass123", str(response.data))
         self.assertNotIn(pending.password_hash, str(response.data))
+
+    @override_settings(KALEYA_PAYMENT_PROVIDER=CheckoutSession.PROVIDER_MANUAL)
+    def test_checkout_session_rejects_existing_email_when_password_is_requested(self):
+        self.make_plan(Plan.CODE_BASIC, 0)
+        User.objects.create_user(
+            username="existing-client@example.com",
+            email="existing-client@example.com",
+            password="test12345",
+        )
+        api = APIClient()
+
+        response = api.post(
+            "/api/billing/checkout-sessions/",
+            {
+                "plan_code": Plan.CODE_BASIC,
+                "email": "existing-client@example.com",
+                "company": "Existing Company",
+                "full_name": "Existing Owner",
+                "password": "strongpass123",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("email", response.data)
+        self.assertEqual(CheckoutSession.objects.count(), 0)
+
+    @override_settings(
+        KALEYA_PAYMENT_PROVIDER=CheckoutSession.PROVIDER_LEMONSQUEEZY,
+        KALEYA_LEMONSQUEEZY_API_KEY="private-api-key",
+        KALEYA_LEMONSQUEEZY_STORE_ID="12345",
+        KALEYA_LEMONSQUEEZY_WEBHOOK_SECRET="private-webhook-secret",
+        KALEYA_LEMONSQUEEZY_TEST_MODE=True,
+        KALEYA_LEMONSQUEEZY_VARIANT_IDS={Plan.CODE_BASIC: "67890"},
+        KALEYA_PAYMENT_SUCCESS_URL="http://testserver/?payment=success",
+    )
+    @mock.patch("billing.views.CheckoutSessionViewSet._lemonsqueezy_json_request")
+    def test_checkout_session_creates_lemonsqueezy_checkout_and_pending_registration(self, lemon_request):
+        self.make_plan(Plan.CODE_BASIC, 0)
+        lemon_request.return_value = {
+            "data": {
+                "id": "checkout_ls_123",
+                "attributes": {
+                    "url": "https://aikaleya.lemonsqueezy.com/checkout/buy/checkout_ls_123",
+                },
+            }
+        }
+        api = APIClient()
+
+        response = api.post(
+            "/api/billing/checkout-sessions/",
+            {
+                "plan_code": Plan.CODE_BASIC,
+                "email": "lemon-client@example.com",
+                "company": "Lemon Company",
+                "full_name": "Lemon Owner",
+                "password": "strongpass123",
+                "phone": "+381600003",
+                "country": "Serbia",
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(response.data["payment_provider_configured"])
+        self.assertEqual(response.data["provider"], CheckoutSession.PROVIDER_LEMONSQUEEZY)
+        self.assertEqual(response.data["status"], CheckoutSession.STATUS_PROVIDER_PENDING)
+        self.assertTrue(response.data["local_checkout_url"].startswith("/checkout.html?session="))
+        self.assertNotIn("private-api-key", str(response.data))
+        checkout = CheckoutSession.objects.get(email="lemon-client@example.com")
+        self.assertEqual(checkout.provider, CheckoutSession.PROVIDER_LEMONSQUEEZY)
+        self.assertEqual(checkout.status, CheckoutSession.STATUS_PROVIDER_PENDING)
+        self.assertEqual(checkout.external_checkout_id, "checkout_ls_123")
+        self.assertEqual(checkout.checkout_url, "https://aikaleya.lemonsqueezy.com/checkout/buy/checkout_ls_123")
+        pending = PendingCheckoutRegistration.objects.get(checkout=checkout)
+        self.assertTrue(check_password("strongpass123", pending.password_hash))
+        lemon_request.assert_called_once()
+        request_url, request_payload = lemon_request.call_args.args
+        self.assertEqual(request_url, "https://api.lemonsqueezy.com/v1/checkouts")
+        attributes = request_payload["data"]["attributes"]
+        self.assertTrue(attributes["test_mode"])
+        self.assertFalse(attributes["checkout_options"]["logo"])
+        self.assertEqual(attributes["checkout_data"]["email"], "lemon-client@example.com")
+        self.assertEqual(
+            request_payload["data"]["relationships"]["variant"]["data"]["id"],
+            "67890",
+        )
+        self.assertEqual(
+            attributes["product_options"]["redirect_url"],
+            f"http://testserver/?payment=success&checkout={checkout.public_id}",
+        )
 
     def test_checkout_session_contact_only_plan_stays_manual(self):
         Plan.objects.create(
@@ -803,6 +895,63 @@ class PackageLimitTests(TestCase):
         self.assertEqual(delete_staff.status_code, 302)
         self.assertFalse(Service.objects.filter(id=service.id).exists())
         self.assertFalse(StaffMember.objects.filter(id=staff.id).exists())
+
+    def test_kaleya_admin_can_manage_working_hours_and_blocked_times(self):
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
+        django_client = Client()
+        django_client.force_login(self.user)
+
+        working_hours_payload = {
+            "section": "update_working_hours",
+            "client_id": self.client_profile.id,
+        }
+        for weekday in range(7):
+            working_hours_payload[f"weekday_{weekday}_start"] = "09:00"
+            working_hours_payload[f"weekday_{weekday}_end"] = "16:00"
+        working_hours_payload["weekday_6_closed"] = "on"
+
+        response = django_client.post("/admin/", working_hours_payload)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(WorkingHours.objects.filter(business_client=self.client_profile).count(), 7)
+        sunday = WorkingHours.objects.get(business_client=self.client_profile, weekday=6, staff_member__isnull=True)
+        self.assertTrue(sunday.is_closed)
+
+        staff = StaffMember.objects.create(
+            business_client=self.client_profile,
+            full_name="Block Test",
+            role_title="Therapist",
+        )
+        block_response = django_client.post(
+            "/admin/",
+            {
+                "section": "add_blocked_time",
+                "client_id": self.client_profile.id,
+                "block_type": "one_day",
+                "staff_id": staff.id,
+                "reason": "pauza",
+                "block_date": "2026-05-10",
+                "start_time": "12:00",
+                "end_time": "13:00",
+            },
+        )
+
+        self.assertEqual(block_response.status_code, 302)
+        blocked_time = BlockedTime.objects.get(business_client=self.client_profile, reason="pauza")
+        self.assertEqual(blocked_time.staff_member, staff)
+
+        delete_response = django_client.post(
+            "/admin/",
+            {
+                "section": "delete_blocked_time",
+                "client_id": self.client_profile.id,
+                "blocked_time_id": blocked_time.id,
+            },
+        )
+
+        self.assertEqual(delete_response.status_code, 302)
+        self.assertFalse(BlockedTime.objects.filter(id=blocked_time.id).exists())
 
     @override_settings(DEBUG=True, KALEYA_PAYPAL_WEBHOOK_ID="")
     def test_paypal_webhook_marks_checkout_paid_and_subscription_active_in_debug(self):

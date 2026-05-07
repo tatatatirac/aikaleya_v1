@@ -50,6 +50,8 @@ urlpatterns = [
     path("register-business-pro-plus.html", FrontendTemplateView.as_view(template_name="register-business-pro-plus.html"), name="frontend-register-business-pro-plus"),
     path("manifest.webmanifest", no_cache_static_serve, {"path": "manifest.webmanifest", "document_root": settings.PROJECT_ROOT / "frontend"}),
     path("sw.js", no_cache_static_serve, {"path": "sw.js", "document_root": settings.PROJECT_ROOT / "frontend"}),
+    path("robots.txt", no_cache_static_serve, {"path": "robots.txt", "document_root": settings.PROJECT_ROOT / "frontend"}),
+    path("sitemap.xml", no_cache_static_serve, {"path": "sitemap.xml", "document_root": settings.PROJECT_ROOT / "frontend"}),
     path("dashboard/", dashboard, name="dashboard"),
     path("admin/", dashboard, name="kaleya-admin"),
     path("admin/logout/", dashboard_logout, name="kaleya-admin-logout"),

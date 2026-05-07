@@ -7,13 +7,14 @@ from rest_framework.test import APIClient
 
 from ai_agent.services import handle_inbound_text
 from accounts.models import Profile
+from appointments.services import aware_client_datetime
 from audit_log.models import AuditLog
 from appointments.models import Appointment
 from billing.models import Plan
 from clients.models import BusinessClient, BusinessKnowledgeEntry
 from communications.models import Conversation, Message
 from notifications.models import NotificationJob
-from staff_services.models import Service, StaffMember
+from staff_services.models import BlockedTime, Service, StaffMember, WorkingHours
 from support.models import SupportTicket
 
 
@@ -245,6 +246,95 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["tool_output"]["status"], "needs_more_details")
         self.assertIn("service", result["decision"]["missing_fields"])
         self.assertEqual(Appointment.objects.count(), 0)
+
+    def test_ai_availability_respects_closed_working_day(self):
+        target_date = date(2026, 5, 11)
+        WorkingHours.objects.create(
+            business_client=self.client,
+            weekday=target_date.weekday(),
+            start_time=time(9, 0),
+            end_time=time(16, 0),
+            is_closed=True,
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Check free slots",
+            channel="web",
+            payload={"date": target_date},
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "check_availability")
+        self.assertTrue(result["tool_output"]["is_closed"])
+        self.assertEqual(result["tool_output"]["free_count"], 0)
+        self.assertEqual(result["tool_output"]["suggested_slots"], [])
+
+    def test_ai_booking_respects_blocked_time(self):
+        target_date = date(2026, 5, 11)
+        BlockedTime.objects.create(
+            business_client=self.client,
+            start_at=aware_client_datetime(self.client, target_date, time(10, 0)),
+            end_at=aware_client_datetime(self.client, target_date, time(11, 0)),
+            reason="Team break",
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Book appointment",
+            channel="web",
+            payload={
+                "date": target_date,
+                "time": time(10, 0),
+                "customer_name": "Emily Carter",
+                "phone": "+15550101",
+            },
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "book_appointment")
+        self.assertEqual(result["tool_output"]["status"], "time_unavailable")
+        self.assertNotIn("10:00", result["tool_output"]["suggested_slots"])
+        self.assertNotIn("10:30", result["tool_output"]["suggested_slots"])
+        self.assertEqual(Appointment.objects.count(), 0)
+
+    def test_ai_booking_uses_available_employee_when_another_employee_is_blocked(self):
+        target_date = date(2026, 5, 11)
+        blocked_staff = StaffMember.objects.create(
+            business_client=self.client,
+            full_name="Ana Blocked",
+            role_title="Stylist",
+        )
+        free_staff = StaffMember.objects.create(
+            business_client=self.client,
+            full_name="Mark Free",
+            role_title="Stylist",
+        )
+        BlockedTime.objects.create(
+            business_client=self.client,
+            staff_member=blocked_staff,
+            start_at=aware_client_datetime(self.client, target_date, time(10, 0)),
+            end_at=aware_client_datetime(self.client, target_date, time(11, 0)),
+            reason="Private appointment",
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Book appointment",
+            channel="web",
+            payload={
+                "date": target_date,
+                "time": time(10, 0),
+                "customer_name": "Noah Carter",
+                "phone": "+15550102",
+            },
+            use_ai=False,
+        )
+
+        self.assertEqual(result["tool_output"]["status"], "booked")
+        self.assertEqual(result["tool_output"]["staff_member"], free_staff.full_name)
+        appointment = Appointment.objects.get(customer__first_name="Noah")
+        self.assertEqual(appointment.staff_member_id, free_staff.id)
 
     def test_ai_fallback_extracts_service_customer_phone_date_and_time_from_text(self):
         Service.objects.create(

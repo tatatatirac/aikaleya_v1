@@ -228,6 +228,24 @@ EMAIL_USE_SSL = env_bool("EMAIL_USE_SSL", False)
 DATA_BACKUP_DIR = Path(os.getenv("DATA_BACKUP_DIR", PROJECT_ROOT / "backups"))
 
 LOG_LEVEL = os.getenv("DJANGO_LOG_LEVEL", "INFO")
+DJANGO_ENV = os.getenv("DJANGO_ENV", "development" if DEBUG else "production")
+SENTRY_DSN = os.getenv("SENTRY_DSN", "")
+
+if SENTRY_DSN and not DEBUG:
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.django import DjangoIntegration
+
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            integrations=[DjangoIntegration()],
+            traces_sample_rate=0.1,
+            send_default_pii=False,
+            environment=DJANGO_ENV,
+        )
+    except ImportError:
+        pass
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,

@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, time, timedelta
 from decimal import Decimal, InvalidOperation
 
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -8,18 +8,18 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.dateparse import parse_time
+from django.utils.dateparse import parse_date, parse_time
 from django.views.decorators.http import require_POST
 
 from ai_core.models import AlarmSettings, KaleyaCommandLog, VoiceSettings
 from appointments.models import Appointment
-from appointments.services import today_availability_summary
+from appointments.services import client_timezone, today_availability_summary
 from billing.models import PaymentWebhookEvent, Plan, Subscription
 from billing.services import enforce_staff_limit
 from clients.models import BusinessClient, ClientApiSettings
 from integrations.models import IntegrationConnection
 from rest_framework.exceptions import ValidationError as DRFValidationError
-from staff_services.models import Service, StaffMember
+from staff_services.models import BlockedTime, Service, StaffMember, WorkingHours
 
 
 def is_admin_user(user):
@@ -84,6 +84,23 @@ def get_client_subscription(client):
         return None
 
 
+def ensure_business_working_hours(client):
+    rows = []
+    for weekday, _label in WorkingHours.WEEKDAY_CHOICES:
+        row, _created = WorkingHours.objects.get_or_create(
+            business_client=client,
+            staff_member=None,
+            weekday=weekday,
+            defaults={
+                "start_time": client.work_start,
+                "end_time": client.work_end,
+                "is_closed": weekday in {5, 6},
+            },
+        )
+        rows.append(row)
+    return rows
+
+
 @require_POST
 def dashboard_logout(request):
     logout(request)
@@ -114,7 +131,17 @@ def dashboard(request):
 
     if request.method == "POST":
         section = request.POST.get("section", "")
-        detail_sections = {"add_staff", "update_staff", "delete_staff", "add_service", "update_service", "delete_service"}
+        detail_sections = {
+            "add_staff",
+            "update_staff",
+            "delete_staff",
+            "add_service",
+            "update_service",
+            "delete_service",
+            "update_working_hours",
+            "add_blocked_time",
+            "delete_blocked_time",
+        }
         if section in detail_sections:
             if not is_admin_user(request.user):
                 messages.error(request, "Samo admin moze da menja radnike i usluge.")
@@ -138,6 +165,15 @@ def dashboard(request):
                 elif section == "delete_service":
                     delete_service(request, selected_client)
                     messages.success(request, "Usluga je obrisana.")
+                elif section == "update_working_hours":
+                    update_business_working_hours(request, selected_client)
+                    messages.success(request, "Radno vreme je sacuvano.")
+                elif section == "add_blocked_time":
+                    add_blocked_time(request, selected_client)
+                    messages.success(request, "Blokada termina je dodata.")
+                elif section == "delete_blocked_time":
+                    delete_blocked_time(request, selected_client)
+                    messages.success(request, "Blokada termina je obrisana.")
             except (DjangoValidationError, DRFValidationError, ValueError) as error:
                 messages.error(request, dashboard_error_message(error))
             return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#client-detail")
@@ -191,6 +227,12 @@ def dashboard(request):
     selected_subscription = get_client_subscription(selected_client)
     selected_staff_members = selected_client.staff_members.all().order_by("full_name")
     selected_services = selected_client.services.all().order_by("category", "name")
+    selected_working_hours = ensure_business_working_hours(selected_client)
+    selected_blocked_times = (
+        BlockedTime.objects.select_related("staff_member")
+        .filter(business_client=selected_client)
+        .order_by("-start_at")[:12]
+    )
     selected_ai_logs = KaleyaCommandLog.objects.filter(business_client=selected_client).order_by("-created_at")[:8]
     selected_appointment_total = Appointment.objects.filter(business_client=selected_client).count()
     admin_has_full_access = is_admin_user(request.user)
@@ -220,6 +262,8 @@ def dashboard(request):
         "selected_subscription": selected_subscription,
         "selected_staff_members": selected_staff_members,
         "selected_services": selected_services,
+        "selected_working_hours": selected_working_hours,
+        "selected_blocked_times": selected_blocked_times,
         "selected_ai_logs": selected_ai_logs,
         "selected_appointment_total": selected_appointment_total,
         "upcoming_appointments": upcoming_appointments,
@@ -334,6 +378,64 @@ def update_service(request, client):
 def delete_service(request, client):
     service = get_object_or_404(Service, id=request.POST.get("service_id"), business_client=client)
     service.delete()
+
+
+def update_business_working_hours(request, client):
+    for weekday, _label in WorkingHours.WEEKDAY_CHOICES:
+        working_hours, _created = WorkingHours.objects.get_or_create(
+            business_client=client,
+            staff_member=None,
+            weekday=weekday,
+            defaults={"start_time": client.work_start, "end_time": client.work_end},
+        )
+        working_hours.start_time = parse_time(request.POST.get(f"weekday_{weekday}_start", "")) or working_hours.start_time
+        working_hours.end_time = parse_time(request.POST.get(f"weekday_{weekday}_end", "")) or working_hours.end_time
+        working_hours.is_closed = checkbox_value(request.POST, f"weekday_{weekday}_closed")
+        working_hours.full_clean()
+        working_hours.save()
+
+
+def add_blocked_time(request, client):
+    block_type = request.POST.get("block_type", "one_day")
+    reason = request.POST.get("reason", "").strip()
+    staff_id = request.POST.get("staff_id", "").strip()
+    staff_member = None
+    if staff_id:
+        staff_member = get_object_or_404(StaffMember, id=staff_id, business_client=client)
+
+    if block_type == "multi_day":
+        start_date = parse_date(request.POST.get("start_date", ""))
+        end_date = parse_date(request.POST.get("end_date", ""))
+        if not start_date or not end_date:
+            raise DjangoValidationError("Unesi datum od i datum do za visednevnu blokadu.")
+        if end_date < start_date:
+            raise DjangoValidationError("Datum do ne moze biti pre datuma od.")
+        start_dt = timezone.make_aware(datetime.combine(start_date, time.min), timezone=client_timezone(client))
+        end_dt = timezone.make_aware(datetime.combine(end_date, time.max), timezone=client_timezone(client))
+    else:
+        target_date = parse_date(request.POST.get("block_date", ""))
+        start_time = parse_time(request.POST.get("start_time", ""))
+        end_time = parse_time(request.POST.get("end_time", ""))
+        if not target_date or not start_time or not end_time:
+            raise DjangoValidationError("Unesi datum i vreme od-do za jednodnevnu blokadu.")
+        start_dt = timezone.make_aware(datetime.combine(target_date, start_time), timezone=client_timezone(client))
+        end_dt = timezone.make_aware(datetime.combine(target_date, end_time), timezone=client_timezone(client))
+
+    blocked_time = BlockedTime(
+        business_client=client,
+        staff_member=staff_member,
+        start_at=start_dt,
+        end_at=end_dt,
+        reason=reason,
+        source="admin_dashboard",
+    )
+    blocked_time.full_clean()
+    blocked_time.save()
+
+
+def delete_blocked_time(request, client):
+    blocked_time = get_object_or_404(BlockedTime, id=request.POST.get("blocked_time_id"), business_client=client)
+    blocked_time.delete()
 
 
 def update_client_settings(request, client):

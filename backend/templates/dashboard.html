@@ -350,6 +350,10 @@
             grid-template-columns: minmax(150px, 1.2fr) minmax(120px, .9fr) 90px 90px 92px auto;
         }
 
+        .edit-row.work-row {
+            grid-template-columns: 120px 120px 120px 120px;
+        }
+
         .edit-row input {
             height: 44px;
             border-radius: 12px;
@@ -713,7 +717,7 @@
             .nav-btn svg { display: none; }
             .main { grid-template-rows: 72px 1fr; }
             .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .dashboard-grid, .detail-grid, .detail-grid.three, .compact-form, .compact-form.three, .edit-row, .edit-row.service-row { grid-template-columns: 1fr; }
+            .dashboard-grid, .detail-grid, .detail-grid.three, .compact-form, .compact-form.three, .edit-row, .edit-row.service-row, .edit-row.work-row { grid-template-columns: 1fr; }
             .page { width: min(100% - 32px, 1320px); }
         }
 
@@ -1040,6 +1044,98 @@
                                     <div class="status-line"><span>Usluge</span><strong>{{ selected_services|length }}</strong></div>
                                     <div class="status-line"><span>Termini</span><strong>{{ selected_appointment_total }}</strong></div>
                                     <div class="status-line"><span>Radno vreme</span><strong>{{ selected_client.work_start|time:"H:i" }}-{{ selected_client.work_end|time:"H:i" }}</strong></div>
+                                </div>
+                            </article>
+                        </div>
+
+                        <div class="detail-grid">
+                            <article class="card detail-card">
+                                <h3>Radno vreme</h3>
+                                <form method="post" class="edit-list">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="section" value="update_working_hours">
+                                    <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                                    {% for row in selected_working_hours %}
+                                        <div class="edit-row work-row">
+                                            <div class="field">
+                                                <label>Dan</label>
+                                                <input value="{{ row.get_weekday_display }}" readonly>
+                                            </div>
+                                            <div class="field">
+                                                <label>Od</label>
+                                                <input type="time" name="weekday_{{ row.weekday }}_start" value="{{ row.start_time|time:'H:i' }}">
+                                            </div>
+                                            <div class="field">
+                                                <label>Do</label>
+                                                <input type="time" name="weekday_{{ row.weekday }}_end" value="{{ row.end_time|time:'H:i' }}">
+                                            </div>
+                                            <label class="check-field">
+                                                <input type="checkbox" name="weekday_{{ row.weekday }}_closed" {% if row.is_closed %}checked{% endif %}>
+                                                Zatvoreno
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                    <button class="primary-btn" type="submit">Sacuvaj radno vreme</button>
+                                </form>
+                            </article>
+
+                            <article class="card detail-card">
+                                <h3>Blokade i pauze</h3>
+                                <form method="post" class="compact-form three">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="section" value="add_blocked_time">
+                                    <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                                    <div class="field">
+                                        <label>Tip</label>
+                                        <select name="block_type">
+                                            <option value="one_day">Jednodnevno</option>
+                                            <option value="multi_day">Vise dana</option>
+                                        </select>
+                                    </div>
+                                    <div class="field">
+                                        <label>Radnik</label>
+                                        <select name="staff_id">
+                                            <option value="">Svi radnici</option>
+                                            {% for staff in selected_staff_members %}
+                                                <option value="{{ staff.id }}">{{ staff.full_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="field"><label>Razlog</label><input name="reason" placeholder="odmor, pauza, bolovanje"></div>
+                                    <div class="field"><label>Datum</label><input type="date" name="block_date"></div>
+                                    <div class="field"><label>Od</label><input type="time" name="start_time" value="{{ selected_client.work_start|time:'H:i' }}"></div>
+                                    <div class="field"><label>Do</label><input type="time" name="end_time" value="{{ selected_client.work_end|time:'H:i' }}"></div>
+                                    <div class="field"><label>Datum od</label><input type="date" name="start_date"></div>
+                                    <div class="field"><label>Datum do</label><input type="date" name="end_date"></div>
+                                    <button class="primary-btn" type="submit">Dodaj blokadu</button>
+                                </form>
+
+                                <div class="edit-list">
+                                    {% for block in selected_blocked_times %}
+                                        <div class="edit-row">
+                                            <div class="field">
+                                                <label>Period</label>
+                                                <input value="{{ block.start_at|date:'d.m.Y H:i' }} - {{ block.end_at|date:'d.m.Y H:i' }}" readonly>
+                                            </div>
+                                            <div class="field">
+                                                <label>Radnik</label>
+                                                <input value="{% if block.staff_member %}{{ block.staff_member.full_name }}{% else %}Svi radnici{% endif %}" readonly>
+                                            </div>
+                                            <div class="field">
+                                                <label>Razlog</label>
+                                                <input value="{{ block.reason|default:'-' }}" readonly>
+                                            </div>
+                                            <form method="post" class="inline-form">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="section" value="delete_blocked_time">
+                                                <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                                                <input type="hidden" name="blocked_time_id" value="{{ block.id }}">
+                                                <button class="danger-btn" type="submit" onclick="return confirm('Obrisati ovu blokadu?');">Obrisi</button>
+                                            </form>
+                                        </div>
+                                    {% empty %}
+                                        <div class="notice">Nema blokada termina.</div>
+                                    {% endfor %}
                                 </div>
                             </article>
                         </div>
