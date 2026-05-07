@@ -125,21 +125,33 @@
         .nav-btn.active svg { color: #111827; }
 
         .logout {
-            margin-top: auto;
-            padding: 22px 30px;
-            border-top: 1px solid var(--line);
+            position: fixed;
+            top: 15px;
+            right: 18px;
+            z-index: 80;
+            margin: 0;
+            padding: 0;
         }
 
         .logout button {
-            border: 0;
-            background: transparent;
-            color: #aeb8c9;
+            min-height: 48px;
+            border: 1px solid #314057;
+            border-radius: 999px;
+            background: #0c1423;
+            color: #dbe4f2;
             display: inline-flex;
             align-items: center;
             gap: 12px;
             cursor: pointer;
             font-weight: 800;
             font-size: 15px;
+            padding: 0 18px;
+            box-shadow: 0 18px 48px rgba(0, 0, 0, .24);
+        }
+
+        .logout button:hover {
+            border-color: #49617f;
+            background: #111b2d;
         }
 
         .main {
@@ -153,7 +165,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 20px;
-            padding: 0 42px;
+            padding: 0 170px 0 42px;
             border-bottom: 1px solid var(--line);
         }
 
@@ -261,6 +273,118 @@
             grid-template-columns: minmax(0, 2.1fr) minmax(330px, 1fr);
             gap: 28px;
             margin-top: 42px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 28px;
+            margin-top: 28px;
+        }
+
+        .detail-grid.three {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .detail-card {
+            padding: 28px;
+        }
+
+        .detail-card h3 {
+            margin: 0 0 20px;
+            font-size: 22px;
+            letter-spacing: 0;
+        }
+
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .detail-table th {
+            color: var(--muted);
+            font-size: 12px;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            text-align: left;
+            padding: 0 0 12px;
+        }
+
+        .detail-table td {
+            border-top: 1px solid var(--line);
+            padding: 14px 0;
+            color: #dbe4f2;
+            font-weight: 700;
+        }
+
+        .detail-table td.muted { color: var(--muted); }
+
+        .compact-form {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .compact-form.three {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .edit-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .edit-row {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+            gap: 10px;
+            align-items: end;
+            border: 1px solid #253248;
+            border-radius: 16px;
+            background: #0c1423;
+            padding: 14px;
+        }
+
+        .edit-row.service-row {
+            grid-template-columns: minmax(150px, 1.2fr) minmax(120px, .9fr) 90px 90px 92px auto;
+        }
+
+        .edit-row input {
+            height: 44px;
+            border-radius: 12px;
+        }
+
+        .check-field {
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #dbe4f2;
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .check-field input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .edit-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .client-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .client-title h2 {
+            margin: 0;
         }
 
         .calls-card, .status-card, .settings-card, .table-card {
@@ -414,6 +538,33 @@
             background: transparent;
             color: var(--text);
             font-weight: 800;
+            cursor: pointer;
+        }
+
+        .mini-btn.success {
+            border-color: rgba(34, 197, 94, .38);
+            background: rgba(34, 197, 94, .12);
+            color: #bbf7d0;
+        }
+
+        .mini-btn.warning {
+            border-color: rgba(245, 158, 11, .38);
+            background: rgba(245, 158, 11, .12);
+            color: #fde68a;
+        }
+
+        .price-cell strong,
+        .renew-cell strong {
+            display: block;
+            color: #f4f7fb;
+        }
+
+        .price-cell span,
+        .renew-cell span {
+            display: block;
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 12px;
         }
 
         .row-actions {
@@ -560,17 +711,19 @@
                 font-size: 13px;
             }
             .nav-btn svg { display: none; }
-            .logout { display: none; }
             .main { grid-template-rows: 72px 1fr; }
             .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .dashboard-grid { grid-template-columns: 1fr; }
+            .dashboard-grid, .detail-grid, .detail-grid.three, .compact-form, .compact-form.three, .edit-row, .edit-row.service-row { grid-template-columns: 1fr; }
             .page { width: min(100% - 32px, 1320px); }
         }
 
         @media (max-width: 720px) {
-            .topbar { padding: 0 18px; }
+            .topbar { padding: 0 128px 0 18px; }
             .topbar h1 { font-size: 22px; }
             .online-pill { height: 40px; padding: 0 14px; font-size: 13px; }
+            .logout { top: 10px; right: 10px; }
+            .logout button { min-height: 40px; padding: 0 12px; font-size: 13px; }
+            .logout svg { display: none; }
             .nav { grid-template-columns: 1fr 1fr; }
             .cards, .form-grid, .form-grid.three, .switch-row { grid-template-columns: 1fr; }
             .client-table { min-width: 860px; }
@@ -620,7 +773,7 @@
                 </button>
             </nav>
 
-            <form class="logout" method="post" action="/django-admin/logout/">
+            <form class="logout" method="post" action="/admin/logout/">
                 {% csrf_token %}
                 <button type="submit">
                     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 3v18"/></svg>
@@ -730,6 +883,9 @@
                                         <th>Ime</th>
                                         <th>Kontakt</th>
                                         <th>Paket</th>
+                                        <th>Pretplata</th>
+                                        <th>Obnova</th>
+                                        <th>Cena</th>
                                         <th>AI model</th>
                                         <th>Status</th>
                                         <th>Akcije</th>
@@ -741,6 +897,36 @@
                                             <td>{{ client.public_name|default:client.name }}</td>
                                             <td class="muted">{{ client.owner.email|default:client.owner.username }}</td>
                                             <td>{{ client.get_package_display }}</td>
+                                            <td>
+                                                {% if client.subscription %}
+                                                    <span class="badge {% if client.subscription.status == 'active' %}ok{% elif client.subscription.status == 'trial' %}pause{% else %}off{% endif %}">
+                                                        {{ client.subscription.get_status_display }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge off">Nema pretplate</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="renew-cell">
+                                                {% if client.subscription.current_period_end %}
+                                                    <strong>{{ client.subscription.current_period_end|date:"d.m.Y" }}</strong>
+                                                    <span>sledeca naplata</span>
+                                                {% elif client.subscription.trial_ends_at %}
+                                                    <strong>{{ client.subscription.trial_ends_at|date:"d.m.Y" }}</strong>
+                                                    <span>kraj trial-a</span>
+                                                {% else %}
+                                                    <strong>-</strong>
+                                                    <span>nije zakazano</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="price-cell">
+                                                {% if client.subscription.plan %}
+                                                    <strong>{{ client.subscription.plan.monthly_price }} {{ client.subscription.plan.currency }}</strong>
+                                                    <span>mesecno</span>
+                                                {% else %}
+                                                    <strong>-</strong>
+                                                    <span>nema plana</span>
+                                                {% endif %}
+                                            </td>
                                             <td class="muted">{{ client.api_settings.ai_model|default:"Globalni" }}</td>
                                             <td>
                                                 <span class="badge {% if client.kaleya_enabled %}ok{% else %}pause{% endif %}">
@@ -749,8 +935,24 @@
                                             </td>
                                             <td>
                                                 <div class="row-actions">
+                                                    <a class="mini-btn" href="?client_id={{ client.id }}#client-detail">Detalji</a>
                                                     <a class="mini-btn" href="?client_id={{ client.id }}#settings">API po klijentu</a>
                                                     {% if is_admin_user %}
+                                                        {% if client.kaleya_enabled %}
+                                                            <form class="inline-form" method="post">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="section" value="pause_client">
+                                                                <input type="hidden" name="client_id" value="{{ client.id }}">
+                                                                <button class="mini-btn warning" type="submit">Pauziraj</button>
+                                                            </form>
+                                                        {% else %}
+                                                            <form class="inline-form" method="post">
+                                                                {% csrf_token %}
+                                                                <input type="hidden" name="section" value="activate_client">
+                                                                <input type="hidden" name="client_id" value="{{ client.id }}">
+                                                                <button class="mini-btn success" type="submit">Aktiviraj</button>
+                                                            </form>
+                                                        {% endif %}
                                                         <form class="inline-form" method="post" onsubmit="return confirm('Obrisati klijenta {{ client.public_name|default:client.name }}?');">
                                                             {% csrf_token %}
                                                             <input type="hidden" name="section" value="delete_client">
@@ -764,6 +966,212 @@
                                     {% endfor %}
                                 </tbody>
                             </table>
+                        </div>
+                    </section>
+
+                    <section class="panel" id="client-detail">
+                        <div class="section-head">
+                            <div>
+                                <div class="client-title">
+                                    <h2>Detalji klijenta</h2>
+                                    <span class="badge {% if selected_client.kaleya_enabled %}ok{% else %}pause{% endif %}">
+                                        {% if selected_client.kaleya_enabled %}Kaleya online{% else %}Kaleya offline{% endif %}
+                                    </span>
+                                </div>
+                                <p>{{ selected_client.public_name|default:selected_client.name }} - {{ selected_client.owner.email|default:selected_client.owner.username }}</p>
+                            </div>
+                            <a class="mini-btn" href="?client_id={{ selected_client.id }}#clients">Nazad na klijente</a>
+                        </div>
+
+                        <div class="detail-grid three">
+                            <article class="card detail-card">
+                                <h3>Pretplata</h3>
+                                <div class="status-list">
+                                    <div class="status-line"><span>Paket</span><strong>{{ selected_client.get_package_display }}</strong></div>
+                                    <div class="status-line">
+                                        <span>Status</span>
+                                        <strong>
+                                            {% if selected_subscription %}
+                                                {{ selected_subscription.get_status_display }}
+                                            {% else %}
+                                                Nema pretplate
+                                            {% endif %}
+                                        </strong>
+                                    </div>
+                                    <div class="status-line">
+                                        <span>Cena</span>
+                                        <strong>
+                                            {% if selected_subscription and selected_subscription.plan %}
+                                                {{ selected_subscription.plan.monthly_price }} {{ selected_subscription.plan.currency }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </strong>
+                                    </div>
+                                    <div class="status-line">
+                                        <span>Obnova</span>
+                                        <strong>
+                                            {% if selected_subscription.current_period_end %}
+                                                {{ selected_subscription.current_period_end|date:"d.m.Y" }}
+                                            {% elif selected_subscription.trial_ends_at %}
+                                                {{ selected_subscription.trial_ends_at|date:"d.m.Y" }}
+                                            {% else %}
+                                                -
+                                            {% endif %}
+                                        </strong>
+                                    </div>
+                                </div>
+                            </article>
+
+                            <article class="card detail-card">
+                                <h3>API status</h3>
+                                <div class="status-list">
+                                    <div class="status-line"><span>AI provider</span><strong>{{ api_settings.ai_provider|default:"global" }}</strong></div>
+                                    <div class="status-line"><span>AI model</span><strong>{{ api_settings.ai_model|default:"global" }}</strong></div>
+                                    <div class="status-line"><span>Voice provider</span><strong>{{ api_settings.voice_provider|default:"ElevenLabs" }}</strong></div>
+                                    <div class="status-line"><span>Voice ID</span><strong>{% if api_settings.voice_id or voice_settings.voice_id %}Podesen{% else %}Globalni{% endif %}</strong></div>
+                                </div>
+                            </article>
+
+                            <article class="card detail-card">
+                                <h3>Operativa</h3>
+                                <div class="status-list">
+                                    <div class="status-line"><span>Radnici</span><strong>{{ selected_staff_members|length }}</strong></div>
+                                    <div class="status-line"><span>Usluge</span><strong>{{ selected_services|length }}</strong></div>
+                                    <div class="status-line"><span>Termini</span><strong>{{ selected_appointment_total }}</strong></div>
+                                    <div class="status-line"><span>Radno vreme</span><strong>{{ selected_client.work_start|time:"H:i" }}-{{ selected_client.work_end|time:"H:i" }}</strong></div>
+                                </div>
+                            </article>
+                        </div>
+
+                        <div class="detail-grid">
+                            <article class="card detail-card">
+                                <h3>Radnici</h3>
+                                {% if is_admin_user %}
+                                    <form method="post" class="compact-form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="section" value="add_staff">
+                                        <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                                        <div class="field"><label>Ime</label><input name="full_name" required></div>
+                                        <div class="field"><label>Zanimanje</label><input name="role_title"></div>
+                                        <div class="field"><label>Telefon</label><input name="phone"></div>
+                                        <div class="field"><label>Email</label><input type="email" name="email"></div>
+                                        <div class="field"><label>Boja</label><input type="color" name="color" value="#3b82f6"></div>
+                                        <label class="check-field"><input type="checkbox" name="is_active" checked> Aktivan</label>
+                                        <button class="primary-btn" type="submit">Dodaj radnika</button>
+                                    </form>
+                                {% endif %}
+
+                                <div class="edit-list">
+                                    {% for staff in selected_staff_members %}
+                                        <form method="post" class="edit-row">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="section" value="update_staff">
+                                            <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                                            <input type="hidden" name="staff_id" value="{{ staff.id }}">
+                                            <div class="field"><label>Ime</label><input name="full_name" value="{{ staff.full_name }}" required></div>
+                                            <div class="field"><label>Zanimanje</label><input name="role_title" value="{{ staff.role_title }}"></div>
+                                            <div class="field"><label>Telefon</label><input name="phone" value="{{ staff.phone }}"></div>
+                                            <div class="field"><label>Email</label><input type="email" name="email" value="{{ staff.email }}"></div>
+                                            <label class="check-field"><input type="checkbox" name="is_active" {% if staff.is_active %}checked{% endif %}> Aktivan</label>
+                                            <div class="edit-actions">
+                                                <button class="mini-btn success" type="submit">Sacuvaj</button>
+                                                <button class="danger-btn" type="submit" name="section" value="delete_staff" onclick="return confirm('Obrisati radnika {{ staff.full_name }}?');">Obrisi</button>
+                                            </div>
+                                        </form>
+                                    {% empty %}
+                                        <div class="notice">Nema dodatih radnika.</div>
+                                    {% endfor %}
+                                </div>
+                            </article>
+
+                            <article class="card detail-card">
+                                <h3>Usluge</h3>
+                                {% if is_admin_user %}
+                                    <form method="post" class="compact-form three">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="section" value="add_service">
+                                        <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                                        <div class="field"><label>Naziv</label><input name="name" required></div>
+                                        <div class="field"><label>Kategorija</label><input name="category"></div>
+                                        <div class="field"><label>Trajanje</label><input type="number" min="5" name="duration_minutes" value="30"></div>
+                                        <div class="field"><label>Cena</label><input type="number" min="0" step="0.01" name="price" value="0"></div>
+                                        <div class="field"><label>Valuta</label><input name="currency" value="USD"></div>
+                                        <label class="check-field"><input type="checkbox" name="is_active" checked> Aktivna</label>
+                                        <button class="primary-btn" type="submit">Dodaj uslugu</button>
+                                    </form>
+                                {% endif %}
+
+                                <div class="edit-list">
+                                    {% for service in selected_services %}
+                                        <form method="post" class="edit-row service-row">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="section" value="update_service">
+                                            <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                                            <input type="hidden" name="service_id" value="{{ service.id }}">
+                                            <div class="field"><label>Naziv</label><input name="name" value="{{ service.name }}" required></div>
+                                            <div class="field"><label>Kategorija</label><input name="category" value="{{ service.category }}"></div>
+                                            <div class="field"><label>Min</label><input type="number" min="5" name="duration_minutes" value="{{ service.duration_minutes }}"></div>
+                                            <div class="field"><label>Cena</label><input type="number" min="0" step="0.01" name="price" value="{{ service.price }}"></div>
+                                            <div class="field"><label>Valuta</label><input name="currency" value="{{ service.currency }}"></div>
+                                            <label class="check-field"><input type="checkbox" name="is_active" {% if service.is_active %}checked{% endif %}> Aktivna</label>
+                                            <div class="edit-actions">
+                                                <button class="mini-btn success" type="submit">Sacuvaj</button>
+                                                <button class="danger-btn" type="submit" name="section" value="delete_service" onclick="return confirm('Obrisati uslugu {{ service.name }}?');">Obrisi</button>
+                                            </div>
+                                        </form>
+                                    {% empty %}
+                                        <div class="notice">Nema dodatih usluga.</div>
+                                    {% endfor %}
+                                </div>
+                            </article>
+                        </div>
+
+                        <div class="detail-grid">
+                            <article class="card detail-card">
+                                <h3>Integracije</h3>
+                                <table class="detail-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Kanal</th>
+                                            <th>Status</th>
+                                            <th>Broj / nalog</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for integration in integrations %}
+                                            <tr>
+                                                <td>{{ integration.get_provider_display }}</td>
+                                                <td>
+                                                    <span class="badge {% if integration.enabled and integration.status == 'connected' %}ok{% elif integration.enabled %}pause{% else %}off{% endif %}">
+                                                        {{ integration.get_status_display }}
+                                                    </span>
+                                                </td>
+                                                <td class="muted">{{ integration.public_number|default:"-" }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </article>
+
+                            <article class="card detail-card">
+                                <h3>Poslednje AI aktivnosti</h3>
+                                <div class="call-list">
+                                    {% for log in selected_ai_logs %}
+                                        <div class="call-row">
+                                            <div class="call-icon {% if log.success %}ok{% else %}bad{% endif %}">{% if log.success %}i{% else %}x{% endif %}</div>
+                                            <div class="call-main">
+                                                <strong>{{ log.command }}</strong>
+                                                <span>{{ log.input_text|truncatechars:82 }}</span>
+                                                {% if log.output_text %}<span>{{ log.output_text|truncatechars:82 }}</span>{% endif %}
+                                            </div>
+                                            <span class="call-time">{{ log.created_at|date:"d.m H:i" }}</span>
+                                        </div>
+                                    {% empty %}
+                                        <div class="notice">Jos nema AI aktivnosti za ovog klijenta.</div>
+                                    {% endfor %}
+                                </div>
+                            </article>
                         </div>
                     </section>
 
@@ -1151,15 +1559,17 @@
         const panels = Array.from(document.querySelectorAll(".panel[id]"));
 
         function activate(tab) {
-            const button = tabs.find((item) => item.dataset.tab === tab) || tabs[0];
+            const requestedTab = panels.some((panel) => panel.id === tab) ? tab : "overview";
+            const parentTab = requestedTab === "client-detail" ? "clients" : requestedTab;
+            const button = tabs.find((item) => item.dataset.tab === parentTab) || tabs[0];
             if (!button) return;
 
-            tabs.forEach((item) => item.classList.toggle("active", item === button));
-            panels.forEach((panel) => panel.classList.toggle("active", panel.id === button.dataset.tab));
-            title.textContent = button.dataset.title || "Kontrolna tabla";
+            tabs.forEach((item) => item.classList.toggle("active", item.dataset.tab === parentTab));
+            panels.forEach((panel) => panel.classList.toggle("active", panel.id === requestedTab));
+            title.textContent = requestedTab === "client-detail" ? "Detalji klijenta" : button.dataset.title || "Kontrolna tabla";
 
             if (history.replaceState) {
-                history.replaceState(null, "", "#" + button.dataset.tab);
+                history.replaceState(null, "", "#" + requestedTab);
             }
         }
 

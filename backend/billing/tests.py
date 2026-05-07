@@ -6,6 +6,7 @@ from django.test import Client, TestCase, override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
 
+from ai_core.models import KaleyaCommandLog
 from billing.models import (
     CheckoutSession,
     PaymentWebhookEvent,
@@ -15,6 +16,8 @@ from billing.models import (
 )
 from billing.views import CheckoutSessionViewSet
 from clients.models import BusinessClient
+from integrations.models import IntegrationConnection
+from staff_services.models import Service, StaffMember
 
 
 class PackageLimitTests(TestCase):
@@ -589,6 +592,217 @@ class PackageLimitTests(TestCase):
         self.assertContains(response, "Plaćanja")
         self.assertContains(response, "subscription_created")
         self.assertContains(response, "subscription_dashboard")
+
+    def test_kaleya_admin_logout_returns_to_frontend(self):
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
+        django_client = Client()
+        django_client.force_login(self.user)
+
+        response = django_client.post("/admin/logout/")
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], "/")
+        response_after_logout = django_client.get("/admin/")
+        self.assertEqual(response_after_logout.status_code, 302)
+        self.assertTrue(response_after_logout["Location"].startswith("/admin/login/"))
+
+    def test_kaleya_admin_can_pause_and_activate_client_access(self):
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
+        plan = self.make_plan(Plan.CODE_BASIC, 0)
+        Subscription.objects.create(
+            business_client=self.client_profile,
+            plan=plan,
+            status=Subscription.STATUS_ACTIVE,
+            current_period_start=timezone.now(),
+            current_period_end=timezone.now() + timedelta(days=30),
+        )
+        django_client = Client()
+        django_client.force_login(self.user)
+
+        pause_response = django_client.post(
+            "/admin/",
+            {"section": "pause_client", "client_id": self.client_profile.id},
+        )
+
+        self.assertEqual(pause_response.status_code, 302)
+        self.client_profile.refresh_from_db()
+        subscription = Subscription.objects.get(business_client=self.client_profile)
+        self.assertFalse(self.client_profile.kaleya_enabled)
+        self.assertEqual(subscription.status, Subscription.STATUS_PAST_DUE)
+        self.assertIsNone(subscription.current_period_end)
+
+        activate_response = django_client.post(
+            "/admin/",
+            {"section": "activate_client", "client_id": self.client_profile.id},
+        )
+
+        self.assertEqual(activate_response.status_code, 302)
+        self.client_profile.refresh_from_db()
+        subscription.refresh_from_db()
+        self.assertTrue(self.client_profile.kaleya_enabled)
+        self.assertEqual(subscription.status, Subscription.STATUS_ACTIVE)
+        self.assertIsNotNone(subscription.current_period_end)
+
+    def test_kaleya_admin_client_detail_panel_shows_operational_summary(self):
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
+        plan = self.make_plan(Plan.CODE_BUSINESS, 5, allow_client_api_override=True)
+        Subscription.objects.create(
+            business_client=self.client_profile,
+            plan=plan,
+            status=Subscription.STATUS_ACTIVE,
+            current_period_start=timezone.now(),
+            current_period_end=timezone.now() + timedelta(days=30),
+        )
+        StaffMember.objects.create(
+            business_client=self.client_profile,
+            full_name="Ana Specialist",
+            role_title="Stylist",
+            phone="+38160111222",
+        )
+        Service.objects.create(
+            business_client=self.client_profile,
+            name="Premium service",
+            duration_minutes=45,
+            price=75,
+            currency="USD",
+        )
+        IntegrationConnection.objects.create(
+            business_client=self.client_profile,
+            provider="whatsapp",
+            enabled=True,
+            status="connected",
+            public_number="+38160111222",
+        )
+        KaleyaCommandLog.objects.create(
+            business_client=self.client_profile,
+            command="check_availability",
+            input_text="Do you have a free slot today?",
+            output_text="There are 4 free slots today.",
+            language="en",
+            channel="web",
+            success=True,
+        )
+        django_client = Client()
+        django_client.force_login(self.user)
+
+        response = django_client.get(f"/admin/?client_id={self.client_profile.id}")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Detalji klijenta")
+        self.assertContains(response, "Ana Specialist")
+        self.assertContains(response, "Premium service")
+        self.assertContains(response, "WhatsApp")
+        self.assertContains(response, "check_availability")
+
+    def test_kaleya_admin_can_manage_staff_and_services_from_client_detail(self):
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
+        plan = self.make_plan(Plan.CODE_BUSINESS, 5)
+        self.client_profile.package = Plan.CODE_BUSINESS
+        self.client_profile.save(update_fields=["package", "updated_at"])
+        Subscription.objects.create(
+            business_client=self.client_profile,
+            plan=plan,
+            status=Subscription.STATUS_ACTIVE,
+            current_period_start=timezone.now(),
+            current_period_end=timezone.now() + timedelta(days=30),
+        )
+        django_client = Client()
+        django_client.force_login(self.user)
+
+        add_staff = django_client.post(
+            "/admin/",
+            {
+                "section": "add_staff",
+                "client_id": self.client_profile.id,
+                "full_name": "Mina Worker",
+                "role_title": "Therapist",
+                "phone": "+38160123456",
+                "email": "mina@example.com",
+                "color": "#14b8a6",
+                "is_active": "on",
+            },
+        )
+
+        self.assertEqual(add_staff.status_code, 302)
+        staff = StaffMember.objects.get(business_client=self.client_profile, full_name="Mina Worker")
+        self.assertTrue(staff.is_active)
+
+        update_staff = django_client.post(
+            "/admin/",
+            {
+                "section": "update_staff",
+                "client_id": self.client_profile.id,
+                "staff_id": staff.id,
+                "full_name": "Mina Updated",
+                "role_title": "Lead therapist",
+                "phone": "+38160999999",
+                "email": "mina.updated@example.com",
+                "is_active": "on",
+            },
+        )
+
+        self.assertEqual(update_staff.status_code, 302)
+        staff.refresh_from_db()
+        self.assertEqual(staff.full_name, "Mina Updated")
+        self.assertEqual(staff.role_title, "Lead therapist")
+
+        add_service = django_client.post(
+            "/admin/",
+            {
+                "section": "add_service",
+                "client_id": self.client_profile.id,
+                "name": "Massage test",
+                "category": "Wellness",
+                "duration_minutes": "60",
+                "price": "88.50",
+                "currency": "USD",
+                "is_active": "on",
+            },
+        )
+
+        self.assertEqual(add_service.status_code, 302)
+        service = Service.objects.get(business_client=self.client_profile, name="Massage test")
+        self.assertEqual(service.duration_minutes, 60)
+        self.assertEqual(str(service.price), "88.50")
+
+        update_service = django_client.post(
+            "/admin/",
+            {
+                "section": "update_service",
+                "client_id": self.client_profile.id,
+                "service_id": service.id,
+                "name": "Massage updated",
+                "category": "Wellness",
+                "duration_minutes": "45",
+                "price": "77.00",
+                "currency": "USD",
+                "is_active": "",
+            },
+        )
+
+        self.assertEqual(update_service.status_code, 302)
+        service.refresh_from_db()
+        self.assertEqual(service.name, "Massage updated")
+        self.assertEqual(service.duration_minutes, 45)
+        self.assertFalse(service.is_active)
+
+        delete_service = django_client.post(
+            "/admin/",
+            {"section": "delete_service", "client_id": self.client_profile.id, "service_id": service.id},
+        )
+        delete_staff = django_client.post(
+            "/admin/",
+            {"section": "delete_staff", "client_id": self.client_profile.id, "staff_id": staff.id},
+        )
+
+        self.assertEqual(delete_service.status_code, 302)
+        self.assertEqual(delete_staff.status_code, 302)
+        self.assertFalse(Service.objects.filter(id=service.id).exists())
+        self.assertFalse(StaffMember.objects.filter(id=staff.id).exists())
 
     @override_settings(DEBUG=True, KALEYA_PAYPAL_WEBHOOK_ID="")
     def test_paypal_webhook_marks_checkout_paid_and_subscription_active_in_debug(self):

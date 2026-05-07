@@ -6,7 +6,7 @@ from django.urls import include, path, re_path
 from django.views.generic import TemplateView
 from django.views.static import serve
 
-from kaleya_config.dashboard_views import dashboard
+from kaleya_config.dashboard_views import dashboard, dashboard_logout
 
 
 admin.site.site_header = "Kaleya"
@@ -52,7 +52,8 @@ urlpatterns = [
     path("sw.js", no_cache_static_serve, {"path": "sw.js", "document_root": settings.PROJECT_ROOT / "frontend"}),
     path("dashboard/", dashboard, name="dashboard"),
     path("admin/", dashboard, name="kaleya-admin"),
-    path("admin/login/", lambda request: redirect("/django-admin/login/?next=/admin/")),
+    path("admin/logout/", dashboard_logout, name="kaleya-admin-logout"),
+    path("admin/login/", lambda request: redirect("/?login=admin")),
     re_path(r"^admin/.+$", lambda request: redirect("/admin/")),
     path("django-admin/", admin.site.urls),
     path("api/health/", health_check, name="health-check"),

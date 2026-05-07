@@ -1,15 +1,25 @@
+from datetime import timedelta
+from decimal import Decimal, InvalidOperation
+
+from django.core.exceptions import ValidationError as DjangoValidationError
 from django.contrib import messages
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.dateparse import parse_time
+from django.views.decorators.http import require_POST
 
-from ai_core.models import AlarmSettings, VoiceSettings
+from ai_core.models import AlarmSettings, KaleyaCommandLog, VoiceSettings
 from appointments.models import Appointment
 from appointments.services import today_availability_summary
-from billing.models import PaymentWebhookEvent
+from billing.models import PaymentWebhookEvent, Plan, Subscription
+from billing.services import enforce_staff_limit
 from clients.models import BusinessClient, ClientApiSettings
 from integrations.models import IntegrationConnection
+from rest_framework.exceptions import ValidationError as DRFValidationError
+from staff_services.models import Service, StaffMember
 
 
 def is_admin_user(user):
@@ -27,11 +37,57 @@ def int_value(value, default):
         return default
 
 
+def decimal_value(value, default):
+    try:
+        return Decimal(str(value).strip())
+    except (InvalidOperation, TypeError, ValueError):
+        return default
+
+
+def dashboard_error_message(error):
+    if isinstance(error, DjangoValidationError):
+        if hasattr(error, "message_dict"):
+            parts = []
+            for field, messages_list in error.message_dict.items():
+                parts.append(f"{field}: {', '.join(str(item) for item in messages_list)}")
+            return "; ".join(parts)
+        return "; ".join(str(item) for item in error.messages)
+
+    detail = getattr(error, "detail", None)
+    if detail:
+        if isinstance(detail, dict):
+            parts = []
+            for field, messages_list in detail.items():
+                if isinstance(messages_list, (list, tuple)):
+                    parts.append(f"{field}: {', '.join(str(item) for item in messages_list)}")
+                else:
+                    parts.append(f"{field}: {messages_list}")
+            return "; ".join(parts)
+        if isinstance(detail, (list, tuple)):
+            return "; ".join(str(item) for item in detail)
+        return str(detail)
+
+    return str(error)
+
+
 def clients_for_user(user):
-    queryset = BusinessClient.objects.select_related("owner").order_by("name")
+    queryset = BusinessClient.objects.select_related("owner", "subscription__plan").order_by("name")
     if is_admin_user(user):
         return queryset
     return queryset.filter(owner=user)
+
+
+def get_client_subscription(client):
+    try:
+        return client.subscription
+    except Subscription.DoesNotExist:
+        return None
+
+
+@require_POST
+def dashboard_logout(request):
+    logout(request)
+    return redirect("/")
 
 
 @login_required(login_url="/admin/login/")
@@ -58,6 +114,33 @@ def dashboard(request):
 
     if request.method == "POST":
         section = request.POST.get("section", "")
+        detail_sections = {"add_staff", "update_staff", "delete_staff", "add_service", "update_service", "delete_service"}
+        if section in detail_sections:
+            if not is_admin_user(request.user):
+                messages.error(request, "Samo admin moze da menja radnike i usluge.")
+                return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#client-detail")
+            try:
+                if section == "add_staff":
+                    add_staff_member(request, selected_client)
+                    messages.success(request, "Radnik je dodat.")
+                elif section == "update_staff":
+                    update_staff_member(request, selected_client)
+                    messages.success(request, "Radnik je sacuvan.")
+                elif section == "delete_staff":
+                    delete_staff_member(request, selected_client)
+                    messages.success(request, "Radnik je obrisan.")
+                elif section == "add_service":
+                    add_service(request, selected_client)
+                    messages.success(request, "Usluga je dodata.")
+                elif section == "update_service":
+                    update_service(request, selected_client)
+                    messages.success(request, "Usluga je sacuvana.")
+                elif section == "delete_service":
+                    delete_service(request, selected_client)
+                    messages.success(request, "Usluga je obrisana.")
+            except (DjangoValidationError, DRFValidationError, ValueError) as error:
+                messages.error(request, dashboard_error_message(error))
+            return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#client-detail")
         if section == "client":
             update_client_settings(request, selected_client)
             messages.success(request, "Podešavanja klijenta su sačuvana.")
@@ -78,6 +161,14 @@ def dashboard(request):
             selected_client.delete()
             messages.success(request, f"Klijent {client_name} je obrisan.")
             return redirect(f"{reverse('dashboard')}#clients")
+        elif section == "activate_client" and is_admin_user(request.user):
+            update_client_subscription_state(selected_client, Subscription.STATUS_ACTIVE)
+            messages.success(request, f"Klijent {selected_client} je aktiviran.")
+            return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#clients")
+        elif section == "pause_client" and is_admin_user(request.user):
+            update_client_subscription_state(selected_client, Subscription.STATUS_PAST_DUE)
+            messages.success(request, f"Klijent {selected_client} je pauziran.")
+            return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#clients")
         elif section == "delete_client":
             messages.error(request, "Samo admin moze da obrise klijenta.")
         else:
@@ -97,6 +188,11 @@ def dashboard(request):
         status=Appointment.STATUS_CANCELLED,
     ).count()
     today_summary = today_availability_summary(selected_client)
+    selected_subscription = get_client_subscription(selected_client)
+    selected_staff_members = selected_client.staff_members.all().order_by("full_name")
+    selected_services = selected_client.services.all().order_by("category", "name")
+    selected_ai_logs = KaleyaCommandLog.objects.filter(business_client=selected_client).order_by("-created_at")[:8]
+    selected_appointment_total = Appointment.objects.filter(business_client=selected_client).count()
     admin_has_full_access = is_admin_user(request.user)
     payment_webhook_events = PaymentWebhookEvent.objects.none()
     payment_webhook_total = 0
@@ -121,6 +217,11 @@ def dashboard(request):
         "alarm_settings": alarm_settings,
         "voice_settings": voice_settings,
         "integrations": integrations,
+        "selected_subscription": selected_subscription,
+        "selected_staff_members": selected_staff_members,
+        "selected_services": selected_services,
+        "selected_ai_logs": selected_ai_logs,
+        "selected_appointment_total": selected_appointment_total,
         "upcoming_appointments": upcoming_appointments,
         "today_summary": today_summary,
         "cancelled_count": cancelled_count,
@@ -137,6 +238,102 @@ def dashboard(request):
         "slot_choices": [15, 20, 30, 45, 60],
     }
     return render(request, "dashboard.html", context)
+
+
+def update_client_subscription_state(client, status):
+    plan = Plan.objects.filter(code=client.package, active=True).first() or Plan.objects.filter(code=Plan.CODE_BASIC).first()
+    if plan is None:
+        raise Plan.DoesNotExist("Nema plana za ovog klijenta.")
+
+    now = timezone.now()
+    defaults = {
+        "plan": plan,
+        "status": status,
+        "trial_ends_at": None,
+    }
+    if status == Subscription.STATUS_ACTIVE:
+        defaults.update(
+            {
+                "current_period_start": now,
+                "current_period_end": now + timedelta(days=30),
+            }
+        )
+        client.kaleya_enabled = True
+    else:
+        defaults.update({"current_period_start": None, "current_period_end": None})
+        client.kaleya_enabled = False
+
+    Subscription.objects.update_or_create(business_client=client, defaults=defaults)
+    client.save(update_fields=["kaleya_enabled", "updated_at"])
+
+
+def add_staff_member(request, client):
+    is_active = checkbox_value(request.POST, "is_active")
+    if is_active:
+        enforce_staff_limit(client)
+    staff_member = StaffMember(
+        business_client=client,
+        full_name=request.POST.get("full_name", "").strip(),
+        role_title=request.POST.get("role_title", "").strip(),
+        phone=request.POST.get("phone", "").strip(),
+        email=request.POST.get("email", "").strip(),
+        color=request.POST.get("color", "#3b82f6").strip() or "#3b82f6",
+        is_active=is_active,
+    )
+    staff_member.full_clean()
+    staff_member.save()
+
+
+def update_staff_member(request, client):
+    staff_member = get_object_or_404(StaffMember, id=request.POST.get("staff_id"), business_client=client)
+    was_inactive = not staff_member.is_active
+    is_active = checkbox_value(request.POST, "is_active")
+    if was_inactive and is_active:
+        enforce_staff_limit(client)
+    staff_member.full_name = request.POST.get("full_name", staff_member.full_name).strip() or staff_member.full_name
+    staff_member.role_title = request.POST.get("role_title", "").strip()
+    staff_member.phone = request.POST.get("phone", "").strip()
+    staff_member.email = request.POST.get("email", "").strip()
+    staff_member.color = request.POST.get("color", staff_member.color).strip() or staff_member.color
+    staff_member.is_active = is_active
+    staff_member.full_clean()
+    staff_member.save()
+
+
+def delete_staff_member(request, client):
+    staff_member = get_object_or_404(StaffMember, id=request.POST.get("staff_id"), business_client=client)
+    staff_member.delete()
+
+
+def add_service(request, client):
+    service = Service(
+        business_client=client,
+        name=request.POST.get("name", "").strip(),
+        category=request.POST.get("category", "").strip(),
+        duration_minutes=int_value(request.POST.get("duration_minutes"), 30),
+        price=decimal_value(request.POST.get("price"), Decimal("0")),
+        currency=request.POST.get("currency", "USD").strip() or "USD",
+        is_active=checkbox_value(request.POST, "is_active"),
+    )
+    service.full_clean()
+    service.save()
+
+
+def update_service(request, client):
+    service = get_object_or_404(Service, id=request.POST.get("service_id"), business_client=client)
+    service.name = request.POST.get("name", service.name).strip() or service.name
+    service.category = request.POST.get("category", "").strip()
+    service.duration_minutes = int_value(request.POST.get("duration_minutes"), service.duration_minutes)
+    service.price = decimal_value(request.POST.get("price"), service.price)
+    service.currency = request.POST.get("currency", service.currency).strip() or service.currency
+    service.is_active = checkbox_value(request.POST, "is_active")
+    service.full_clean()
+    service.save()
+
+
+def delete_service(request, client):
+    service = get_object_or_404(Service, id=request.POST.get("service_id"), business_client=client)
+    service.delete()
 
 
 def update_client_settings(request, client):

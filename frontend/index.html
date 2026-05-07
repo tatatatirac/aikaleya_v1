@@ -2344,6 +2344,25 @@ async function backendLogin(email, password) {
     return response.json();
 }
 
+function extractBackendLoginError(detail) {
+    if (!detail) return '';
+    if (typeof detail === 'string') return detail;
+    if (detail.detail) return detail.detail;
+    if (Array.isArray(detail.non_field_errors) && detail.non_field_errors.length) {
+        return detail.non_field_errors[0];
+    }
+    if (detail.email) return Array.isArray(detail.email) ? detail.email[0] : detail.email;
+    if (detail.password) return Array.isArray(detail.password) ? detail.password[0] : detail.password;
+    return '';
+}
+
+function loginErrorMessage(error) {
+    if (error.message === 'backend_unavailable') {
+        return 'Backend server nije pokrenut. Pokreni server pa probaj ponovo.';
+    }
+    return extractBackendLoginError(error.detail) || T.login_err || 'Wrong email or password';
+}
+
 document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const email = document.getElementById('email').value.trim();
@@ -2368,9 +2387,7 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
             showView('client');
             return;
         } catch (err) {
-            error.textContent = err.message === 'backend_unavailable'
-                ? 'Backend server nije pokrenut. Pokreni server pa probaj ponovo.'
-                : (T.login_err || 'Wrong email or password');
+            error.textContent = loginErrorMessage(err);
             error.classList.remove('hidden');
             return;
         }
@@ -5868,6 +5885,9 @@ if (savedAuthToken && (savedUserRole === 'client' || savedUserRole === 'employee
     showView('landing');
 }
 handlePaymentReturn();
+if (new URLSearchParams(window.location.search).get('login') === 'admin') {
+    showView('login');
+}
 
 // Preload wake word listener on client view idle
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
