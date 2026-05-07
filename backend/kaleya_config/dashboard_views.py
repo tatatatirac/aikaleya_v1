@@ -7,6 +7,7 @@ from django.utils.dateparse import parse_time
 from ai_core.models import AlarmSettings, VoiceSettings
 from appointments.models import Appointment
 from appointments.services import today_availability_summary
+from billing.models import PaymentWebhookEvent
 from clients.models import BusinessClient, ClientApiSettings
 from integrations.models import IntegrationConnection
 
@@ -96,9 +97,24 @@ def dashboard(request):
         status=Appointment.STATUS_CANCELLED,
     ).count()
     today_summary = today_availability_summary(selected_client)
+    admin_has_full_access = is_admin_user(request.user)
+    payment_webhook_events = PaymentWebhookEvent.objects.none()
+    payment_webhook_total = 0
+    payment_webhook_processed = 0
+    payment_webhook_failed = 0
+    payment_webhook_pending = 0
+    if admin_has_full_access:
+        payment_webhooks = PaymentWebhookEvent.objects.select_related("checkout", "checkout__plan")
+        payment_webhook_events = payment_webhooks.order_by("-created_at")[:20]
+        payment_webhook_total = payment_webhooks.count()
+        payment_webhook_processed = payment_webhooks.filter(status=PaymentWebhookEvent.STATUS_PROCESSED).count()
+        payment_webhook_failed = payment_webhooks.filter(status=PaymentWebhookEvent.STATUS_FAILED).count()
+        payment_webhook_pending = payment_webhooks.filter(
+            status__in=(PaymentWebhookEvent.STATUS_RECEIVED, PaymentWebhookEvent.STATUS_VERIFIED)
+        ).count()
 
     context = {
-        "is_admin_user": is_admin_user(request.user),
+        "is_admin_user": admin_has_full_access,
         "clients": clients,
         "selected_client": selected_client,
         "api_settings": api_settings,
@@ -108,6 +124,11 @@ def dashboard(request):
         "upcoming_appointments": upcoming_appointments,
         "today_summary": today_summary,
         "cancelled_count": cancelled_count,
+        "payment_webhook_events": payment_webhook_events,
+        "payment_webhook_total": payment_webhook_total,
+        "payment_webhook_processed": payment_webhook_processed,
+        "payment_webhook_failed": payment_webhook_failed,
+        "payment_webhook_pending": payment_webhook_pending,
         "language_choices": BusinessClient.LANGUAGE_CHOICES,
         "package_choices": BusinessClient.PACKAGE_CHOICES,
         "time_format_choices": BusinessClient.TIME_FORMAT_CHOICES,

@@ -2,7 +2,7 @@ from datetime import time, timedelta
 
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.models import User
-from django.test import TestCase, override_settings
+from django.test import Client, TestCase, override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
 
@@ -557,6 +557,38 @@ class PackageLimitTests(TestCase):
         self.assertTrue(public_response.data["account_activated"])
         self.assertEqual(public_response.data["subscription_status"], Subscription.STATUS_ACTIVE)
         self.assertEqual(public_response.data["login_url"], "/")
+
+    def test_kaleya_admin_dashboard_shows_payment_webhook_events(self):
+        self.user.is_staff = True
+        self.user.save(update_fields=["is_staff"])
+        plan = self.make_plan(Plan.CODE_BASIC, 0)
+        checkout = CheckoutSession.objects.create(
+            business_client=self.client_profile,
+            plan=plan,
+            provider=CheckoutSession.PROVIDER_LEMONSQUEEZY,
+            status=CheckoutSession.STATUS_PAID,
+            external_checkout_id="subscription_dashboard",
+            email="owner@example.com",
+            amount=plan.monthly_price,
+            currency=plan.currency,
+        )
+        PaymentWebhookEvent.objects.create(
+            provider=CheckoutSession.PROVIDER_LEMONSQUEEZY,
+            event_name="subscription_created",
+            external_object_id="subscription_dashboard",
+            checkout=checkout,
+            status=PaymentWebhookEvent.STATUS_PROCESSED,
+            signature_valid=True,
+        )
+        django_client = Client()
+        django_client.force_login(self.user)
+
+        response = django_client.get("/admin/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Plaćanja")
+        self.assertContains(response, "subscription_created")
+        self.assertContains(response, "subscription_dashboard")
 
     @override_settings(DEBUG=True, KALEYA_PAYPAL_WEBHOOK_ID="")
     def test_paypal_webhook_marks_checkout_paid_and_subscription_active_in_debug(self):
