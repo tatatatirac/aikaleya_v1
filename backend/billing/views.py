@@ -9,14 +9,21 @@ import urllib.request
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
+from django.utils import timezone
 from rest_framework import permissions, status, viewsets
 from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from accounts.permissions import IsAdminRole, user_role
-from billing.models import CheckoutSession, PendingCheckoutRegistration, Plan, Subscription
-from billing.serializers import CheckoutSessionCreateSerializer, CheckoutSessionSerializer, PlanSerializer, SubscriptionSerializer
+from billing.models import CheckoutSession, PaymentWebhookEvent, PendingCheckoutRegistration, Plan, Subscription
+from billing.serializers import (
+    CheckoutSessionCreateSerializer,
+    CheckoutSessionSerializer,
+    PaymentWebhookEventSerializer,
+    PlanSerializer,
+    SubscriptionSerializer,
+)
 from billing.services import (
     activate_checkout_subscription,
     cancel_checkout_subscription,
@@ -60,6 +67,21 @@ LEMONSQUEEZY_CANCELLED_EVENTS = {
 }
 
 
+def append_url_query(url, **params):
+    split = urllib.parse.urlsplit(url)
+    query = dict(urllib.parse.parse_qsl(split.query, keep_blank_values=True))
+    query.update({key: str(value) for key, value in params.items() if value not in ("", None)})
+    return urllib.parse.urlunsplit(
+        (
+            split.scheme,
+            split.netloc,
+            split.path,
+            urllib.parse.urlencode(query),
+            split.fragment,
+        )
+    )
+
+
 class PlanViewSet(viewsets.ModelViewSet):
     serializer_class = PlanSerializer
 
@@ -70,6 +92,14 @@ class PlanViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Plan.objects.filter(active=True)
+
+
+class PaymentWebhookEventViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = PaymentWebhookEventSerializer
+    permission_classes = (IsAdminRole,)
+
+    def get_queryset(self):
+        return PaymentWebhookEvent.objects.select_related("checkout", "checkout__plan").all()
 
 
 class SubscriptionViewSet(viewsets.ModelViewSet):
@@ -292,6 +322,11 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
 
     def _create_lemonsqueezy_checkout(self, plan, payload, metadata, checkout):
         variant_id = settings.KALEYA_LEMONSQUEEZY_VARIANT_IDS.get(plan.code, "")
+        success_url = append_url_query(
+            settings.KALEYA_PAYMENT_SUCCESS_URL,
+            payment="success",
+            checkout=str(checkout.public_id),
+        )
         custom_data = {
             "checkout_public_id": str(checkout.public_id),
             "plan_code": plan.code,
@@ -314,9 +349,9 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
                     "product_options": {
                         "name": f"Kaleya {plan.name}",
                         "description": f"{plan.trial_days} days trial, then {plan.monthly_price} {plan.currency} per month.",
-                        "redirect_url": settings.KALEYA_PAYMENT_SUCCESS_URL,
+                        "redirect_url": success_url,
                         "receipt_button_text": "Open Kaleya",
-                        "receipt_link_url": settings.KALEYA_PAYMENT_SUCCESS_URL,
+                        "receipt_link_url": success_url,
                         "enabled_variants": [int(variant_id)] if str(variant_id).isdigit() else [variant_id],
                     },
                     "checkout_options": {
@@ -590,12 +625,15 @@ class CheckoutPublicDetailView(APIView):
 
     def get(self, request, public_id):
         checkout = (
-            CheckoutSession.objects.select_related("plan")
+            CheckoutSession.objects.select_related("plan", "business_client")
             .filter(public_id=public_id)
             .first()
         )
         if not checkout:
             return Response({"detail": "Checkout sesija nije pronadjena."}, status=status.HTTP_404_NOT_FOUND)
+        subscription = None
+        if checkout.business_client_id:
+            subscription = Subscription.objects.filter(business_client=checkout.business_client).first()
         return Response(
             {
                 "public_id": str(checkout.public_id),
@@ -616,6 +654,9 @@ class CheckoutPublicDetailView(APIView):
                     checkout.checkout_url
                     and checkout.status == CheckoutSession.STATUS_PROVIDER_PENDING
                 ),
+                "account_activated": bool(checkout.business_client_id),
+                "subscription_status": subscription.status if subscription else "",
+                "login_url": "/",
             }
         )
 
@@ -626,45 +667,96 @@ class LemonSqueezyWebhookView(APIView):
 
     def post(self, request):
         raw_body = getattr(getattr(request, "_request", request), "body", b"")
+        raw_body_text = raw_body.decode("utf-8", errors="replace") if raw_body else ""
+        webhook_log = None
         try:
             event = json.loads(raw_body.decode("utf-8")) if raw_body else request.data
         except (json.JSONDecodeError, UnicodeDecodeError):
+            webhook_log = PaymentWebhookEvent.objects.create(
+                provider=CheckoutSession.PROVIDER_LEMONSQUEEZY,
+                status=PaymentWebhookEvent.STATUS_FAILED,
+                raw_body=raw_body_text,
+                error="Neispravan Lemon Squeezy webhook JSON.",
+            )
             return Response({"detail": "Neispravan Lemon Squeezy webhook JSON."}, status=status.HTTP_400_BAD_REQUEST)
         if not isinstance(event, dict):
+            webhook_log = PaymentWebhookEvent.objects.create(
+                provider=CheckoutSession.PROVIDER_LEMONSQUEEZY,
+                status=PaymentWebhookEvent.STATUS_FAILED,
+                raw_body=raw_body_text,
+                payload={"received_type": type(event).__name__},
+                error="Lemon Squeezy webhook mora biti JSON objekat.",
+            )
             return Response({"detail": "Lemon Squeezy webhook mora biti JSON objekat."}, status=status.HTTP_400_BAD_REQUEST)
-
-        verified, verify_error = self._verify_lemonsqueezy_signature(request, raw_body)
-        if not verified:
-            return Response({"detail": verify_error}, status=status.HTTP_400_BAD_REQUEST)
 
         meta = event.get("meta") or {}
         data = event.get("data") or {}
         attributes = data.get("attributes") or {}
         event_name = meta.get("event_name", "")
         external_id = str(data.get("id") or attributes.get("subscription_id") or "")
-        checkout = self._checkout_for_event(meta, external_id)
+        external_event_id = str(meta.get("webhook_id") or meta.get("event_id") or "")
+        webhook_log = PaymentWebhookEvent.objects.create(
+            provider=CheckoutSession.PROVIDER_LEMONSQUEEZY,
+            event_name=event_name,
+            external_event_id=external_event_id,
+            external_object_id=external_id,
+            status=PaymentWebhookEvent.STATUS_RECEIVED,
+            raw_body=raw_body_text,
+            payload=event,
+        )
 
-        if checkout and event_name in LEMONSQUEEZY_ACTIVE_EVENTS:
-            checkout.status = CheckoutSession.STATUS_PAID
-            checkout.external_checkout_id = external_id or checkout.external_checkout_id
-            checkout.metadata = {**checkout.metadata, "last_lemonsqueezy_event": event_name}
-            checkout.save(update_fields=["status", "external_checkout_id", "metadata", "updated_at"])
-            self._activate_subscription(checkout, attributes)
-        elif checkout and event_name in LEMONSQUEEZY_PAST_DUE_EVENTS:
-            checkout.metadata = {**checkout.metadata, "last_lemonsqueezy_event": event_name}
-            checkout.save(update_fields=["metadata", "updated_at"])
-            self._mark_subscription_past_due(checkout, attributes)
-        elif checkout and event_name in LEMONSQUEEZY_CANCELLED_EVENTS:
-            checkout.status = CheckoutSession.STATUS_CANCELLED
-            checkout.external_checkout_id = external_id or checkout.external_checkout_id
-            checkout.metadata = {**checkout.metadata, "last_lemonsqueezy_event": event_name}
-            checkout.save(update_fields=["status", "external_checkout_id", "metadata", "updated_at"])
-            self._cancel_subscription(checkout, attributes)
+        verified, verify_error = self._verify_lemonsqueezy_signature(request, raw_body)
+        if not verified:
+            webhook_log.status = PaymentWebhookEvent.STATUS_FAILED
+            webhook_log.error = verify_error
+            webhook_log.save(update_fields=["status", "error", "updated_at"])
+            return Response({"detail": verify_error}, status=status.HTTP_400_BAD_REQUEST)
+
+        webhook_log.signature_valid = True
+        webhook_log.status = PaymentWebhookEvent.STATUS_VERIFIED
+        checkout = self._checkout_for_event(meta, external_id)
+        webhook_log.checkout = checkout
+        webhook_log.save(update_fields=["signature_valid", "status", "checkout", "updated_at"])
+
+        try:
+            if checkout and event_name in LEMONSQUEEZY_ACTIVE_EVENTS:
+                checkout.status = CheckoutSession.STATUS_PAID
+                checkout.external_checkout_id = external_id or checkout.external_checkout_id
+                checkout.metadata = {**checkout.metadata, "last_lemonsqueezy_event": event_name}
+                checkout.save(update_fields=["status", "external_checkout_id", "metadata", "updated_at"])
+                self._activate_subscription(checkout, attributes)
+                webhook_log.status = PaymentWebhookEvent.STATUS_PROCESSED
+                webhook_log.processed_at = timezone.now()
+            elif checkout and event_name in LEMONSQUEEZY_PAST_DUE_EVENTS:
+                checkout.metadata = {**checkout.metadata, "last_lemonsqueezy_event": event_name}
+                checkout.save(update_fields=["metadata", "updated_at"])
+                self._mark_subscription_past_due(checkout, attributes)
+                webhook_log.status = PaymentWebhookEvent.STATUS_PROCESSED
+                webhook_log.processed_at = timezone.now()
+            elif checkout and event_name in LEMONSQUEEZY_CANCELLED_EVENTS:
+                checkout.status = CheckoutSession.STATUS_CANCELLED
+                checkout.external_checkout_id = external_id or checkout.external_checkout_id
+                checkout.metadata = {**checkout.metadata, "last_lemonsqueezy_event": event_name}
+                checkout.save(update_fields=["status", "external_checkout_id", "metadata", "updated_at"])
+                self._cancel_subscription(checkout, attributes)
+                webhook_log.status = PaymentWebhookEvent.STATUS_PROCESSED
+                webhook_log.processed_at = timezone.now()
+            else:
+                webhook_log.status = PaymentWebhookEvent.STATUS_IGNORED
+                webhook_log.error = "" if checkout else "Checkout sesija nije pronadjena za webhook."
+            webhook_log.save(update_fields=["status", "processed_at", "error", "updated_at"])
+        except Exception as exc:
+            webhook_log.status = PaymentWebhookEvent.STATUS_FAILED
+            webhook_log.error = str(exc)
+            webhook_log.save(update_fields=["status", "error", "updated_at"])
+            raise
 
         return Response(
             {
                 "received": True,
                 "verified": True,
+                "webhook_event_id": webhook_log.id,
+                "webhook_event_status": webhook_log.status,
                 "event_name": event_name,
                 "external_subscription_id": external_id,
                 "checkout_found": bool(checkout),

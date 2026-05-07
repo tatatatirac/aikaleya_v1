@@ -5712,6 +5712,61 @@ function showToast(text) {
     setTimeout(()=>t.classList.add('hidden'), 2500);
 }
 
+function paymentReturnText(key) {
+    const copy = {
+        sr: {
+            success: 'Placanje je vraceno na Kaleya. Prijavite se emailom i lozinkom iz registracije.',
+            active: 'Nalog je aktiviran. Mozete da se prijavite.',
+            pending: 'Placanje je primljeno, cekamo potvrdu payment webhook-a.',
+            cancel: 'Placanje je otkazano. Mozete ponovo pokusati iz cenovnika.'
+        },
+        en: {
+            success: 'Payment returned to Kaleya. Sign in with the email and password used during registration.',
+            active: 'Account is activated. You can sign in now.',
+            pending: 'Payment was received, waiting for payment webhook confirmation.',
+            cancel: 'Payment was cancelled. You can try again from pricing.'
+        }
+    };
+    return (copy[currentLang] && copy[currentLang][key]) || copy.en[key] || key;
+}
+
+async function loadPublicCheckoutStatus(publicId) {
+    const response = await fetch(`/api/billing/checkout-sessions/public/${publicId}/`);
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.detail || 'checkout_status_failed');
+    return data;
+}
+
+async function handlePaymentReturn() {
+    const params = new URLSearchParams(window.location.search);
+    const paymentState = params.get('payment');
+    if (!paymentState) return;
+
+    if (paymentState === 'cancel') {
+        showView('landing');
+        showToast(paymentReturnText('cancel'));
+        return;
+    }
+
+    if (paymentState !== 'success') return;
+
+    showView('login');
+    showToast(paymentReturnText('success'));
+    const checkoutId = params.get('checkout');
+    if (!checkoutId || !isBackendServed()) return;
+
+    try {
+        const checkout = await loadPublicCheckoutStatus(checkoutId);
+        if (checkout.account_activated || checkout.status === 'paid') {
+            showToast(paymentReturnText('active'));
+            return;
+        }
+        showToast(paymentReturnText('pending'));
+    } catch (error) {
+        console.warn('Kaleya payment return check failed', error);
+    }
+}
+
 function registerKaleyaServiceWorker() {
     if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
     navigator.serviceWorker.register('/sw.js').catch(error => {
@@ -5812,6 +5867,7 @@ if (savedAuthToken && (savedUserRole === 'client' || savedUserRole === 'employee
 } else {
     showView('landing');
 }
+handlePaymentReturn();
 
 // Preload wake word listener on client view idle
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {

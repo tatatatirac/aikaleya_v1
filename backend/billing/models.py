@@ -184,3 +184,50 @@ class PendingCheckoutRegistration(models.Model):
 
     def __str__(self):
         return f"Pending registration: {self.email}"
+
+
+class PaymentWebhookEvent(models.Model):
+    STATUS_RECEIVED = "received"
+    STATUS_VERIFIED = "verified"
+    STATUS_PROCESSED = "processed"
+    STATUS_IGNORED = "ignored"
+    STATUS_FAILED = "failed"
+
+    STATUS_CHOICES = (
+        (STATUS_RECEIVED, "Received"),
+        (STATUS_VERIFIED, "Verified"),
+        (STATUS_PROCESSED, "Processed"),
+        (STATUS_IGNORED, "Ignored"),
+        (STATUS_FAILED, "Failed"),
+    )
+
+    provider = models.CharField(max_length=40, default=CheckoutSession.PROVIDER_LEMONSQUEEZY)
+    event_name = models.CharField(max_length=120, blank=True)
+    external_event_id = models.CharField(max_length=180, blank=True)
+    external_object_id = models.CharField(max_length=180, blank=True)
+    checkout = models.ForeignKey(
+        CheckoutSession,
+        on_delete=models.SET_NULL,
+        related_name="webhook_events",
+        null=True,
+        blank=True,
+    )
+    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default=STATUS_RECEIVED)
+    signature_valid = models.BooleanField(default=False)
+    payload = models.JSONField(default=dict, blank=True)
+    raw_body = models.TextField(blank=True)
+    error = models.TextField(blank=True)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+        indexes = [
+            models.Index(fields=("provider", "event_name", "status")),
+            models.Index(fields=("external_object_id",)),
+            models.Index(fields=("created_at",)),
+        ]
+
+    def __str__(self):
+        return f"{self.provider} {self.event_name or 'webhook'} - {self.status}"

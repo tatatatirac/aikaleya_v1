@@ -6,7 +6,13 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
 
-from billing.models import CheckoutSession, PendingCheckoutRegistration, Plan, Subscription
+from billing.models import (
+    CheckoutSession,
+    PaymentWebhookEvent,
+    PendingCheckoutRegistration,
+    Plan,
+    Subscription,
+)
 from billing.views import CheckoutSessionViewSet
 from clients.models import BusinessClient
 
@@ -339,6 +345,8 @@ class PackageLimitTests(TestCase):
         self.assertEqual(response.data["plan"]["code"], Plan.CODE_BASIC)
         self.assertTrue(response.data["payment_ready"])
         self.assertEqual(response.data["provider_checkout_url"], checkout.checkout_url)
+        self.assertFalse(response.data["account_activated"])
+        self.assertEqual(response.data["subscription_status"], "")
         self.assertNotIn("private@example.com", str(response.data))
         self.assertNotIn("Private Company", str(response.data))
         self.assertNotIn("Private Owner", str(response.data))
@@ -412,6 +420,24 @@ class PackageLimitTests(TestCase):
         self.assertNotIn("private-webhook-secret", str(response.data))
 
     @override_settings(DEBUG=True, KALEYA_LEMONSQUEEZY_WEBHOOK_SECRET="")
+    def test_lemonsqueezy_webhook_logs_invalid_json(self):
+        api = APIClient()
+
+        response = api.generic(
+            "POST",
+            "/api/billing/lemonsqueezy/webhook/",
+            data=b"{bad",
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        webhook_event = PaymentWebhookEvent.objects.get()
+        self.assertEqual(webhook_event.provider, CheckoutSession.PROVIDER_LEMONSQUEEZY)
+        self.assertEqual(webhook_event.status, PaymentWebhookEvent.STATUS_FAILED)
+        self.assertFalse(webhook_event.signature_valid)
+        self.assertIn("Neispravan", webhook_event.error)
+
+    @override_settings(DEBUG=True, KALEYA_LEMONSQUEEZY_WEBHOOK_SECRET="")
     def test_lemonsqueezy_webhook_marks_checkout_paid_and_subscription_active_in_debug(self):
         plan = self.make_plan(Plan.CODE_BASIC, 0)
         subscription = Subscription.objects.create(
@@ -448,12 +474,20 @@ class PackageLimitTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["webhook_event_status"], PaymentWebhookEvent.STATUS_PROCESSED)
         checkout.refresh_from_db()
         subscription.refresh_from_db()
         self.assertEqual(checkout.status, CheckoutSession.STATUS_PAID)
         self.assertEqual(checkout.external_checkout_id, "subscription_123")
         self.assertEqual(subscription.status, Subscription.STATUS_ACTIVE)
         self.assertEqual(subscription.external_subscription_id, "subscription_123")
+        webhook_event = PaymentWebhookEvent.objects.get()
+        self.assertEqual(webhook_event.checkout, checkout)
+        self.assertEqual(webhook_event.event_name, "subscription_created")
+        self.assertEqual(webhook_event.external_object_id, "subscription_123")
+        self.assertEqual(webhook_event.status, PaymentWebhookEvent.STATUS_PROCESSED)
+        self.assertTrue(webhook_event.signature_valid)
+        self.assertIsNotNone(webhook_event.processed_at)
 
     @override_settings(DEBUG=True, KALEYA_LEMONSQUEEZY_WEBHOOK_SECRET="")
     def test_lemonsqueezy_webhook_activates_pending_registration(self):
@@ -502,6 +536,7 @@ class PackageLimitTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["webhook_event_status"], PaymentWebhookEvent.STATUS_PROCESSED)
         checkout.refresh_from_db()
         self.assertIsNotNone(checkout.business_client)
         self.assertEqual(checkout.business_client.package, Plan.CODE_PRO)
@@ -512,6 +547,16 @@ class PackageLimitTests(TestCase):
         self.assertEqual(subscription.external_subscription_id, "subscription_pending")
         self.assertEqual(subscription.trial_ends_at.date(), provider_trial_end.date())
         self.assertEqual(subscription.current_period_end.date(), provider_period_end.date())
+        webhook_event = PaymentWebhookEvent.objects.get()
+        self.assertEqual(webhook_event.checkout, checkout)
+        self.assertEqual(webhook_event.status, PaymentWebhookEvent.STATUS_PROCESSED)
+        self.assertTrue(webhook_event.signature_valid)
+
+        public_response = api.get(f"/api/billing/checkout-sessions/public/{checkout.public_id}/")
+        self.assertEqual(public_response.status_code, 200)
+        self.assertTrue(public_response.data["account_activated"])
+        self.assertEqual(public_response.data["subscription_status"], Subscription.STATUS_ACTIVE)
+        self.assertEqual(public_response.data["login_url"], "/")
 
     @override_settings(DEBUG=True, KALEYA_PAYPAL_WEBHOOK_ID="")
     def test_paypal_webhook_marks_checkout_paid_and_subscription_active_in_debug(self):

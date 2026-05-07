@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib import admin
 
-from billing.models import CheckoutSession, PendingCheckoutRegistration, Plan, Subscription
+from billing.models import CheckoutSession, PaymentWebhookEvent, PendingCheckoutRegistration, Plan, Subscription
 
 
 class PlanAdminForm(forms.ModelForm):
@@ -113,4 +113,42 @@ class PendingCheckoutRegistrationAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Registracija", {"fields": ("checkout", "email", "company", "full_name", "phone", "country")}),
         ("Sistem", {"fields": ("password_hash", "activated_at", "created_at", "updated_at")}),
+    )
+
+
+@admin.register(PaymentWebhookEvent)
+class PaymentWebhookEventAdmin(admin.ModelAdmin):
+    list_display = (
+        "provider",
+        "event_name",
+        "status",
+        "signature_valid",
+        "external_object_id",
+        "checkout",
+        "processed_at",
+        "created_at",
+    )
+    list_filter = ("provider", "event_name", "status", "signature_valid", "created_at")
+    search_fields = ("event_name", "external_event_id", "external_object_id", "checkout__email", "checkout__company")
+    readonly_fields = (
+        "provider",
+        "event_name",
+        "external_event_id",
+        "external_object_id",
+        "checkout",
+        "status",
+        "signature_valid",
+        "payload",
+        "raw_body",
+        "error",
+        "processed_at",
+        "created_at",
+        "updated_at",
+    )
+    fieldsets = (
+        ("Webhook", {"fields": ("provider", "event_name", "status", "signature_valid")}),
+        ("Veze", {"fields": ("checkout", "external_event_id", "external_object_id")}),
+        ("Obrada", {"fields": ("processed_at", "error")}),
+        ("Podaci", {"fields": ("payload", "raw_body")}),
+        ("Sistem", {"fields": ("created_at", "updated_at")}),
     )

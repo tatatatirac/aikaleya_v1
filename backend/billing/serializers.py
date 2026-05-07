@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from billing.models import CheckoutSession, Plan, Subscription
+from billing.models import CheckoutSession, PaymentWebhookEvent, Plan, Subscription
 
 
 class PlanSerializer(serializers.ModelSerializer):
@@ -97,3 +97,31 @@ class CheckoutSessionCreateSerializer(serializers.Serializer):
     phone = serializers.CharField(required=False, allow_blank=True, max_length=40)
     country = serializers.CharField(required=False, allow_blank=True, max_length=80)
     note = serializers.CharField(required=False, allow_blank=True, max_length=500)
+
+
+class PaymentWebhookEventSerializer(serializers.ModelSerializer):
+    checkout_public_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PaymentWebhookEvent
+        fields = (
+            "id",
+            "provider",
+            "event_name",
+            "external_event_id",
+            "external_object_id",
+            "checkout",
+            "checkout_public_id",
+            "status",
+            "signature_valid",
+            "payload",
+            "raw_body",
+            "error",
+            "processed_at",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = fields
+
+    def get_checkout_public_id(self, obj):
+        return str(obj.checkout.public_id) if obj.checkout_id else ""
