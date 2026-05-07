@@ -1156,10 +1156,25 @@ function registrationErrorText(data) {
         .join(' ') || pageText('registration_failed');
 }
 
+function getPageCookie(name) {
+    const cookie = `; ${document.cookie || ''}`;
+    const parts = cookie.split(`; ${name}=`);
+    if (parts.length !== 2) return '';
+    return decodeURIComponent(parts.pop().split(';').shift() || '');
+}
+
+function pageJsonHeaders() {
+    const headers = { 'Content-Type': 'application/json' };
+    const csrfToken = getPageCookie('csrftoken');
+    if (csrfToken) headers['X-CSRFToken'] = csrfToken;
+    return headers;
+}
+
 async function createCheckoutSession(payload) {
     const response = await fetch('/api/billing/checkout-sessions/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        headers: pageJsonHeaders(),
         body: JSON.stringify({
             plan_code: payload.plan_code,
             email: payload.email,
@@ -1216,7 +1231,8 @@ async function submitRegistrationForm(form) {
 
         const response = await fetch('/api/auth/register-client/', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            headers: pageJsonHeaders(),
             body: JSON.stringify(payload)
         });
         const data = await response.json().catch(() => ({}));

@@ -3,6 +3,8 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import include, path, re_path
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView
 from django.views.static import serve
 
@@ -29,6 +31,7 @@ def no_cache_static_serve(request, *args, **kwargs):
     return no_cache_response(serve(request, *args, **kwargs))
 
 
+@method_decorator(ensure_csrf_cookie, name="dispatch")
 class FrontendTemplateView(TemplateView):
     def render_to_response(self, context, **response_kwargs):
         response = super().render_to_response(context, **response_kwargs)
