@@ -1,7 +1,5 @@
-const KALEYA_SW_VERSION = 'kaleya-pwa-2026-05-01-05';
+const KALEYA_SW_VERSION = 'kaleya-pwa-2026-05-08-02';
 const APP_SHELL = [
-  '/',
-  '/index.html',
   '/logo.png',
   '/manifest.webmanifest'
 ];
@@ -22,21 +20,41 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET') return;
+
   const url = new URL(request.url);
-  if (url.pathname.startsWith('/api/')) return;
+  if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
+
+  const isHtmlRequest =
+    request.mode === 'navigate' ||
+    url.pathname === '/' ||
+    url.pathname.endsWith('.html');
+
+  if (isHtmlRequest) {
+    event.respondWith(
+      fetch(request, { cache: 'no-store' })
+        .catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
 
   event.respondWith(
     fetch(request)
       .then(response => {
         const copy = response.clone();
-        if (response.ok && url.origin === self.location.origin) {
+        if (response.ok) {
           caches.open(KALEYA_SW_VERSION).then(cache => cache.put(request, copy));
         }
         return response;
       })
-      .catch(() => caches.match(request).then(cached => cached || caches.match('/index.html')))
+      .catch(() => caches.match(request))
   );
 });

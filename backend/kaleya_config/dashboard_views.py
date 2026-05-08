@@ -71,6 +71,16 @@ def dashboard_error_message(error):
     return str(error)
 
 
+def dashboard_section_anchor(section):
+    return {
+        "client": "settings",
+        "api": "settings",
+        "voice": "settings",
+        "alarms": "alarms",
+        "integrations": "integrations",
+    }.get(section or "overview", section or "overview")
+
+
 def clients_for_user(user):
     queryset = BusinessClient.objects.select_related("owner", "subscription__plan").order_by("name")
     if is_admin_user(user):
@@ -211,7 +221,7 @@ def dashboard(request):
         else:
             messages.error(request, "Nije moguće sačuvati ovu sekciju.")
 
-        return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#{section or 'overview'}")
+        return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#{dashboard_section_anchor(section)}")
 
     integrations = ensure_integrations(selected_client)
     upcoming_appointments = (
@@ -491,6 +501,7 @@ def update_api_settings(request, api_settings):
     api_settings.voice_provider = post.get("voice_provider", api_settings.voice_provider).strip() or api_settings.voice_provider
     api_settings.voice_model = post.get("voice_model", api_settings.voice_model).strip()
     api_settings.voice_id = post.get("voice_id", api_settings.voice_id).strip()
+    api_settings.master_prompt = post.get("master_prompt", api_settings.master_prompt).strip()
 
     ai_api_key = post.get("ai_api_key", "").strip()
     voice_api_key = post.get("voice_api_key", "").strip()

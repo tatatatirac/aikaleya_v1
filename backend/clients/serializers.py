@@ -23,6 +23,7 @@ class ClientApiSettingsSerializer(serializers.ModelSerializer):
             "voice_api_key",
             "has_voice_api_key",
             "voice_id",
+            "master_prompt",
             "updated_at",
         )
         read_only_fields = ("id", "has_ai_api_key", "has_voice_api_key", "updated_at")

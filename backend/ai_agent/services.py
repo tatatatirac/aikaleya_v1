@@ -18,7 +18,7 @@ from ai_agent.tools import (
 )
 from accounts.permissions import user_role
 from audit_log.services import write_audit_log
-from clients.models import BusinessKnowledgeEntry
+from clients.models import BusinessKnowledgeEntry, ClientApiSettings
 from communications.models import Conversation, Message
 from notifications.services import queue_notification_jobs_for_event
 from staff_services.models import Service, StaffMember
@@ -613,7 +613,16 @@ def support_priority_from_text(text):
     return SupportTicket.PRIORITY_URGENT if any(word in lowered for word in urgent_words) else SupportTicket.PRIORITY_NORMAL
 
 
-def create_support_ticket_for_handoff(business_client, conversation, text, channel, language, preprocess, planner_raw_response):
+def create_support_ticket_for_handoff(
+    business_client,
+    conversation,
+    text,
+    channel,
+    language,
+    preprocess,
+    planner_raw_response,
+    payload=None,
+):
     existing = None
     if conversation:
         existing = (
@@ -628,11 +637,20 @@ def create_support_ticket_for_handoff(business_client, conversation, text, chann
     if existing:
         return existing
 
+    payload = payload or {}
+    requester = conversation.customer if conversation and conversation.customer else None
+    requester_name = requester.full_name if requester else (payload.get("customer_name") or payload.get("name") or "")
+    requester_phone = requester.phone if requester else (payload.get("phone") or payload.get("customer_phone") or "")
+    requester_email = requester.email if requester else (payload.get("email") or payload.get("customer_email") or "")
+
     subject = f"Kaleya support handoff - {channel or 'web'}"
     message = (
         "Kaleya nije mogla samostalno da zavrsi zahtev.\n\n"
         f"Kanal: {channel or 'web'}\n"
         f"Jezik: {language or 'en'}\n"
+        f"Klijent: {requester_name or 'Nepoznato'}\n"
+        f"Telefon: {requester_phone or 'Nepoznato'}\n"
+        f"Email: {requester_email or 'Nepoznato'}\n"
         f"Poruka korisnika: {text or ''}"
     )
     return SupportTicket.objects.create(
@@ -646,7 +664,11 @@ def create_support_ticket_for_handoff(business_client, conversation, text, chann
             "conversation_id": conversation.id if conversation else None,
             "channel": channel,
             "language": language,
+            "requester_name": requester_name,
+            "requester_phone": requester_phone,
+            "requester_email": requester_email,
             "input_text": text,
+            "payload": json_safe(payload),
             "preprocess": json_safe(preprocess),
             "planner": json_safe(planner_raw_response),
         },
@@ -840,7 +862,7 @@ def build_text_response(business_client, intent, tool_output):
 
 def build_system_prompt(business_client):
     language = business_client.interface_language or business_client.language or "en"
-    return (
+    prompt = (
         "Ti si Kaleya, profesionalna AI sekretarica za zakazivanje termina. "
         "Odgovaraj kratko, jasno i ljubazno. "
         "Ne izmisljaj termine. Tool output je jedini izvor istine za kalendar. "
@@ -850,6 +872,13 @@ def build_system_prompt(business_client):
         "Ako korisnik trazi nesto sto ne mozes da potvrdis kroz tool output, reci da ces proveriti ili prebaciti supportu. "
         f"Jezik odgovora mora biti: {language}."
     )
+    try:
+        master_prompt = (business_client.api_settings.master_prompt or "").strip()
+    except ClientApiSettings.DoesNotExist:
+        master_prompt = ""
+    if master_prompt:
+        prompt = f"{prompt}\n\nDodatna pravila za ovog klijenta:\n{master_prompt}"
+    return prompt
 
 
 def handle_inbound_text(
@@ -1012,6 +1041,7 @@ def handle_inbound_text(
             language,
             preprocess,
             planner_raw_response,
+            payload,
         )
         tool_output["support_ticket_id"] = support_ticket.id
         tool_run.output_payload = json_safe(tool_output)

@@ -92,6 +92,7 @@ class ClientApiSettings(models.Model):
     voice_model = models.CharField(max_length=120, blank=True)
     voice_api_key = models.CharField(max_length=500, blank=True)
     voice_id = models.CharField(max_length=160, blank=True)
+    master_prompt = models.TextField(blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):

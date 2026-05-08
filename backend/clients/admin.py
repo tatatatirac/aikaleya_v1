@@ -70,6 +70,7 @@ class ClientApiSettingsAdminForm(forms.ModelForm):
             "voice_model",
             "voice_api_key",
             "voice_id",
+            "master_prompt",
         )
         labels = {
             "business_client": "Klijent",
@@ -80,6 +81,7 @@ class ClientApiSettingsAdminForm(forms.ModelForm):
             "voice_model": "Voice model",
             "voice_api_key": "Voice API ključ",
             "voice_id": "Voice ID",
+            "master_prompt": "Master prompt",
         }
         help_texts = {
             "ai_provider": "Za Claude upiši anthropic. Za OpenAI upiši openai.",
@@ -88,6 +90,7 @@ class ClientApiSettingsAdminForm(forms.ModelForm):
             "voice_provider": "Za ElevenLabs upiši elevenlabs.",
             "voice_api_key": "Privatan ElevenLabs ključ.",
             "voice_id": "ID glasa iz ElevenLabs voice library.",
+            "master_prompt": "Dodatna pravila tona, stila i ponasanja Kaleye za ovog klijenta.",
         }
 
 
@@ -122,7 +125,7 @@ class ClientApiSettingsAdmin(admin.ModelAdmin):
     list_display = ("business_client", "ai_provider", "ai_model", "voice_provider", "has_voice_id")
     search_fields = ("business_client__name", "ai_provider", "ai_model", "voice_provider")
     fieldsets = (
-        ("AI", {"description": "Ovde se podešava AI model za izabranog klijenta.", "fields": ("business_client", "ai_provider", "ai_model", "ai_api_key")}),
+        ("AI", {"description": "Ovde se podesava AI model za izabranog klijenta.", "fields": ("business_client", "ai_provider", "ai_model", "ai_api_key", "master_prompt")}),
         ("Glas", {"description": "Ovde se podešava ElevenLabs ili drugi voice provider.", "fields": ("voice_provider", "voice_model", "voice_api_key", "voice_id")}),
     )
 

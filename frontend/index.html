@@ -828,7 +828,7 @@
                                 </div>
                             </div>
 
-                            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                            <div class="hidden p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                                 <div class="flex items-start justify-between gap-3 mb-3">
                                     <div>
                                         <p class="text-xs font-semibold text-slate-600 dark:text-slate-300" data-i18n="knowledge_title">Kaleya baza znanja</p>
@@ -867,7 +867,7 @@
                                 </div>
                             </div>
 
-                            <div id="clientAiTestPanel" class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                            <div id="clientAiTestPanel" class="hidden p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                                 <div class="flex items-start justify-between gap-3">
                                     <div>
                                         <p class="text-xs font-semibold text-slate-600 dark:text-slate-300" data-i18n="ai_test_title">Privatni AI test</p>
@@ -1305,7 +1305,7 @@
 
 <script>
 // ===== STATE =====
-const KALEYA_APP_VERSION = '2026-05-08-staging-fixes-01';
+const KALEYA_APP_VERSION = '2026-05-08-staging-fixes-02';
 const savedAppVersion = localStorage.getItem('kaleya_app_version');
 if (savedAppVersion && savedAppVersion !== KALEYA_APP_VERSION) {
     localStorage.removeItem('kaleya_auth_token');
@@ -2192,11 +2192,20 @@ function storedUserDisplayName() {
     return (localStorage.getItem('kaleya_user_full_name') || '').trim();
 }
 
+function activeClientDisplayName() {
+    const ownerName = (currentClientInfo?.owner_name || '').trim();
+    const publicName = (currentClientInfo?.public_name || '').trim();
+    const businessName = (currentClientInfo?.name || '').trim();
+    const storedName = storedUserDisplayName();
+    if (ownerName && !ownerName.toLowerCase().includes('test')) return ownerName;
+    return publicName || businessName || ownerName || storedName;
+}
+
 function updateClientGreeting() {
     const greeting = document.getElementById('clientGreeting');
     if (!greeting) return;
     const base = tr('client_greet');
-    const name = storedUserDisplayName();
+    const name = activeClientDisplayName();
     greeting.textContent = name ? `${base}, ${name}` : base;
 }
 
@@ -2233,7 +2242,6 @@ function setLang(lang) {
     localStorage.setItem('kaleya_lang_user_set', '1');
     if (!localStorage.getItem('kaleya_voice_lang')) currentVoiceLang = lang;
     applyLang();
-    renderClientKnowledgeSettings();
     renderClientSupportInbox();
     saveClientSettingsToBackend({ interface_language: lang, language: lang }).catch(error => {
         console.warn('Kaleya language save failed', error);
@@ -2867,7 +2875,8 @@ function browserSpeak(text, langOverride) {
     speechSynthesis.speak(utter);
 }
 
-async function speak(text, langOverride) {
+async function speak(text, langOverride, options = {}) {
+    const allowBrowserFallback = options.allowBrowserFallback !== false;
     if (getAuthToken() && location.protocol !== 'file:') {
         try {
             const voiceStatus = await getBackendVoiceStatus();
@@ -2887,7 +2896,7 @@ async function speak(text, langOverride) {
             console.warn('Kaleya backend TTS failed, fallback to browser', e);
         }
     }
-    browserSpeak(text, langOverride);
+    if (allowBrowserFallback) browserSpeak(text, langOverride);
 }
 
 function availabilityPrompt() {
@@ -3295,33 +3304,29 @@ function unpackApiRows(data) {
 async function loadClientOperationalDataFromBackend() {
     if (!getAuthToken() || location.protocol === 'file:') {
         renderClientOperationalSettings();
-        renderClientKnowledgeSettings();
         renderEmployeeDirectory();
         populateAppointmentStaffServiceFields();
         populateBlockedStaffSelect();
         return;
     }
     try {
-        const [staffRes, serviceRes, linkRes, blockedRes, knowledgeRes] = await Promise.all([
+        const [staffRes, serviceRes, linkRes, blockedRes] = await Promise.all([
             kaleyaApi('/api/staff-services/staff/', { method: 'GET' }),
             kaleyaApi('/api/staff-services/services/', { method: 'GET' }),
             kaleyaApi('/api/staff-services/staff-services/', { method: 'GET' }),
-            kaleyaApi('/api/staff-services/blocked-times/', { method: 'GET' }),
-            kaleyaApi('/api/clients/knowledge/', { method: 'GET' })
+            kaleyaApi('/api/staff-services/blocked-times/', { method: 'GET' })
         ]);
         if (!staffRes.ok) throw new Error(await staffRes.text());
         if (!serviceRes.ok) throw new Error(await serviceRes.text());
         if (!linkRes.ok) throw new Error(await linkRes.text());
         if (!blockedRes.ok) throw new Error(await blockedRes.text());
-        if (!knowledgeRes.ok) throw new Error(await knowledgeRes.text());
 
         clientStaffMembers = unpackApiRows(await staffRes.json()).filter(item => item.is_active !== false);
         clientServices = unpackApiRows(await serviceRes.json()).filter(item => item.is_active !== false);
         clientStaffServiceLinks = unpackApiRows(await linkRes.json()).filter(item => item.is_active !== false);
         clientBlockedTimes = unpackApiRows(await blockedRes.json());
-        clientKnowledgeEntries = unpackApiRows(await knowledgeRes.json()).filter(item => item.is_active !== false);
+        clientKnowledgeEntries = [];
         renderClientOperationalSettings();
-        renderClientKnowledgeSettings();
         renderEmployeeDirectory();
         populateAppointmentStaffServiceFields();
         populateBlockedStaffSelect();
@@ -3634,6 +3639,21 @@ function supportTicketDateLabel(ticket) {
     return `${formatClientDate(clientIsoDate(date))} ${formatClientTime(`${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`)}`;
 }
 
+function supportTicketRequesterLabel(ticket) {
+    const meta = ticket?.metadata || {};
+    const payload = meta.payload || {};
+    const name = meta.requester_name || payload.customer_name || payload.name || '';
+    const phone = meta.requester_phone || payload.phone || payload.customer_phone || '';
+    const email = meta.requester_email || payload.email || payload.customer_email || '';
+    const channel = meta.channel || payload.channel || '';
+    const parts = [];
+    if (name) parts.push(name);
+    if (phone) parts.push(phone);
+    if (email) parts.push(email);
+    if (channel) parts.push(channel);
+    return parts.join(' - ');
+}
+
 function renderClientSupportInbox() {
     const list = document.getElementById('clientSupportTicketList');
     if (!list) return;
@@ -3650,6 +3670,7 @@ function renderClientSupportInbox() {
                                 <span class="px-2 py-0.5 rounded-full ${supportPriorityClass(ticket.priority)} text-[9px] font-semibold">${escapeHtml(supportPriorityLabel(ticket.priority))}</span>
                             </div>
                             <p class="mt-1 text-[12px] font-semibold truncate">${escapeHtml(ticket.subject || 'Kaleya support')}</p>
+                            ${supportTicketRequesterLabel(ticket) ? `<p class="mt-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300">${escapeHtml(supportTicketRequesterLabel(ticket))}</p>` : ''}
                             <p class="mt-0.5 text-[10px] text-slate-500 line-clamp-3 whitespace-pre-line">${escapeHtml(ticket.message || '')}</p>
                             <p class="mt-1 text-[9px] text-slate-400">${escapeHtml(supportTicketDateLabel(ticket))}</p>
                         </div>
@@ -4298,7 +4319,7 @@ async function handleQuickAction(action) {
     if (action === 'proveri') {
         let msg = await todayAvailabilityMessageFromBackend() || todayAvailabilityMessage();
         try {
-            await speak(msg, currentVoiceLang);
+            await speak(msg, currentVoiceLang, { allowBrowserFallback: false });
             showToast(msg);
         } catch (e) {
             console.warn('Kaleya availability voice failed', e);
@@ -5812,8 +5833,19 @@ async function handlePaymentReturn() {
 
 function registerKaleyaServiceWorker() {
     if (!('serviceWorker' in navigator) || location.protocol === 'file:') return;
-    navigator.serviceWorker.register('/sw.js').catch(error => {
+    navigator.serviceWorker.register(`/sw.js?v=${KALEYA_APP_VERSION}`).then(registration => {
+        registration.update().catch(() => {});
+        if (registration.waiting) {
+            registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        }
+    }).catch(error => {
         console.warn('Kaleya service worker registration failed', error);
+    });
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
     });
 }
 
@@ -5891,7 +5923,6 @@ if (!T[currentVoiceLang]) currentVoiceLang = currentLang;
 applyLang();
 syncClientCalendarSettingsUI();
 renderClientOperationalSettings();
-renderClientKnowledgeSettings();
 renderClientSupportInbox();
 renderSchedule();
 renderClientCalendar();
