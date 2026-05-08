@@ -327,7 +327,8 @@ def activate_checkout_subscription(
         },
     )
     business_client.package = checkout.plan.code
-    business_client.save(update_fields=["package", "updated_at"])
+    business_client.kaleya_enabled = True
+    business_client.save(update_fields=["package", "kaleya_enabled", "updated_at"])
     return subscription
 
 
@@ -335,6 +336,8 @@ def mark_checkout_subscription_past_due(checkout, external_customer_id="", exter
     business_client = checkout.business_client
     if not business_client:
         return None
+    business_client.kaleya_enabled = False
+    business_client.save(update_fields=["kaleya_enabled", "updated_at"])
     return Subscription.objects.filter(business_client=business_client).update(
         status=Subscription.STATUS_PAST_DUE,
         external_customer_id=external_customer_id,
@@ -346,6 +349,8 @@ def cancel_checkout_subscription(checkout, external_customer_id="", external_sub
     business_client = checkout.business_client
     if not business_client:
         return None
+    business_client.kaleya_enabled = False
+    business_client.save(update_fields=["kaleya_enabled", "updated_at"])
     return Subscription.objects.filter(business_client=business_client).update(
         status=Subscription.STATUS_CANCELLED,
         external_customer_id=external_customer_id,

@@ -3,6 +3,7 @@ from unittest import mock
 
 from django.contrib.auth.models import User
 from django.test import TestCase
+from rest_framework import status
 from rest_framework.test import APIClient
 
 from ai_agent.services import handle_inbound_text
@@ -635,6 +636,121 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["intent"], "cancel_appointment")
         self.assertEqual(result["tool_output"]["status"], "needs_target")
         self.assertEqual(appointment.status, Appointment.STATUS_CONFIRMED)
+
+
+class AIAppointmentApiTests(TestCase):
+    def setUp(self):
+        self.api = APIClient()
+        self.owner = User.objects.create_user(
+            username="owner@example.com",
+            email="owner@example.com",
+            password="test12345",
+        )
+        self.owner.profile.role = Profile.ROLE_CLIENT
+        self.owner.profile.save(update_fields=["role", "updated_at"])
+        self.client = BusinessClient.objects.create(
+            owner=self.owner,
+            name="AI API Salon",
+            package=Plan.CODE_BUSINESS_PLUS,
+            interface_language="en",
+            language="en",
+            work_start=time(9, 0),
+            work_end=time(16, 0),
+            slot_interval_minutes=30,
+        )
+
+    def test_owner_can_book_appointment_through_inbound_text_api(self):
+        self.api.force_authenticate(self.owner)
+
+        response = self.api.post(
+            "/api/ai-agent/inbound-text/",
+            {
+                "text": "Book appointment",
+                "date": date.today().isoformat(),
+                "time": "10:00",
+                "customer_name": "Sofia Adams",
+                "phone": "+15550123",
+                "channel": "web",
+                "use_ai": False,
+                "include_voice": False,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["intent"], "book_appointment")
+        self.assertEqual(response.data["tool_output"]["status"], "booked")
+        self.assertTrue(response.data["conversation_id"])
+        appointment = Appointment.objects.get()
+        self.assertEqual(appointment.customer.full_name, "Sofia Adams")
+        self.assertEqual(appointment.start_time, time(10, 0))
+        self.assertEqual(appointment.source, "ai_agent")
+
+    def test_employee_booking_api_is_scoped_to_own_staff_profile(self):
+        employee_user = User.objects.create_user(
+            username="employee-api",
+            email="employee-api@example.com",
+            password="emp123",
+        )
+        employee_user.profile.role = Profile.ROLE_EMPLOYEE
+        employee_user.profile.business_client = self.client
+        employee_user.profile.save(update_fields=["role", "business_client", "updated_at"])
+        employee_staff = StaffMember.objects.create(
+            business_client=self.client,
+            user=employee_user,
+            full_name="Employee API",
+            role_title="Stylist",
+        )
+        other_staff = StaffMember.objects.create(
+            business_client=self.client,
+            full_name="Other API",
+            role_title="Stylist",
+        )
+        self.api.force_authenticate(employee_user)
+
+        response = self.api.post(
+            "/api/ai-agent/inbound-text/",
+            {
+                "text": "Book appointment",
+                "date": date.today().isoformat(),
+                "time": "11:00",
+                "customer_name": "Employee Customer",
+                "phone": "+15550124",
+                "staff_member_id": other_staff.id,
+                "channel": "web",
+                "use_ai": False,
+                "include_voice": False,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["tool_output"]["status"], "booked")
+        appointment = Appointment.objects.get(customer__first_name="Employee")
+        self.assertEqual(appointment.staff_member_id, employee_staff.id)
+
+    def test_demo_client_inbound_text_api_never_uses_paid_ai_or_voice(self):
+        self.client.is_demo = True
+        self.client.save(update_fields=["is_demo", "updated_at"])
+        self.api.force_authenticate(self.owner)
+
+        response = self.api.post(
+            "/api/ai-agent/inbound-text/",
+            {
+                "text": "Check free slots today",
+                "date": date.today().isoformat(),
+                "channel": "web",
+                "use_ai": True,
+                "include_voice": True,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["demo_mode"])
+        self.assertEqual(response.data["ai_provider"], "demo-fallback")
+        self.assertIsNone(response.data["voice"])
+        self.assertEqual(response.data["tool_output"]["free_count"], 14)
 
 
 class PublicIntroSpeechApiTests(TestCase):

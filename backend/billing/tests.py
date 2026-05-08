@@ -653,6 +653,110 @@ class PackageLimitTests(TestCase):
         self.assertEqual(public_response.data["subscription_status"], Subscription.STATUS_ACTIVE)
         self.assertEqual(public_response.data["login_url"], "/")
 
+    @override_settings(DEBUG=True, KALEYA_LEMONSQUEEZY_WEBHOOK_SECRET="")
+    def test_lemonsqueezy_payment_failed_marks_subscription_past_due_and_disables_kaleya(self):
+        plan = self.make_plan(Plan.CODE_PRO, 1)
+        self.client_profile.package = Plan.CODE_PRO
+        self.client_profile.kaleya_enabled = True
+        self.client_profile.save(update_fields=["package", "kaleya_enabled", "updated_at"])
+        Subscription.objects.create(
+            business_client=self.client_profile,
+            plan=plan,
+            status=Subscription.STATUS_ACTIVE,
+            current_period_start=timezone.now(),
+            current_period_end=timezone.now() + timedelta(days=30),
+            external_subscription_id="subscription_failed",
+        )
+        checkout = CheckoutSession.objects.create(
+            business_client=self.client_profile,
+            plan=plan,
+            provider=CheckoutSession.PROVIDER_LEMONSQUEEZY,
+            status=CheckoutSession.STATUS_PAID,
+            external_checkout_id="subscription_failed",
+            email="owner@example.com",
+            amount=plan.monthly_price,
+            currency=plan.currency,
+        )
+        api = APIClient()
+
+        response = api.post(
+            "/api/billing/lemonsqueezy/webhook/",
+            {
+                "meta": {
+                    "event_name": "subscription_payment_failed",
+                    "custom_data": {"checkout_public_id": str(checkout.public_id)},
+                },
+                "data": {
+                    "id": "subscription_failed",
+                    "attributes": {"customer_id": "customer_failed"},
+                },
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["webhook_event_status"], PaymentWebhookEvent.STATUS_PROCESSED)
+        self.client_profile.refresh_from_db()
+        subscription = Subscription.objects.get(business_client=self.client_profile)
+        self.assertFalse(self.client_profile.kaleya_enabled)
+        self.assertEqual(subscription.status, Subscription.STATUS_PAST_DUE)
+        self.assertEqual(subscription.external_customer_id, "customer_failed")
+        webhook_event = PaymentWebhookEvent.objects.get(event_name="subscription_payment_failed")
+        self.assertEqual(webhook_event.status, PaymentWebhookEvent.STATUS_PROCESSED)
+
+    @override_settings(DEBUG=True, KALEYA_LEMONSQUEEZY_WEBHOOK_SECRET="")
+    def test_lemonsqueezy_cancelled_subscription_disables_kaleya_access(self):
+        plan = self.make_plan(Plan.CODE_BUSINESS, 5)
+        self.client_profile.package = Plan.CODE_BUSINESS
+        self.client_profile.kaleya_enabled = True
+        self.client_profile.save(update_fields=["package", "kaleya_enabled", "updated_at"])
+        Subscription.objects.create(
+            business_client=self.client_profile,
+            plan=plan,
+            status=Subscription.STATUS_ACTIVE,
+            current_period_start=timezone.now(),
+            current_period_end=timezone.now() + timedelta(days=30),
+            external_subscription_id="subscription_cancelled",
+        )
+        checkout = CheckoutSession.objects.create(
+            business_client=self.client_profile,
+            plan=plan,
+            provider=CheckoutSession.PROVIDER_LEMONSQUEEZY,
+            status=CheckoutSession.STATUS_PAID,
+            external_checkout_id="subscription_cancelled",
+            email="owner@example.com",
+            amount=plan.monthly_price,
+            currency=plan.currency,
+        )
+        api = APIClient()
+
+        response = api.post(
+            "/api/billing/lemonsqueezy/webhook/",
+            {
+                "meta": {
+                    "event_name": "subscription_cancelled",
+                    "custom_data": {"checkout_public_id": str(checkout.public_id)},
+                },
+                "data": {
+                    "id": "subscription_cancelled",
+                    "attributes": {"customer_id": "customer_cancelled"},
+                },
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["webhook_event_status"], PaymentWebhookEvent.STATUS_PROCESSED)
+        self.client_profile.refresh_from_db()
+        checkout.refresh_from_db()
+        subscription = Subscription.objects.get(business_client=self.client_profile)
+        self.assertFalse(self.client_profile.kaleya_enabled)
+        self.assertEqual(checkout.status, CheckoutSession.STATUS_CANCELLED)
+        self.assertEqual(subscription.status, Subscription.STATUS_CANCELLED)
+        self.assertEqual(subscription.external_customer_id, "customer_cancelled")
+        webhook_event = PaymentWebhookEvent.objects.get(event_name="subscription_cancelled")
+        self.assertEqual(webhook_event.status, PaymentWebhookEvent.STATUS_PROCESSED)
+
     def test_kaleya_admin_dashboard_shows_payment_webhook_events(self):
         self.user.is_staff = True
         self.user.save(update_fields=["is_staff"])
