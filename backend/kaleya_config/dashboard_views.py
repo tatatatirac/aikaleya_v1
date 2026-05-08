@@ -18,9 +18,11 @@ from appointments.services import client_timezone, today_availability_summary
 from billing.models import PaymentWebhookEvent, Plan, Subscription
 from billing.services import enforce_staff_limit
 from clients.models import BusinessClient, ClientApiSettings
+from communications.models import Conversation
 from integrations.models import IntegrationConnection
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from staff_services.models import BlockedTime, Service, StaffMember, WorkingHours
+from support.models import SupportTicket
 
 
 def is_admin_user(user):
@@ -110,6 +112,71 @@ def ensure_business_working_hours(client):
         )
         rows.append(row)
     return rows
+
+
+def support_requester_label(ticket):
+    metadata = ticket.metadata or {}
+    payload = metadata.get("payload") or {}
+    parts = [
+        metadata.get("requester_name") or payload.get("customer_name") or payload.get("name") or "",
+        metadata.get("requester_phone") or payload.get("phone") or payload.get("customer_phone") or "",
+        metadata.get("requester_email") or payload.get("email") or payload.get("customer_email") or "",
+    ]
+    return " - ".join(part for part in parts if part)
+
+
+def build_conversation_feed(client):
+    feed = []
+    conversations = (
+        Conversation.objects.select_related("customer")
+        .prefetch_related("messages")
+        .filter(business_client=client)
+        .order_by("-last_message_at", "-created_at")[:12]
+    )
+    for conversation in conversations:
+        messages = list(conversation.messages.all())
+        last_message = messages[-1] if messages else None
+        customer = conversation.customer
+        metadata = conversation.metadata or {}
+        customer_name = (
+            getattr(customer, "full_name", "")
+            or metadata.get("customer_name")
+            or metadata.get("name")
+            or "Nepoznat klijent"
+        )
+        customer_phone = getattr(customer, "phone", "") or metadata.get("phone") or metadata.get("customer_phone") or ""
+        status_group = "urgent" if conversation.status == "handoff" else "resolved" if conversation.status == "closed" else "unresolved"
+        feed.append(
+            {
+                "kind": "conversation",
+                "filter": status_group,
+                "title": f"{customer_name} - {conversation.get_channel_display()}",
+                "subtitle": last_message.body if last_message else "Razgovor nema sacuvanih poruka.",
+                "contact": customer_phone or conversation.get_status_display(),
+                "status": conversation.get_status_display(),
+                "created_at": conversation.last_message_at or conversation.created_at,
+                "urgent": conversation.status == "handoff",
+            }
+        )
+
+    tickets = SupportTicket.objects.filter(business_client=client).order_by("-created_at")[:12]
+    for ticket in tickets:
+        closed = ticket.status in (SupportTicket.STATUS_RESOLVED, SupportTicket.STATUS_CLOSED)
+        urgent = ticket.priority == SupportTicket.PRIORITY_URGENT or not closed
+        feed.append(
+            {
+                "kind": "support",
+                "filter": "urgent" if urgent else "resolved",
+                "title": ticket.subject,
+                "subtitle": ticket.message,
+                "contact": support_requester_label(ticket) or "Kontakt nije upisan",
+                "status": ticket.get_status_display(),
+                "created_at": ticket.created_at,
+                "urgent": urgent,
+            }
+        )
+
+    return sorted(feed, key=lambda item: item["created_at"], reverse=True)[:18]
 
 
 @require_POST
@@ -246,6 +313,7 @@ def dashboard(request):
     )
     selected_ai_logs = KaleyaCommandLog.objects.filter(business_client=selected_client).order_by("-created_at")[:8]
     selected_appointment_total = Appointment.objects.filter(business_client=selected_client).count()
+    conversation_feed = build_conversation_feed(selected_client)
     admin_has_full_access = is_admin_user(request.user)
     payment_webhook_events = PaymentWebhookEvent.objects.none()
     payment_webhook_total = 0
@@ -287,6 +355,7 @@ def dashboard(request):
         "selected_blocked_times": selected_blocked_times,
         "selected_ai_logs": selected_ai_logs,
         "selected_appointment_total": selected_appointment_total,
+        "conversation_feed": conversation_feed,
         "upcoming_appointments": upcoming_appointments,
         "today_summary": today_summary,
         "cancelled_count": cancelled_count,

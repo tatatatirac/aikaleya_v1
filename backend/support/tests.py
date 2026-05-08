@@ -54,7 +54,7 @@ class SupportTicketApiTests(TestCase):
         self.assertEqual(update_response.status_code, 200)
         self.assertEqual(update_response.data["status"], SupportTicket.STATUS_RESOLVED)
 
-    def test_employee_cannot_access_owner_support_inbox(self):
+    def test_employee_can_manage_only_own_support_tickets(self):
         self.api.force_authenticate(self.employee)
 
         list_response = self.api.get("/api/support/tickets/")
@@ -66,4 +66,12 @@ class SupportTicketApiTests(TestCase):
             {"subject": "Employee ticket", "message": "Test"},
             format="json",
         )
-        self.assertEqual(create_response.status_code, 403)
+        self.assertEqual(create_response.status_code, 201)
+        self.assertEqual(create_response.data["metadata"]["created_by_user_id"], self.employee.id)
+        self.assertEqual(create_response.data["metadata"]["requester_role"], Profile.ROLE_EMPLOYEE)
+
+        second_list_response = self.api.get("/api/support/tickets/")
+        self.assertEqual(second_list_response.status_code, 200)
+        rows = self.response_rows(second_list_response)
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0]["subject"], "Employee ticket")
