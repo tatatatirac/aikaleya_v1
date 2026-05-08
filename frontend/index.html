@@ -2319,12 +2319,27 @@ function isBackendServed() {
     return window.location.protocol === 'http:' || window.location.protocol === 'https:';
 }
 
+function getCookie(name) {
+    const cookie = `; ${document.cookie || ''}`;
+    const parts = cookie.split(`; ${name}=`);
+    if (parts.length !== 2) return '';
+    return decodeURIComponent(parts.pop().split(';').shift() || '');
+}
+
+function frontendJsonHeaders(extraHeaders = {}) {
+    const headers = { 'Content-Type': 'application/json', ...extraHeaders };
+    const csrfToken = getCookie('csrftoken');
+    if (csrfToken) headers['X-CSRFToken'] = csrfToken;
+    return headers;
+}
+
 async function backendLogin(email, password) {
     let response;
     try {
         response = await fetch('/api/auth/login/', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            headers: frontendJsonHeaders(),
             body: JSON.stringify({ email, password })
         });
     } catch (networkError) {
@@ -2497,9 +2512,9 @@ function currentEmployeeStaffMember() {
 
 async function kaleyaApi(path, options = {}) {
     const token = getAuthToken();
-    const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+    const headers = frontendJsonHeaders(options.headers || {});
     if (token) headers.Authorization = `Token ${token}`;
-    return fetch(path, { ...options, headers });
+    return fetch(path, { credentials: 'same-origin', ...options, headers });
 }
 
 const FRONTEND_CHANNEL_OPTIONS = [
