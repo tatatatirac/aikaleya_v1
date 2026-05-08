@@ -35,7 +35,7 @@
         }
 
         a { color: inherit; text-decoration: none; }
-        button, input, select, textarea { font: inherit; }
+        button, input, select, textarea { font: inherit; min-width: 0; }
 
         .app {
             min-height: 100vh;
@@ -320,13 +320,21 @@
 
         .compact-form {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 12px;
             margin-bottom: 18px;
         }
 
         .compact-form.three {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        }
+
+        .compact-form > .primary-btn {
+            width: 100%;
+            min-width: 0;
+            padding: 0 14px;
+            white-space: normal;
+            line-height: 1.15;
         }
 
         .edit-list {
@@ -336,7 +344,7 @@
 
         .edit-row {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+            grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
             gap: 10px;
             align-items: end;
             border: 1px solid #253248;
@@ -346,11 +354,11 @@
         }
 
         .edit-row.service-row {
-            grid-template-columns: minmax(150px, 1.2fr) minmax(120px, .9fr) 90px 90px 92px auto;
+            grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
         }
 
         .edit-row.work-row {
-            grid-template-columns: 120px 120px 120px 120px;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
         }
 
         .edit-row input {
@@ -363,6 +371,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
             color: #dbe4f2;
             font-size: 13px;
             font-weight: 900;
@@ -374,9 +383,18 @@
         }
 
         .edit-actions {
-            display: flex;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(120px, 160px));
             gap: 8px;
             align-items: center;
+            grid-column: 1 / -1;
+        }
+
+        .edit-actions .mini-btn,
+        .edit-actions .danger-btn,
+        .edit-row .inline-form .danger-btn {
+            width: 100%;
+            min-width: 0;
         }
 
         .client-title {

@@ -44,6 +44,51 @@
         #langDropdown.open { display: block; }
         .device-preview { cursor: pointer; }
         * { -webkit-tap-highlight-color: transparent; }
+        .client-settings-panel input,
+        .client-settings-panel select,
+        .client-settings-panel button,
+        .client-settings-panel textarea {
+            min-width: 0;
+        }
+        .client-settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+            gap: 0.5rem;
+        }
+        .client-settings-actions {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 0.5rem;
+        }
+        .client-settings-list-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 0.625rem;
+            align-items: center;
+        }
+        .client-settings-list-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.375rem;
+            flex-wrap: wrap;
+        }
+        .client-settings-list-actions button {
+            white-space: nowrap;
+        }
+        @media (max-width: 430px) {
+            .client-settings-panel {
+                padding: 1rem;
+            }
+            .client-settings-grid,
+            .client-settings-actions,
+            .client-settings-list-row {
+                grid-template-columns: 1fr;
+            }
+            .client-settings-list-actions {
+                justify-content: flex-start;
+            }
+        }
     </style>
 </head>
 <body class="font-sans bg-[#fafbff] dark:bg-[#060a14] text-slate-900 dark:text-slate-100 antialiased transition-colors duration-300">
@@ -637,7 +682,7 @@
             <div id="client-settings" class="fixed inset-0 z-50 hidden">
                 <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeClientSettings()"></div>
                 <div class="absolute bottom-0 inset-x-0 max-w-[430px] mx-auto">
-                    <div class="mx-3 mb-3 rounded-[28px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 max-h-[80vh] overflow-auto">
+                    <div class="client-settings-panel mx-3 mb-3 rounded-[28px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 max-h-[80vh] overflow-auto">
                         <div class="flex items-center justify-between">
                             <h3 class="font-display font-bold text-lg" data-i18n="cset_t">Podešavanja glasa</h3>
                             <button onclick="closeClientSettings()" class="w-8 h-8 grid place-items-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">✕</button>
@@ -692,7 +737,7 @@
 
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                                 <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="calendar_settings">Podešavanja kalendara</p>
-                                <div class="grid grid-cols-2 gap-3">
+                                <div class="client-settings-grid">
                                     <label class="text-[11px] text-slate-500"><span data-i18n="work_from">Rad od</span>
                                         <input id="clientWorkStart" type="text" inputmode="numeric" value="09:00" placeholder="09:00" onchange="saveClientCalendarSettings()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]">
                                     </label>
@@ -775,22 +820,22 @@
                                 <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="staff_services_title">Osoblje i usluge</p>
                                 <div id="clientStaffList" class="space-y-2"></div>
                                 <div id="clientServiceList" class="mt-3 space-y-2"></div>
-                                <div class="mt-4 grid grid-cols-2 gap-2">
+                                <div class="mt-4 client-settings-grid">
                                     <input id="newStaffName" type="text" placeholder="Ime zaposlenog" data-i18n-placeholder="staff_name_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                     <input id="newStaffRole" type="text" placeholder="Zanimanje" data-i18n-placeholder="staff_role_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                 </div>
                                 <input id="newStaffPhone" type="tel" placeholder="Telefon zaposlenog" data-i18n-placeholder="staff_phone_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
-                                <div class="mt-2 grid grid-cols-2 gap-2">
+                                <div class="mt-2 client-settings-grid">
                                     <input id="newStaffUsername" type="text" placeholder="Korisnicko ime" data-i18n-placeholder="staff_username_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                     <input id="newStaffPassword" type="password" placeholder="Lozinka" data-i18n-placeholder="staff_password_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                 </div>
                                 <p class="mt-1 text-[10px] text-slate-500" data-i18n="staff_login_note">Vlasnik unosi login za zaposlenog. Ako menjate osobu, lozinku unesite samo kada zelite novu.</p>
                                 <input id="editingStaffId" type="hidden">
-                                <div class="mt-2 grid grid-cols-[1fr_auto] gap-2">
+                                <div class="mt-2 client-settings-actions">
                                     <button id="clientStaffSaveBtn" onclick="saveClientStaffForm()" class="h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12px] font-semibold" data-i18n="add_person">Dodaj osobu</button>
                                     <button id="clientStaffCancelBtn" onclick="resetClientStaffForm()" class="hidden h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="cancel_btn">Odustani</button>
                                 </div>
-                                <div class="mt-2 grid grid-cols-[1fr_82px] gap-2">
+                                <div class="mt-2 client-settings-grid">
                                     <input id="newServiceName" type="text" placeholder="Naziv usluge" data-i18n-placeholder="service_name_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                     <select id="newServiceDuration" class="h-10 px-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px]">
                                         <option value="30">30m</option>
@@ -802,7 +847,7 @@
                                 </div>
                                 <input id="newServicePrice" type="number" min="0" step="0.01" placeholder="Cena" data-i18n-placeholder="price_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                 <input id="editingServiceId" type="hidden">
-                                <div class="mt-2 grid grid-cols-[1fr_auto] gap-2">
+                                <div class="mt-2 client-settings-actions">
                                     <button id="clientServiceSaveBtn" onclick="saveClientServiceForm()" class="h-10 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="add_service">Dodaj uslugu</button>
                                     <button id="clientServiceCancelBtn" onclick="resetClientServiceForm()" class="hidden h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="cancel_btn">Odustani</button>
                                 </div>
@@ -814,7 +859,7 @@
                                         <option value="single" data-i18n="one_day">Jednodnevno</option>
                                         <option value="multi" data-i18n="multi_day">Više dana</option>
                                     </select>
-                                    <div class="mt-3 grid grid-cols-2 gap-2">
+                                    <div class="mt-3 client-settings-grid">
                                         <input id="blockedDate" type="text" inputmode="numeric" placeholder="28-04-2026" onchange="handleDateInputChange('blockedDate')" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                         <input id="blockedDateTo" type="text" inputmode="numeric" placeholder="28-04-2026" onchange="handleDateInputChange('blockedDateTo')" class="hidden h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                         <select id="blockedStaff" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px]">
@@ -1305,7 +1350,7 @@
 
 <script>
 // ===== STATE =====
-const KALEYA_APP_VERSION = '2026-05-08-staging-fixes-02';
+const KALEYA_APP_VERSION = '2026-05-08-layout-fixes-01';
 const savedAppVersion = localStorage.getItem('kaleya_app_version');
 if (savedAppVersion && savedAppVersion !== KALEYA_APP_VERSION) {
     localStorage.removeItem('kaleya_auth_token');
@@ -3393,12 +3438,12 @@ function renderClientOperationalSettings() {
     if (staffList) {
         staffList.innerHTML = clientStaffMembers.length
             ? clientStaffMembers.map(staff => `
-                <div class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2">
+                <div class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 client-settings-list-row">
                     <div class="min-w-0">
                         <p class="text-[12px] font-semibold truncate">${escapeHtml(staff.full_name)}</p>
                         <p class="text-[10px] text-slate-500 truncate">${escapeHtml(staff.role_title || tr('staff_default_role'))}${staff.phone ? ` - ${escapeHtml(staff.phone)}` : ''}${staff.user_username ? ` - login: ${escapeHtml(staff.user_username)}` : ''}</p>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="client-settings-list-actions">
                         <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
                         <button onclick="startEditClientStaffMember('${staff.id}')" class="h-7 px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-semibold">${escapeHtml(tr('edit_btn'))}</button>
                         <button onclick="deleteClientStaffMember('${staff.id}')" class="h-7 px-2.5 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-[10px] font-semibold">${escapeHtml(tr('delete_btn'))}</button>
@@ -3410,12 +3455,12 @@ function renderClientOperationalSettings() {
     if (serviceList) {
         serviceList.innerHTML = clientServices.length
             ? clientServices.map(service => `
-                <div class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-between gap-2">
+                <div class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 client-settings-list-row">
                     <div class="min-w-0">
                         <p class="text-[12px] font-semibold truncate">${escapeHtml(service.name)}</p>
                         <p class="text-[10px] text-slate-500">${Number(service.duration_minutes || 30)} min</p>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="client-settings-list-actions">
                         <span class="text-[10px] text-slate-500">${escapeHtml(service.currency || 'EUR')} ${escapeHtml(service.price || '0.00')}</span>
                         <button onclick="startEditClientService('${service.id}')" class="h-7 px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-semibold">${escapeHtml(tr('edit_btn'))}</button>
                         <button onclick="deleteClientService('${service.id}')" class="h-7 px-2.5 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-[10px] font-semibold">${escapeHtml(tr('delete_btn'))}</button>
@@ -3432,7 +3477,7 @@ function renderClientOperationalSettings() {
                 .slice(0, 8)
                 .map(block => {
                     return `
-                        <div class="px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/25 border border-amber-200 dark:border-amber-900 flex items-center justify-between gap-2">
+                        <div class="px-3 py-2 rounded-xl bg-amber-50 dark:bg-amber-950/25 border border-amber-200 dark:border-amber-900 client-settings-list-row">
                             <div class="min-w-0">
                                 <p class="text-[12px] font-semibold truncate">${escapeHtml(blockRangeLabel(block))}</p>
                                 <p class="text-[10px] text-amber-700 dark:text-amber-300 truncate">${escapeHtml(block.staff_member_name || staffNameById(block.staff_member))} - ${escapeHtml(block.reason || tr('blocked_default_reason'))}</p>
