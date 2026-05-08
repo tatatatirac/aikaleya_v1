@@ -1220,12 +1220,12 @@ async function submitRegistrationForm(form) {
 
     try {
         const checkout = await createCheckoutSession(payload);
-        if (checkout.local_checkout_url) {
-            window.location.href = checkout.local_checkout_url;
-            return;
-        }
         if (checkout.checkout_url) {
             window.location.href = checkout.checkout_url;
+            return;
+        }
+        if (checkout.local_checkout_url) {
+            window.location.href = checkout.local_checkout_url;
             return;
         }
 
