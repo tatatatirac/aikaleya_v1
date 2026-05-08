@@ -204,9 +204,6 @@
 
         .panel { display: none; }
         .panel.active { display: block; }
-        body:has(.panel:target) .panel.active { display: none; }
-        body:has(.panel:target) .panel:target { display: block; }
-
         .section-head {
             display: flex;
             align-items: flex-start;
@@ -863,7 +860,7 @@
                             <article class="card status-card">
                                 <h2>Kaleya status</h2>
                                 <div class="status-list">
-                                    <div class="status-line"><span>Glas</span><strong>{{ api_settings.voice_provider|default:"ElevenLabs" }}</strong></div>
+                                    <div class="status-line"><span>Glas</span><strong>{% firstof api_settings.voice_provider global_voice_provider "ElevenLabs" %}</strong></div>
                                     <div class="status-line"><span>Jezik</span><strong>{{ selected_client.get_interface_language_display }}</strong></div>
                                     <div class="status-line"><span>Wake word</span><strong>"hej Kaleya"</strong></div>
                                     <div class="status-line"><span>Radno vreme</span><strong>{{ selected_client.work_start|time:"H:i" }}-{{ selected_client.work_end|time:"H:i" }}</strong></div>
@@ -933,7 +930,7 @@
                                                     <span>nema plana</span>
                                                 {% endif %}
                                             </td>
-                                            <td class="muted">{{ client.api_settings.ai_model|default:"Globalni" }}</td>
+                                            <td class="muted">{{ client.api_settings.ai_model|default:global_ai_model|default:"Globalni" }}</td>
                                             <td>
                                                 <span class="badge {% if client.kaleya_enabled %}ok{% else %}pause{% endif %}">
                                                     {% if client.kaleya_enabled %}Aktivan{% else %}Pauza{% endif %}
@@ -1032,10 +1029,10 @@
                             <article class="card detail-card">
                                 <h3>API status</h3>
                                 <div class="status-list">
-                                    <div class="status-line"><span>AI provider</span><strong>{{ api_settings.ai_provider|default:"global" }}</strong></div>
-                                    <div class="status-line"><span>AI model</span><strong>{{ api_settings.ai_model|default:"global" }}</strong></div>
-                                    <div class="status-line"><span>Voice provider</span><strong>{{ api_settings.voice_provider|default:"ElevenLabs" }}</strong></div>
-                                    <div class="status-line"><span>Voice ID</span><strong>{% if api_settings.voice_id or voice_settings.voice_id %}Podesen{% else %}Globalni{% endif %}</strong></div>
+                                    <div class="status-line"><span>AI provider</span><strong>{% firstof api_settings.ai_provider global_ai_provider "global" %}</strong></div>
+                                    <div class="status-line"><span>AI model</span><strong>{% firstof api_settings.ai_model global_ai_model "global" %}</strong></div>
+                                    <div class="status-line"><span>Voice provider</span><strong>{% firstof api_settings.voice_provider global_voice_provider "ElevenLabs" %}</strong></div>
+                                    <div class="status-line"><span>Voice ID</span><strong>{% if api_settings.voice_id or voice_settings.voice_id or global_voice_id %}Podesen{% else %}Nije podesen{% endif %}</strong></div>
                                 </div>
                             </article>
 
@@ -1543,7 +1540,7 @@
                                 </div>
                                 <div class="field">
                                     <label>Voice ID</label>
-                                    <input name="voice_id" value="{{ voice_settings.voice_id }}">
+                                    <input name="voice_id" value="{% firstof voice_settings.voice_id global_voice_id %}">
                                 </div>
                                 <div class="field">
                                     <label>Speed</label>
@@ -1572,31 +1569,31 @@
                                 <div class="form-grid">
                                     <div class="field">
                                         <label>AI provider</label>
-                                        <input name="ai_provider" value="{{ api_settings.ai_provider }}">
+                                        <input name="ai_provider" value="{% firstof api_settings.ai_provider global_ai_provider %}">
                                     </div>
                                     <div class="field">
                                         <label>AI model</label>
-                                        <input name="ai_model" value="{{ api_settings.ai_model }}">
+                                        <input name="ai_model" value="{% firstof api_settings.ai_model global_ai_model %}">
                                     </div>
                                     <div class="field full">
                                         <label>AI API key</label>
-                                        <input type="password" name="ai_api_key" placeholder="{% if api_settings.ai_api_key %}Ključ je već sačuvan{% else %}Unesi Claude API ključ{% endif %}">
+                                        <input type="password" name="ai_api_key" placeholder="{% if api_settings.ai_api_key %}Ključ po klijentu je sačuvan{% elif global_ai_key_configured %}Koristi globalni Claude API iz .env{% else %}Unesi Claude API ključ{% endif %}">
                                     </div>
                                     <div class="field">
                                         <label>Voice provider</label>
-                                        <input name="voice_provider" value="{{ api_settings.voice_provider }}">
+                                        <input name="voice_provider" value="{% firstof api_settings.voice_provider global_voice_provider %}">
                                     </div>
                                     <div class="field">
                                         <label>Voice model</label>
-                                        <input name="voice_model" value="{{ api_settings.voice_model }}">
+                                        <input name="voice_model" value="{% firstof api_settings.voice_model global_voice_model %}">
                                     </div>
                                     <div class="field">
                                         <label>Voice ID</label>
-                                        <input name="voice_id" value="{{ api_settings.voice_id }}">
+                                        <input name="voice_id" value="{% firstof api_settings.voice_id global_voice_id %}">
                                     </div>
                                     <div class="field">
                                         <label>Voice API key</label>
-                                        <input type="password" name="voice_api_key" placeholder="{% if api_settings.voice_api_key %}Ključ je već sačuvan{% else %}Unesi ElevenLabs ključ{% endif %}">
+                                        <input type="password" name="voice_api_key" placeholder="{% if api_settings.voice_api_key %}Ključ po klijentu je sačuvan{% elif global_voice_key_configured %}Koristi globalni ElevenLabs API iz .env{% else %}Unesi ElevenLabs ključ{% endif %}">
                                     </div>
                                 </div>
                                 <div class="actions">
@@ -1656,6 +1653,13 @@
         const tabs = Array.from(document.querySelectorAll("[data-tab]"));
         const panels = Array.from(document.querySelectorAll(".panel[id]"));
 
+        function setDashboardHash(tab) {
+            const nextHash = "#" + tab;
+            if (window.location.hash !== nextHash) {
+                window.location.hash = nextHash;
+            }
+        }
+
         function activate(tab, updateUrl = true) {
             const requestedTab = panels.some((panel) => panel.id === tab) ? tab : "overview";
             const parentTab = requestedTab === "client-detail" ? "clients" : requestedTab;
@@ -1668,8 +1672,8 @@
                 title.textContent = requestedTab === "client-detail" ? "Detalji klijenta" : button.dataset.title || "Kontrolna tabla";
             }
 
-            if (updateUrl && history.replaceState) {
-                history.replaceState(null, "", "#" + requestedTab);
+            if (updateUrl) {
+                setDashboardHash(requestedTab);
             }
         }
         window.activate = activate;

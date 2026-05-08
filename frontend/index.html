@@ -58,7 +58,7 @@
                 </div>
                 <div class="flex-1">
                     <p class="font-bold text-amber-900 dark:text-amber-100 text-sm" id="notifQueueTitle">Sledeći klijent na redu</p>
-                    <p class="text-xs text-amber-700 dark:text-amber-300 mt-0.5" id="notifQueueText">Marko Petrović je sledeći na redu</p>
+                    <p class="text-xs text-amber-700 dark:text-amber-300 mt-0.5" id="notifQueueText">Test klijent je sledeći na redu</p>
                 </div>
                 <button onclick="dismissNotif('notifQueue')" class="text-amber-500 hover:text-amber-700 mt-0.5">x</button>
             </div>
@@ -491,7 +491,7 @@
                 <!-- Main -->
                 <div data-client-screen="home" class="flex-1 px-5 pt-8 pb-24">
                     <div class="text-center">
-                        <p class="text-xs uppercase tracking-widest text-slate-500 font-semibold" data-i18n="client_greet">Dobro jutro, Marko</p>
+                        <p id="clientGreeting" class="text-xs uppercase tracking-widest text-slate-500 font-semibold" data-i18n="client_greet">Dobro jutro</p>
                         <h2 class="mt-2 font-display text-[28px] font-bold leading-tight" data-i18n="client_how">Kako mogu pomoći danas?</h2>
                     </div>
                     <div id="clientSubscriptionCard" class="mt-4 rounded-2xl border border-teal-100 dark:border-teal-900/60 bg-teal-50/70 dark:bg-teal-950/20 p-3 text-left">
@@ -886,7 +886,7 @@
                                     </select>
                                     <button id="clientAiTestRunBtn" onclick="runPrivateAiTest()" class="h-10 px-4 rounded-xl gradient-bg text-white text-[12px] font-semibold" data-i18n="ai_test_run">Testiraj</button>
                                 </div>
-                                <textarea id="clientAiTestInput" rows="4" data-i18n-placeholder="ai_test_input_placeholder" placeholder="Npr. Klijent Marko zeli sisanje sutra u 15:00, telefon +381..." class="mt-2 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none resize-none"></textarea>
+                                <textarea id="clientAiTestInput" rows="4" data-i18n-placeholder="ai_test_input_placeholder" placeholder="Npr. Klijent želi šišanje sutra u 15:00, telefon +381..." class="mt-2 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none resize-none"></textarea>
                                 <p id="clientAiTestNote" class="mt-2 text-[10px] text-slate-500" data-i18n="ai_test_real_note">Pravi nalozi koriste AI model iz backenda. Demo nalog koristi sigurni fallback bez trosenja API kredita.</p>
                                 <div id="clientAiTestResult" class="hidden mt-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 p-3 text-[12px]">
                                     <div class="grid grid-cols-3 gap-2">
@@ -1122,7 +1122,7 @@
                                         <tr><th class="text-left px-4 py-3">Ime</th><th class="text-left px-4 py-3">Kontakt</th><th class="text-left px-4 py-3">Paket</th><th class="text-left px-4 py-3">AI model</th><th class="text-left px-4 py-3">Status</th><th class="text-left px-4 py-3">Akcije</th></tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                                        <tr><td class="px-4 py-3 font-medium">Marko Petrović</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">administrator@test.com</td><td class="px-4 py-3">Pro</td><td class="px-4 py-3 text-slate-500">Globalni</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[11px]">Aktivan</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Marko Petrović')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po firmi</button></td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">Demo Administrator</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">administrator@test.com</td><td class="px-4 py-3">Pro</td><td class="px-4 py-3 text-slate-500">Globalni</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[11px]">Aktivan</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Demo Administrator')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po firmi</button></td></tr>
                                         <tr><td class="px-4 py-3 font-medium">Salon Lepote Bella</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">+381 11 123456</td><td class="px-4 py-3">Business</td><td class="px-4 py-3 text-slate-500">Jači model</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[11px]">Aktivan</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Salon Lepote Bella')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po firmi</button></td></tr>
                                         <tr><td class="px-4 py-3 font-medium">Ordinacija Dr. Milić</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">+381 21 555888</td><td class="px-4 py-3">Starter</td><td class="px-4 py-3 text-slate-500">Globalni</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[11px]">Pauza</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Ordinacija Dr. Milić')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po firmi</button></td></tr>
                                     </tbody>
@@ -1305,13 +1305,14 @@
 
 <script>
 // ===== STATE =====
-const KALEYA_APP_VERSION = '2026-05-06-support-inbox-01';
+const KALEYA_APP_VERSION = '2026-05-08-staging-fixes-01';
 const savedAppVersion = localStorage.getItem('kaleya_app_version');
 if (savedAppVersion && savedAppVersion !== KALEYA_APP_VERSION) {
     localStorage.removeItem('kaleya_auth_token');
     localStorage.removeItem('kaleya_user_role');
     localStorage.removeItem('kaleya_user_email');
     localStorage.removeItem('kaleya_user_username');
+    localStorage.removeItem('kaleya_user_full_name');
     sessionStorage.clear();
 }
 localStorage.setItem('kaleya_app_version', KALEYA_APP_VERSION);
@@ -1421,7 +1422,7 @@ const T = {
         footer_privacy: 'Privatnost', footer_terms: 'Uslovi',
         back_home: 'Nazad', login_title: 'Dobrodošli nazad', login_sub: 'Prijavite se na Kaleya',
         email: 'Email', password: 'Lozinka', login_btn: 'Prijavi se', login_err: 'Pogrešan email ili lozinka',
-        client_active: 'online', client_greet: 'Dobro jutro, Marko', client_how: 'Kako mogu pomoći danas?',
+        client_active: 'online', client_greet: 'Dobro jutro', client_how: 'Kako mogu pomoći danas?',
         say_wake: 'Reci "hej Kaleya"', tap_to_talk: 'Dodirnite za razgovor', listening: 'Slušam...', quick: 'Brze akcije',
         qa1: 'Zakaži', qa1_s: 'Novi termin', qa2: 'Otkaži', qa2_s: 'Sastanak', qa3: 'Proveri', qa3_s: 'Termine',
         today: 'Danas', nav_home: 'Početna', nav_cal: 'Kalendar', nav_set: 'Podeš.',
@@ -1465,7 +1466,7 @@ const T = {
         footer_privacy: 'Privacy', footer_terms: 'Terms',
         back_home: 'Back', login_title: 'Welcome back', login_sub: 'Sign in to Kaleya',
         email: 'Email', password: 'Password', login_btn: 'Sign in', login_err: 'Wrong email or password',
-        client_active: 'online', client_greet: 'Good morning, Marko', client_how: 'How can I help today?',
+        client_active: 'online', client_greet: 'Good morning', client_how: 'How can I help today?',
         say_wake: 'Say "hey Kaleya"', tap_to_talk: 'Tap to talk', listening: 'Listening...', quick: 'Quick actions',
         qa1: 'Schedule', qa1_s: 'New slot', qa2: 'Cancel', qa2_s: 'Meeting', qa3: 'Check', qa3_s: 'Slots',
         today: 'Today', nav_home: 'Home', nav_cal: 'Calendar', nav_set: 'Settings',
@@ -1509,7 +1510,7 @@ const T = {
         footer_privacy: 'Privacidad', footer_terms: 'Términos',
         back_home: 'Atrás', login_title: 'Bienvenido de nuevo', login_sub: 'Inicia sesión en Kaleya',
         email: 'Email', password: 'Contraseña', login_btn: 'Entrar', login_err: 'Email o contraseña incorrectos',
-        client_active: 'online', client_greet: 'Buenos días, Marko', client_how: '¿Cómo puedo ayudar hoy?',
+        client_active: 'online', client_greet: 'Buenos días', client_how: '¿Cómo puedo ayudar hoy?',
         say_wake: 'Di "hey Kaleya"', tap_to_talk: 'Toca para hablar', listening: 'Escuchando...', quick: 'Acciones rápidas',
         qa1: 'Agendar', qa1_s: 'Nueva cita', qa2: 'Cancelar', qa2_s: 'Reunión', qa3: 'Revisar', qa3_s: 'Horarios',
         today: 'Hoy', nav_home: 'Inicio', nav_cal: 'Calendario', nav_set: 'Ajustes',
@@ -1553,7 +1554,7 @@ const T = {
         footer_privacy: 'Privacidade', footer_terms: 'Termos',
         back_home: 'Voltar', login_title: 'Bem-vindo de volta', login_sub: 'Entrar na Kaleya',
         email: 'Email', password: 'Senha', login_btn: 'Entrar', login_err: 'Email ou senha incorretos',
-        client_active: 'online', client_greet: 'Bom dia, Marko', client_how: 'Como posso ajudar hoje?',
+        client_active: 'online', client_greet: 'Bom dia', client_how: 'Como posso ajudar hoje?',
         say_wake: 'Diga "hey Kaleya"', tap_to_talk: 'Toque para falar', listening: 'Ouvindo...', quick: 'Ações rápidas',
         qa1: 'Agendar', qa1_s: 'Novo horário', qa2: 'Cancelar', qa2_s: 'Reunião', qa3: 'Verificar', qa3_s: 'Horários',
         today: 'Hoje', nav_home: 'Início', nav_cal: 'Calendário', nav_set: 'Ajustes',
@@ -1597,7 +1598,7 @@ const T = {
         footer_privacy: 'Конфиденциальность', footer_terms: 'Условия',
         back_home: 'Назад', login_title: 'С возвращением', login_sub: 'Войти в Kaleya',
         email: 'Email', password: 'Пароль', login_btn: 'Войти', login_err: 'Неверный email или пароль',
-        client_active: 'online', client_greet: 'Доброе утро, Marko', client_how: 'Чем помочь сегодня?',
+        client_active: 'online', client_greet: 'Доброе утро', client_how: 'Чем помочь сегодня?',
         say_wake: 'Скажите "hey Kaleya"', tap_to_talk: 'Нажмите, чтобы говорить', listening: 'Слушаю...', quick: 'Быстрые действия',
         qa1: 'Записать', qa1_s: 'Новый слот', qa2: 'Отменить', qa2_s: 'Встреча', qa3: 'Проверить', qa3_s: 'Время',
         today: 'Сегодня', nav_home: 'Главная', nav_cal: 'Календарь', nav_set: 'Настр.',
@@ -1637,7 +1638,7 @@ T.fr = {
     popular: 'POPULAIRE', price_btn: 'Commencer', price_btn2: 'Essayer 14 jours', trial_btn: 'Essayer 14 jours', price_contact: 'Contact',
     footer_privacy: 'Confidentialite', footer_terms: 'Conditions',
     back_home: 'Retour', login_title: 'Bon retour', login_sub: 'Connectez-vous a Kaleya', password: 'Mot de passe', login_btn: 'Connexion', login_err: 'Email ou mot de passe incorrect',
-    client_active: 'online', client_greet: 'Bonjour, Marko', client_how: 'Comment puis-je aider aujourd hui ?',
+    client_active: 'online', client_greet: 'Bonjour', client_how: 'Comment puis-je aider aujourd hui ?',
     say_wake: 'Dites "hey Kaleya"', tap_to_talk: 'Touchez pour parler', listening: 'J ecoute...', quick: 'Actions rapides',
     qa1: 'Planifier', qa1_s: 'Nouveau creneau', qa2: 'Annuler', qa2_s: 'Rendez-vous', qa3: 'Verifier', qa3_s: 'Creneaux',
     today: 'Aujourd hui', nav_home: 'Accueil', nav_cal: 'Calendrier', nav_set: 'Reglages',
@@ -1669,7 +1670,7 @@ T.it = {
     popular: 'POPOLARE', price_btn: 'Inizia', price_btn2: 'Prova 14 giorni', trial_btn: 'Prova 14 giorni', price_contact: 'Contatto',
     footer_privacy: 'Privacy', footer_terms: 'Termini',
     back_home: 'Indietro', login_title: 'Bentornato', login_sub: 'Accedi a Kaleya', password: 'Password', login_btn: 'Accedi', login_err: 'Email o password errati',
-    client_active: 'online', client_greet: 'Buongiorno, Marko', client_how: 'Come posso aiutare oggi?',
+    client_active: 'online', client_greet: 'Buongiorno', client_how: 'Come posso aiutare oggi?',
     say_wake: 'Dici "hey Kaleya"', tap_to_talk: 'Tocca per parlare', listening: 'Sto ascoltando...', quick: 'Azioni rapide',
     qa1: 'Prenota', qa1_s: 'Nuovo slot', qa2: 'Annulla', qa2_s: 'Riunione', qa3: 'Controlla', qa3_s: 'Slot',
     today: 'Oggi', nav_home: 'Home', nav_cal: 'Calendario', nav_set: 'Impost.',
@@ -1769,7 +1770,7 @@ const EXTRA_TRANSLATIONS = {
         p_business_plus_d: 'Bis zu 15 Mitarbeiter', p_business_plus_f1: 'Alles aus Basic + Pro + Business', p_business_plus_f2: 'Bis zu 15 Mitarbeiter', p_business_plus_f3: 'Telefonanrufe und SMS', p_business_plus_f4: 'ElevenLabs AI voice',
         p_business_pro_d: '15+ Mitarbeiter', p_business_pro_f1: 'Alles aus Basic + Pro + Business + Business+', p_business_pro_f2: '15+ Mitarbeiter', p_business_pro_f3: 'Custom Integrationen', p_business_pro_f4: 'Erweiterte Architektur nach Vereinbarung', custom_price: 'Custom',
         footer_privacy: 'Datenschutz', footer_terms: 'Bedingungen', back_home: 'Zurück', login_title: 'Willkommen zurück', login_sub: 'Bei Kaleya anmelden', password: 'Passwort', login_btn: 'Anmelden', login_err: 'Falsche E-Mail oder falsches Passwort',
-        client_active: 'online', client_greet: 'Guten Morgen, Marko', client_how: 'Wie kann ich heute helfen?', say_wake: 'Sagen Sie "hey Kaleya"', tap_to_talk: 'Zum Sprechen tippen', listening: 'Ich höre zu...', quick: 'Schnellaktionen', qa1: 'Buchen', qa1_s: 'Neuer Termin', qa2: 'Stornieren', qa2_s: 'Termin', qa3: 'Prüfen', qa3_s: 'Slots', today: 'Heute', nav_home: 'Start', nav_cal: 'Kalender', nav_set: 'Einst.',
+        client_active: 'online', client_greet: 'Guten Morgen', client_how: 'Wie kann ich heute helfen?', say_wake: 'Sagen Sie "hey Kaleya"', tap_to_talk: 'Zum Sprechen tippen', listening: 'Ich höre zu...', quick: 'Schnellaktionen', qa1: 'Buchen', qa1_s: 'Neuer Termin', qa2: 'Stornieren', qa2_s: 'Termin', qa3: 'Prüfen', qa3_s: 'Slots', today: 'Heute', nav_home: 'Start', nav_cal: 'Kalender', nav_set: 'Einst.',
         cset_t: 'Einstellungen', cset_ui_lang: 'Sprache der Oberfläche', cset_voice_lang: 'Kaleya Sprachstimme', cset_el_desc: 'Natürliche Stimme über ElevenLabs', cset_test: 'Kaleya Stimme testen', cset_note: 'Der Kaleya Admin setzt den API-Schlüssel; der Firmenadministrator wählt Sprache und Verhalten.', cset_integrations: 'Buchungskanäle', cset_alarm: 'Team-Alarme', active: 'Aktiv', pending: 'In Vorbereitung',
         team_label: 'Team', employee_list_title: 'Mitarbeiter', employee_list_desc: 'Kontaktliste fuer Mitarbeiter. Der Inhaber steht immer oben.', calendar_settings: 'Kalender Einstellungen', work_from: 'Arbeit von', work_to: 'Arbeit bis', interval_label: 'Intervall', time_label: 'Zeit', date_label: 'Datum', first_day_label: 'Erster Tag',
         staff_services_title: 'Team und Services', blocked_time_title: 'Blockierte Zeit / Pausen', one_day: 'Ein Tag', multi_day: 'Mehrere Tage', all_staff: 'Alle Mitarbeiter', add_block: 'Blockierung hinzufuegen', appointment_title: 'Termin', name_service_label: 'Name und Service', service_label: 'Service', staff_label: 'Team', no_service: 'Kein Service', any_staff: 'Jeder', channel_label: 'Kanal', status_label: 'Status', status_confirmed: 'Gebucht', status_moved: 'Verschoben', status_cancelled: 'Abgesagt', status_pending: 'Ausstehend', duration_label: 'Termindauer',
@@ -1901,7 +1902,7 @@ const PRIVATE_AI_TEST_TRANSLATIONS = {
     sr: {
         ai_test_title: 'Privatni AI test',
         ai_test_desc: 'Posaljite poruku kao da je stigla od klijenta i proverite sta bi Kaleya uradila.',
-        ai_test_input_placeholder: 'Npr. Klijent Marko zeli sisanje sutra u 15:00, telefon +381...',
+        ai_test_input_placeholder: 'Npr. Klijent želi šišanje sutra u 15:00, telefon +381...',
         ai_test_run: 'Testiraj',
         ai_test_running: 'Kaleya proverava...',
         ai_test_response: 'Odgovor Kaleye',
@@ -2187,6 +2188,18 @@ function tr(key) {
     return (T[currentLang] && T[currentLang][key]) || T.en[key] || T.sr[key] || key;
 }
 
+function storedUserDisplayName() {
+    return (localStorage.getItem('kaleya_user_full_name') || '').trim();
+}
+
+function updateClientGreeting() {
+    const greeting = document.getElementById('clientGreeting');
+    if (!greeting) return;
+    const base = tr('client_greet');
+    const name = storedUserDisplayName();
+    greeting.textContent = name ? `${base}, ${name}` : base;
+}
+
 function applyLang() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
@@ -2209,6 +2222,7 @@ function applyLang() {
     renderSchedule();
     renderClientCalendar();
     updateKaleyaPowerUI();
+    updateClientGreeting();
     updatePwaInstallButtons();
 }
 
@@ -2393,6 +2407,9 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
             localStorage.setItem('kaleya_user_role', data.user.role);
             localStorage.setItem('kaleya_user_email', data.user.email);
             localStorage.setItem('kaleya_user_username', data.user.username || data.user.email || email);
+            const displayName = [data.user.first_name, data.user.last_name].filter(Boolean).join(' ').trim();
+            if (displayName) localStorage.setItem('kaleya_user_full_name', displayName);
+            else localStorage.removeItem('kaleya_user_full_name');
 
             if (data.user.role === 'admin' || data.user.is_staff) {
                 window.location.href = '/admin/';
@@ -2411,16 +2428,19 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     if (email === 'admin@aikaleya.com' && pass === 'admin123') {
         localStorage.setItem('kaleya_user_role', 'admin');
         localStorage.setItem('kaleya_user_email', email);
+        localStorage.removeItem('kaleya_user_full_name');
         showView('admin');
     } else if (email === 'administrator@test.com' && pass === 'test123') {
         localStorage.setItem('kaleya_user_role', 'client');
         localStorage.setItem('kaleya_user_email', email);
         localStorage.setItem('kaleya_user_username', email);
+        localStorage.setItem('kaleya_user_full_name', 'Demo Administrator');
         showView('client');
     } else if ((email === 'employee@test.com' || email.toLowerCase() === 'employee') && pass === 'emp123') {
         localStorage.setItem('kaleya_user_role', 'employee');
         localStorage.setItem('kaleya_user_email', email.includes('@') ? email : 'employee@test.com');
         localStorage.setItem('kaleya_user_username', 'employee');
+        localStorage.setItem('kaleya_user_full_name', 'Employee');
         showView('client');
     } else {
         error.classList.remove('hidden');
@@ -2452,6 +2472,7 @@ async function logout() {
     localStorage.removeItem('kaleya_user_role');
     localStorage.removeItem('kaleya_user_email');
     localStorage.removeItem('kaleya_user_username');
+    localStorage.removeItem('kaleya_user_full_name');
     showView('landing');
 }
 
@@ -4277,21 +4298,11 @@ async function handleQuickAction(action) {
     if (action === 'proveri') {
         let msg = await todayAvailabilityMessageFromBackend() || todayAvailabilityMessage();
         try {
-            const result = await askKaleyaBackend(availabilityPrompt(), true, { date: clientIsoDate(new Date()) }, false);
-            if (result?.tool_output && result.tool_output.free_count !== undefined) {
-                msg = availabilityMessageFromFreeCount(result.tool_output.free_count);
-            } else if (result?.response_text) {
-                msg = result.response_text;
-            }
-            showKaleyaAiResult(result, msg);
-            if (result?.voice?.audio_url) {
-                await playAudioUrl(result.voice.audio_url);
-            } else {
-                await speak(msg, currentVoiceLang);
-            }
-        } catch (e) {
-            console.warn('Kaleya availability backend failed, fallback to local demo', e);
             await speak(msg, currentVoiceLang);
+            showToast(msg);
+        } catch (e) {
+            console.warn('Kaleya availability voice failed', e);
+            showToast(msg);
         }
         return;
     }
@@ -5675,7 +5686,7 @@ function addAlarmLog(kind, text) {
     log.prepend(row);
 }
 
-async function fireQueueAlarm(name = 'Marko Petrović') {
+async function fireQueueAlarm(name = 'Test klijent') {
     const text = {
         sr: `Klijent ${name} je sledeći na redu.`,
         en: `Client ${name} is next in line.`,
@@ -5694,7 +5705,7 @@ async function fireQueueAlarm(name = 'Marko Petrović') {
 }
 
 function fireQueueAlarmCustom() {
-    const name = document.getElementById('queueCustomName')?.value.trim() || 'Marko Petrović';
+    const name = document.getElementById('queueCustomName')?.value.trim() || 'Test klijent';
     fireQueueAlarm(name);
 }
 
@@ -5895,6 +5906,7 @@ if (savedAuthToken && (savedUserRole === 'client' || savedUserRole === 'employee
     localStorage.removeItem('kaleya_user_role');
     localStorage.removeItem('kaleya_user_email');
     localStorage.removeItem('kaleya_user_username');
+    localStorage.removeItem('kaleya_user_full_name');
     showView('landing');
 } else {
     showView('landing');

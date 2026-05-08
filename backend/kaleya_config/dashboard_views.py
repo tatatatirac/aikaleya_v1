@@ -1,6 +1,7 @@
 from datetime import datetime, time, timedelta
 from decimal import Decimal, InvalidOperation
 
+from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.contrib import messages
 from django.contrib.auth import logout
@@ -251,6 +252,16 @@ def dashboard(request):
             status__in=(PaymentWebhookEvent.STATUS_RECEIVED, PaymentWebhookEvent.STATUS_VERIFIED)
         ).count()
 
+    global_ai_provider = getattr(settings, "KALEYA_AI_PROVIDER", "") or "anthropic"
+    global_ai_model = (
+        getattr(settings, "KALEYA_ANTHROPIC_MODEL", "")
+        or getattr(settings, "KALEYA_OPENAI_MODEL", "")
+        or ""
+    )
+    global_voice_provider = "elevenlabs" if getattr(settings, "KALEYA_ELEVENLABS_API_KEY", "") else ""
+    global_voice_model = "eleven_multilingual_v2" if global_voice_provider else ""
+    global_voice_id = getattr(settings, "KALEYA_ELEVENLABS_VOICE_ID", "") or ""
+
     context = {
         "is_admin_user": admin_has_full_access,
         "clients": clients,
@@ -280,6 +291,13 @@ def dashboard(request):
         "date_format_choices": BusinessClient.DATE_FORMAT_CHOICES,
         "week_start_choices": BusinessClient.WEEK_START_CHOICES,
         "slot_choices": [15, 20, 30, 45, 60],
+        "global_ai_provider": global_ai_provider,
+        "global_ai_model": global_ai_model,
+        "global_ai_key_configured": bool(getattr(settings, "KALEYA_ANTHROPIC_API_KEY", "") or getattr(settings, "KALEYA_OPENAI_API_KEY", "")),
+        "global_voice_provider": global_voice_provider,
+        "global_voice_model": global_voice_model,
+        "global_voice_id": global_voice_id,
+        "global_voice_key_configured": bool(getattr(settings, "KALEYA_ELEVENLABS_API_KEY", "")),
     }
     return render(request, "dashboard.html", context)
 
