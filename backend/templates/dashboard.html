@@ -1524,6 +1524,21 @@
 
                             <div class="cards">
                                 <article class="card metric">
+                                    <span>Klijenti za proveru</span>
+                                    <strong>{{ billing_client_stats.needs_attention|default:0 }}</strong>
+                                    <small style="color:var(--orange)">naplata ili pristup</small>
+                                </article>
+                                <article class="card metric">
+                                    <span>Aktivne pretplate</span>
+                                    <strong>{{ billing_client_stats.active|default:0 }}</strong>
+                                    <small>placaju i rade</small>
+                                </article>
+                                <article class="card metric">
+                                    <span>Trial</span>
+                                    <strong>{{ billing_client_stats.trial|default:0 }}</strong>
+                                    <small style="color:var(--orange)">14 dana proba</small>
+                                </article>
+                                <article class="card metric">
                                     <span>Ukupno webhook-a</span>
                                     <strong>{{ payment_webhook_total }}</strong>
                                     <small style="color:var(--muted)">svi događaji</small>
@@ -1546,6 +1561,67 @@
                             </div>
 
                             <div class="card table-card table-scroll" style="margin-top:28px">
+                                <h3>Billing status klijenata</h3>
+                                <table class="client-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Klijent</th>
+                                            <th>Paket</th>
+                                            <th>Pretplata</th>
+                                            <th>Pristup</th>
+                                            <th>Obnova / trial</th>
+                                            <th>Cena</th>
+                                            <th>Problem / sledeca akcija</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in billing_client_rows %}
+                                            <tr>
+                                                <td>
+                                                    <strong>{{ row.client.public_name|default:row.client.name }}</strong>
+                                                    <br><span class="muted">{{ row.client.owner.email|default:row.client.owner.username }}</span>
+                                                </td>
+                                                <td>{{ row.client.get_package_display }}</td>
+                                                <td>
+                                                    <span class="badge {{ row.badge_class }}">{{ row.status_label }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge {{ row.access_badge_class }}">{{ row.access_label }}</span>
+                                                </td>
+                                                <td class="renew-cell">
+                                                    {% if row.due_at %}
+                                                        <strong>{{ row.due_at|date:"d.m.Y" }}</strong>
+                                                        <span>{% if row.status_code == "trial" %}kraj trial-a{% else %}sledeca naplata{% endif %}</span>
+                                                    {% else %}
+                                                        <strong>-</strong>
+                                                        <span>nema datuma</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="price-cell">
+                                                    {% if row.price %}
+                                                        <strong>{{ row.price }} {{ row.currency }}</strong>
+                                                        <span>mesecno</span>
+                                                    {% else %}
+                                                        <strong>-</strong>
+                                                        <span>nema plana</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <strong {% if row.needs_attention %}style="color:var(--orange)"{% endif %}>{{ row.issue }}</strong>
+                                                    <br><span class="muted">{{ row.action }}</span>
+                                                </td>
+                                            </tr>
+                                        {% empty %}
+                                            <tr>
+                                                <td colspan="7" class="muted">Nema klijenata za billing pregled.</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="card table-card table-scroll" style="margin-top:28px">
+                                <h3>Webhook log</h3>
                                 <table class="client-table">
                                     <thead>
                                         <tr>

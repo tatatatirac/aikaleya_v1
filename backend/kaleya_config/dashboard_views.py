@@ -179,6 +179,90 @@ def build_conversation_feed(client):
     return sorted(feed, key=lambda item: item["created_at"], reverse=True)[:18]
 
 
+def build_billing_client_rows(clients):
+    rows = []
+    stats = {
+        "active": 0,
+        "trial": 0,
+        "past_due": 0,
+        "cancelled": 0,
+        "none": 0,
+        "needs_attention": 0,
+    }
+    now = timezone.now()
+
+    for client in clients:
+        subscription = get_client_subscription(client)
+        status_code = subscription.status if subscription else "none"
+        stats[status_code if status_code in stats else "none"] += 1
+        badge_class = "ok"
+        issue = "OK"
+        action = "Nema akcije"
+        needs_attention = False
+
+        if not subscription:
+            badge_class = "off"
+            issue = "Nema pretplate"
+            action = "Proveri da li je nalog rucno kreiran ili checkout nije zavrsen."
+            needs_attention = True
+        elif subscription.status == Subscription.STATUS_PAST_DUE:
+            badge_class = "off"
+            issue = "Naplata nije prosla"
+            action = "Kontaktirati klijenta ili proveriti Lemon Squeezy event."
+            needs_attention = True
+        elif subscription.status == Subscription.STATUS_CANCELLED:
+            badge_class = "off"
+            issue = "Pretplata je otkazana"
+            action = "Proveriti da li pristup treba da ostane ugasen."
+            needs_attention = True
+        elif subscription.status == Subscription.STATUS_TRIAL:
+            badge_class = "pause"
+            if subscription.trial_ends_at and subscription.trial_ends_at < now:
+                issue = "Trial je istekao"
+                action = "Proveriti da li je placanje aktiviralo pretplatu."
+                needs_attention = True
+            else:
+                issue = "Trial aktivan"
+                action = "Pratiti kraj trial perioda."
+
+        if subscription and not client.kaleya_enabled and subscription.status in {
+            Subscription.STATUS_ACTIVE,
+            Subscription.STATUS_TRIAL,
+        }:
+            badge_class = "pause"
+            issue = "Pristup je pauziran"
+            action = "Aktiviraj klijenta ako je naplata uredna."
+            needs_attention = True
+
+        if needs_attention:
+            stats["needs_attention"] += 1
+
+        due_at = None
+        if subscription:
+            due_at = subscription.current_period_end or subscription.trial_ends_at
+
+        rows.append(
+            {
+                "client": client,
+                "subscription": subscription,
+                "status_code": status_code,
+                "status_label": subscription.get_status_display() if subscription else "Nema pretplate",
+                "badge_class": badge_class,
+                "access_label": "Aktivan" if client.kaleya_enabled else "Pauza",
+                "access_badge_class": "ok" if client.kaleya_enabled else "pause",
+                "due_at": due_at,
+                "price": subscription.plan.monthly_price if subscription and subscription.plan else None,
+                "currency": subscription.plan.currency if subscription and subscription.plan else "",
+                "issue": issue,
+                "action": action,
+                "needs_attention": needs_attention,
+            }
+        )
+
+    rows.sort(key=lambda item: (not item["needs_attention"], item["client"].name.lower()))
+    return rows, stats
+
+
 @require_POST
 def dashboard_logout(request):
     logout(request)
@@ -320,6 +404,8 @@ def dashboard(request):
     payment_webhook_processed = 0
     payment_webhook_failed = 0
     payment_webhook_pending = 0
+    billing_client_rows = []
+    billing_client_stats = {}
     if admin_has_full_access:
         payment_webhooks = PaymentWebhookEvent.objects.select_related("checkout", "checkout__plan")
         payment_webhook_events = payment_webhooks.order_by("-created_at")[:20]
@@ -329,6 +415,7 @@ def dashboard(request):
         payment_webhook_pending = payment_webhooks.filter(
             status__in=(PaymentWebhookEvent.STATUS_RECEIVED, PaymentWebhookEvent.STATUS_VERIFIED)
         ).count()
+        billing_client_rows, billing_client_stats = build_billing_client_rows(clients)
 
     global_ai_provider = getattr(settings, "KALEYA_AI_PROVIDER", "") or "anthropic"
     global_ai_model = (
@@ -364,6 +451,8 @@ def dashboard(request):
         "payment_webhook_processed": payment_webhook_processed,
         "payment_webhook_failed": payment_webhook_failed,
         "payment_webhook_pending": payment_webhook_pending,
+        "billing_client_rows": billing_client_rows,
+        "billing_client_stats": billing_client_stats,
         "language_choices": BusinessClient.LANGUAGE_CHOICES,
         "package_choices": BusinessClient.PACKAGE_CHOICES,
         "time_format_choices": BusinessClient.TIME_FORMAT_CHOICES,

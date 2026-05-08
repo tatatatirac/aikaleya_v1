@@ -786,6 +786,8 @@ class PackageLimitTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Plaćanja")
+        self.assertContains(response, "Billing status klijenata")
+        self.assertContains(response, "Klijenti za proveru")
         self.assertContains(response, "subscription_created")
         self.assertContains(response, "subscription_dashboard")
 
