@@ -1,5 +1,6 @@
 from datetime import datetime, time, timedelta
 from decimal import Decimal, InvalidOperation
+import secrets
 
 from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -80,6 +81,7 @@ def dashboard_section_anchor(section):
         "voice": "settings",
         "alarms": "alarms",
         "integrations": "integrations",
+        "telegram_integration": "integrations",
     }.get(section or "overview", section or "overview")
 
 
@@ -354,6 +356,9 @@ def dashboard(request):
         elif section == "integrations":
             update_integrations(request, selected_client)
             messages.success(request, "Integracije su sačuvane.")
+        elif section == "telegram_integration":
+            update_telegram_integration(request, selected_client)
+            messages.success(request, "Telegram integracija je sacuvana.")
         elif section == "delete_client" and is_admin_user(request.user):
             client_name = str(selected_client)
             selected_client.delete()
@@ -375,6 +380,7 @@ def dashboard(request):
         return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#{dashboard_section_anchor(section)}")
 
     integrations = ensure_integrations(selected_client)
+    telegram_integration = next((item for item in integrations if item.provider == "telegram"), None)
     upcoming_appointments = (
         Appointment.objects.select_related("customer")
         .filter(business_client=selected_client)
@@ -435,6 +441,11 @@ def dashboard(request):
         "alarm_settings": alarm_settings,
         "voice_settings": voice_settings,
         "integrations": integrations,
+        "telegram_integration": telegram_integration,
+        "telegram_bot_token_configured": bool((telegram_integration.config or {}).get("bot_token")) if telegram_integration else False,
+        "telegram_webhook_secret_configured": bool((telegram_integration.config or {}).get("webhook_secret")) if telegram_integration else False,
+        "telegram_webhook_secret": (telegram_integration.config or {}).get("webhook_secret", "") if telegram_integration else "",
+        "telegram_webhook_url": request.build_absolute_uri(reverse("telegram-webhook", args=[telegram_integration.id])) if telegram_integration else "",
         "selected_subscription": selected_subscription,
         "selected_staff_members": selected_staff_members,
         "selected_services": selected_services,
@@ -716,3 +727,31 @@ def update_integrations(request, client):
         integration.public_number = request.POST.get(f"{prefix}_public_number", integration.public_number).strip()
         integration.webhook_url = request.POST.get(f"{prefix}_webhook_url", integration.webhook_url).strip()
         integration.save()
+
+
+def update_telegram_integration(request, client):
+    integration, _created = IntegrationConnection.objects.get_or_create(
+        business_client=client,
+        provider="telegram",
+        defaults={"enabled": False, "status": "draft"},
+    )
+    config = dict(integration.config or {})
+
+    bot_token = request.POST.get("telegram_bot_token", "").strip()
+    webhook_secret = request.POST.get("telegram_webhook_secret", "").strip()
+    if bot_token:
+        config["bot_token"] = bot_token
+    if webhook_secret:
+        config["webhook_secret"] = webhook_secret
+    elif not config.get("webhook_secret"):
+        config["webhook_secret"] = secrets.token_urlsafe(32)
+
+    integration.enabled = checkbox_value(request.POST, "telegram_enabled")
+    integration.status = request.POST.get("telegram_status", integration.status)
+    integration.public_number = request.POST.get("telegram_public_number", integration.public_number).strip()
+    integration.webhook_url = request.POST.get("telegram_webhook_url", integration.webhook_url).strip()
+    integration.config = config
+    if integration.status != "error":
+        integration.last_error = ""
+    integration.full_clean()
+    integration.save()

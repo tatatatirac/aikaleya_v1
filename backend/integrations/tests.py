@@ -2,7 +2,7 @@ from datetime import time
 from unittest import mock
 
 from django.contrib.auth.models import User
-from django.test import TestCase
+from django.test import Client, TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -179,3 +179,56 @@ class IntegrationStatusTests(TestCase):
         self.assertEqual(Message.objects.count(), 2)
         send_mock.assert_called_once()
         self.assertEqual(send_mock.call_args.args[1], 12345)
+
+    def test_dashboard_can_save_telegram_configuration_without_exposing_token(self):
+        django_client = Client()
+        django_client.force_login(self.user)
+
+        response = django_client.post(
+            "/admin/",
+            {
+                "section": "telegram_integration",
+                "client_id": self.business_client.id,
+                "telegram_enabled": "on",
+                "telegram_status": "connected",
+                "telegram_public_number": "@kaleya_test_bot",
+                "telegram_bot_token": "123456:telegram-secret-token",
+                "telegram_webhook_secret": "webhook-secret",
+                "telegram_webhook_url": "https://staging.aikaleya.com/api/integrations/telegram/webhook/1/",
+            },
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertIn("#integrations", response["Location"])
+        connection = IntegrationConnection.objects.get(business_client=self.business_client, provider="telegram")
+        self.assertTrue(connection.enabled)
+        self.assertEqual(connection.status, "connected")
+        self.assertEqual(connection.public_number, "@kaleya_test_bot")
+        self.assertEqual(connection.config["bot_token"], "123456:telegram-secret-token")
+        self.assertEqual(connection.config["webhook_secret"], "webhook-secret")
+
+        second_response = django_client.post(
+            "/admin/",
+            {
+                "section": "telegram_integration",
+                "client_id": self.business_client.id,
+                "telegram_enabled": "on",
+                "telegram_status": "paused",
+                "telegram_public_number": "@kaleya_updated_bot",
+                "telegram_webhook_secret": "webhook-secret-2",
+                "telegram_webhook_url": "https://staging.aikaleya.com/api/integrations/telegram/webhook/1/",
+            },
+        )
+
+        self.assertEqual(second_response.status_code, status.HTTP_302_FOUND)
+        connection.refresh_from_db()
+        self.assertEqual(connection.status, "paused")
+        self.assertEqual(connection.public_number, "@kaleya_updated_bot")
+        self.assertEqual(connection.config["bot_token"], "123456:telegram-secret-token")
+        self.assertEqual(connection.config["webhook_secret"], "webhook-secret-2")
+
+        page = django_client.get(f"/admin/?client_id={self.business_client.id}#integrations")
+        self.assertEqual(page.status_code, status.HTTP_200_OK)
+        self.assertContains(page, "Telegram bot")
+        self.assertContains(page, "Bot token je sacuvan")
+        self.assertNotContains(page, "123456:telegram-secret-token")

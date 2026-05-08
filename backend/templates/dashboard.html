@@ -749,6 +749,18 @@
 
         .field.full { grid-column: 1 / -1; }
 
+        .helper-text {
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.45;
+            font-weight: 700;
+        }
+
+        .readonly-input {
+            color: #cbd5e1;
+            background: #0a1220;
+        }
+
         label {
             color: var(--muted);
             font-size: 13px;
@@ -1508,6 +1520,56 @@
                             </div>
                             <div class="actions">
                                 <button class="primary-btn" type="submit">Sačuvaj integracije</button>
+                            </div>
+                        </form>
+
+                        <form method="post" class="card settings-card" style="margin-top:28px">
+                            {% csrf_token %}
+                            <input type="hidden" name="section" value="telegram_integration">
+                            <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                            <h2>Telegram bot</h2>
+                            <p class="helper-text">
+                                Ovde se povezuje Telegram bot za izabranu firmu. Bot token se ne prikazuje posle cuvanja;
+                                ako zelis promenu, unesi novi token i sacuvaj ponovo.
+                            </p>
+                            <div class="form-grid">
+                                <label class="switch">Telegram aktivan <input type="checkbox" name="telegram_enabled" {% if telegram_integration.enabled %}checked{% endif %}></label>
+                                <div class="field">
+                                    <label>Status</label>
+                                    <select name="telegram_status">
+                                        <option value="draft" {% if telegram_integration.status == "draft" %}selected{% endif %}>Draft</option>
+                                        <option value="connected" {% if telegram_integration.status == "connected" %}selected{% endif %}>Connected</option>
+                                        <option value="paused" {% if telegram_integration.status == "paused" %}selected{% endif %}>Paused</option>
+                                        <option value="error" {% if telegram_integration.status == "error" %}selected{% endif %}>Error</option>
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label>Telegram username</label>
+                                    <input name="telegram_public_number" value="{{ telegram_integration.public_number }}" placeholder="@kaleya_bot">
+                                </div>
+                                <div class="field full">
+                                    <label>Bot token</label>
+                                    <input type="password" name="telegram_bot_token" placeholder="{% if telegram_bot_token_configured %}Bot token je sacuvan{% else %}Unesi token iz BotFather-a{% endif %}">
+                                </div>
+                                <div class="field full">
+                                    <label>Webhook URL</label>
+                                    <input class="readonly-input" name="telegram_webhook_url" value="{% firstof telegram_integration.webhook_url telegram_webhook_url %}" readonly>
+                                    <span class="helper-text">Ovaj URL se upisuje u Telegram setWebhook za ovog klijenta.</span>
+                                </div>
+                                <div class="field full">
+                                    <label>Webhook secret</label>
+                                    <input name="telegram_webhook_secret" value="{{ telegram_webhook_secret }}" placeholder="Automatski se generise ako ostane prazno">
+                                    <span class="helper-text">Telegram salje ovaj secret u header-u i backend odbija sve sto ga nema.</span>
+                                </div>
+                                {% if telegram_integration.last_error %}
+                                    <div class="field full">
+                                        <label>Poslednja greska</label>
+                                        <textarea readonly>{{ telegram_integration.last_error }}</textarea>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="actions">
+                                <button class="primary-btn" type="submit">Sacuvaj Telegram</button>
                             </div>
                         </form>
                     </section>
