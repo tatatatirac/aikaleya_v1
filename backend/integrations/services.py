@@ -1,6 +1,12 @@
+import json
+import urllib.parse
+import urllib.request
+
 from django.utils import timezone
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
+from ai_agent.services import handle_inbound_text
 from billing.services import channel_allowed, enforce_channel_allowed, limits_for_client
 from communications.models import Conversation, Message
 from integrations.models import IntegrationConnection
@@ -17,7 +23,7 @@ CHANNEL_DEFINITIONS = {
     },
     "telegram": {
         "label": "Telegram",
-        "required_config": ("bot_token",),
+        "required_config": ("bot_token", "webhook_secret"),
     },
     "sms": {
         "label": "SMS",
@@ -137,3 +143,142 @@ def queue_test_message(business_client, provider, to_value, body):
         },
     )
     return conversation, message
+
+
+def telegram_message_from_update(update):
+    if not isinstance(update, dict):
+        return None
+    return (
+        update.get("message")
+        or update.get("edited_message")
+        or (update.get("callback_query") or {}).get("message")
+    )
+
+
+def telegram_text_from_message(message):
+    if not isinstance(message, dict):
+        return ""
+    return (message.get("text") or message.get("caption") or "").strip()
+
+
+def telegram_sender_label(message):
+    sender = message.get("from") or {}
+    first_name = (sender.get("first_name") or "").strip()
+    last_name = (sender.get("last_name") or "").strip()
+    username = (sender.get("username") or "").strip()
+    full_name = " ".join(part for part in (first_name, last_name) if part).strip()
+    if username and full_name:
+        return f"{full_name} (@{username})"
+    return full_name or (f"@{username}" if username else "Telegram korisnik")
+
+
+def verify_telegram_webhook_secret(connection, provided_secret):
+    expected_secret = (connection.config or {}).get("webhook_secret", "")
+    if not expected_secret:
+        raise PermissionDenied("Telegram webhook secret nije podesen.")
+    if provided_secret != expected_secret:
+        raise PermissionDenied("Telegram webhook secret nije validan.")
+
+
+def validate_telegram_connection(connection):
+    if connection.provider != "telegram":
+        raise serializers.ValidationError({"provider": "Integracija nije Telegram."})
+    enforce_channel_allowed(connection.business_client, "telegram")
+    if not connection.enabled:
+        raise serializers.ValidationError({"integration": "Telegram integracija nije ukljucena."})
+    if connection.status != "connected":
+        raise serializers.ValidationError({"integration": "Telegram integracija nije povezana."})
+    missing = missing_config_keys("telegram", connection)
+    if missing:
+        raise serializers.ValidationError({"config": f"Nedostaje konfiguracija: {', '.join(missing)}."})
+
+
+def send_telegram_message(connection, chat_id, text):
+    bot_token = (connection.config or {}).get("bot_token", "")
+    if not bot_token:
+        raise serializers.ValidationError({"bot_token": "Telegram bot token nije podesen."})
+    payload = urllib.parse.urlencode(
+        {
+            "chat_id": str(chat_id),
+            "text": text or "",
+            "disable_web_page_preview": "true",
+        }
+    ).encode("utf-8")
+    request = urllib.request.Request(
+        f"https://api.telegram.org/bot{bot_token}/sendMessage",
+        data=payload,
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=20) as response:
+        body = response.read().decode("utf-8")
+    try:
+        return json.loads(body)
+    except json.JSONDecodeError:
+        return {"ok": False, "raw": body}
+
+
+def process_telegram_webhook(connection, update, provided_secret):
+    verify_telegram_webhook_secret(connection, provided_secret)
+    validate_telegram_connection(connection)
+
+    message = telegram_message_from_update(update)
+    text = telegram_text_from_message(message)
+    if not message or not text:
+        return {
+            "processed": False,
+            "ignored": True,
+            "reason": "Telegram update nema tekstualnu poruku.",
+        }
+
+    chat = message.get("chat") or {}
+    chat_id = chat.get("id")
+    if not chat_id:
+        raise serializers.ValidationError({"chat_id": "Telegram chat id nije pronadjen."})
+
+    sender = message.get("from") or {}
+    business_client = connection.business_client
+    external_thread_id = f"telegram:{chat_id}"
+    payload = {
+        "customer_name": telegram_sender_label(message),
+        "channel": "telegram",
+    }
+    if sender.get("username"):
+        payload["telegram_username"] = sender["username"]
+
+    result = handle_inbound_text(
+        business_client,
+        text,
+        channel="telegram",
+        payload=payload,
+        use_ai=False if getattr(business_client, "is_demo", False) else True,
+        include_voice=False,
+        external_thread_id=external_thread_id,
+        record_messages=True,
+    )
+    telegram_response = send_telegram_message(connection, chat_id, result["response_text"])
+    conversation = Conversation.objects.filter(
+        business_client=business_client,
+        channel="telegram",
+        external_thread_id=external_thread_id,
+    ).order_by("-updated_at").first()
+    if conversation:
+        metadata = conversation.metadata or {}
+        metadata["telegram"] = {
+            "chat_id": str(chat_id),
+            "last_update_id": update.get("update_id"),
+            "sender_id": str(sender.get("id") or ""),
+            "username": sender.get("username", ""),
+            "connection_id": connection.id,
+        }
+        conversation.metadata = metadata
+        conversation.save(update_fields=["metadata", "updated_at"])
+
+    return {
+        "processed": True,
+        "ignored": False,
+        "conversation_id": result.get("conversation_id"),
+        "intent": result.get("intent"),
+        "tool_status": (result.get("tool_output") or {}).get("status", ""),
+        "telegram_sent": bool(telegram_response.get("ok", True)),
+    }

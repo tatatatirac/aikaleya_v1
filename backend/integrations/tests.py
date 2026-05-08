@@ -1,4 +1,5 @@
 from datetime import time
+from unittest import mock
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -92,3 +93,89 @@ class IntegrationStatusTests(TestCase):
         self.assertEqual(Conversation.objects.count(), 1)
         self.assertEqual(Message.objects.count(), 1)
         self.assertEqual(Message.objects.first().body, "Kaleya test")
+
+    def test_telegram_status_requires_bot_token_and_webhook_secret(self):
+        IntegrationConnection.objects.create(
+            business_client=self.business_client,
+            provider="telegram",
+            enabled=True,
+            status="connected",
+            public_number="@kaleya_test_bot",
+            config={"bot_token": "secret-token"},
+        )
+
+        response = self.api.get("/api/integrations/connections/status/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        telegram = next(row for row in response.data["integrations"] if row["provider"] == "telegram")
+        self.assertFalse(telegram["ready"])
+        self.assertIn("webhook_secret", telegram["missing_config_keys"])
+        self.assertIn("bot_token", telegram["configured_keys"])
+        self.assertNotIn("secret-token", str(response.data))
+
+    def test_telegram_webhook_rejects_invalid_secret_without_changing_status(self):
+        connection = IntegrationConnection.objects.create(
+            business_client=self.business_client,
+            provider="telegram",
+            enabled=True,
+            status="connected",
+            public_number="@kaleya_test_bot",
+            config={"bot_token": "secret-token", "webhook_secret": "correct-secret"},
+        )
+
+        response = self.api.post(
+            f"/api/integrations/telegram/webhook/{connection.id}/",
+            {"update_id": 1001, "message": {"chat": {"id": 12345}, "text": "Check free slots today"}},
+            format="json",
+            HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN="wrong-secret",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        connection.refresh_from_db()
+        self.assertEqual(connection.status, "connected")
+        self.assertEqual(Conversation.objects.count(), 0)
+
+    @mock.patch("integrations.services.send_telegram_message", return_value={"ok": True})
+    def test_telegram_webhook_processes_text_and_sends_reply(self, send_mock):
+        self.business_client.is_demo = True
+        self.business_client.save(update_fields=["is_demo", "updated_at"])
+        connection = IntegrationConnection.objects.create(
+            business_client=self.business_client,
+            provider="telegram",
+            enabled=True,
+            status="connected",
+            public_number="@kaleya_test_bot",
+            config={"bot_token": "secret-token", "webhook_secret": "correct-secret"},
+        )
+
+        response = self.api.post(
+            f"/api/integrations/telegram/webhook/{connection.id}/",
+            {
+                "update_id": 1002,
+                "message": {
+                    "message_id": 11,
+                    "chat": {"id": 12345, "type": "private"},
+                    "from": {
+                        "id": 222,
+                        "first_name": "Liam",
+                        "last_name": "Stone",
+                        "username": "liamstone",
+                    },
+                    "text": "Check free slots today",
+                },
+            },
+            format="json",
+            HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN="correct-secret",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["processed"])
+        self.assertEqual(response.data["intent"], "check_availability")
+        self.assertEqual(Conversation.objects.count(), 1)
+        conversation = Conversation.objects.first()
+        self.assertEqual(conversation.channel, "telegram")
+        self.assertEqual(conversation.external_thread_id, "telegram:12345")
+        self.assertEqual(conversation.metadata["telegram"]["username"], "liamstone")
+        self.assertEqual(Message.objects.count(), 2)
+        send_mock.assert_called_once()
+        self.assertEqual(send_mock.call_args.args[1], 12345)

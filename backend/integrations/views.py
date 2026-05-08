@@ -1,12 +1,14 @@
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from accounts.permissions import user_role
 from clients.models import BusinessClient, get_active_client_for_user
 from integrations.models import IntegrationConnection
 from integrations.serializers import IntegrationConnectionSerializer
-from integrations.services import integration_rows_for_client, queue_test_message
+from integrations.services import integration_rows_for_client, process_telegram_webhook, queue_test_message
 
 
 class IntegrationConnectionViewSet(viewsets.ModelViewSet):
@@ -72,3 +74,37 @@ class IntegrationConnectionViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_202_ACCEPTED,
         )
+
+
+class TelegramWebhookAPIView(APIView):
+    authentication_classes = ()
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, connection_id):
+        connection = (
+            IntegrationConnection.objects.select_related("business_client")
+            .filter(id=connection_id, provider="telegram")
+            .first()
+        )
+        if not connection:
+            return Response({"detail": "Telegram integracija nije pronadjena."}, status=status.HTTP_404_NOT_FOUND)
+
+        provided_secret = (
+            request.headers.get("X-Telegram-Bot-Api-Secret-Token")
+            or request.query_params.get("secret", "")
+        )
+        try:
+            result = process_telegram_webhook(connection, request.data, provided_secret)
+        except PermissionDenied as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as exc:
+            connection.status = "error"
+            connection.last_error = str(exc)
+            connection.save(update_fields=["status", "last_error", "updated_at"])
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        if connection.status == "error":
+            connection.status = "connected"
+            connection.last_error = ""
+            connection.save(update_fields=["status", "last_error", "updated_at"])
+        return Response(result, status=status.HTTP_200_OK)
