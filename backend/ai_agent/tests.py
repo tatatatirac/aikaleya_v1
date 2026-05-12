@@ -368,7 +368,36 @@ class AIAppointmentToolTests(TestCase):
 
         self.assertEqual(result["tool_output"]["status"], "needs_more_details")
         self.assertIn("service", result["decision"]["missing_fields"])
+        self.assertIn("Haircut", result["response_text"])
         self.assertEqual(Appointment.objects.count(), 0)
+
+    def test_ai_lists_available_services_when_service_is_missing(self):
+        Service.objects.create(
+            business_client=self.client,
+            name="AI zakazivanje",
+            category="Osnovno",
+            duration_minutes=30,
+            price=59,
+        )
+        Service.objects.create(
+            business_client=self.client,
+            name="Konsultacija",
+            category="Osnovno",
+            duration_minutes=30,
+            price=25,
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Zakazi termin danas",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic"},
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "book_appointment")
+        self.assertIn("service", result["decision"]["missing_fields"])
+        self.assertIn("Dostupne usluge: AI zakazivanje, Konsultacija", result["response_text"])
 
     def test_ai_availability_respects_closed_working_day(self):
         target_date = date(2026, 5, 11)

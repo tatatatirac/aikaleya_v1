@@ -25,6 +25,7 @@ TEMPLATE_CLIENTS = [
         "plan_code": Plan.CODE_BASIC,
         "staff": [],
         "services": [
+            {"name": "Sisanje", "category": "Salon", "duration": 30, "price": 25},
             {"name": "AI zakazivanje", "category": "Osnovno", "duration": 30, "price": 59},
             {"name": "Konsultacija", "category": "Osnovno", "duration": 30, "price": 25},
         ],

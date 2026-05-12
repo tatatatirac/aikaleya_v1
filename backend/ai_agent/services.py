@@ -558,6 +558,30 @@ def workflow_missing_fields(business_client, intent_name, text, payload, custome
     return []
 
 
+def service_options_text(business_client, limit=6):
+    services = Service.objects.filter(business_client=business_client, is_active=True).order_by("category", "name")[:limit]
+    return ", ".join(service.name for service in services)
+
+
+def service_clarifying_response(business_client, language):
+    options = service_options_text(business_client)
+    if language == "sr":
+        return f"Za koju uslugu zelite termin? Dostupne usluge: {options}." if options else "Za koju uslugu zelite termin?"
+    if language == "de":
+        return f"Fuer welche Leistung moechten Sie den Termin? Verfuegbare Leistungen: {options}." if options else "Fuer welche Leistung moechten Sie den Termin?"
+    if language == "es":
+        return f"Para que servicio quiere la cita? Servicios disponibles: {options}." if options else "Para que servicio quiere la cita?"
+    if language == "pt":
+        return f"Para qual servico quer o agendamento? Servicos disponiveis: {options}." if options else "Para qual servico quer o agendamento?"
+    if language == "fr":
+        return f"Pour quel service souhaitez-vous le rendez-vous? Services disponibles: {options}." if options else "Pour quel service souhaitez-vous le rendez-vous?"
+    if language == "it":
+        return f"Per quale servizio desidera l'appuntamento? Servizi disponibili: {options}." if options else "Per quale servizio desidera l'appuntamento?"
+    if language == "ru":
+        return f"Для какой услуги нужна запись? Доступные услуги: {options}." if options else "Для какой услуги нужна запись?"
+    return f"Which service would you like to book? Available services: {options}." if options else "Which service would you like to book?"
+
+
 def build_clarifying_response(business_client, intent, missing_fields, tool_output=None):
     tool_output = tool_output or {}
     language = tool_output.get("response_language") or business_client.interface_language or business_client.language or "en"
@@ -572,7 +596,7 @@ def build_clarifying_response(business_client, intent, missing_fields, tool_outp
         if "customer_contact" in missing:
             return "Treba mi ime ili telefon klijenta da bih mogla bezbedno da zakazem termin."
         if "service" in missing:
-            return "Za koju uslugu zelite termin?"
+            return service_clarifying_response(business_client, language)
         if "appointment_target" in missing:
             return "Treba mi ime, telefon ili tacan termin da bih pronasla rezervaciju."
         if "new_date" in missing and "new_time" in missing:
@@ -595,7 +619,7 @@ def build_clarifying_response(business_client, intent, missing_fields, tool_outp
         if "customer_contact" in missing:
             return "Ich brauche Name oder Telefonnummer des Kunden, um den Termin sicher zu buchen."
         if "service" in missing:
-            return "Fuer welche Leistung moechten Sie den Termin?"
+            return service_clarifying_response(business_client, language)
         if "appointment_target" in missing:
             return "Ich brauche Name, Telefon oder den genauen Termin, um die Buchung zu finden."
         if "new_date" in missing and "new_time" in missing:
@@ -617,7 +641,7 @@ def build_clarifying_response(business_client, intent, missing_fields, tool_outp
     if "customer_contact" in missing:
         return "I need the customer's name or phone number before I can safely book the appointment."
     if "service" in missing:
-        return "Which service would you like to book?"
+        return service_clarifying_response(business_client, language)
     if "appointment_target" in missing:
         return "I need the name, phone number or exact appointment so I can find the booking."
     if "new_date" in missing and "new_time" in missing:
