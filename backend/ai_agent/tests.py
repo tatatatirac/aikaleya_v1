@@ -66,6 +66,32 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["decision"]["missing_fields"], [])
         self.assertIn("Ima 14 slobodnih termina", result["response_text"])
 
+    def test_ai_availability_keeps_response_language_across_supported_languages(self):
+        cases = (
+            ("en", "Are there available slots today?", "There are 14 available slots"),
+            ("sr", "Da li ima slobodnih termina danas?", "Ima 14 slobodnih termina"),
+            ("es", "Hay citas disponibles hoy?", "Hay 14 turnos disponibles"),
+            ("pt", "Tem horários livres hoje?", "Há 14 horários disponíveis"),
+            ("fr", "Y a-t-il des créneaux disponibles aujourd'hui?", "Il y a 14 créneaux disponibles"),
+            ("it", "Ci sono appuntamenti disponibili oggi?", "Ci sono 14 slot disponibili"),
+            ("de", "Gibt es freie Termine heute?", "Es gibt 14 freie Termine"),
+            ("ru", "Есть свободные записи сегодня?", "Есть 14 свободных слотов"),
+        )
+
+        for expected_language, text, expected_response in cases:
+            with self.subTest(language=expected_language):
+                result = handle_inbound_text(
+                    self.client,
+                    text,
+                    channel="telegram",
+                    use_ai=False,
+                )
+
+                self.assertEqual(result["intent"], "check_availability")
+                self.assertEqual(result["preprocess"]["language"], expected_language)
+                self.assertEqual(result["tool_output"]["free_count"], 14)
+                self.assertIn(expected_response, result["response_text"])
+
     def test_ai_can_book_structured_appointment_without_external_provider(self):
         result = handle_inbound_text(
             self.client,

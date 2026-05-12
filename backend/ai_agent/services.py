@@ -1,5 +1,6 @@
 import json
 import re
+import unicodedata
 from datetime import date
 
 from django.core.serializers.json import DjangoJSONEncoder
@@ -51,14 +52,31 @@ AVAILABILITY_HINTS = (
     "slobodne termine",
     "slobodan termin",
     "slobodno vreme",
+    "слободних термина",
+    "слободни термини",
+    "слободан термин",
     "ima slobodnih",
     "ima li slobod",
     "da li ima slobod",
+    "има слободних",
+    "да ли има слобод",
     "proveri slobod",
     "provera slobod",
     "free slots",
     "available slots",
     "available appointments",
+    "citas disponibles",
+    "cita disponible",
+    "horarios disponibles",
+    "horarios livres",
+    "disponibil",
+    "disponible",
+    "disponivel",
+    "livre",
+    "libero",
+    "frei",
+    "freie termine",
+    "свобод",
 )
 BOOKING_ACTION_HINTS = (
     "zakazi",
@@ -89,6 +107,41 @@ DATE_HINT_WORDS = (
     "heute",
 )
 
+AVAILABILITY_RESPONSE_TEMPLATES = {
+    "en": (
+        "There are {count} available slots. Suggestions: {suggestions}.",
+        "There are {count} available slots.",
+    ),
+    "sr": (
+        "Ima {count} slobodnih termina. Predlog: {suggestions}.",
+        "Ima {count} slobodnih termina.",
+    ),
+    "es": (
+        "Hay {count} turnos disponibles. Sugerencia: {suggestions}.",
+        "Hay {count} turnos disponibles.",
+    ),
+    "pt": (
+        "Há {count} horários disponíveis. Sugestão: {suggestions}.",
+        "Há {count} horários disponíveis.",
+    ),
+    "ru": (
+        "Есть {count} свободных слотов. Вариант: {suggestions}.",
+        "Есть {count} свободных слотов.",
+    ),
+    "fr": (
+        "Il y a {count} créneaux disponibles. Proposition: {suggestions}.",
+        "Il y a {count} créneaux disponibles.",
+    ),
+    "it": (
+        "Ci sono {count} slot disponibili. Proposta: {suggestions}.",
+        "Ci sono {count} slot disponibili.",
+    ),
+    "de": (
+        "Es gibt {count} freie Termine. Vorschlag: {suggestions}.",
+        "Es gibt {count} freie Termine.",
+    ),
+}
+
 APPOINTMENT_TARGET_STOP_WORDS = {
     "please",
     "cancel",
@@ -116,12 +169,12 @@ APPOINTMENT_TARGET_STOP_WORDS = {
 }
 
 LANGUAGE_HINTS = (
-    ("sr", ("zakaz", "termin", "sutra", "danas", "otkaz", "pomeri", "usluga", "radno vreme")),
-    ("en", ("appointment", "book", "cancel", "reschedule", "available", "today", "tomorrow")),
-    ("es", ("cita", "reserva", "cancelar", "disponible", "mañana", "hoy")),
-    ("pt", ("marcar", "consulta", "cancelar", "disponivel", "amanha", "hoje")),
-    ("fr", ("rendez", "annuler", "disponible", "demain", "aujourd")),
-    ("it", ("appuntamento", "prenota", "annulla", "disponibile", "domani")),
+    ("sr", ("zakaz", "termin", "sutra", "danas", "otkaz", "pomeri", "usluga", "radno vreme", "слобод", "термин", "данас", "сутра")),
+    ("en", ("appointment", "book", "cancel", "reschedule", "available", "today", "tomorrow", "free slots")),
+    ("es", ("cita", "reserva", "cancelar", "disponible", "manana", "mañana", "hoy", "servicio")),
+    ("pt", ("marcar", "consulta", "cancelar", "disponivel", "disponível", "amanha", "amanhã", "hoje", "horario", "horário", "servico", "serviço")),
+    ("fr", ("rendez", "annuler", "disponible", "demain", "aujourd", "creneau", "créneau")),
+    ("it", ("appuntament", "prenota", "annulla", "disponibile", "domani", "oggi")),
     ("de", ("termin", "buchen", "absagen", "frei", "morgen", "heute")),
     ("ru", ("запис", "сегодня", "завтра", "отмен", "свобод")),
 )
@@ -159,14 +212,31 @@ def json_safe(value):
     return json.loads(json.dumps(value, cls=DjangoJSONEncoder))
 
 
+def normalize_intent_text(value):
+    normalized = unicodedata.normalize("NFKD", str(value or "")).casefold()
+    normalized = "".join(char for char in normalized if not unicodedata.combining(char))
+    return re.sub(r"\s+", " ", normalized).strip()
+
+
+def contains_normalized_hint(text, hints):
+    normalized = normalize_intent_text(text)
+    return any(normalize_intent_text(hint) in normalized for hint in hints)
+
+
+def localized_availability_response(language, count, suggestions):
+    templates = AVAILABILITY_RESPONSE_TEMPLATES.get(language) or AVAILABILITY_RESPONSE_TEMPLATES["en"]
+    template = templates[0] if suggestions else templates[1]
+    return template.format(count=count, suggestions=suggestions)
+
+
 def detect_intent(text):
-    normalized = (text or "").strip().lower()
-    has_availability_hint = any(keyword in normalized for keyword in AVAILABILITY_HINTS)
-    has_booking_action = any(keyword in normalized for keyword in BOOKING_ACTION_HINTS)
+    normalized = normalize_intent_text(text)
+    has_availability_hint = contains_normalized_hint(normalized, AVAILABILITY_HINTS)
+    has_booking_action = contains_normalized_hint(normalized, BOOKING_ACTION_HINTS)
     if has_availability_hint and not has_booking_action:
         return "check_availability", 0.88
     for intent, keywords in INTENT_KEYWORDS.items():
-        if any(keyword in normalized for keyword in keywords):
+        if any(normalize_intent_text(keyword) in normalized for keyword in keywords):
             return intent, 0.82
     return "unknown", 0.25
 
@@ -188,17 +258,24 @@ def safe_float(value, fallback):
 
 
 def text_has_date_hint(text):
-    normalized = (text or "").strip().lower()
-    return bool(DATE_HINT_PATTERN.search(normalized) or any(word in normalized for word in DATE_HINT_WORDS))
+    normalized = normalize_intent_text(text)
+    return bool(DATE_HINT_PATTERN.search(normalized) or any(normalize_intent_text(word) in normalized for word in DATE_HINT_WORDS))
 
 
 def detect_message_language(text, fallback="en"):
-    normalized = (text or "").strip().lower()
+    normalized = normalize_intent_text(text)
     if not normalized:
         return fallback or "en"
+
+    best_language = fallback or "en"
+    best_score = 0
     for language, hints in LANGUAGE_HINTS:
-        if any(hint in normalized for hint in hints):
-            return language
+        score = sum(1 for hint in hints if normalize_intent_text(hint) in normalized)
+        if score > best_score:
+            best_language = language
+            best_score = score
+    if best_score:
+        return best_language
     if re.search(r"[а-яА-Я]", text or ""):
         return "ru"
     return fallback or "en"
@@ -794,11 +871,7 @@ def build_text_response(business_client, intent, tool_output):
     if intent == "check_availability":
         count = tool_output.get("free_count", 0)
         suggestions = ", ".join(tool_output.get("suggested_slots", [])[:3])
-        if language == "sr":
-            return f"Ima {count} slobodnih termina. Predlog: {suggestions}." if suggestions else f"Ima {count} slobodnih termina."
-        if language == "de":
-            return f"Es gibt {count} freie Termine. Vorschlag: {suggestions}." if suggestions else f"Es gibt {count} freie Termine."
-        return f"There are {count} available slots today."
+        return localized_availability_response(language, count, suggestions)
 
     if intent == "book_appointment":
         status = tool_output.get("status")
