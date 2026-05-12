@@ -328,6 +328,52 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(appointment.service.name, "Sisanje")
         self.assertEqual(appointment.start_time, time(10, 0))
 
+    def test_ai_resumes_booking_with_natural_serbian_time_answers(self):
+        for text_value, expected_time in (
+            ("moze u pola 10", time(9, 30)),
+            ("930", time(9, 30)),
+            ("9 30", time(9, 30)),
+            ("9", time(9, 0)),
+        ):
+            with self.subTest(text_value=text_value):
+                Appointment.objects.all().delete()
+                Conversation.objects.all().delete()
+                Service.objects.all().delete()
+                Service.objects.create(
+                    business_client=self.client,
+                    name="Sisanje",
+                    duration_minutes=30,
+                    price=25,
+                )
+                external_thread_id = f"telegram:test-time-{text_value}"
+
+                handle_inbound_text(
+                    self.client,
+                    "Zakazi termin danas",
+                    channel="telegram",
+                    payload={"customer_name": "Bane Kostic"},
+                    external_thread_id=external_thread_id,
+                    use_ai=False,
+                )
+                handle_inbound_text(
+                    self.client,
+                    "sisanje",
+                    channel="telegram",
+                    external_thread_id=external_thread_id,
+                    use_ai=False,
+                )
+                result = handle_inbound_text(
+                    self.client,
+                    text_value,
+                    channel="telegram",
+                    external_thread_id=external_thread_id,
+                    use_ai=False,
+                )
+
+                appointment = Appointment.objects.get()
+                self.assertEqual(result["tool_output"]["status"], "booked")
+                self.assertEqual(appointment.start_time, expected_time)
+
     def test_repeated_unknown_intent_escalates_to_support(self):
         conversation = Conversation.objects.create(
             business_client=self.client,

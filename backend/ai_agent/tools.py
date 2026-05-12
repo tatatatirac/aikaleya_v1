@@ -75,10 +75,25 @@ def parse_requested_time(text, explicit_time=None):
     if explicit_time:
         return str(explicit_time)[:5]
 
-    normalized = (text or "").lower().replace(".", ":")
+    normalized = normalize_lookup((text or "").replace(".", ":"))
     match = re.search(r"\b([01]?\d|2[0-3]):([0-5]\d)\b", normalized)
     if match:
         return f"{int(match.group(1)):02d}:{int(match.group(2)):02d}"
+
+    spaced_minutes = re.search(r"\b([01]?\d|2[0-3])\s+([0-5]\d)\b", normalized)
+    if spaced_minutes:
+        return f"{int(spaced_minutes.group(1)):02d}:{int(spaced_minutes.group(2)):02d}"
+
+    compact_minutes = re.search(r"\b([01]?\d|2[0-3])([0-5]\d)\b", normalized)
+    if compact_minutes:
+        return f"{int(compact_minutes.group(1)):02d}:{int(compact_minutes.group(2)):02d}"
+
+    half_hour = re.search(r"\b(?:pola|half\s+past)\s+([1-9]|1[0-9]|2[0-4])\b", normalized)
+    if half_hour:
+        hour = int(half_hour.group(1)) - 1
+        if hour <= 0:
+            hour += 12
+        return f"{hour:02d}:30"
 
     ampm = re.search(r"\b([1-9]|1[0-2])\s*([ap])\.?\s*m\.?\b", normalized)
     if ampm:
@@ -96,6 +111,10 @@ def parse_requested_time(text, explicit_time=None):
     prefixed = re.search(r"\b(?:u|at|um|alle|a las|às|a)\s+([01]?\d|2[0-3])\b", normalized)
     if prefixed:
         return f"{int(prefixed.group(1)):02d}:00"
+
+    bare_hour = re.fullmatch(r"\s*([01]?\d|2[0-3])\s*", normalized)
+    if bare_hour:
+        return f"{int(bare_hour.group(1)):02d}:00"
 
     return ""
 
