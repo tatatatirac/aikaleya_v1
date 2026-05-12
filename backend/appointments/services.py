@@ -168,4 +168,5 @@ def availability_for_date(business_client, target_date, duration_minutes=None, s
 
 
 def today_availability_summary(business_client, staff_member_id=None):
-    return availability_for_date(business_client, date_cls.today(), staff_member_id=staff_member_id)
+    target_date = timezone.localtime(timezone.now(), client_timezone(business_client)).date()
+    return availability_for_date(business_client, target_date, staff_member_id=staff_member_id)

@@ -1,6 +1,6 @@
-from datetime import date as date_cls
 from datetime import datetime
 
+from django.utils import timezone
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,7 +9,7 @@ from django.db.models import Q
 from accounts.permissions import user_role
 from appointments.models import Appointment, Customer
 from appointments.serializers import AppointmentSerializer, CustomerSerializer
-from appointments.services import availability_for_date, today_availability_summary
+from appointments.services import availability_for_date, client_timezone, today_availability_summary
 from clients.utils import client_for_request
 
 
@@ -99,7 +99,11 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         staff_member = staff_member_for_employee(request.user)
         if staff_member:
             staff_member_id = staff_member.id
-        target_date = datetime.strptime(date_value, "%Y-%m-%d").date() if date_value else date_cls.today()
+        target_date = (
+            datetime.strptime(date_value, "%Y-%m-%d").date()
+            if date_value
+            else timezone.localtime(timezone.now(), client_timezone(client)).date()
+        )
         duration = int(duration_value) if duration_value else None
 
         return Response(availability_for_date(client, target_date, duration, staff_member_id=staff_member_id))

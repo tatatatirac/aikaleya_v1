@@ -6,9 +6,10 @@ from datetime import datetime, timedelta
 
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db.models import Q
+from django.utils import timezone
 
 from appointments.models import Appointment, Customer
-from appointments.services import availability_for_date
+from appointments.services import availability_for_date, client_timezone
 from staff_services.models import Service, StaffMember
 
 
@@ -39,7 +40,12 @@ CUSTOMER_NAME_PATTERNS = (
 )
 
 
-def parse_requested_date(text, explicit_date=None):
+def client_local_today(business_client):
+    return timezone.localtime(timezone.now(), client_timezone(business_client)).date()
+
+
+def parse_requested_date(text, explicit_date=None, reference_date=None):
+    base_date = reference_date or date_cls.today()
     if explicit_date:
         if isinstance(explicit_date, date_cls):
             return explicit_date
@@ -49,9 +55,9 @@ def parse_requested_date(text, explicit_date=None):
     today_keywords = DATE_KEYWORDS["today"] + ("сегодня",)
     tomorrow_keywords = DATE_KEYWORDS["tomorrow"] + ("mañana", "amanhã", "завтра")
     if any(normalize_lookup(keyword) in normalized for keyword in today_keywords):
-        return date_cls.today()
+        return base_date
     if any(normalize_lookup(keyword) in normalized for keyword in tomorrow_keywords):
-        return date_cls.today() + timedelta(days=1)
+        return base_date + timedelta(days=1)
 
     iso_match = re.search(r"\b(20\d{2})-(\d{2})-(\d{2})\b", normalized)
     if iso_match:
@@ -62,7 +68,7 @@ def parse_requested_date(text, explicit_date=None):
         day, month, year = map(int, eu_match.groups())
         return date_cls(year, month, day)
 
-    return date_cls.today()
+    return base_date
 
 
 def parse_requested_time(text, explicit_time=None):
@@ -276,7 +282,7 @@ def infer_payload_from_text(business_client, text, payload=None):
         keyword in normalize_lookup(text)
         for keyword in ("danas", "today", "hoy", "hoje", "sutra", "tomorrow", "mañana", "demain", "morgen")
     ):
-        inferred["date"] = parse_requested_date(text)
+        inferred["date"] = parse_requested_date(text, reference_date=client_local_today(business_client))
 
     return inferred
 
@@ -409,7 +415,7 @@ def ensure_customer(business_client, customer=None, payload=None):
 
 def check_availability_tool(business_client, text="", payload=None):
     payload = infer_payload_from_text(business_client, text, payload)
-    target_date = parse_requested_date(text, payload.get("date"))
+    target_date = parse_requested_date(text, payload.get("date"), reference_date=client_local_today(business_client))
     service = scoped_service(business_client, payload.get("service_id")) or resolve_service_by_hint(business_client, payload.get("service_hint"))
     staff_member = scoped_staff_member(business_client, payload.get("staff_member_id")) or resolve_staff_member_by_hint(business_client, payload.get("staff_hint"))
     duration = int(payload.get("duration_minutes") or (service.duration_minutes if service else business_client.slot_interval_minutes))
@@ -433,7 +439,7 @@ def check_availability_tool(business_client, text="", payload=None):
 
 def book_appointment_tool(business_client, text="", customer=None, channel="web", payload=None):
     payload = infer_payload_from_text(business_client, text, payload)
-    target_date = parse_requested_date(text, payload.get("date"))
+    target_date = parse_requested_date(text, payload.get("date"), reference_date=client_local_today(business_client))
     requested_time = parse_requested_time(text, payload.get("time"))
     service = scoped_service(business_client, payload.get("service_id")) or resolve_service_by_hint(business_client, payload.get("service_hint"))
     staff_member = scoped_staff_member(business_client, payload.get("staff_member_id")) or resolve_staff_member_by_hint(business_client, payload.get("staff_hint"))
@@ -535,7 +541,7 @@ def find_target_appointment(business_client, customer=None, payload=None, text="
         return queryset.filter(customer=customer).order_by("date", "start_time").first()
 
     if payload.get("date"):
-        queryset = queryset.filter(date=parse_requested_date(text, payload.get("date")))
+        queryset = queryset.filter(date=parse_requested_date(text, payload.get("date"), reference_date=client_local_today(business_client)))
     if payload.get("time"):
         queryset = queryset.filter(start_time=as_time(payload.get("time")))
     if payload.get("phone"):
@@ -593,7 +599,7 @@ def reschedule_appointment_tool(business_client, text="", customer=None, channel
     if not appointment:
         return {"status": "needs_target", "message": "appointment_not_found"}
 
-    target_date = parse_requested_date(text, payload.get("date"))
+    target_date = parse_requested_date(text, payload.get("date"), reference_date=client_local_today(business_client))
     requested_time = parse_requested_time(text, payload.get("time"))
     if not requested_time:
         availability, suggested_slots = first_free_slots(

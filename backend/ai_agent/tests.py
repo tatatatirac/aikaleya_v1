@@ -1,4 +1,4 @@
-from datetime import date, time
+from datetime import date, datetime, time, timezone as dt_timezone
 from unittest import mock
 
 from django.contrib.auth.models import User
@@ -112,6 +112,29 @@ class AIAppointmentToolTests(TestCase):
         appointment = Appointment.objects.get()
         self.assertEqual(appointment.customer.full_name, "Emily Carter")
         self.assertEqual(appointment.start_time, time(10, 0))
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_uses_client_timezone_for_today_booking(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 12, 22, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.save(update_fields=["timezone", "updated_at"])
+
+        result = handle_inbound_text(
+            self.client,
+            "Zakazi termin danas",
+            channel="telegram",
+            payload={
+                "time": time(9, 0),
+                "customer_name": "Bane Kostic",
+                "phone": "+381601234567",
+            },
+            use_ai=False,
+        )
+
+        appointment = Appointment.objects.get()
+        self.assertEqual(result["tool_output"]["status"], "booked")
+        self.assertEqual(appointment.date, date(2026, 5, 13))
+        self.assertIn("2026-05-13", result["response_text"])
 
     def test_ai_booking_keeps_response_language_across_supported_languages(self):
         cases = (

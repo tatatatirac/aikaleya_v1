@@ -12,6 +12,7 @@ from ai_agent.tools import (
     book_appointment_tool,
     cancel_appointment_tool,
     check_availability_tool,
+    client_local_today,
     infer_payload_from_text,
     parse_requested_date,
     parse_requested_time,
@@ -479,7 +480,7 @@ def merge_conversation_payload(conversation, payload):
 def build_preprocess_context(business_client, text, customer=None, payload=None, channel="web", language_fallback=""):
     payload = payload or {}
     language = detect_message_language(text, language_fallback or business_client.interface_language or business_client.language or "en")
-    requested_date = parse_requested_date(text, payload.get("date"))
+    requested_date = parse_requested_date(text, payload.get("date"), reference_date=client_local_today(business_client))
     requested_time = parse_requested_time(text, payload.get("time"))
     customer_filter = None
     if customer:
@@ -937,7 +938,7 @@ def build_planner_context(business_client):
     )
     language = business_client.interface_language or business_client.language or "en"
     return {
-        "today": date.today().isoformat(),
+        "today": client_local_today(business_client).isoformat(),
         "business": {
             "id": business_client.id,
             "name": business_client.public_name or business_client.name,
