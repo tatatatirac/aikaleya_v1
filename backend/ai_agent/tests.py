@@ -113,6 +113,38 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(appointment.customer.full_name, "Emily Carter")
         self.assertEqual(appointment.start_time, time(10, 0))
 
+    def test_ai_booking_keeps_response_language_across_supported_languages(self):
+        cases = (
+            ("en", "Book appointment today", "The appointment is booked for", time(9, 0)),
+            ("sr", "Zakazi termin danas", "Termin je zakazan za", time(9, 30)),
+            ("es", "Reservar cita hoy", "La cita esta reservada para", time(10, 0)),
+            ("pt", "Marcar consulta hoje", "O agendamento esta marcado para", time(10, 30)),
+            ("fr", "Reserver rendez-vous aujourd'hui", "Le rendez-vous est reserve pour", time(11, 0)),
+            ("it", "Prenota appuntamento oggi", "L'appuntamento e prenotato per", time(11, 30)),
+            ("de", "Termin buchen heute", "Der Termin ist fuer", time(12, 0)),
+            ("ru", "Записаться сегодня", "Запись назначена на", time(12, 30)),
+        )
+
+        for expected_language, text, expected_response, slot_time in cases:
+            with self.subTest(language=expected_language):
+                result = handle_inbound_text(
+                    self.client,
+                    text,
+                    channel="telegram",
+                    payload={
+                        "date": date.today(),
+                        "time": slot_time,
+                        "customer_name": f"Client {expected_language}",
+                        "phone": f"+1555099{slot_time.hour:02d}{slot_time.minute:02d}",
+                    },
+                    use_ai=False,
+                )
+
+                self.assertEqual(result["intent"], "book_appointment")
+                self.assertEqual(result["preprocess"]["language"], expected_language)
+                self.assertEqual(result["tool_output"]["status"], "booked")
+                self.assertIn(expected_response, result["response_text"])
+
     @mock.patch("ai_agent.services.generate_anthropic_reply", return_value="The appointment is booked.")
     @mock.patch("ai_agent.services.generate_anthropic_plan")
     def test_ai_planner_can_extract_booking_fields(self, planner_mock, reply_mock):
@@ -462,6 +494,38 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(appointment.status, Appointment.STATUS_CANCELLED)
         self.assertEqual(appointment.cancelled_reason, "Client requested cancellation")
 
+    def test_ai_cancel_keeps_response_language(self):
+        customer = self.client.customers.create(
+            first_name="Marko",
+            last_name="Markovic",
+            phone="+38160111111",
+        )
+        appointment = Appointment.objects.create(
+            business_client=self.client,
+            customer=customer,
+            title="Test termin",
+            status=Appointment.STATUS_CONFIRMED,
+            date=date.today(),
+            start_time=time(13, 0),
+            duration_minutes=30,
+            channel="telegram",
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Otkazi termin za Marko Markovic",
+            channel="telegram",
+            payload={"appointment_id": appointment.id, "reason": "Test cancel"},
+            use_ai=False,
+        )
+
+        appointment.refresh_from_db()
+        self.assertEqual(result["intent"], "cancel_appointment")
+        self.assertEqual(result["preprocess"]["language"], "sr")
+        self.assertEqual(result["tool_output"]["status"], "cancelled")
+        self.assertEqual(appointment.status, Appointment.STATUS_CANCELLED)
+        self.assertIn("Termin je otkazan", result["response_text"])
+
     def test_ai_asks_for_target_before_cancel_without_identity(self):
         Appointment.objects.create(
             business_client=self.client,
@@ -507,6 +571,43 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["tool_output"]["status"], "needs_more_details")
         self.assertIn("appointment_target", result["decision"]["missing_fields"])
         self.assertEqual(Appointment.objects.filter(status=Appointment.STATUS_MOVED).count(), 0)
+
+    def test_ai_reschedule_keeps_response_language(self):
+        customer = self.client.customers.create(
+            first_name="Anna",
+            last_name="Schmidt",
+            phone="+491511111111",
+        )
+        appointment = Appointment.objects.create(
+            business_client=self.client,
+            customer=customer,
+            title="Test Termin",
+            status=Appointment.STATUS_CONFIRMED,
+            date=date.today(),
+            start_time=time(13, 30),
+            duration_minutes=30,
+            channel="telegram",
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Termin verschieben heute",
+            channel="telegram",
+            payload={
+                "appointment_id": appointment.id,
+                "date": date.today(),
+                "time": time(14, 0),
+            },
+            use_ai=False,
+        )
+
+        appointment.refresh_from_db()
+        self.assertEqual(result["intent"], "reschedule_appointment")
+        self.assertEqual(result["preprocess"]["language"], "de")
+        self.assertEqual(result["tool_output"]["status"], "rescheduled")
+        self.assertEqual(appointment.status, Appointment.STATUS_MOVED)
+        self.assertEqual(appointment.start_time, time(14, 0))
+        self.assertIn("Der Termin wurde auf", result["response_text"])
 
     def test_ai_reuses_external_thread_and_records_messages(self):
         first = handle_inbound_text(

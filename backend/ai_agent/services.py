@@ -37,10 +37,11 @@ INTENT_KEYWORDS = {
 VALID_INTENTS = set(INTENT_KEYWORDS.keys()) | {"business_info", "unknown"}
 INTENT_KEYWORDS.update(
     {
-        "cancel_appointment": ("otkazi", "otkaz", "cancel", "cancela", "annuler", "annulla", "absagen", "stornieren"),
+        "cancel_appointment": ("otkazi", "otkaz", "cancel", "cancela", "annuler", "annulla", "absagen", "stornieren", "отмен"),
         "business_info": ("cena", "price", "cost", "radno vreme", "working hours", "address", "adresa", "usluge", "services"),
         "support_handoff": ("covek", "operater", "support", "human", "agent", "mensch", "zalba", "problem", "complaint"),
-        "book_appointment": ("zakazi", "zakaz", "termin", "appointment", "book", "reserva", "reserver", "prenota", "buchen"),
+        "reschedule_appointment": ("pomeri", "promeni", "reschedule", "move", "cambiar", "deplacer", "déplacer", "sposta", "spostare", "verschieb", "remarcar", "alterar", "перенес"),
+        "book_appointment": ("zakazi", "zakaz", "termin", "appointment", "book", "reserva", "reserver", "rendez-vous", "prenota", "appuntamento", "buchen", "marcar", "agendar", "consulta", "запис"),
     }
 )
 VALID_INTENTS = set(INTENT_KEYWORDS.keys()) | {"unknown"}
@@ -142,6 +143,85 @@ AVAILABILITY_RESPONSE_TEMPLATES = {
     ),
 }
 
+BOOKING_RESPONSE_TEMPLATES = {
+    "booked": {
+        "en": "The appointment is booked for {date} at {time}.",
+        "sr": "Termin je zakazan za {date} u {time}.",
+        "es": "La cita esta reservada para {date} a las {time}.",
+        "pt": "O agendamento esta marcado para {date} as {time}.",
+        "ru": "Запись назначена на {date} в {time}.",
+        "fr": "Le rendez-vous est reserve pour le {date} a {time}.",
+        "it": "L'appuntamento e prenotato per il {date} alle {time}.",
+        "de": "Der Termin ist fuer {date} um {time} gebucht.",
+    },
+    "needs_time": {
+        "en": "I can offer these available slots: {suggestions}. Which one works for you?",
+        "sr": "Mogu da ponudim ove slobodne termine: {suggestions}. Koji zelite?",
+        "es": "Puedo ofrecer estos horarios disponibles: {suggestions}. Cual le viene bien?",
+        "pt": "Posso oferecer estes horarios disponiveis: {suggestions}. Qual prefere?",
+        "ru": "Могу предложить эти свободные слоты: {suggestions}. Какой вам подходит?",
+        "fr": "Je peux proposer ces creneaux disponibles: {suggestions}. Lequel vous convient?",
+        "it": "Posso proporre questi slot disponibili: {suggestions}. Quale preferisce?",
+        "de": "Ich kann diese freien Termine anbieten: {suggestions}. Welchen moechten Sie?",
+    },
+    "time_unavailable": {
+        "en": "That slot is not available. Available suggestions: {suggestions}.",
+        "sr": "Taj termin nije slobodan. Slobodni predlozi su: {suggestions}.",
+        "es": "Ese horario no esta disponible. Opciones disponibles: {suggestions}.",
+        "pt": "Esse horario nao esta disponivel. Sugestoes disponiveis: {suggestions}.",
+        "ru": "Этот слот недоступен. Доступные варианты: {suggestions}.",
+        "fr": "Ce creneau n'est pas disponible. Propositions disponibles: {suggestions}.",
+        "it": "Quello slot non e disponibile. Proposte disponibili: {suggestions}.",
+        "de": "Dieser Termin ist nicht frei. Verfuegbare Vorschlaege: {suggestions}.",
+    },
+}
+
+CANCEL_RESPONSE_TEMPLATES = {
+    "cancelled": {
+        "en": "The appointment has been cancelled and the slot is now free.",
+        "sr": "Termin je otkazan i slot je oslobodjen.",
+        "es": "La cita se ha cancelado y el horario queda libre.",
+        "pt": "O agendamento foi cancelado e o horario ficou livre.",
+        "ru": "Запись отменена, слот снова свободен.",
+        "fr": "Le rendez-vous a ete annule et le creneau est libere.",
+        "it": "L'appuntamento e stato annullato e lo slot e libero.",
+        "de": "Der Termin wurde abgesagt und der Slot ist wieder frei.",
+    },
+    "target_missing": {
+        "en": "I need a name, phone number or exact appointment to cancel the right slot.",
+        "sr": "Treba mi ime, telefon ili tacan termin da bih otkazala pravi termin.",
+        "es": "Necesito nombre, telefono o cita exacta para cancelar el horario correcto.",
+        "pt": "Preciso do nome, telefone ou agendamento exato para cancelar o horario correto.",
+        "ru": "Мне нужно имя, телефон или точная запись, чтобы отменить правильный слот.",
+        "fr": "J'ai besoin du nom, du telephone ou du rendez-vous exact pour annuler le bon creneau.",
+        "it": "Mi serve nome, telefono o appuntamento esatto per annullare lo slot corretto.",
+        "de": "Ich brauche Name, Telefon oder den genauen Termin, um den richtigen Termin abzusagen.",
+    },
+}
+
+RESCHEDULE_RESPONSE_TEMPLATES = {
+    "rescheduled": {
+        "en": "The appointment has been moved to {date} at {time}.",
+        "sr": "Termin je pomeren na {date} u {time}.",
+        "es": "La cita se ha movido a {date} a las {time}.",
+        "pt": "O agendamento foi remarcado para {date} as {time}.",
+        "ru": "Запись перенесена на {date} в {time}.",
+        "fr": "Le rendez-vous a ete deplace au {date} a {time}.",
+        "it": "L'appuntamento e stato spostato al {date} alle {time}.",
+        "de": "Der Termin wurde auf {date} um {time} verschoben.",
+    },
+    "missing_new_time": {
+        "en": "I can reschedule it, but I need the new date and time.",
+        "sr": "Mogu da pomerim termin, ali treba mi novi datum i vreme.",
+        "es": "Puedo cambiar la cita, pero necesito la nueva fecha y hora.",
+        "pt": "Posso remarcar, mas preciso da nova data e hora.",
+        "ru": "Я могу перенести запись, но мне нужны новая дата и время.",
+        "fr": "Je peux deplacer le rendez-vous, mais il me faut la nouvelle date et l'heure.",
+        "it": "Posso spostare l'appuntamento, ma mi servono nuova data e ora.",
+        "de": "Ich kann den Termin verschieben, brauche aber neues Datum und Uhrzeit.",
+    },
+}
+
 APPOINTMENT_TARGET_STOP_WORDS = {
     "please",
     "cancel",
@@ -227,6 +307,12 @@ def localized_availability_response(language, count, suggestions):
     templates = AVAILABILITY_RESPONSE_TEMPLATES.get(language) or AVAILABILITY_RESPONSE_TEMPLATES["en"]
     template = templates[0] if suggestions else templates[1]
     return template.format(count=count, suggestions=suggestions)
+
+
+def localized_status_response(templates_by_status, status, language, **context):
+    templates = templates_by_status.get(status) or {}
+    template = templates.get(language) or templates.get("en") or ""
+    return template.format(**context)
 
 
 def detect_intent(text):
@@ -875,52 +961,50 @@ def build_text_response(business_client, intent, tool_output):
 
     if intent == "book_appointment":
         status = tool_output.get("status")
+        suggestions = ", ".join(tool_output.get("suggested_slots", [])[:3])
         if status == "booked":
-            if language == "sr":
-                return f"Termin je zakazan za {tool_output.get('date')} u {tool_output.get('time')}."
-            if language == "de":
-                return f"Der Termin ist fuer {tool_output.get('date')} um {tool_output.get('time')} gebucht."
-            return f"The appointment is booked for {tool_output.get('date')} at {tool_output.get('time')}."
+            return localized_status_response(
+                BOOKING_RESPONSE_TEMPLATES,
+                "booked",
+                language,
+                date=tool_output.get("date"),
+                time=tool_output.get("time"),
+                suggestions=suggestions,
+            )
         if status == "needs_time":
-            suggestions = ", ".join(tool_output.get("suggested_slots", [])[:3])
-            if language == "sr":
-                return f"Mogu da ponudim ove slobodne termine: {suggestions}. Koji zelite?"
-            if language == "de":
-                return f"Ich kann diese freien Termine anbieten: {suggestions}. Welchen moechten Sie?"
-            return f"I can offer these available slots: {suggestions}. Which one works for you?"
+            return localized_status_response(
+                BOOKING_RESPONSE_TEMPLATES,
+                "needs_time",
+                language,
+                date=tool_output.get("date"),
+                time=tool_output.get("time"),
+                suggestions=suggestions,
+            )
         if status == "time_unavailable":
-            suggestions = ", ".join(tool_output.get("suggested_slots", [])[:3])
-            if language == "sr":
-                return f"Taj termin nije slobodan. Slobodni predlozi su: {suggestions}."
-            if language == "de":
-                return f"Dieser Termin ist nicht frei. Verfuegbare Vorschlaege: {suggestions}."
-            return f"That slot is not available. Available suggestions: {suggestions}."
+            return localized_status_response(
+                BOOKING_RESPONSE_TEMPLATES,
+                "time_unavailable",
+                language,
+                date=tool_output.get("date"),
+                time=tool_output.get("time"),
+                suggestions=suggestions,
+            )
 
     if intent == "cancel_appointment":
         if tool_output.get("status") == "cancelled":
-            if language == "sr":
-                return "Termin je otkazan i slot je oslobodjen."
-            if language == "de":
-                return "Der Termin wurde abgesagt und der Slot ist wieder frei."
-            return "The appointment has been cancelled and the slot is now free."
-        if language == "sr":
-            return "Treba mi ime, telefon ili tacan termin da bih otkazala pravi termin."
-        if language == "de":
-            return "Ich brauche Name, Telefon oder den genauen Termin, um den richtigen Termin abzusagen."
-        return "I need a name, phone number or exact appointment to cancel the right slot."
+            return localized_status_response(CANCEL_RESPONSE_TEMPLATES, "cancelled", language)
+        return localized_status_response(CANCEL_RESPONSE_TEMPLATES, "target_missing", language)
 
     if intent == "reschedule_appointment":
         if tool_output.get("status") == "rescheduled":
-            if language == "sr":
-                return f"Termin je pomeren na {tool_output.get('date')} u {tool_output.get('time')}."
-            if language == "de":
-                return f"Der Termin wurde auf {tool_output.get('date')} um {tool_output.get('time')} verschoben."
-            return f"The appointment has been moved to {tool_output.get('date')} at {tool_output.get('time')}."
-        if language == "sr":
-            return "Mogu da pomerim termin, ali treba mi novi datum i vreme."
-        if language == "de":
-            return "Ich kann den Termin verschieben, brauche aber neues Datum und Uhrzeit."
-        return "I can reschedule it, but I need the new date and time."
+            return localized_status_response(
+                RESCHEDULE_RESPONSE_TEMPLATES,
+                "rescheduled",
+                language,
+                date=tool_output.get("date"),
+                time=tool_output.get("time"),
+            )
+        return localized_status_response(RESCHEDULE_RESPONSE_TEMPLATES, "missing_new_time", language)
 
     if intent == "support_handoff":
         if language == "sr":
