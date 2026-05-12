@@ -194,18 +194,24 @@ def validate_telegram_connection(connection):
 
 
 def send_telegram_message(connection, chat_id, text):
-    bot_token = (connection.config or {}).get("bot_token", "")
-    if not bot_token:
-        raise serializers.ValidationError({"bot_token": "Telegram bot token nije podesen."})
-    payload = urllib.parse.urlencode(
+    return telegram_api_post(
+        connection,
+        "sendMessage",
         {
             "chat_id": str(chat_id),
             "text": text or "",
             "disable_web_page_preview": "true",
-        }
-    ).encode("utf-8")
+        },
+    )
+
+
+def telegram_api_post(connection, method, data):
+    bot_token = (connection.config or {}).get("bot_token", "")
+    if not bot_token:
+        raise serializers.ValidationError({"bot_token": "Telegram bot token nije podesen."})
+    payload = urllib.parse.urlencode(data).encode("utf-8")
     request = urllib.request.Request(
-        f"https://api.telegram.org/bot{bot_token}/sendMessage",
+        f"https://api.telegram.org/bot{bot_token}/{method}",
         data=payload,
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         method="POST",
@@ -216,6 +222,42 @@ def send_telegram_message(connection, chat_id, text):
         return json.loads(body)
     except json.JSONDecodeError:
         return {"ok": False, "raw": body}
+
+
+def configure_telegram_webhook(connection, webhook_url="", drop_pending_updates=False):
+    if connection.provider != "telegram":
+        raise serializers.ValidationError({"provider": "Integracija nije Telegram."})
+
+    config = connection.config or {}
+    bot_token = config.get("bot_token", "")
+    webhook_secret = config.get("webhook_secret", "")
+    target_url = (webhook_url or connection.webhook_url or "").strip()
+    if not bot_token:
+        raise serializers.ValidationError({"bot_token": "Telegram bot token nije podesen."})
+    if not webhook_secret:
+        raise serializers.ValidationError({"webhook_secret": "Telegram webhook secret nije podesen."})
+    if not target_url:
+        raise serializers.ValidationError({"webhook_url": "Telegram webhook URL nije podesen."})
+
+    response = telegram_api_post(
+        connection,
+        "setWebhook",
+        {
+            "url": target_url,
+            "secret_token": webhook_secret,
+            "drop_pending_updates": "true" if drop_pending_updates else "false",
+        },
+    )
+    if not response.get("ok"):
+        description = response.get("description") or response.get("raw") or "Telegram nije prihvatio webhook."
+        raise serializers.ValidationError({"telegram": description})
+
+    connection.webhook_url = target_url
+    connection.enabled = True
+    connection.status = "connected"
+    connection.last_error = ""
+    connection.save(update_fields=["webhook_url", "enabled", "status", "last_error", "updated_at"])
+    return response
 
 
 def process_telegram_webhook(connection, update, provided_secret):

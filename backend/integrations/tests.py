@@ -1,7 +1,9 @@
 from datetime import time
+from io import StringIO
 from unittest import mock
 
 from django.contrib.auth.models import User
+from django.core.management import call_command
 from django.test import Client, TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -232,3 +234,34 @@ class IntegrationStatusTests(TestCase):
         self.assertContains(page, "Telegram bot")
         self.assertContains(page, "Bot token je sacuvan")
         self.assertNotContains(page, "123456:telegram-secret-token")
+
+    @mock.patch("integrations.services.telegram_api_post", return_value={"ok": True, "description": "Webhook was set"})
+    def test_configure_telegram_webhook_command_sets_webhook_without_printing_token(self, post_mock):
+        connection = IntegrationConnection.objects.create(
+            business_client=self.business_client,
+            provider="telegram",
+            enabled=False,
+            status="draft",
+            public_number="@kaleya_test_bot",
+            config={"bot_token": "123456:telegram-secret-token", "webhook_secret": "webhook-secret"},
+        )
+        output = StringIO()
+
+        call_command(
+            "configure_telegram_webhook",
+            "--connection-id",
+            str(connection.id),
+            "--url",
+            "https://staging.aikaleya.com/api/integrations/telegram/webhook/1/",
+            stdout=output,
+        )
+
+        connection.refresh_from_db()
+        self.assertTrue(connection.enabled)
+        self.assertEqual(connection.status, "connected")
+        self.assertEqual(connection.webhook_url, "https://staging.aikaleya.com/api/integrations/telegram/webhook/1/")
+        post_mock.assert_called_once()
+        self.assertEqual(post_mock.call_args.args[1], "setWebhook")
+        self.assertEqual(post_mock.call_args.args[2]["secret_token"], "webhook-secret")
+        self.assertNotIn("123456:telegram-secret-token", output.getvalue())
+        self.assertIn("Telegram webhook je konfigurisan.", output.getvalue())
