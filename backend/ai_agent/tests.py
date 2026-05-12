@@ -46,6 +46,26 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["tool_output"]["free_count"], 14)
         self.assertEqual(result["ai_provider"], "fallback")
 
+    def test_ai_understands_serbian_availability_question_without_booking(self):
+        Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            duration_minutes=30,
+            price=25,
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Da li ima slobodnih termina danas?",
+            channel="telegram",
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "check_availability")
+        self.assertEqual(result["tool_output"]["free_count"], 14)
+        self.assertEqual(result["decision"]["missing_fields"], [])
+        self.assertIn("Ima 14 slobodnih termina", result["response_text"])
+
     def test_ai_can_book_structured_appointment_without_external_provider(self):
         result = handle_inbound_text(
             self.client,

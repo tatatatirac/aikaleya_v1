@@ -45,6 +45,31 @@ INTENT_KEYWORDS.update(
 VALID_INTENTS = set(INTENT_KEYWORDS.keys()) | {"unknown"}
 LOW_CONFIDENCE_THRESHOLD = 0.45
 MAX_UNKNOWN_BEFORE_HANDOFF = 2
+AVAILABILITY_HINTS = (
+    "slobodnih termina",
+    "slobodni termini",
+    "slobodne termine",
+    "slobodan termin",
+    "slobodno vreme",
+    "ima slobodnih",
+    "ima li slobod",
+    "da li ima slobod",
+    "proveri slobod",
+    "provera slobod",
+    "free slots",
+    "available slots",
+    "available appointments",
+)
+BOOKING_ACTION_HINTS = (
+    "zakazi",
+    "zakaži",
+    "zakazivanje",
+    "rezervisi",
+    "rezerviši",
+    "book",
+    "reserve",
+    "schedule",
+)
 
 DATE_HINT_PATTERN = re.compile(r"\b(20\d{2}-\d{2}-\d{2}|\d{1,2}[.\-/]\d{1,2}[.\-/]20\d{2})\b")
 DATE_HINT_WORDS = (
@@ -136,6 +161,10 @@ def json_safe(value):
 
 def detect_intent(text):
     normalized = (text or "").strip().lower()
+    has_availability_hint = any(keyword in normalized for keyword in AVAILABILITY_HINTS)
+    has_booking_action = any(keyword in normalized for keyword in BOOKING_ACTION_HINTS)
+    if has_availability_hint and not has_booking_action:
+        return "check_availability", 0.88
     for intent, keywords in INTENT_KEYWORDS.items():
         if any(keyword in normalized for keyword in keywords):
             return intent, 0.82
