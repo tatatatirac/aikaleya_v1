@@ -261,6 +261,50 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(conversation.status, "waiting")
         self.assertEqual(conversation.metadata["ai_state"]["last_intent"], "book_appointment")
 
+    def test_ai_resumes_booking_when_customer_answers_requested_service(self):
+        Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            duration_minutes=30,
+            price=25,
+        )
+        external_thread_id = "telegram:test-booking-followup"
+
+        first = handle_inbound_text(
+            self.client,
+            "Zakazi termin danas",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic"},
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        second = handle_inbound_text(
+            self.client,
+            "sisianje",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        third = handle_inbound_text(
+            self.client,
+            "10:00",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        self.assertEqual(first["intent"], "book_appointment")
+        self.assertIn("service", first["decision"]["missing_fields"])
+        self.assertEqual(second["intent"], "book_appointment")
+        self.assertEqual(second["preprocess"]["language"], "sr")
+        self.assertEqual(second["tool_output"]["status"], "needs_time")
+        self.assertIn("Mogu da ponudim", second["response_text"])
+        self.assertEqual(third["intent"], "book_appointment")
+        self.assertEqual(third["tool_output"]["status"], "booked")
+        appointment = Appointment.objects.get()
+        self.assertEqual(appointment.service.name, "Sisanje")
+        self.assertEqual(appointment.start_time, time(10, 0))
+
     def test_repeated_unknown_intent_escalates_to_support(self):
         conversation = Conversation.objects.create(
             business_client=self.client,

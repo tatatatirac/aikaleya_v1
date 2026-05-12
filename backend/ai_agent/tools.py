@@ -1,5 +1,6 @@
 import re
 import unicodedata
+from difflib import SequenceMatcher
 from datetime import date as date_cls
 from datetime import datetime, timedelta
 
@@ -136,6 +137,17 @@ def text_contains_phrase(text, phrase):
     return f" {normalized_phrase} " in normalized_text or normalized_phrase in normalized_text
 
 
+def fuzzy_phrase_score(text, phrase):
+    normalized_text = normalize_lookup(text)
+    normalized_phrase = normalize_lookup(phrase)
+    if len(normalized_phrase) < 5:
+        return 0
+    tokens = [token for token in re.findall(r"\w+", normalized_text) if len(token) >= 5]
+    candidates = tokens + ([normalized_text] if normalized_text else [])
+    best_ratio = max((SequenceMatcher(None, normalized_phrase, candidate).ratio() for candidate in candidates), default=0)
+    return len(normalized_phrase) if best_ratio >= 0.84 else 0
+
+
 def extract_phone(text):
     match = PHONE_PATTERN.search(text or "")
     if not match:
@@ -187,6 +199,8 @@ def infer_service_from_text(business_client, text):
         for phrase in (service.name, service.category, service.description):
             if phrase and text_contains_phrase(text, phrase):
                 score += len(normalize_lookup(phrase))
+            elif phrase:
+                score += fuzzy_phrase_score(text, phrase)
         if score:
             ranked.append((score, service))
     ranked.sort(key=lambda item: item[0], reverse=True)

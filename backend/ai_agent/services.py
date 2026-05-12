@@ -286,6 +286,12 @@ WORKFLOW_STEPS = (
     "respond",
     "audit",
 )
+RESUMABLE_INTENTS = {
+    "book_appointment",
+    "reschedule_appointment",
+    "cancel_appointment",
+    "check_availability",
+}
 
 
 def json_safe(value):
@@ -470,9 +476,9 @@ def merge_conversation_payload(conversation, payload):
     return merge_payloads(pending_payload, payload)
 
 
-def build_preprocess_context(business_client, text, customer=None, payload=None, channel="web"):
+def build_preprocess_context(business_client, text, customer=None, payload=None, channel="web", language_fallback=""):
     payload = payload or {}
-    language = detect_message_language(text, business_client.interface_language or business_client.language or "en")
+    language = detect_message_language(text, language_fallback or business_client.interface_language or business_client.language or "en")
     requested_date = parse_requested_date(text, payload.get("date"))
     requested_time = parse_requested_time(text, payload.get("time"))
     customer_filter = None
@@ -948,6 +954,18 @@ def merge_payloads(ai_payload, explicit_payload):
     return merged
 
 
+def should_resume_previous_intent(intent_name, previous_state):
+    if intent_name != "unknown":
+        return False
+    if not previous_state or previous_state.get("status") != "waiting_for_customer":
+        return False
+    return previous_state.get("last_intent") in RESUMABLE_INTENTS
+
+
+def resume_previous_intent(previous_state):
+    return previous_state.get("last_intent"), safe_float(previous_state.get("last_confidence"), 0.72)
+
+
 def build_text_response(business_client, intent, tool_output):
     language = tool_output.get("response_language") or business_client.interface_language or business_client.language or "en"
 
@@ -1124,8 +1142,18 @@ def handle_inbound_text(
             planner_raw_response = {"engine": "keyword-fallback", "planner_error": str(exc)}
 
     payload = merge_payloads(planner_payload, payload)
+    if should_resume_previous_intent(intent_name, previous_state):
+        intent_name, confidence = resume_previous_intent(previous_state)
+        planner_raw_response["resumed_from_previous_state"] = True
     payload = infer_payload_from_text(business_client, text, payload)
-    preprocess = build_preprocess_context(business_client, text, customer=customer, payload=payload, channel=channel)
+    preprocess = build_preprocess_context(
+        business_client,
+        text,
+        customer=customer,
+        payload=payload,
+        channel=channel,
+        language_fallback=conversation.language if conversation else "",
+    )
     language = preprocess["language"]
     matched_knowledge = match_knowledge_entry(business_client, text, language)
     if intent_name == "unknown" and matched_knowledge:
