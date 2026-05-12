@@ -17,6 +17,7 @@ from ai_agent.tools import (
     parse_requested_date,
     parse_requested_time,
     reschedule_appointment_tool,
+    text_has_parseable_date,
 )
 from accounts.permissions import user_role
 from audit_log.services import write_audit_log
@@ -221,6 +222,16 @@ RESCHEDULE_RESPONSE_TEMPLATES = {
         "it": "Posso spostare l'appuntamento, ma mi servono nuova data e ora.",
         "de": "Ich kann den Termin verschieben, brauche aber neues Datum und Uhrzeit.",
     },
+    "needs_time": {
+        "en": "I can move it to {date}. Available slots: {suggestions}. Which one works for you?",
+        "sr": "Mogu da pomerim termin na {date}. Slobodni termini: {suggestions}. Koji zelite?",
+        "es": "Puedo mover la cita a {date}. Horarios disponibles: {suggestions}. Cual le viene bien?",
+        "pt": "Posso remarcar para {date}. Horarios disponiveis: {suggestions}. Qual prefere?",
+        "ru": "Могу перенести запись на {date}. Доступные слоты: {suggestions}. Какой вам подходит?",
+        "fr": "Je peux deplacer le rendez-vous au {date}. Creneaux disponibles: {suggestions}. Lequel vous convient?",
+        "it": "Posso spostare l'appuntamento al {date}. Slot disponibili: {suggestions}. Quale preferisce?",
+        "de": "Ich kann den Termin auf {date} verschieben. Freie Termine: {suggestions}. Welcher passt?",
+    },
 }
 
 APPOINTMENT_TARGET_STOP_WORDS = {
@@ -293,6 +304,7 @@ RESUMABLE_INTENTS = {
     "cancel_appointment",
     "check_availability",
 }
+AMBIGUOUS_COMPLETED_FOLLOWUP_INTENTS = {"unknown", "book_appointment", "check_availability"}
 
 
 def json_safe(value):
@@ -352,7 +364,11 @@ def safe_float(value, fallback):
 
 def text_has_date_hint(text):
     normalized = normalize_intent_text(text)
-    return bool(DATE_HINT_PATTERN.search(normalized) or any(normalize_intent_text(word) in normalized for word in DATE_HINT_WORDS))
+    return bool(
+        DATE_HINT_PATTERN.search(normalized)
+        or text_has_parseable_date(text)
+        or any(normalize_intent_text(word) in normalized for word in DATE_HINT_WORDS)
+    )
 
 
 def detect_message_language(text, fallback="en"):
@@ -549,8 +565,6 @@ def workflow_missing_fields(business_client, intent_name, text, payload, custome
             missing.append("appointment_target")
         if not payload.get("date") and not text_has_date_hint(text):
             missing.append("new_date")
-        if not payload.get("time") and not parse_requested_time(text):
-            missing.append("new_time")
         return missing
     if intent_name == "cancel_appointment":
         if not cancel_target_present(text, payload=payload, customer=customer):
@@ -681,6 +695,9 @@ def save_conversation_ai_state(conversation, intent_name, payload, tool_output, 
     if tool_status in {"booked", "cancelled", "rescheduled"}:
         state_status = "completed"
 
+    appointment_id = (tool_output or {}).get("appointment_id") or previous_state.get("last_appointment_id")
+    appointment_date = (tool_output or {}).get("date") or previous_state.get("last_appointment_date")
+    appointment_time = (tool_output or {}).get("time") or previous_state.get("last_appointment_time")
     pending_payload = payload if state_status == "waiting_for_customer" else {}
     state = {
         "status": state_status,
@@ -691,6 +708,12 @@ def save_conversation_ai_state(conversation, intent_name, payload, tool_output, 
         "last_tool_status": tool_status,
         "unknown_count": unknown_count,
     }
+    if appointment_id:
+        state["last_appointment_id"] = appointment_id
+    if appointment_date:
+        state["last_appointment_date"] = appointment_date
+    if appointment_time:
+        state["last_appointment_time"] = appointment_time
     metadata["ai_state"] = state
     conversation.metadata = metadata
     conversation.language = language
@@ -925,7 +948,23 @@ def apply_actor_scope_to_payload(business_client, actor, intent_name, payload):
     return payload, ""
 
 
-def build_planner_context(business_client):
+def recent_conversation_messages(conversation, limit=6):
+    if not conversation:
+        return []
+    messages = list(conversation.messages.order_by("-created_at")[:limit])
+    messages.reverse()
+    return [
+        {
+            "direction": message.direction,
+            "sender": message.sender_label,
+            "body": message.body,
+            "created_at": message.created_at.isoformat(),
+        }
+        for message in messages
+    ]
+
+
+def build_planner_context(business_client, conversation=None, conversation_state=None):
     services = list(
         Service.objects.filter(business_client=business_client, is_active=True)
         .order_by("category", "name")
@@ -937,7 +976,7 @@ def build_planner_context(business_client):
         .values("id", "full_name", "role_title")[:30]
     )
     language = business_client.interface_language or business_client.language or "en"
-    return {
+    context = {
         "today": client_local_today(business_client).isoformat(),
         "business": {
             "id": business_client.id,
@@ -952,6 +991,11 @@ def build_planner_context(business_client):
         "staff_members": staff_members,
         "knowledge_entries": knowledge_entries_for_client(business_client, language)[:20],
     }
+    if conversation_state:
+        context["conversation_state"] = json_safe(conversation_state)
+    if conversation:
+        context["recent_messages"] = recent_conversation_messages(conversation)
+    return context
 
 
 def normalize_ai_plan(plan):
@@ -989,6 +1033,26 @@ def should_resume_previous_intent(intent_name, previous_state):
 
 def resume_previous_intent(previous_state):
     return previous_state.get("last_intent"), safe_float(previous_state.get("last_confidence"), 0.72)
+
+
+def should_treat_as_reschedule_followup(intent_name, previous_state, text, payload):
+    if not previous_state or previous_state.get("status") != "completed":
+        return False
+    if previous_state.get("last_intent") not in {"book_appointment", "reschedule_appointment"}:
+        return False
+    if not previous_state.get("last_appointment_id"):
+        return False
+    if intent_name not in AMBIGUOUS_COMPLETED_FOLLOWUP_INTENTS:
+        return False
+    return bool(payload.get("date") or payload.get("time") or text_has_date_hint(text) or parse_requested_time(text))
+
+
+def attach_last_appointment_to_payload(payload, previous_state):
+    if not previous_state or not previous_state.get("last_appointment_id"):
+        return payload
+    payload = {**(payload or {})}
+    payload.setdefault("appointment_id", previous_state["last_appointment_id"])
+    return payload
 
 
 def build_text_response(business_client, intent, tool_output):
@@ -1039,6 +1103,7 @@ def build_text_response(business_client, intent, tool_output):
         return localized_status_response(CANCEL_RESPONSE_TEMPLATES, "target_missing", language)
 
     if intent == "reschedule_appointment":
+        suggestions = ", ".join(tool_output.get("suggested_slots", [])[:3])
         if tool_output.get("status") == "rescheduled":
             return localized_status_response(
                 RESCHEDULE_RESPONSE_TEMPLATES,
@@ -1046,6 +1111,14 @@ def build_text_response(business_client, intent, tool_output):
                 language,
                 date=tool_output.get("date"),
                 time=tool_output.get("time"),
+            )
+        if tool_output.get("status") == "needs_time":
+            return localized_status_response(
+                RESCHEDULE_RESPONSE_TEMPLATES,
+                "needs_time",
+                language,
+                date=tool_output.get("date"),
+                suggestions=suggestions,
             )
         return localized_status_response(RESCHEDULE_RESPONSE_TEMPLATES, "missing_new_time", language)
 
@@ -1155,7 +1228,11 @@ def handle_inbound_text(
             planner = generate_anthropic_plan(
                 business_client,
                 text,
-                context=build_planner_context(business_client),
+                context=build_planner_context(
+                    business_client,
+                    conversation=conversation,
+                    conversation_state=previous_state,
+                ),
             )
             planned_intent = (planner.get("intent") or "").strip()
             if planned_intent in VALID_INTENTS:
@@ -1170,6 +1247,13 @@ def handle_inbound_text(
     if should_resume_previous_intent(intent_name, previous_state):
         intent_name, confidence = resume_previous_intent(previous_state)
         planner_raw_response["resumed_from_previous_state"] = True
+    if intent_name == "reschedule_appointment":
+        payload = attach_last_appointment_to_payload(payload, previous_state)
+    elif should_treat_as_reschedule_followup(intent_name, previous_state, text, payload):
+        intent_name = "reschedule_appointment"
+        confidence = max(confidence, 0.74)
+        payload = attach_last_appointment_to_payload(payload, previous_state)
+        planner_raw_response["resumed_from_completed_appointment"] = True
     payload = infer_payload_from_text(business_client, text, payload)
     preprocess = build_preprocess_context(
         business_client,

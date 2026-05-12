@@ -25,6 +25,48 @@ DATE_KEYWORDS = {
     "tomorrow": ("sutra", "tomorrow", "manana", "mañana", "amanha", "amanhã", "demain", "domani", "завтра", "morgen"),
 }
 
+MONTH_NAME_NUMBERS = {
+    "januar": 1,
+    "januara": 1,
+    "jan": 1,
+    "februar": 2,
+    "februara": 2,
+    "feb": 2,
+    "mart": 3,
+    "marta": 3,
+    "mar": 3,
+    "april": 4,
+    "aprila": 4,
+    "apr": 4,
+    "maj": 5,
+    "maja": 5,
+    "jun": 6,
+    "juna": 6,
+    "jul": 7,
+    "jula": 7,
+    "avgust": 8,
+    "avgusta": 8,
+    "august": 8,
+    "augusta": 8,
+    "septembar": 9,
+    "septembra": 9,
+    "sep": 9,
+    "oktobar": 10,
+    "oktobra": 10,
+    "okt": 10,
+    "novembar": 11,
+    "novembra": 11,
+    "nov": 11,
+    "decembar": 12,
+    "decembra": 12,
+    "dec": 12,
+}
+MONTH_NAME_PATTERN = re.compile(
+    r"\b(\d{1,2})(?:\.|-)?(?:og|tog|te|ti)?\s*("
+    + "|".join(sorted(MONTH_NAME_NUMBERS, key=len, reverse=True))
+    + r")\b"
+)
+
 
 PHONE_PATTERN = re.compile(r"(?<!\w)(\+?\d[\d\s().-]{6,}\d)(?!\w)")
 EMAIL_PATTERN = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.IGNORECASE)
@@ -68,7 +110,29 @@ def parse_requested_date(text, explicit_date=None, reference_date=None):
         day, month, year = map(int, eu_match.groups())
         return date_cls(year, month, day)
 
+    month_name_match = MONTH_NAME_PATTERN.search(normalized)
+    if month_name_match:
+        day = int(month_name_match.group(1))
+        month = MONTH_NAME_NUMBERS[month_name_match.group(2)]
+        candidate = date_cls(base_date.year, month, day)
+        if candidate < base_date:
+            candidate = date_cls(base_date.year + 1, month, day)
+        return candidate
+
     return base_date
+
+
+def text_has_parseable_date(text):
+    normalized = normalize_lookup(text)
+    today_keywords = DATE_KEYWORDS["today"] + ("сегодня",)
+    tomorrow_keywords = DATE_KEYWORDS["tomorrow"] + ("mañana", "amanhã", "завтра")
+    return bool(
+        any(normalize_lookup(keyword) in normalized for keyword in today_keywords)
+        or any(normalize_lookup(keyword) in normalized for keyword in tomorrow_keywords)
+        or re.search(r"\b(20\d{2})-(\d{2})-(\d{2})\b", normalized)
+        or re.search(r"\b(\d{1,2})[.\-/](\d{1,2})[.\-/](20\d{2})\b", normalized)
+        or MONTH_NAME_PATTERN.search(normalized)
+    )
 
 
 def parse_requested_time(text, explicit_time=None):
@@ -297,10 +361,7 @@ def infer_payload_from_text(business_client, text, payload=None):
         if parsed_time:
             inferred["time"] = parsed_time
 
-    if not inferred.get("date") and any(
-        keyword in normalize_lookup(text)
-        for keyword in ("danas", "today", "hoy", "hoje", "sutra", "tomorrow", "mañana", "demain", "morgen")
-    ):
+    if not inferred.get("date") and text_has_parseable_date(text):
         inferred["date"] = parse_requested_date(text, reference_date=client_local_today(business_client))
 
     return inferred

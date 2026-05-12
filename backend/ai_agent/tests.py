@@ -374,6 +374,75 @@ class AIAppointmentToolTests(TestCase):
                 self.assertEqual(result["tool_output"]["status"], "booked")
                 self.assertEqual(appointment.start_time, expected_time)
 
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_reschedules_last_booked_appointment_from_date_followup(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 12, 22, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.save(update_fields=["timezone", "updated_at"])
+        Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            duration_minutes=30,
+            price=25,
+        )
+        external_thread_id = "telegram:test-reschedule-after-booking"
+
+        handle_inbound_text(
+            self.client,
+            "Zakazi termin danas",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic", "phone": "+38160123456"},
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        handle_inbound_text(
+            self.client,
+            "Sisanje",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        booked = handle_inbound_text(
+            self.client,
+            "pola 11",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        appointment = Appointment.objects.get()
+        self.assertEqual(booked["tool_output"]["status"], "booked")
+        self.assertEqual(appointment.date, date(2026, 5, 13))
+        self.assertEqual(appointment.start_time, time(10, 30))
+
+        date_change = handle_inbound_text(
+            self.client,
+            "jel moze 14tog maja",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        self.assertEqual(date_change["intent"], "reschedule_appointment")
+        self.assertEqual(date_change["tool_output"]["status"], "needs_time")
+        self.assertEqual(date_change["tool_output"]["appointment_id"], appointment.id)
+        self.assertEqual(date_change["tool_output"]["date"], "2026-05-14")
+        self.assertIn("Slobodni termini", date_change["response_text"])
+
+        rescheduled = handle_inbound_text(
+            self.client,
+            "pola 10",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        appointment.refresh_from_db()
+        self.assertEqual(rescheduled["tool_output"]["status"], "rescheduled")
+        self.assertEqual(appointment.status, Appointment.STATUS_MOVED)
+        self.assertEqual(appointment.date, date(2026, 5, 14))
+        self.assertEqual(appointment.start_time, time(9, 30))
+
     def test_repeated_unknown_intent_escalates_to_support(self):
         conversation = Conversation.objects.create(
             business_client=self.client,
