@@ -6,7 +6,8 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from ai_agent.services import handle_inbound_text
+from ai_agent.models import CustomerMemory
+from ai_agent.services import build_planner_context, handle_inbound_text
 from accounts.models import Profile
 from appointments.services import aware_client_datetime
 from audit_log.models import AuditLog
@@ -863,6 +864,49 @@ class AIAppointmentToolTests(TestCase):
         job = NotificationJob.objects.get()
         self.assertEqual(job.payload["event"], "appointment_created")
         self.assertEqual(job.payload["source"], "kaleya_ai")
+
+    def test_ai_updates_customer_memory_after_booking(self):
+        service = Service.objects.create(
+            business_client=self.client,
+            name="Haircut",
+            duration_minutes=30,
+            price=30,
+        )
+        result = handle_inbound_text(
+            self.client,
+            "Book Haircut today at 10:00 for Emily Carter phone +15550177",
+            channel="telegram",
+            payload={
+                "date": date.today(),
+                "time": time(10, 0),
+                "service_id": service.id,
+                "customer_name": "Emily Carter",
+                "phone": "+15550177",
+            },
+            external_thread_id="telegram:emily-memory",
+            use_ai=False,
+        )
+
+        appointment = Appointment.objects.get()
+        memory = CustomerMemory.objects.get(customer=appointment.customer)
+        conversation = Conversation.objects.get(id=result["conversation_id"])
+        planner_context = build_planner_context(
+            self.client,
+            conversation=conversation,
+            conversation_state=result["conversation_state"],
+            customer=appointment.customer,
+        )
+
+        self.assertEqual(result["tool_output"]["status"], "booked")
+        self.assertEqual(conversation.customer, appointment.customer)
+        self.assertEqual(memory.business_client, self.client)
+        self.assertEqual(memory.last_service, service)
+        self.assertEqual(memory.appointment_count, 1)
+        self.assertEqual(memory.preferences["services"]["Haircut"], 1)
+        self.assertEqual(memory.preferences["channels"]["telegram"], 1)
+        self.assertIn("Haircut", memory.summary)
+        self.assertEqual(result["customer_memory"]["last_service"], "Haircut")
+        self.assertEqual(planner_context["customer_memory"]["customer_name"], "Emily Carter")
 
     def test_ai_answers_from_business_knowledge_base(self):
         BusinessKnowledgeEntry.objects.create(

@@ -6,7 +6,7 @@ from datetime import date
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
 
-from ai_agent.models import AIIntent, AIToolRun
+from ai_agent.models import AIIntent, AIToolRun, CustomerMemory
 from ai_agent.providers import ProviderError, generate_anthropic_plan, generate_anthropic_reply, synthesize_elevenlabs_speech
 from ai_agent.tools import (
     book_appointment_tool,
@@ -21,6 +21,7 @@ from ai_agent.tools import (
 )
 from accounts.permissions import user_role
 from audit_log.services import write_audit_log
+from appointments.models import Appointment
 from clients.models import BusinessKnowledgeEntry, ClientApiSettings
 from communications.models import Conversation, Message
 from notifications.services import queue_notification_jobs_for_event
@@ -816,6 +817,148 @@ def match_knowledge_entry(business_client, text, language):
     return None
 
 
+def appointment_from_tool_output(business_client, tool_output):
+    appointment_id = (tool_output or {}).get("appointment_id")
+    if not appointment_id:
+        return None
+    return (
+        business_client.appointments.select_related("customer", "service", "staff_member")
+        .filter(id=appointment_id)
+        .first()
+    )
+
+
+def increment_memory_preference(preferences, group, key):
+    preferences = dict(preferences or {})
+    if not key:
+        return preferences
+    group_values = dict(preferences.get(group) or {})
+    group_values[key] = int(group_values.get(key) or 0) + 1
+    preferences[group] = group_values
+    return preferences
+
+
+def top_memory_preference(preferences, group):
+    values = (preferences or {}).get(group) or {}
+    if not isinstance(values, dict) or not values:
+        return "", 0
+    key, count = sorted(values.items(), key=lambda item: item[1], reverse=True)[0]
+    return key, int(count or 0)
+
+
+def calculate_no_show_risk(total_count, cancellation_count):
+    if total_count >= 3 and cancellation_count / max(total_count, 1) >= 0.5:
+        return CustomerMemory.RISK_HIGH
+    if cancellation_count:
+        return CustomerMemory.RISK_MEDIUM
+    return CustomerMemory.RISK_LOW
+
+
+def build_customer_memory_summary(customer, appointment, memory, channel):
+    parts = [f"{customer.full_name} has {memory.appointment_count} active appointment records with this business."]
+    if appointment.service_id:
+        parts.append(f"Last service: {appointment.service.name}.")
+    if appointment.staff_member_id:
+        parts.append(f"Last staff member: {appointment.staff_member.full_name}.")
+    if channel:
+        parts.append(f"Recent channel: {channel}.")
+    if memory.no_show_risk != CustomerMemory.RISK_LOW:
+        parts.append(f"Reliability note: {memory.no_show_risk} cancellation risk.")
+    return " ".join(parts)
+
+
+def build_customer_routine_notes(memory):
+    service, service_count = top_memory_preference(memory.preferences, "services")
+    staff_member, staff_count = top_memory_preference(memory.preferences, "staff_members")
+    notes = []
+    if service and service_count >= 2:
+        notes.append(f"Often books {service}.")
+    if staff_member and staff_count >= 2:
+        notes.append(f"Often chooses {staff_member}.")
+    return " ".join(notes)
+
+
+def customer_memory_context(customer):
+    if not customer:
+        return {}
+    memory = CustomerMemory.objects.filter(customer=customer).select_related("last_service", "preferred_staff_member").first()
+    if not memory:
+        return {}
+    return {
+        "customer_id": customer.id,
+        "customer_name": customer.full_name,
+        "summary": memory.summary,
+        "routine_notes": memory.routine_notes,
+        "preferences": memory.preferences,
+        "appointment_count": memory.appointment_count,
+        "cancellation_count": memory.cancellation_count,
+        "reschedule_count": memory.reschedule_count,
+        "no_show_risk": memory.no_show_risk,
+        "last_service": memory.last_service.name if memory.last_service_id else "",
+        "preferred_staff_member": memory.preferred_staff_member.full_name if memory.preferred_staff_member_id else "",
+        "last_seen_at": memory.last_seen_at.isoformat() if memory.last_seen_at else "",
+    }
+
+
+def update_customer_memory_from_tool_output(business_client, conversation, intent_name, tool_output, channel):
+    appointment = appointment_from_tool_output(business_client, tool_output)
+    if not appointment or not appointment.customer_id:
+        return {}
+
+    customer = appointment.customer
+    if conversation and conversation.customer_id != customer.id:
+        conversation.customer = customer
+        conversation.save(update_fields=["customer", "updated_at"])
+
+    memory, _ = CustomerMemory.objects.get_or_create(
+        business_client=business_client,
+        customer=customer,
+    )
+    preferences = memory.preferences if isinstance(memory.preferences, dict) else {}
+    preferences = increment_memory_preference(preferences, "channels", channel)
+    if appointment.service_id:
+        preferences = increment_memory_preference(preferences, "services", appointment.service.name)
+    if appointment.staff_member_id:
+        preferences = increment_memory_preference(preferences, "staff_members", appointment.staff_member.full_name)
+
+    appointment_count = business_client.appointments.filter(
+        customer=customer,
+        status__in=[Appointment.STATUS_CONFIRMED, Appointment.STATUS_MOVED, Appointment.STATUS_PENDING],
+    ).count()
+    cancellation_count = business_client.appointments.filter(customer=customer, status=Appointment.STATUS_CANCELLED).count()
+    reschedule_count = business_client.appointments.filter(customer=customer, status=Appointment.STATUS_MOVED).count()
+    total_count = appointment_count + cancellation_count
+
+    memory.preferences = preferences
+    memory.last_service = appointment.service
+    memory.preferred_staff_member = appointment.staff_member
+    memory.appointment_count = appointment_count
+    memory.cancellation_count = cancellation_count
+    memory.reschedule_count = reschedule_count
+    memory.no_show_risk = calculate_no_show_risk(total_count, cancellation_count)
+    memory.last_seen_at = timezone.now()
+    memory.last_appointment_at = appointment.updated_at
+    memory.summary = build_customer_memory_summary(customer, appointment, memory, channel)
+    memory.routine_notes = build_customer_routine_notes(memory)
+    memory.save(
+        update_fields=[
+            "preferences",
+            "last_service",
+            "preferred_staff_member",
+            "appointment_count",
+            "cancellation_count",
+            "reschedule_count",
+            "no_show_risk",
+            "last_seen_at",
+            "last_appointment_at",
+            "summary",
+            "routine_notes",
+            "updated_at",
+        ]
+    )
+    return customer_memory_context(customer)
+
+
 def queue_ai_follow_up_jobs(business_client, intent_name, tool_output, language):
     event_by_status = {
         "booked": "appointment_created",
@@ -964,7 +1107,7 @@ def recent_conversation_messages(conversation, limit=6):
     ]
 
 
-def build_planner_context(business_client, conversation=None, conversation_state=None):
+def build_planner_context(business_client, conversation=None, conversation_state=None, customer=None):
     services = list(
         Service.objects.filter(business_client=business_client, is_active=True)
         .order_by("category", "name")
@@ -993,6 +1136,9 @@ def build_planner_context(business_client, conversation=None, conversation_state
     }
     if conversation_state:
         context["conversation_state"] = json_safe(conversation_state)
+    memory_customer = customer or (conversation.customer if conversation and conversation.customer_id else None)
+    if memory_customer:
+        context["customer_memory"] = customer_memory_context(memory_customer)
     if conversation:
         context["recent_messages"] = recent_conversation_messages(conversation)
     return context
@@ -1232,6 +1378,7 @@ def handle_inbound_text(
                     business_client,
                     conversation=conversation,
                     conversation_state=previous_state,
+                    customer=customer,
                 ),
             )
             planned_intent = (planner.get("intent") or "").strip()
@@ -1369,6 +1516,13 @@ def handle_inbound_text(
         tool_output["support_ticket_id"] = support_ticket.id
         tool_run.output_payload = json_safe(tool_output)
         tool_run.save(update_fields=["output_payload"])
+    customer_memory = update_customer_memory_from_tool_output(
+        business_client,
+        conversation,
+        intent_name,
+        tool_output,
+        channel,
+    )
     conversation_state = save_conversation_ai_state(
         conversation,
         intent_name,
@@ -1404,6 +1558,7 @@ def handle_inbound_text(
                         "status": status,
                         "missing_fields": missing_fields,
                         "conversation_state": conversation_state,
+                        "customer_memory": customer_memory,
                         "follow_up_job_count": len(follow_up_jobs),
                     },
                     "preprocess": preprocess,
@@ -1453,6 +1608,7 @@ def handle_inbound_text(
         },
         "preprocess": preprocess,
         "conversation_state": conversation_state,
+        "customer_memory": customer_memory,
         "workflow_trace": workflow_trace,
         "conversation_id": conversation.id if conversation else None,
         "follow_up_jobs": [job.id for job in follow_up_jobs],
