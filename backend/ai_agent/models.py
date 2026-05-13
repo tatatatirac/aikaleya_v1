@@ -80,6 +80,7 @@ class CustomerMemory(models.Model):
     summary = models.TextField(blank=True)
     routine_notes = models.TextField(blank=True)
     preferences = models.JSONField(default=dict, blank=True)
+    identifiers = models.JSONField(default=dict, blank=True)
     last_service = models.ForeignKey(
         "staff_services.Service",
         on_delete=models.SET_NULL,

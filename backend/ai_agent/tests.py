@@ -908,6 +908,94 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["customer_memory"]["last_service"], "Haircut")
         self.assertEqual(planner_context["customer_memory"]["customer_name"], "Emily Carter")
 
+    def test_ai_identifies_returning_telegram_customer_and_suggests_memory(self):
+        service = Service.objects.create(
+            business_client=self.client,
+            name="Haircut",
+            duration_minutes=30,
+            price=30,
+        )
+        first = handle_inbound_text(
+            self.client,
+            "Book Haircut today at 10:00",
+            channel="telegram",
+            payload={
+                "date": date.today(),
+                "time": time(10, 0),
+                "service_id": service.id,
+                "customer_name": "Emily Carter",
+                "phone": "+15550177",
+                "telegram_username": "emily_c",
+                "telegram_user_id": "424242",
+                "telegram_chat_id": "9001",
+            },
+            external_thread_id="telegram:first-memory-thread",
+            use_ai=False,
+        )
+        appointment = Appointment.objects.get()
+        memory = CustomerMemory.objects.get(customer=appointment.customer)
+
+        second = handle_inbound_text(
+            self.client,
+            "Zakazi termin sutra",
+            channel="telegram",
+            payload={
+                "customer_name": "Telegram User",
+                "telegram_username": "emily_c",
+                "telegram_user_id": "424242",
+                "telegram_chat_id": "new-chat",
+            },
+            external_thread_id="telegram:new-memory-thread",
+            use_ai=False,
+        )
+
+        second_conversation = Conversation.objects.get(id=second["conversation_id"])
+        self.assertEqual(first["tool_output"]["status"], "booked")
+        self.assertEqual(memory.identifiers["telegram_user_id"], "424242")
+        self.assertEqual(second_conversation.customer, appointment.customer)
+        self.assertEqual(second["intent"], "book_appointment")
+        self.assertIn("service", second["decision"]["missing_fields"])
+        self.assertNotIn("customer_contact", second["decision"]["missing_fields"])
+        self.assertIn("Da li zelite opet Haircut", second["response_text"])
+
+    def test_ai_prioritizes_favorite_time_for_returning_customer(self):
+        service = Service.objects.create(
+            business_client=self.client,
+            name="Haircut",
+            duration_minutes=30,
+            price=30,
+        )
+        handle_inbound_text(
+            self.client,
+            "Book Haircut today at 10:00",
+            channel="telegram",
+            payload={
+                "date": date.today(),
+                "time": time(10, 0),
+                "service_id": service.id,
+                "customer_name": "Emily Carter",
+                "telegram_user_id": "525252",
+            },
+            external_thread_id="telegram:first-time-memory-thread",
+            use_ai=False,
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Zakazi Haircut sutra",
+            channel="telegram",
+            payload={
+                "telegram_user_id": "525252",
+                "customer_name": "Emily Carter",
+            },
+            external_thread_id="telegram:second-time-memory-thread",
+            use_ai=False,
+        )
+
+        self.assertEqual(result["tool_output"]["status"], "needs_time")
+        self.assertEqual(result["customer_memory"]["favorite_time"], "10:00")
+        self.assertIn("Mogu da ponudim ove slobodne termine: 10:00", result["response_text"])
+
     def test_ai_answers_from_business_knowledge_base(self):
         BusinessKnowledgeEntry.objects.create(
             business_client=self.client,

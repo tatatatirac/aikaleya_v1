@@ -284,7 +284,10 @@ def process_telegram_webhook(connection, update, provided_secret):
     payload = {
         "customer_name": telegram_sender_label(message),
         "channel": "telegram",
+        "telegram_chat_id": str(chat_id),
     }
+    if sender.get("id"):
+        payload["telegram_user_id"] = str(sender["id"])
     if sender.get("username"):
         payload["telegram_username"] = sender["username"]
 

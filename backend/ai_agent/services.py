@@ -21,7 +21,7 @@ from ai_agent.tools import (
 )
 from accounts.permissions import user_role
 from audit_log.services import write_audit_log
-from appointments.models import Appointment
+from appointments.models import Appointment, Customer
 from clients.models import BusinessKnowledgeEntry, ClientApiSettings
 from communications.models import Conversation, Message
 from notifications.services import queue_notification_jobs_for_event
@@ -579,22 +579,56 @@ def service_options_text(business_client, limit=6):
     return ", ".join(service.name for service in services)
 
 
-def service_clarifying_response(business_client, language):
+def customer_memory_service_prompt(customer_memory):
+    if not customer_memory:
+        return ""
+    return customer_memory.get("favorite_service") or customer_memory.get("last_service") or ""
+
+
+def memory_prioritized_suggestions(tool_output):
+    suggestions = list((tool_output or {}).get("suggested_slots", [])[:5])
+    customer_memory = (tool_output or {}).get("customer_memory") or {}
+    favorite_time = customer_memory.get("favorite_time") or ""
+    if favorite_time:
+        preferred = [slot for slot in suggestions if str(slot).startswith(favorite_time)]
+        remaining = [slot for slot in suggestions if slot not in preferred]
+        suggestions = preferred + remaining
+    return ", ".join(suggestions[:3])
+
+
+def service_clarifying_response(business_client, language, customer_memory=None):
     options = service_options_text(business_client)
+    memory_service = customer_memory_service_prompt(customer_memory)
     if language == "sr":
+        if memory_service:
+            return f"Da li zelite opet {memory_service}? Dostupne usluge: {options}." if options else f"Da li zelite opet {memory_service}?"
         return f"Za koju uslugu zelite termin? Dostupne usluge: {options}." if options else "Za koju uslugu zelite termin?"
     if language == "de":
+        if memory_service:
+            return f"Moechten Sie wieder {memory_service}? Verfuegbare Leistungen: {options}." if options else f"Moechten Sie wieder {memory_service}?"
         return f"Fuer welche Leistung moechten Sie den Termin? Verfuegbare Leistungen: {options}." if options else "Fuer welche Leistung moechten Sie den Termin?"
     if language == "es":
+        if memory_service:
+            return f"Quiere de nuevo {memory_service}? Servicios disponibles: {options}." if options else f"Quiere de nuevo {memory_service}?"
         return f"Para que servicio quiere la cita? Servicios disponibles: {options}." if options else "Para que servicio quiere la cita?"
     if language == "pt":
+        if memory_service:
+            return f"Quer novamente {memory_service}? Servicos disponiveis: {options}." if options else f"Quer novamente {memory_service}?"
         return f"Para qual servico quer o agendamento? Servicos disponiveis: {options}." if options else "Para qual servico quer o agendamento?"
     if language == "fr":
+        if memory_service:
+            return f"Souhaitez-vous a nouveau {memory_service}? Services disponibles: {options}." if options else f"Souhaitez-vous a nouveau {memory_service}?"
         return f"Pour quel service souhaitez-vous le rendez-vous? Services disponibles: {options}." if options else "Pour quel service souhaitez-vous le rendez-vous?"
     if language == "it":
+        if memory_service:
+            return f"Desidera di nuovo {memory_service}? Servizi disponibili: {options}." if options else f"Desidera di nuovo {memory_service}?"
         return f"Per quale servizio desidera l'appuntamento? Servizi disponibili: {options}." if options else "Per quale servizio desidera l'appuntamento?"
     if language == "ru":
+        if memory_service:
+            return f"Хотите снова {memory_service}? Доступные услуги: {options}." if options else f"Хотите снова {memory_service}?"
         return f"Для какой услуги нужна запись? Доступные услуги: {options}." if options else "Для какой услуги нужна запись?"
+    if memory_service:
+        return f"Would you like {memory_service} again? Available services: {options}." if options else f"Would you like {memory_service} again?"
     return f"Which service would you like to book? Available services: {options}." if options else "Which service would you like to book?"
 
 
@@ -603,6 +637,7 @@ def build_clarifying_response(business_client, intent, missing_fields, tool_outp
     language = tool_output.get("response_language") or business_client.interface_language or business_client.language or "en"
     missing = set(missing_fields or [])
     suggestions = ", ".join(tool_output.get("suggested_slots", [])[:3])
+    customer_memory = tool_output.get("customer_memory") or {}
 
     if language == "sr":
         if "date" in missing and "customer_contact" in missing:
@@ -612,7 +647,7 @@ def build_clarifying_response(business_client, intent, missing_fields, tool_outp
         if "customer_contact" in missing:
             return "Treba mi ime ili telefon klijenta da bih mogla bezbedno da zakazem termin."
         if "service" in missing:
-            return service_clarifying_response(business_client, language)
+            return service_clarifying_response(business_client, language, customer_memory)
         if "appointment_target" in missing:
             return "Treba mi ime, telefon ili tacan termin da bih pronasla rezervaciju."
         if "new_date" in missing and "new_time" in missing:
@@ -635,7 +670,7 @@ def build_clarifying_response(business_client, intent, missing_fields, tool_outp
         if "customer_contact" in missing:
             return "Ich brauche Name oder Telefonnummer des Kunden, um den Termin sicher zu buchen."
         if "service" in missing:
-            return service_clarifying_response(business_client, language)
+            return service_clarifying_response(business_client, language, customer_memory)
         if "appointment_target" in missing:
             return "Ich brauche Name, Telefon oder den genauen Termin, um die Buchung zu finden."
         if "new_date" in missing and "new_time" in missing:
@@ -657,7 +692,7 @@ def build_clarifying_response(business_client, intent, missing_fields, tool_outp
     if "customer_contact" in missing:
         return "I need the customer's name or phone number before I can safely book the appointment."
     if "service" in missing:
-        return service_clarifying_response(business_client, language)
+        return service_clarifying_response(business_client, language, customer_memory)
     if "appointment_target" in missing:
         return "I need the name, phone number or exact appointment so I can find the booking."
     if "new_date" in missing and "new_time" in missing:
@@ -817,6 +852,62 @@ def match_knowledge_entry(business_client, text, language):
     return None
 
 
+def normalize_phone_identity(value):
+    digits = re.sub(r"\D+", "", str(value or ""))
+    return digits if len(digits) >= 6 else ""
+
+
+def normalize_text_identity(value):
+    return str(value or "").strip().lstrip("@").casefold()
+
+
+def customer_identity_entries(payload=None, customer=None):
+    payload = payload or {}
+    entries = {}
+    phone = normalize_phone_identity(payload.get("phone") or (customer.phone if customer else ""))
+    email = normalize_text_identity(payload.get("email") or (customer.email if customer else ""))
+    telegram_username = normalize_text_identity(payload.get("telegram_username"))
+    telegram_user_id = str(payload.get("telegram_user_id") or "").strip()
+    telegram_chat_id = str(payload.get("telegram_chat_id") or "").strip()
+
+    if phone:
+        entries["phone"] = phone
+    if email:
+        entries["email"] = email
+    if telegram_username:
+        entries["telegram_username"] = telegram_username
+    if telegram_user_id:
+        entries["telegram_user_id"] = telegram_user_id
+    if telegram_chat_id:
+        entries["telegram_chat_id"] = telegram_chat_id
+    return entries
+
+
+def find_customer_by_payload_identity(business_client, payload=None):
+    payload = payload or {}
+    phone = normalize_phone_identity(payload.get("phone"))
+    if phone:
+        customer = Customer.objects.filter(business_client=business_client, phone__icontains=phone[-6:]).first()
+        if customer:
+            return customer
+
+    email = normalize_text_identity(payload.get("email"))
+    if email:
+        customer = Customer.objects.filter(business_client=business_client, email__iexact=email).first()
+        if customer:
+            return customer
+
+    for key, value in customer_identity_entries(payload).items():
+        memory = (
+            CustomerMemory.objects.select_related("customer")
+            .filter(business_client=business_client, **{f"identifiers__{key}": value})
+            .first()
+        )
+        if memory:
+            return memory.customer
+    return None
+
+
 def appointment_from_tool_output(business_client, tool_output):
     appointment_id = (tool_output or {}).get("appointment_id")
     if not appointment_id:
@@ -890,17 +981,20 @@ def customer_memory_context(customer):
         "summary": memory.summary,
         "routine_notes": memory.routine_notes,
         "preferences": memory.preferences,
+        "identifiers": memory.identifiers,
         "appointment_count": memory.appointment_count,
         "cancellation_count": memory.cancellation_count,
         "reschedule_count": memory.reschedule_count,
         "no_show_risk": memory.no_show_risk,
         "last_service": memory.last_service.name if memory.last_service_id else "",
         "preferred_staff_member": memory.preferred_staff_member.full_name if memory.preferred_staff_member_id else "",
+        "favorite_service": top_memory_preference(memory.preferences, "services")[0],
+        "favorite_time": top_memory_preference(memory.preferences, "times")[0],
         "last_seen_at": memory.last_seen_at.isoformat() if memory.last_seen_at else "",
     }
 
 
-def update_customer_memory_from_tool_output(business_client, conversation, intent_name, tool_output, channel):
+def update_customer_memory_from_tool_output(business_client, conversation, intent_name, tool_output, channel, payload=None):
     appointment = appointment_from_tool_output(business_client, tool_output)
     if not appointment or not appointment.customer_id:
         return {}
@@ -916,10 +1010,13 @@ def update_customer_memory_from_tool_output(business_client, conversation, inten
     )
     preferences = memory.preferences if isinstance(memory.preferences, dict) else {}
     preferences = increment_memory_preference(preferences, "channels", channel)
+    preferences = increment_memory_preference(preferences, "times", appointment.start_time.strftime("%H:%M"))
     if appointment.service_id:
         preferences = increment_memory_preference(preferences, "services", appointment.service.name)
     if appointment.staff_member_id:
         preferences = increment_memory_preference(preferences, "staff_members", appointment.staff_member.full_name)
+    identifiers = memory.identifiers if isinstance(memory.identifiers, dict) else {}
+    identifiers.update(customer_identity_entries(payload, customer=customer))
 
     appointment_count = business_client.appointments.filter(
         customer=customer,
@@ -930,6 +1027,7 @@ def update_customer_memory_from_tool_output(business_client, conversation, inten
     total_count = appointment_count + cancellation_count
 
     memory.preferences = preferences
+    memory.identifiers = identifiers
     memory.last_service = appointment.service
     memory.preferred_staff_member = appointment.staff_member
     memory.appointment_count = appointment_count
@@ -943,6 +1041,7 @@ def update_customer_memory_from_tool_output(business_client, conversation, inten
     memory.save(
         update_fields=[
             "preferences",
+            "identifiers",
             "last_service",
             "preferred_staff_member",
             "appointment_count",
@@ -1190,6 +1289,8 @@ def should_treat_as_reschedule_followup(intent_name, previous_state, text, paylo
         return False
     if intent_name not in AMBIGUOUS_COMPLETED_FOLLOWUP_INTENTS:
         return False
+    if intent_name == "book_appointment" and contains_normalized_hint(text, BOOKING_ACTION_HINTS):
+        return False
     return bool(payload.get("date") or payload.get("time") or text_has_date_hint(text) or parse_requested_time(text))
 
 
@@ -1214,7 +1315,7 @@ def build_text_response(business_client, intent, tool_output):
 
     if intent == "book_appointment":
         status = tool_output.get("status")
-        suggestions = ", ".join(tool_output.get("suggested_slots", [])[:3])
+        suggestions = memory_prioritized_suggestions(tool_output)
         if status == "booked":
             return localized_status_response(
                 BOOKING_RESPONSE_TEMPLATES,
@@ -1249,7 +1350,7 @@ def build_text_response(business_client, intent, tool_output):
         return localized_status_response(CANCEL_RESPONSE_TEMPLATES, "target_missing", language)
 
     if intent == "reschedule_appointment":
-        suggestions = ", ".join(tool_output.get("suggested_slots", [])[:3])
+        suggestions = memory_prioritized_suggestions(tool_output)
         if tool_output.get("status") == "rescheduled":
             return localized_status_response(
                 RESCHEDULE_RESPONSE_TEMPLATES,
@@ -1343,6 +1444,8 @@ def handle_inbound_text(
     actor=None,
 ):
     payload = payload or {}
+    if not customer:
+        customer = find_customer_by_payload_identity(business_client, payload)
     planner_raw_response = {"engine": "keyword-fallback"}
     planner_payload = {}
     intent_name, confidence = detect_intent(text)
@@ -1358,6 +1461,11 @@ def handle_inbound_text(
     if not customer and conversation and conversation.customer:
         customer = conversation.customer
     payload = merge_conversation_payload(conversation, payload)
+    if not customer:
+        customer = find_customer_by_payload_identity(business_client, payload)
+        if customer and conversation and conversation.customer_id != customer.id:
+            conversation.customer = customer
+            conversation.save(update_fields=["customer", "updated_at"])
     previous_state = get_conversation_ai_state(conversation)
     inbound_message = None
     if record_messages:
@@ -1411,6 +1519,7 @@ def handle_inbound_text(
         language_fallback=conversation.language if conversation else "",
     )
     language = preprocess["language"]
+    current_customer_memory = customer_memory_context(customer)
     matched_knowledge = match_knowledge_entry(business_client, text, language)
     if intent_name == "unknown" and matched_knowledge:
         intent_name = "business_info"
@@ -1455,6 +1564,7 @@ def handle_inbound_text(
             "status": "needs_more_details",
             "missing_fields": missing_fields,
             "pending_payload": json_safe(payload),
+            "customer_memory": current_customer_memory,
         }
         status = "planned"
     elif intent_name == "check_availability":
@@ -1493,6 +1603,8 @@ def handle_inbound_text(
         status = "planned"
 
     tool_output.setdefault("response_language", language)
+    if current_customer_memory:
+        tool_output.setdefault("customer_memory", current_customer_memory)
 
     tool_run = AIToolRun.objects.create(
         business_client=business_client,
@@ -1522,7 +1634,8 @@ def handle_inbound_text(
         intent_name,
         tool_output,
         channel,
-    )
+        payload,
+    ) or current_customer_memory
     conversation_state = save_conversation_ai_state(
         conversation,
         intent_name,

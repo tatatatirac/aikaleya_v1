@@ -478,7 +478,14 @@ def ensure_customer(business_client, customer=None, payload=None):
         return None
 
     if phone:
-        existing = Customer.objects.filter(business_client=business_client, phone=phone).first()
+        phone_digits = re.sub(r"\D+", "", phone)
+        phone_query = phone_digits[-6:] if len(phone_digits) >= 6 else phone
+        existing = Customer.objects.filter(business_client=business_client, phone__icontains=phone_query).first()
+        if existing:
+            return existing
+
+    if email:
+        existing = Customer.objects.filter(business_client=business_client, email__iexact=email).first()
         if existing:
             return existing
 
