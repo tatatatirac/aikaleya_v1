@@ -450,6 +450,62 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(appointment.start_time, time(15, 0))
 
     @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_books_natural_service_date_and_approx_time(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 14, 0, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.save(update_fields=["timezone", "updated_at"])
+        service = Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            category="Osnovno",
+            duration_minutes=30,
+            price=25,
+        )
+
+        booked = handle_inbound_text(
+            self.client,
+            "treba mi sisanje sutra oko15",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic", "phone": "+38160123456"},
+            external_thread_id="telegram:test-natural-booking",
+            use_ai=False,
+        )
+
+        appointment = Appointment.objects.get()
+        self.assertEqual(booked["intent"], "book_appointment")
+        self.assertEqual(booked["tool_output"]["status"], "booked")
+        self.assertEqual(appointment.service, service)
+        self.assertEqual(appointment.date, date(2026, 5, 15))
+        self.assertEqual(appointment.start_time, time(15, 0))
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_natural_service_date_without_time_asks_only_for_time(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 14, 0, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.save(update_fields=["timezone", "updated_at"])
+        Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            category="Osnovno",
+            duration_minutes=30,
+            price=25,
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "treba mi sisanje sutra",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic", "phone": "+38160123456"},
+            external_thread_id="telegram:test-natural-booking-needs-time",
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "book_appointment")
+        self.assertEqual(result["tool_output"]["status"], "needs_time")
+        self.assertEqual(result["decision"]["missing_fields"], [])
+        self.assertIn("Mogu da ponudim", result["response_text"])
+
+    @mock.patch("ai_agent.tools.timezone.now")
     def test_ai_closed_day_response_has_no_empty_suggestions_and_no_loop(self, now_mock):
         now_mock.return_value = datetime(2026, 5, 14, 0, 30, tzinfo=dt_timezone.utc)
         self.client.timezone = "Europe/Belgrade"

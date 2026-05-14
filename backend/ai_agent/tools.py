@@ -214,6 +214,10 @@ def parse_requested_time(text, explicit_time=None):
     if prefixed:
         return f"{int(prefixed.group(1)):02d}:00"
 
+    approximate_hour = re.search(r"\b(?:oko|around|about|circa)\s*([01]?\d|2[0-3])\b", normalized)
+    if approximate_hour:
+        return f"{int(approximate_hour.group(1)):02d}:00"
+
     bare_hour = re.fullmatch(r"\s*([01]?\d|2[0-3])\s*", normalized)
     if bare_hour:
         return f"{int(bare_hour.group(1)):02d}:00"

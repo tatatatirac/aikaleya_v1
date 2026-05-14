@@ -92,6 +92,25 @@ BOOKING_ACTION_HINTS = (
     "reserve",
     "schedule",
 )
+NATURAL_BOOKING_REQUEST_HINTS = (
+    "treba mi",
+    "potreban mi",
+    "potrebno mi",
+    "zelim",
+    "želim",
+    "hocu",
+    "hoću",
+    "hteo bih",
+    "htela bih",
+    "moze li",
+    "može li",
+    "da ako moze",
+    "da ako može",
+    "i need",
+    "i want",
+    "can i",
+    "could i",
+)
 GREETING_HINTS = (
     "hi",
     "hello",
@@ -1387,6 +1406,18 @@ def has_fresh_date_or_time(text):
     return bool(text_has_parseable_date(text) or parse_requested_time(text))
 
 
+def should_assume_booking_from_natural_text(intent_name, text, payload):
+    if intent_name != "unknown":
+        return False
+    if not has_fresh_date_or_time(text):
+        return False
+    has_service = bool((payload or {}).get("service_id") or (payload or {}).get("service_hint"))
+    has_date = bool((payload or {}).get("date"))
+    has_time = bool((payload or {}).get("time"))
+    has_natural_booking_hint = contains_normalized_hint(text, NATURAL_BOOKING_REQUEST_HINTS)
+    return bool((has_date and has_time) or (has_service and (has_date or has_time)) or (has_natural_booking_hint and (has_date or has_time or has_service)))
+
+
 def should_treat_as_reschedule_followup(intent_name, previous_state, text, payload):
     if not previous_state or previous_state.get("status") != "completed":
         return False
@@ -1630,10 +1661,10 @@ def handle_inbound_text(
         payload = attach_last_appointment_to_payload(payload, previous_state)
         planner_raw_response["resumed_from_completed_appointment"] = True
     payload = infer_payload_from_text(business_client, text, payload)
-    if intent_name == "unknown" and payload.get("date") and payload.get("time") and has_fresh_date_or_time(text):
+    if should_assume_booking_from_natural_text(intent_name, text, payload):
         intent_name = "book_appointment"
         confidence = max(confidence, 0.72)
-        planner_raw_response["assumed_booking_from_date_time"] = True
+        planner_raw_response["assumed_booking_from_natural_text"] = True
     preprocess = build_preprocess_context(
         business_client,
         text,
