@@ -221,6 +221,39 @@ def next_date_for_weekday(base_date, weekday):
     return base_date + timedelta(days=days_ahead)
 
 
+def next_monday(base_date):
+    days_ahead = (7 - base_date.weekday()) % 7
+    return base_date + timedelta(days=days_ahead or 7)
+
+
+def has_next_week_phrase(normalized):
+    return any(
+        phrase in normalized
+        for phrase in (
+            "sledece nedelje",
+            "sledecu nedelju",
+            "sljedece sedmice",
+            "sljedecu sedmicu",
+            "naredne nedelje",
+            "narednu nedelju",
+            "next week",
+        )
+    )
+
+
+def has_this_week_phrase(normalized):
+    return any(
+        phrase in normalized
+        for phrase in (
+            "ove nedelje",
+            "ovu nedelju",
+            "ove sedmice",
+            "ovu sedmicu",
+            "this week",
+        )
+    )
+
+
 def parse_requested_date(text, explicit_date=None, reference_date=None):
     base_date = reference_date or date_cls.today()
     if explicit_date:
@@ -237,6 +270,10 @@ def parse_requested_date(text, explicit_date=None, reference_date=None):
         return base_date + timedelta(days=2)
     if any(normalize_lookup(keyword) in normalized for keyword in tomorrow_keywords):
         return base_date + timedelta(days=1)
+    if has_next_week_phrase(normalized):
+        return next_monday(base_date)
+    if has_this_week_phrase(normalized):
+        return base_date
 
     iso_match = re.search(r"\b(20\d{2})-(\d{2})-(\d{2})\b", normalized)
     if iso_match:
@@ -283,6 +320,8 @@ def text_has_parseable_date(text):
         any(normalize_lookup(keyword) in normalized for keyword in today_keywords)
         or any(normalize_lookup(keyword) in normalized for keyword in DAY_AFTER_TOMORROW_KEYWORDS)
         or any(normalize_lookup(keyword) in normalized for keyword in tomorrow_keywords)
+        or has_next_week_phrase(normalized)
+        or has_this_week_phrase(normalized)
         or re.search(r"\b(20\d{2})-(\d{2})-(\d{2})\b", normalized)
         or re.search(r"\b(\d{1,2})[.\-/](\d{1,2})[.\-/](20\d{2})\b", normalized)
         or MONTH_NAME_PATTERN.search(normalized)
@@ -813,7 +852,7 @@ def check_availability_tool(business_client, text="", payload=None):
     staff_member = scoped_staff_member(business_client, payload.get("staff_member_id")) or resolve_staff_member_by_hint(business_client, payload.get("staff_hint"))
     duration = int(payload.get("duration_minutes") or (service.duration_minutes if service else business_client.slot_interval_minutes))
     if not staff_member and StaffMember.objects.filter(business_client=business_client, is_active=True).exists():
-        return aggregate_staff_availability(
+        availability = aggregate_staff_availability(
             business_client,
             target_date,
             duration_minutes=duration,
@@ -822,6 +861,15 @@ def check_availability_tool(business_client, text="", payload=None):
             requested_time=requested_time,
             exclude_past_slots=True,
         )
+        if not availability.get("free_count"):
+            availability["next_available_slot"] = next_available_slot_after(
+                business_client,
+                target_date,
+                duration,
+                service=service,
+                staff_member=None,
+            )
+        return availability
     availability, suggested_slots = first_free_slots(
         business_client,
         target_date,
@@ -835,6 +883,14 @@ def check_availability_tool(business_client, text="", payload=None):
     availability["requested_time_available"] = bool(
         requested_time and requested_time in [slot["time"] for slot in availability["slots"] if slot["available"]]
     )
+    if not availability.get("free_count"):
+        availability["next_available_slot"] = next_available_slot_after(
+            business_client,
+            target_date,
+            duration,
+            service=service,
+            staff_member=staff_member,
+        )
     return availability
 
 
