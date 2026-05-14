@@ -307,6 +307,10 @@ def parse_requested_time(text, explicit_time=None):
     if compact_minutes:
         return f"{int(compact_minutes.group(1)):02d}:{int(compact_minutes.group(2)):02d}"
 
+    spoken_minutes = re.search(r"\b([01]?\d|2[0-3])\s*(?:i|and)\s*([0-5]\d)\b", normalized)
+    if spoken_minutes:
+        return f"{int(spoken_minutes.group(1)):02d}:{int(spoken_minutes.group(2)):02d}"
+
     half_hour = re.search(r"\b(?:pola\s*|half\s+past\s+)([1-9]|1[0-9]|2[0-4])\b", normalized)
     if half_hour:
         hour = int(half_hour.group(1)) - 1

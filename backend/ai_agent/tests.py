@@ -334,6 +334,7 @@ class AIAppointmentToolTests(TestCase):
             ("moze u pola 10", time(9, 30)),
             ("930", time(9, 30)),
             ("9 30", time(9, 30)),
+            ("u 14 i 30", time(14, 30)),
             ("9", time(9, 0)),
         ):
             with self.subTest(text_value=text_value):
@@ -556,6 +557,97 @@ class AIAppointmentToolTests(TestCase):
         self.assertNotIn("Predlozi su: .", second["response_text"])
         self.assertEqual(third["intent"], "unknown")
         self.assertNotEqual(third["tool_output"].get("status"), "time_unavailable")
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_availability_refinement_keeps_closed_day_context(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 14, 10, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        WorkingHours.objects.create(
+            business_client=self.client,
+            weekday=date(2026, 5, 16).weekday(),
+            start_time=time(9, 0),
+            end_time=time(16, 0),
+            is_closed=True,
+        )
+        external_thread_id = "telegram:test-closed-availability-refinement"
+
+        first = handle_inbound_text(
+            self.client,
+            "imate li prekosutra slobodnih termina popodne",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic", "phone": "+38160123456"},
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        refined = handle_inbound_text(
+            self.client,
+            "a oko 14h",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        self.assertEqual(first["intent"], "check_availability")
+        self.assertEqual(first["tool_output"]["date"], "2026-05-16")
+        self.assertTrue(first["tool_output"]["is_closed"])
+        self.assertEqual(first["conversation_state"]["status"], "waiting_for_customer")
+        self.assertEqual(first["conversation_state"]["pending_payload"]["date"], "2026-05-16")
+        self.assertIn("neradan", first["response_text"])
+        self.assertEqual(refined["intent"], "check_availability")
+        self.assertEqual(refined["tool_output"]["date"], "2026-05-16")
+        self.assertTrue(refined["tool_output"]["is_closed"])
+        self.assertIn("neradan", refined["response_text"])
+        self.assertNotIn("Da, oko 14:00 ima slobodno", refined["response_text"])
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_keeps_requested_time_when_closed_day_moves_to_next_workday(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 14, 0, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            category="Osnovno",
+            duration_minutes=30,
+            price=25,
+        )
+        WorkingHours.objects.create(
+            business_client=self.client,
+            weekday=date(2026, 5, 16).weekday(),
+            start_time=time(9, 0),
+            end_time=time(16, 0),
+            is_closed=True,
+        )
+        external_thread_id = "telegram:test-closed-day-keeps-time"
+
+        closed_day = handle_inbound_text(
+            self.client,
+            "mose li sisanje u pola 3 prekosutra",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic", "phone": "+38160123456"},
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        booked = handle_inbound_text(
+            self.client,
+            "ok moze li u ponedeljak",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        appointment = Appointment.objects.get()
+        self.assertEqual(closed_day["tool_output"]["status"], "time_unavailable")
+        self.assertEqual(closed_day["tool_output"]["requested_time"], "14:30")
+        self.assertEqual(booked["intent"], "book_appointment")
+        self.assertEqual(booked["tool_output"]["status"], "booked")
+        self.assertEqual(appointment.date, date(2026, 5, 18))
+        self.assertEqual(appointment.start_time, time(14, 30))
 
     @mock.patch("ai_agent.tools.timezone.now")
     def test_ai_bare_day_after_closed_day_changes_date_instead_of_time(self, now_mock):
@@ -874,6 +966,57 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(appointment.status, Appointment.STATUS_MOVED)
         self.assertEqual(appointment.date, date(2026, 5, 14))
         self.assertEqual(appointment.start_time, time(9, 30))
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_reschedules_same_date_from_spoken_minutes_followup(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 14, 0, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        customer = self.client.customers.create(first_name="Bane", last_name="Kostic", phone="+38160123456")
+        appointment = Appointment.objects.create(
+            business_client=self.client,
+            customer=customer,
+            title="Sisanje",
+            status=Appointment.STATUS_CONFIRMED,
+            date=date(2026, 5, 19),
+            start_time=time(14, 0),
+            duration_minutes=30,
+            channel="telegram",
+            source="ai_agent",
+        )
+        conversation = Conversation.objects.create(
+            business_client=self.client,
+            customer=customer,
+            channel="telegram",
+            external_thread_id="telegram:test-same-date-spoken-minutes",
+            language="sr",
+            metadata={
+                "ai_state": {
+                    "status": "completed",
+                    "last_intent": "book_appointment",
+                    "last_confidence": 0.9,
+                    "last_appointment_id": appointment.id,
+                    "last_appointment_date": "2026-05-19",
+                    "last_appointment_time": "14:00",
+                }
+            },
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "u 14 i 30 mi treba",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+
+        appointment.refresh_from_db()
+        self.assertEqual(result["intent"], "reschedule_appointment")
+        self.assertEqual(result["tool_output"]["status"], "rescheduled")
+        self.assertEqual(appointment.date, date(2026, 5, 19))
+        self.assertEqual(appointment.start_time, time(14, 30))
 
     def test_repeated_unknown_intent_escalates_to_support(self):
         conversation = Conversation.objects.create(

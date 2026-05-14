@@ -1000,7 +1000,11 @@ def save_conversation_ai_state(conversation, intent_name, payload, tool_output, 
     state_status = "handoff" if intent_name == "support_handoff" else "open"
     if missing_fields or tool_status in waiting_statuses:
         state_status = "waiting_for_customer"
-    if intent_name == "check_availability" and (tool_output or {}).get("free_count", 0) > 0:
+    if intent_name == "check_availability" and (
+        "date" in (tool_output or {})
+        or (tool_output or {}).get("requested_time")
+        or (tool_output or {}).get("free_count", 0) > 0
+    ):
         state_status = "waiting_for_customer"
     if tool_status in {"booked", "cancelled", "rescheduled"}:
         state_status = "completed"
@@ -1639,11 +1643,29 @@ def should_treat_as_reschedule_followup(intent_name, previous_state, text, paylo
     return bool(payload.get("date") or payload.get("time") or text_has_date_hint(text) or parse_requested_time(text))
 
 
+def should_use_last_appointment_date(intent_name, previous_state, text, payload):
+    if intent_name != "reschedule_appointment":
+        return False
+    if not previous_state or not previous_state.get("last_appointment_date"):
+        return False
+    if payload.get("date") or text_has_date_hint(text):
+        return False
+    return bool(payload.get("time") or parse_requested_time(text))
+
+
 def attach_last_appointment_to_payload(payload, previous_state):
     if not previous_state or not previous_state.get("last_appointment_id"):
         return payload
     payload = {**(payload or {})}
     payload.setdefault("appointment_id", previous_state["last_appointment_id"])
+    return payload
+
+
+def attach_last_appointment_date_to_payload(payload, previous_state):
+    if not previous_state or not previous_state.get("last_appointment_date"):
+        return payload
+    payload = {**(payload or {})}
+    payload.setdefault("date", previous_state["last_appointment_date"])
     return payload
 
 
@@ -1657,6 +1679,8 @@ def build_text_response(business_client, intent, tool_output):
         count = tool_output.get("free_count", 0)
         suggestions = ", ".join(tool_output.get("suggested_slots", [])[:3])
         requested_time = tool_output.get("requested_time") or ""
+        if tool_output.get("is_closed"):
+            return localized_no_available_booking_response(language, tool_output, business_client=business_client)
         if requested_time:
             return localized_time_availability_response(
                 language,
@@ -1912,6 +1936,9 @@ def handle_inbound_text(
         payload = attach_last_appointment_to_payload(payload, previous_state)
         planner_raw_response["resumed_from_completed_appointment"] = True
     payload = infer_payload_from_text(business_client, text, payload)
+    if should_use_last_appointment_date(intent_name, previous_state, text, payload):
+        payload = attach_last_appointment_date_to_payload(payload, previous_state)
+        planner_raw_response["used_last_appointment_date"] = True
     if planner_raw_response.get("bare_number_as_date"):
         payload.pop("time", None)
     if should_assume_booking_from_natural_text(intent_name, text, payload):
