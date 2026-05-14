@@ -946,6 +946,31 @@
                                     <input id="blockedReason" type="text" placeholder="Razlog, npr. pauza ili odmor" data-i18n-placeholder="blocked_reason_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                     <button onclick="createClientBlockedTime()" class="mt-2 w-full h-10 rounded-xl bg-amber-500 text-white text-[12px] font-semibold" data-i18n="add_block">Dodaj blokadu</button>
                                 </div>
+
+                                <div class="mt-5 pt-4 border-t border-slate-200 dark:border-slate-800">
+                                    <div class="flex items-start justify-between gap-3 mb-3">
+                                        <div>
+                                            <p class="text-xs font-semibold text-slate-600 dark:text-slate-300" data-i18n="memory_title">Memorija musterija</p>
+                                            <p class="mt-1 text-[10px] text-slate-500" data-i18n="memory_desc">Pregled navika koje Kaleya pamti za stalne musterije.</p>
+                                        </div>
+                                        <button onclick="loadClientCustomerMemoriesFromBackend()" class="shrink-0 h-8 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[10px] font-semibold" data-i18n="refresh_btn">Osvezi</button>
+                                    </div>
+                                    <div id="clientCustomerMemoryList" class="space-y-2"></div>
+                                    <input id="editingCustomerMemoryId" type="hidden">
+                                    <div id="clientCustomerMemoryEditor" class="hidden mt-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700">
+                                        <p id="customerMemoryEditorName" class="text-[12px] font-semibold">-</p>
+                                        <textarea id="customerMemoryNotesInput" rows="3" data-i18n-placeholder="memory_notes_placeholder" placeholder="Napomena ili rutina musterije" class="mt-2 w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[12px] outline-none resize-none"></textarea>
+                                        <select id="customerMemoryRiskInput" class="mt-2 w-full h-10 px-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[12px]">
+                                            <option value="low" data-i18n="memory_risk_low">Nizak no-show rizik</option>
+                                            <option value="medium" data-i18n="memory_risk_medium">Srednji no-show rizik</option>
+                                            <option value="high" data-i18n="memory_risk_high">Visok no-show rizik</option>
+                                        </select>
+                                        <div class="mt-2 grid grid-cols-[1fr_auto] gap-2">
+                                            <button onclick="saveClientCustomerMemory()" class="h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12px] font-semibold" data-i18n="memory_save">Sacuvaj memoriju</button>
+                                            <button onclick="resetClientCustomerMemoryEditor()" class="h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="cancel_btn">Odustani</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="hidden p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
@@ -1425,7 +1450,7 @@
 
 <script>
 // ===== STATE =====
-const KALEYA_APP_VERSION = '2026-05-08-client-support-activity-01';
+const KALEYA_APP_VERSION = '2026-05-14-customer-memory-01';
 const savedAppVersion = localStorage.getItem('kaleya_app_version');
 if (savedAppVersion && savedAppVersion !== KALEYA_APP_VERSION) {
     localStorage.removeItem('kaleya_auth_token');
@@ -1480,6 +1505,7 @@ let clientServices = [];
 let clientStaffServiceLinks = [];
 let clientBlockedTimes = [];
 let clientKnowledgeEntries = [];
+let clientCustomerMemories = [];
 let clientSupportTickets = [];
 let recognition = null;
 let activeClientForApi = '';
@@ -2018,6 +2044,149 @@ Object.entries(KNOWLEDGE_RUNTIME_TRANSLATIONS).forEach(([lang, values]) => {
     T[lang] = { ...(T[lang] || T.en), ...values };
 });
 
+const CUSTOMER_MEMORY_TRANSLATIONS = {
+    sr: {
+        memory_title: 'Memorija musterija',
+        memory_desc: 'Pregled navika koje Kaleya pamti za stalne musterije.',
+        memory_empty: 'Kaleya jos nema memoriju musterija.',
+        memory_last_service: 'Poslednja usluga',
+        memory_favorite_time: 'Omiljeno vreme',
+        memory_bookings: 'Zakazivanja',
+        memory_cancellations: 'Otkazivanja',
+        memory_notes: 'Napomena',
+        memory_notes_placeholder: 'Napomena ili rutina musterije',
+        memory_save: 'Sacuvaj memoriju',
+        memory_saved: 'Memorija je sacuvana',
+        memory_not_saved: 'Memorija nije sacuvana',
+        memory_risk_low: 'Nizak no-show rizik',
+        memory_risk_medium: 'Srednji no-show rizik',
+        memory_risk_high: 'Visok no-show rizik'
+    },
+    en: {
+        memory_title: 'Customer memory',
+        memory_desc: 'Habits Kaleya remembers for returning customers.',
+        memory_empty: 'Kaleya has no customer memory yet.',
+        memory_last_service: 'Last service',
+        memory_favorite_time: 'Favorite time',
+        memory_bookings: 'Bookings',
+        memory_cancellations: 'Cancellations',
+        memory_notes: 'Notes',
+        memory_notes_placeholder: 'Customer note or routine',
+        memory_save: 'Save memory',
+        memory_saved: 'Memory saved',
+        memory_not_saved: 'Memory was not saved',
+        memory_risk_low: 'Low no-show risk',
+        memory_risk_medium: 'Medium no-show risk',
+        memory_risk_high: 'High no-show risk'
+    },
+    es: {
+        memory_title: 'Memoria de clientes',
+        memory_desc: 'Habitos que Kaleya recuerda para clientes recurrentes.',
+        memory_empty: 'Kaleya aun no tiene memoria de clientes.',
+        memory_last_service: 'Ultimo servicio',
+        memory_favorite_time: 'Hora favorita',
+        memory_bookings: 'Reservas',
+        memory_cancellations: 'Cancelaciones',
+        memory_notes: 'Notas',
+        memory_notes_placeholder: 'Nota o rutina del cliente',
+        memory_save: 'Guardar memoria',
+        memory_saved: 'Memoria guardada',
+        memory_not_saved: 'La memoria no se guardo',
+        memory_risk_low: 'Riesgo no-show bajo',
+        memory_risk_medium: 'Riesgo no-show medio',
+        memory_risk_high: 'Riesgo no-show alto'
+    },
+    pt: {
+        memory_title: 'Memoria de clientes',
+        memory_desc: 'Habitos que Kaleya lembra para clientes recorrentes.',
+        memory_empty: 'Kaleya ainda nao tem memoria de clientes.',
+        memory_last_service: 'Ultimo servico',
+        memory_favorite_time: 'Horario favorito',
+        memory_bookings: 'Agendamentos',
+        memory_cancellations: 'Cancelamentos',
+        memory_notes: 'Notas',
+        memory_notes_placeholder: 'Nota ou rotina do cliente',
+        memory_save: 'Salvar memoria',
+        memory_saved: 'Memoria salva',
+        memory_not_saved: 'A memoria nao foi salva',
+        memory_risk_low: 'Risco no-show baixo',
+        memory_risk_medium: 'Risco no-show medio',
+        memory_risk_high: 'Risco no-show alto'
+    },
+    ru: {
+        memory_title: 'Pamyat klientov',
+        memory_desc: 'Privychki postoyannyh klientov, kotorye zapominaet Kaleya.',
+        memory_empty: 'U Kaleya poka net pamyati klientov.',
+        memory_last_service: 'Poslednyaya usluga',
+        memory_favorite_time: 'Lyubimoe vremya',
+        memory_bookings: 'Zapisi',
+        memory_cancellations: 'Otmeny',
+        memory_notes: 'Zametki',
+        memory_notes_placeholder: 'Zametka ili rutina klienta',
+        memory_save: 'Sohranit pamyat',
+        memory_saved: 'Pamyat sohranena',
+        memory_not_saved: 'Pamyat ne sohranena',
+        memory_risk_low: 'Nizkiy no-show risk',
+        memory_risk_medium: 'Sredniy no-show risk',
+        memory_risk_high: 'Vysokiy no-show risk'
+    },
+    fr: {
+        memory_title: 'Memoire clients',
+        memory_desc: 'Habitudes que Kaleya retient pour les clients reguliers.',
+        memory_empty: 'Kaleya n a pas encore de memoire client.',
+        memory_last_service: 'Dernier service',
+        memory_favorite_time: 'Heure favorite',
+        memory_bookings: 'Reservations',
+        memory_cancellations: 'Annulations',
+        memory_notes: 'Notes',
+        memory_notes_placeholder: 'Note ou routine du client',
+        memory_save: 'Enregistrer memoire',
+        memory_saved: 'Memoire enregistree',
+        memory_not_saved: 'La memoire n a pas ete enregistree',
+        memory_risk_low: 'Risque no-show bas',
+        memory_risk_medium: 'Risque no-show moyen',
+        memory_risk_high: 'Risque no-show eleve'
+    },
+    it: {
+        memory_title: 'Memoria clienti',
+        memory_desc: 'Abitudini che Kaleya ricorda per clienti abituali.',
+        memory_empty: 'Kaleya non ha ancora memoria clienti.',
+        memory_last_service: 'Ultimo servizio',
+        memory_favorite_time: 'Orario preferito',
+        memory_bookings: 'Prenotazioni',
+        memory_cancellations: 'Cancellazioni',
+        memory_notes: 'Note',
+        memory_notes_placeholder: 'Nota o routine cliente',
+        memory_save: 'Salva memoria',
+        memory_saved: 'Memoria salvata',
+        memory_not_saved: 'Memoria non salvata',
+        memory_risk_low: 'Rischio no-show basso',
+        memory_risk_medium: 'Rischio no-show medio',
+        memory_risk_high: 'Rischio no-show alto'
+    },
+    de: {
+        memory_title: 'Kunden-Memory',
+        memory_desc: 'Gewohnheiten, die Kaleya fuer Stammkunden merkt.',
+        memory_empty: 'Kaleya hat noch keine Kunden-Memory.',
+        memory_last_service: 'Letzter Service',
+        memory_favorite_time: 'Lieblingszeit',
+        memory_bookings: 'Buchungen',
+        memory_cancellations: 'Stornos',
+        memory_notes: 'Notizen',
+        memory_notes_placeholder: 'Kundennotiz oder Routine',
+        memory_save: 'Memory speichern',
+        memory_saved: 'Memory gespeichert',
+        memory_not_saved: 'Memory wurde nicht gespeichert',
+        memory_risk_low: 'Niedriges no-show Risiko',
+        memory_risk_medium: 'Mittleres no-show Risiko',
+        memory_risk_high: 'Hohes no-show Risiko'
+    }
+};
+
+Object.entries(CUSTOMER_MEMORY_TRANSLATIONS).forEach(([lang, values]) => {
+    T[lang] = { ...(T[lang] || T.en), ...values };
+});
+
 const PRIVATE_AI_TEST_TRANSLATIONS = {
     sr: {
         ai_test_title: 'Privatni AI test',
@@ -2502,6 +2671,7 @@ function applyLang() {
     renderClientCalendar();
     renderClientActivityLog();
     renderClientSupportInbox();
+    renderClientCustomerMemorySettings();
     updateKaleyaPowerUI();
     updateClientGreeting();
     updatePwaInstallButtons();
@@ -2566,6 +2736,7 @@ function showView(view) {
         loadClientEntitlementsFromBackend();
         loadClientSettingsFromBackend();
         loadClientOperationalDataFromBackend();
+        loadClientCustomerMemoriesFromBackend();
         loadClientAppointmentsFromBackend();
         updateKaleyaPowerUI();
         updatePwaInstallButtons();
@@ -3882,6 +4053,132 @@ async function deleteClientKnowledgeEntry(entryId) {
     } catch (error) {
         console.warn('Kaleya knowledge delete failed', error);
         showToast(tr('knowledge_not_deleted'));
+    }
+}
+
+function memoryRiskLabel(risk = 'low') {
+    return tr(`memory_risk_${risk}`) || risk;
+}
+
+function memoryRiskClass(risk = 'low') {
+    if (risk === 'high') return 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300';
+    if (risk === 'medium') return 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300';
+    return 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300';
+}
+
+function memoryStat(label, value) {
+    return `
+        <div class="rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-2 py-1.5">
+            <p class="text-[9px] uppercase tracking-wide text-slate-400">${escapeHtml(label)}</p>
+            <p class="text-[12px] font-semibold text-slate-700 dark:text-slate-100 truncate">${escapeHtml(value || '-')}</p>
+        </div>
+    `;
+}
+
+function renderClientCustomerMemorySettings() {
+    const list = document.getElementById('clientCustomerMemoryList');
+    if (!list) return;
+    const memories = clientCustomerMemories.slice().sort((a, b) => {
+        const aSeen = a.last_seen_at || a.updated_at || '';
+        const bSeen = b.last_seen_at || b.updated_at || '';
+        return String(bSeen).localeCompare(String(aSeen));
+    });
+
+    list.innerHTML = memories.length
+        ? memories.map(memory => {
+            const contact = [memory.customer_phone, memory.customer_email].filter(Boolean).join(' - ');
+            const notes = memory.routine_notes || memory.summary || '';
+            return `
+                <div class="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <p class="text-[12px] font-semibold truncate">${escapeHtml(memory.customer_name || 'Customer')}</p>
+                            ${contact ? `<p class="mt-0.5 text-[10px] text-slate-500 truncate">${escapeHtml(contact)}</p>` : ''}
+                        </div>
+                        <span class="shrink-0 px-2 py-0.5 rounded-full text-[9px] font-semibold ${memoryRiskClass(memory.no_show_risk)}">${escapeHtml(memoryRiskLabel(memory.no_show_risk))}</span>
+                    </div>
+                    <div class="mt-2 grid grid-cols-2 gap-2">
+                        ${memoryStat(tr('memory_last_service'), memory.last_service_name || memory.favorite_service)}
+                        ${memoryStat(tr('memory_favorite_time'), memory.favorite_time)}
+                        ${memoryStat(tr('memory_bookings'), String(memory.appointment_count || 0))}
+                        ${memoryStat(tr('memory_cancellations'), String(memory.cancellation_count || 0))}
+                    </div>
+                    ${notes ? `<p class="mt-2 text-[10px] leading-relaxed text-slate-500 line-clamp-2">${escapeHtml(notes)}</p>` : ''}
+                    <button onclick="startEditClientCustomerMemory('${memory.id}')" class="mt-2 h-8 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[10px] font-semibold">${escapeHtml(tr('edit_btn'))}</button>
+                </div>
+            `;
+        }).join('')
+        : `<p class="text-[12px] text-slate-500">${escapeHtml(tr('memory_empty'))}</p>`;
+}
+
+function resetClientCustomerMemoryEditor() {
+    const id = document.getElementById('editingCustomerMemoryId');
+    const name = document.getElementById('customerMemoryEditorName');
+    const notes = document.getElementById('customerMemoryNotesInput');
+    const risk = document.getElementById('customerMemoryRiskInput');
+    if (id) id.value = '';
+    if (name) name.textContent = '-';
+    if (notes) notes.value = '';
+    if (risk) risk.value = 'low';
+    document.getElementById('clientCustomerMemoryEditor')?.classList.add('hidden');
+}
+
+function startEditClientCustomerMemory(memoryId) {
+    const memory = clientCustomerMemories.find(item => String(item.id) === String(memoryId));
+    if (!memory) return;
+    document.getElementById('editingCustomerMemoryId').value = memory.id;
+    document.getElementById('customerMemoryEditorName').textContent = memory.customer_name || 'Customer';
+    document.getElementById('customerMemoryNotesInput').value = memory.routine_notes || '';
+    document.getElementById('customerMemoryRiskInput').value = memory.no_show_risk || 'low';
+    document.getElementById('clientCustomerMemoryEditor')?.classList.remove('hidden');
+    document.getElementById('customerMemoryNotesInput')?.focus();
+}
+
+async function loadClientCustomerMemoriesFromBackend() {
+    if (!getAuthToken() || location.protocol === 'file:' || isEmployeeUser()) {
+        renderClientCustomerMemorySettings();
+        return;
+    }
+    try {
+        const res = await kaleyaApi('/api/ai-agent/customer-memories/', { method: 'GET' });
+        if (!res.ok) throw new Error(await res.text());
+        clientCustomerMemories = unpackApiRows(await res.json());
+        renderClientCustomerMemorySettings();
+    } catch (error) {
+        console.warn('Kaleya customer memory load failed', error);
+    }
+}
+
+async function saveClientCustomerMemory() {
+    const memoryId = document.getElementById('editingCustomerMemoryId')?.value || '';
+    if (!memoryId) return;
+    const payload = {
+        routine_notes: document.getElementById('customerMemoryNotesInput')?.value.trim() || '',
+        no_show_risk: document.getElementById('customerMemoryRiskInput')?.value || 'low'
+    };
+
+    if (!getAuthToken() || location.protocol === 'file:') {
+        clientCustomerMemories = clientCustomerMemories.map(item => String(item.id) === String(memoryId) ? { ...item, ...payload } : item);
+        resetClientCustomerMemoryEditor();
+        renderClientCustomerMemorySettings();
+        showToast(tr('memory_saved'));
+        return;
+    }
+
+    try {
+        const res = await kaleyaApi(`/api/ai-agent/customer-memories/${memoryId}/`, {
+            method: 'PATCH',
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const saved = await res.json();
+        clientCustomerMemories = clientCustomerMemories.map(item => String(item.id) === String(memoryId) ? saved : item);
+        resetClientCustomerMemoryEditor();
+        renderClientCustomerMemorySettings();
+        showToast(tr('memory_saved'));
+    } catch (error) {
+        console.warn('Kaleya customer memory save failed', error);
+        showToast(tr('memory_not_saved'));
     }
 }
 
@@ -5891,7 +6188,7 @@ async function openClientSettings() {
     updateClientLangButtons();
     syncClientCalendarSettingsUI();
     updatePwaInstallButtons();
-    await Promise.all([loadClientEntitlementsFromBackend(), loadClientSettingsFromBackend(), loadClientOperationalDataFromBackend(), loadClientSupportTicketsFromBackend()]);
+    await Promise.all([loadClientEntitlementsFromBackend(), loadClientSettingsFromBackend(), loadClientOperationalDataFromBackend(), loadClientCustomerMemoriesFromBackend(), loadClientSupportTicketsFromBackend()]);
 }
 function closeClientSettings() { document.getElementById('client-settings').classList.add('hidden'); }
 function updateElStatus() {

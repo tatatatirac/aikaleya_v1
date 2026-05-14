@@ -1,10 +1,18 @@
 from rest_framework import permissions, viewsets
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from ai_agent.models import AIIntent, AIToolRun
+from accounts.permissions import user_role
+from ai_agent.models import AIIntent, AIToolRun, CustomerMemory
 from ai_agent.providers import ProviderError, get_client_ai_config, get_client_voice_config, synthesize_elevenlabs_speech
-from ai_agent.serializers import AIIntentSerializer, AIToolRunSerializer, InboundTextSerializer, TextToSpeechSerializer
+from ai_agent.serializers import (
+    AIIntentSerializer,
+    AIToolRunSerializer,
+    CustomerMemorySerializer,
+    InboundTextSerializer,
+    TextToSpeechSerializer,
+)
 from ai_agent.services import handle_inbound_text
 from appointments.models import Customer
 from billing.services import enforce_channel_allowed, enforce_elevenlabs_voice_allowed
@@ -64,6 +72,44 @@ class AIToolRunViewSet(viewsets.ReadOnlyModelViewSet):
         if not client:
             return AIToolRun.objects.none()
         return AIToolRun.objects.select_related("intent").filter(business_client=client)
+
+
+class CustomerMemoryViewSet(viewsets.ModelViewSet):
+    serializer_class = CustomerMemorySerializer
+    permission_classes = (permissions.IsAuthenticated,)
+    http_method_names = ("get", "patch", "head", "options")
+
+    def get_queryset(self):
+        role = user_role(self.request.user)
+        queryset = CustomerMemory.objects.select_related(
+            "business_client",
+            "customer",
+            "last_service",
+            "preferred_staff_member",
+        )
+
+        if role == "admin":
+            client_id = self.request.query_params.get("client_id")
+            if client_id:
+                queryset = queryset.filter(business_client_id=client_id)
+            return queryset
+
+        if role == "employee":
+            return CustomerMemory.objects.none()
+
+        client = client_for_request(self.request)
+        if not client:
+            return CustomerMemory.objects.none()
+        return queryset.filter(business_client=client)
+
+    def perform_update(self, serializer):
+        memory = self.get_object()
+        role = user_role(self.request.user)
+        if role == "employee":
+            raise PermissionDenied("Zaposleni ne moze da menja memoriju musterija.")
+        if role != "admin" and memory.business_client.owner_id != self.request.user.id:
+            raise PermissionDenied("Samo vlasnik firme moze da menja memoriju musterija.")
+        serializer.save()
 
 
 class InboundTextAPIView(APIView):

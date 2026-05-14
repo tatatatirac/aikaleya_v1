@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from ai_agent.views import (
     AIIntentViewSet,
     AIToolRunViewSet,
+    CustomerMemoryViewSet,
     InboundTextAPIView,
     ProviderStatusAPIView,
     PublicIntroSpeechAPIView,
@@ -15,6 +16,7 @@ from ai_agent.views import (
 router = DefaultRouter()
 router.register("intents", AIIntentViewSet, basename="ai-intent")
 router.register("tool-runs", AIToolRunViewSet, basename="ai-tool-run")
+router.register("customer-memories", CustomerMemoryViewSet, basename="customer-memory")
 
 urlpatterns = [
     path("inbound-text/", InboundTextAPIView.as_view(), name="ai-agent-inbound-text"),

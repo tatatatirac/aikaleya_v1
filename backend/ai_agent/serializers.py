@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ai_agent.models import AIIntent, AIToolRun
+from ai_agent.models import AIIntent, AIToolRun, CustomerMemory
 
 
 class AIIntentSerializer(serializers.ModelSerializer):
@@ -34,6 +34,80 @@ class AIToolRunSerializer(serializers.ModelSerializer):
             "created_at",
         )
         read_only_fields = fields
+
+
+class CustomerMemorySerializer(serializers.ModelSerializer):
+    customer_name = serializers.CharField(source="customer.full_name", read_only=True)
+    customer_phone = serializers.CharField(source="customer.phone", read_only=True)
+    customer_email = serializers.EmailField(source="customer.email", read_only=True)
+    last_service_name = serializers.CharField(source="last_service.name", read_only=True)
+    preferred_staff_member_name = serializers.CharField(source="preferred_staff_member.full_name", read_only=True)
+    favorite_service = serializers.SerializerMethodField()
+    favorite_time = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CustomerMemory
+        fields = (
+            "id",
+            "customer",
+            "customer_name",
+            "customer_phone",
+            "customer_email",
+            "summary",
+            "routine_notes",
+            "preferences",
+            "identifiers",
+            "last_service",
+            "last_service_name",
+            "preferred_staff_member",
+            "preferred_staff_member_name",
+            "appointment_count",
+            "cancellation_count",
+            "reschedule_count",
+            "no_show_risk",
+            "favorite_service",
+            "favorite_time",
+            "last_seen_at",
+            "last_appointment_at",
+            "source",
+            "created_at",
+            "updated_at",
+        )
+        read_only_fields = (
+            "id",
+            "customer",
+            "customer_name",
+            "customer_phone",
+            "customer_email",
+            "preferences",
+            "identifiers",
+            "last_service",
+            "last_service_name",
+            "preferred_staff_member",
+            "preferred_staff_member_name",
+            "appointment_count",
+            "cancellation_count",
+            "reschedule_count",
+            "favorite_service",
+            "favorite_time",
+            "last_seen_at",
+            "last_appointment_at",
+            "source",
+            "created_at",
+            "updated_at",
+        )
+
+    def get_favorite_service(self, obj):
+        services = (obj.preferences or {}).get("services") or {}
+        if not services:
+            return ""
+        return max(services.items(), key=lambda item: item[1])[0]
+
+    def get_favorite_time(self, obj):
+        times = (obj.preferences or {}).get("times") or {}
+        if not times:
+            return ""
+        return max(times.items(), key=lambda item: item[1])[0]
 
 
 class InboundTextSerializer(serializers.Serializer):

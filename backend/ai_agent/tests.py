@@ -996,6 +996,60 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["customer_memory"]["favorite_time"], "10:00")
         self.assertIn("Mogu da ponudim ove slobodne termine: 10:00", result["response_text"])
 
+    def test_owner_can_view_and_update_customer_memory(self):
+        customer = self.client.customers.create(
+            first_name="Emily",
+            last_name="Carter",
+            phone="+15550177",
+            email="emily@example.com",
+        )
+        memory = CustomerMemory.objects.create(
+            business_client=self.client,
+            customer=customer,
+            summary="Regular haircut customer.",
+            routine_notes="Likes morning slots.",
+            appointment_count=4,
+            cancellation_count=1,
+            preferences={"services": {"Haircut": 4}, "times": {"10:00": 3}},
+        )
+        api = APIClient()
+        api.force_authenticate(self.user)
+
+        list_response = api.get("/api/ai-agent/customer-memories/")
+        update_response = api.patch(
+            f"/api/ai-agent/customer-memories/{memory.id}/",
+            {"routine_notes": "Prefers quiet morning appointments.", "no_show_risk": CustomerMemory.RISK_MEDIUM},
+            format="json",
+        )
+
+        memory.refresh_from_db()
+        self.assertEqual(list_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(list_response.data["results"][0]["customer_name"], "Emily Carter")
+        self.assertEqual(list_response.data["results"][0]["favorite_service"], "Haircut")
+        self.assertEqual(list_response.data["results"][0]["favorite_time"], "10:00")
+        self.assertEqual(update_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(memory.routine_notes, "Prefers quiet morning appointments.")
+        self.assertEqual(memory.no_show_risk, CustomerMemory.RISK_MEDIUM)
+
+    def test_employee_cannot_view_customer_memory_list(self):
+        employee_user = User.objects.create_user(username="employee", email="employee@example.com", password="emp123")
+        employee_user.profile.role = Profile.ROLE_EMPLOYEE
+        employee_user.profile.business_client = self.client
+        employee_user.profile.save(update_fields=["role", "business_client", "updated_at"])
+        customer = self.client.customers.create(first_name="Emily", last_name="Carter", phone="+15550177")
+        CustomerMemory.objects.create(
+            business_client=self.client,
+            customer=customer,
+            summary="Private owner memory.",
+        )
+        api = APIClient()
+        api.force_authenticate(employee_user)
+
+        response = api.get("/api/ai-agent/customer-memories/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["count"], 0)
+
     def test_ai_answers_from_business_knowledge_base(self):
         BusinessKnowledgeEntry.objects.create(
             business_client=self.client,
