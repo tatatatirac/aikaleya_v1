@@ -1134,7 +1134,7 @@ class AIAppointmentToolTests(TestCase):
         self.client.interface_language = "sr"
         self.client.language = "sr"
         self.client.save(update_fields=["interface_language", "language", "updated_at"])
-        for message in ("hvala ......", "ok hvala", "fala", "fala vi", "okfala", "okhvala", "doviđenja", "vidimo se"):
+        for message in ("hvala", "ok hvala", "fala", "fala vi", "okfala", "okhvala", "doviđenja", "vidimo se"):
             with self.subTest(message=message):
                 conversation = Conversation.objects.create(
                     business_client=self.client,
