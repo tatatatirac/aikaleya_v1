@@ -551,10 +551,149 @@ class AIAppointmentToolTests(TestCase):
 
         self.assertIn("service", first["decision"]["missing_fields"])
         self.assertEqual(second["tool_output"]["status"], "time_unavailable")
-        self.assertIn("zatvoren", second["response_text"])
+        self.assertIn("neradan", second["response_text"])
+        self.assertIn("Radno vreme", second["response_text"])
         self.assertNotIn("Predlozi su: .", second["response_text"])
         self.assertEqual(third["intent"], "unknown")
         self.assertNotEqual(third["tool_output"].get("status"), "time_unavailable")
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_bare_day_after_closed_day_changes_date_instead_of_time(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 14, 0, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.save(update_fields=["timezone", "updated_at"])
+        Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            category="Osnovno",
+            duration_minutes=30,
+            price=25,
+        )
+        WorkingHours.objects.create(
+            business_client=self.client,
+            weekday=date(2026, 5, 16).weekday(),
+            start_time=time(9, 0),
+            end_time=time(16, 0),
+            is_closed=True,
+        )
+        external_thread_id = "telegram:test-bare-day-after-closed-day"
+
+        closed_day = handle_inbound_text(
+            self.client,
+            "zakazi sisanje prekosutra u pola 3",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic", "phone": "+38160123456"},
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        new_day = handle_inbound_text(
+            self.client,
+            "18",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        self.assertEqual(closed_day["tool_output"]["status"], "time_unavailable")
+        self.assertEqual(closed_day["tool_output"]["date"], "2026-05-16")
+        self.assertEqual(new_day["intent"], "book_appointment")
+        self.assertEqual(new_day["tool_output"]["status"], "needs_time")
+        self.assertEqual(new_day["tool_output"]["date"], "2026-05-18")
+        self.assertNotEqual(new_day["tool_output"]["date"], closed_day["tool_output"]["date"])
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_availability_time_followup_outside_hours_reports_work_schedule(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 14, 0, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        for weekday in range(7):
+            WorkingHours.objects.create(
+                business_client=self.client,
+                weekday=weekday,
+                start_time=time(9, 0),
+                end_time=time(16, 0),
+                is_closed=weekday >= 5,
+            )
+        external_thread_id = "telegram:test-outside-work-hours-followup"
+
+        availability = handle_inbound_text(
+            self.client,
+            "treba mi neki slobodan termin u petak",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic", "phone": "+38160123456"},
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        outside_hours = handle_inbound_text(
+            self.client,
+            "moze li u pola 6",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        self.assertEqual(availability["intent"], "check_availability")
+        self.assertEqual(availability["tool_output"]["date"], "2026-05-15")
+        self.assertEqual(outside_hours["intent"], "book_appointment")
+        self.assertEqual(outside_hours["tool_output"]["status"], "time_unavailable")
+        self.assertTrue(outside_hours["tool_output"]["is_outside_work_hours"])
+        self.assertEqual(outside_hours["tool_output"]["requested_time"], "17:30")
+        self.assertIn("radno vreme", outside_hours["response_text"])
+        self.assertIn("od ponedeljka do petka", outside_hours["response_text"])
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_cancels_all_customer_appointments_from_conversation_memory(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 14, 0, 30, tzinfo=dt_timezone.utc)
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+        customer = self.client.customers.create(first_name="Bane", last_name="Kostic", phone="+38160123456")
+        first = Appointment.objects.create(
+            business_client=self.client,
+            customer=customer,
+            title="Sisanje",
+            status=Appointment.STATUS_CONFIRMED,
+            date=date(2026, 5, 15),
+            start_time=time(10, 0),
+            duration_minutes=30,
+            channel="telegram",
+        )
+        second = Appointment.objects.create(
+            business_client=self.client,
+            customer=customer,
+            title="Konsultacija",
+            status=Appointment.STATUS_CONFIRMED,
+            date=date(2026, 5, 18),
+            start_time=time(11, 0),
+            duration_minutes=30,
+            channel="telegram",
+        )
+        Conversation.objects.create(
+            business_client=self.client,
+            customer=customer,
+            channel="telegram",
+            external_thread_id="telegram:test-cancel-all",
+            language="sr",
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "mogu li da otkazem sve termine",
+            channel="telegram",
+            external_thread_id="telegram:test-cancel-all",
+            use_ai=False,
+        )
+
+        first.refresh_from_db()
+        second.refresh_from_db()
+        self.assertEqual(result["intent"], "cancel_appointment")
+        self.assertEqual(result["tool_output"]["status"], "cancelled")
+        self.assertEqual(result["tool_output"]["cancelled_count"], 2)
+        self.assertEqual(first.status, Appointment.STATUS_CANCELLED)
+        self.assertEqual(second.status, Appointment.STATUS_CANCELLED)
+        self.assertIn("Otkazala sam 2 termina", result["response_text"])
 
     @mock.patch("ai_agent.tools.timezone.now")
     def test_ai_reschedule_day_number_overrides_previous_date(self, now_mock):

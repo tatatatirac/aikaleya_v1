@@ -14,6 +14,7 @@ from ai_agent.tools import (
     check_availability_tool,
     client_local_today,
     infer_payload_from_text,
+    parse_bare_day_of_month_date,
     parse_requested_date,
     parse_requested_time,
     reschedule_appointment_tool,
@@ -25,8 +26,74 @@ from appointments.models import Appointment, Customer
 from clients.models import BusinessKnowledgeEntry, ClientApiSettings
 from communications.models import Conversation, Message
 from notifications.services import queue_notification_jobs_for_event
-from staff_services.models import Service, StaffMember
+from staff_services.models import Service, StaffMember, WorkingHours
 from support.models import SupportTicket
+
+
+SERBIAN_CYRILLIC_TRANSLITERATION = str.maketrans(
+    {
+        "а": "a",
+        "б": "b",
+        "в": "v",
+        "г": "g",
+        "д": "d",
+        "ђ": "dj",
+        "е": "e",
+        "ж": "z",
+        "з": "z",
+        "и": "i",
+        "ј": "j",
+        "к": "k",
+        "л": "l",
+        "љ": "lj",
+        "м": "m",
+        "н": "n",
+        "њ": "nj",
+        "о": "o",
+        "п": "p",
+        "р": "r",
+        "с": "s",
+        "т": "t",
+        "ћ": "c",
+        "у": "u",
+        "ф": "f",
+        "х": "h",
+        "ц": "c",
+        "ч": "c",
+        "џ": "dz",
+        "ш": "s",
+        "А": "a",
+        "Б": "b",
+        "В": "v",
+        "Г": "g",
+        "Д": "d",
+        "Ђ": "dj",
+        "Е": "e",
+        "Ж": "z",
+        "З": "z",
+        "И": "i",
+        "Ј": "j",
+        "К": "k",
+        "Л": "l",
+        "Љ": "lj",
+        "М": "m",
+        "Н": "n",
+        "Њ": "nj",
+        "О": "o",
+        "П": "p",
+        "Р": "r",
+        "С": "s",
+        "Т": "t",
+        "Ћ": "c",
+        "У": "u",
+        "Ф": "f",
+        "Х": "h",
+        "Ц": "c",
+        "Ч": "c",
+        "Џ": "dz",
+        "Ш": "s",
+    }
+)
 
 
 INTENT_KEYWORDS = {
@@ -91,6 +158,9 @@ BOOKING_ACTION_HINTS = (
     "book",
     "reserve",
     "schedule",
+    "zakazem",
+    "zakazati",
+    "rezervisati",
 )
 NATURAL_BOOKING_REQUEST_HINTS = (
     "treba mi",
@@ -307,7 +377,7 @@ LANGUAGE_HINTS = (
     ("pt", ("marcar", "consulta", "cancelar", "disponivel", "disponível", "amanha", "amanhã", "hoje", "horario", "horário", "servico", "serviço")),
     ("fr", ("rendez", "annuler", "disponible", "demain", "aujourd", "creneau", "créneau")),
     ("it", ("appuntament", "prenota", "annulla", "disponibile", "domani", "oggi")),
-    ("de", ("termin", "buchen", "absagen", "frei", "morgen", "heute")),
+    ("de", ("termin", "buchen", "absagen", "frei", "morgen", "heute", "verschieb", "verschieben")),
     ("ru", ("запис", "сегодня", "завтра", "отмен", "свобод")),
 )
 
@@ -352,8 +422,10 @@ def json_safe(value):
 
 
 def normalize_intent_text(value):
-    normalized = unicodedata.normalize("NFKD", str(value or "")).casefold()
+    normalized = str(value or "").translate(SERBIAN_CYRILLIC_TRANSLITERATION)
+    normalized = unicodedata.normalize("NFKD", normalized).casefold()
     normalized = "".join(char for char in normalized if not unicodedata.combining(char))
+    normalized = normalized.replace("đ", "dj")
     return re.sub(r"\s+", " ", normalized).strip()
 
 
@@ -448,7 +520,12 @@ def detect_message_language(text, fallback="en"):
     best_language = fallback or "en"
     best_score = 0
     for language, hints in LANGUAGE_HINTS:
-        score = sum(1 for hint in hints if normalize_intent_text(hint) in normalized)
+        matched_hints = set()
+        for hint in hints:
+            normalized_hint = normalize_intent_text(hint)
+            if normalized_hint and normalized_hint in normalized:
+                matched_hints.add(normalized_hint)
+        score = len(matched_hints)
         if score > best_score:
             best_language = language
             best_score = score
@@ -682,12 +759,40 @@ def localized_greeting_response(language):
     return "Hi, this is Kaleya. I can help you book, cancel, reschedule or check an appointment."
 
 
-def localized_no_available_booking_response(language, tool_output):
+SERBIAN_WEEKDAY_GENITIVE = {
+    0: "ponedeljka",
+    1: "utorka",
+    2: "srede",
+    3: "cetvrtka",
+    4: "petka",
+    5: "subote",
+    6: "nedelje",
+}
+
+
+def sr_work_schedule_summary(business_client):
+    work_start = business_client.work_start.strftime("%H:%M")
+    work_end = business_client.work_end.strftime("%H:%M")
+    rows = list(
+        WorkingHours.objects.filter(business_client=business_client, staff_member__isnull=True).order_by("weekday")
+    )
+    if rows:
+        open_days = [row.weekday for row in rows if not row.is_closed]
+        if open_days == [0, 1, 2, 3, 4]:
+            return f"od ponedeljka do petka od {work_start} do {work_end}"
+        if open_days:
+            day_names = ", ".join(SERBIAN_WEEKDAY_GENITIVE.get(day, str(day)) for day in open_days)
+            return f"{day_names} od {work_start} do {work_end}"
+    return f"od {work_start} do {work_end}"
+
+
+def localized_no_available_booking_response(language, tool_output, business_client=None):
     date_value = tool_output.get("date") or ""
     requested_time = tool_output.get("requested_time") or tool_output.get("time") or ""
     if language == "sr":
         if tool_output.get("is_closed"):
-            return f"Taj dan je zatvoren za zakazivanje ({date_value}). Napisite drugi datum ili pitajte za slobodne termine."
+            schedule = sr_work_schedule_summary(business_client) if business_client else "u podeseno radno vreme"
+            return f"Izvinite, taj dan je neradan ({date_value}). Radno vreme je {schedule}."
         if requested_time:
             return f"Termin u {requested_time} nije slobodan za {date_value}. Napisite drugo vreme ili pitajte za slobodne termine tog dana."
         return f"Za {date_value} nema slobodnih termina. Napisite drugi datum."
@@ -702,6 +807,26 @@ def localized_no_available_booking_response(language, tool_output):
     if requested_time:
         return f"The slot at {requested_time} is not available for {date_value}. Please choose another time or ask for free slots."
     return f"There are no available slots for {date_value}. Please choose another date."
+
+
+def localized_outside_work_hours_response(language, tool_output, business_client):
+    suggestions = ", ".join((tool_output or {}).get("suggested_slots", [])[:3])
+    work_start = (tool_output or {}).get("work_start") or business_client.work_start.strftime("%H:%M")
+    work_end = (tool_output or {}).get("work_end") or business_client.work_end.strftime("%H:%M")
+    if language == "sr":
+        base = f"Izvinite, radno vreme je {sr_work_schedule_summary(business_client)}."
+        if suggestions:
+            return f"{base} Mogu da ponudim: {suggestions}."
+        return base
+    if language == "de":
+        base = f"Entschuldigung, die Arbeitszeit ist von {work_start} bis {work_end}."
+        if suggestions:
+            return f"{base} Ich kann anbieten: {suggestions}."
+        return base
+    base = f"Sorry, working hours are {work_start} to {work_end}."
+    if suggestions:
+        return f"{base} I can offer: {suggestions}."
+    return base
 
 
 def service_clarifying_response(business_client, language, customer_memory=None):
@@ -844,7 +969,13 @@ def save_conversation_ai_state(conversation, intent_name, payload, tool_output, 
     appointment_id = (tool_output or {}).get("appointment_id") or previous_state.get("last_appointment_id")
     appointment_date = (tool_output or {}).get("date") or previous_state.get("last_appointment_date")
     appointment_time = (tool_output or {}).get("time") or previous_state.get("last_appointment_time")
-    pending_payload = payload if state_status == "waiting_for_customer" else {}
+    pending_payload = {}
+    if state_status == "waiting_for_customer":
+        pending_payload = {key: value for key, value in (payload or {}).items() if not str(key).startswith("_")}
+        if (tool_output or {}).get("date") and not pending_payload.get("date"):
+            pending_payload["date"] = (tool_output or {}).get("date")
+        if (tool_output or {}).get("requested_time") and not pending_payload.get("time"):
+            pending_payload["time"] = (tool_output or {}).get("requested_time")
     state = {
         "status": state_status,
         "last_intent": intent_name,
@@ -854,6 +985,12 @@ def save_conversation_ai_state(conversation, intent_name, payload, tool_output, 
         "last_tool_status": tool_status,
         "unknown_count": unknown_count,
     }
+    if "free_count" in (tool_output or {}):
+        state["last_free_count"] = int((tool_output or {}).get("free_count") or 0)
+    if "is_closed" in (tool_output or {}):
+        state["last_is_closed"] = bool((tool_output or {}).get("is_closed"))
+    if "suggested_slots" in (tool_output or {}):
+        state["last_suggested_slots"] = list((tool_output or {}).get("suggested_slots") or [])[:5]
     if appointment_id:
         state["last_appointment_id"] = appointment_id
     if appointment_date:
@@ -1406,6 +1543,21 @@ def has_fresh_date_or_time(text):
     return bool(text_has_parseable_date(text) or parse_requested_time(text))
 
 
+def should_treat_bare_number_as_date(previous_state, text):
+    if not previous_state or not parse_bare_day_of_month_date(text):
+        return False
+    missing_fields = set(previous_state.get("missing_fields") or [])
+    if missing_fields.intersection({"date", "new_date"}):
+        return True
+    if previous_state.get("last_tool_status") == "time_unavailable":
+        return bool(
+            previous_state.get("last_is_closed")
+            or int(previous_state.get("last_free_count") or 0) == 0
+            or not previous_state.get("last_suggested_slots")
+        )
+    return False
+
+
 def should_assume_booking_from_natural_text(intent_name, text, payload):
     if intent_name != "unknown":
         return False
@@ -1428,6 +1580,8 @@ def should_treat_as_reschedule_followup(intent_name, previous_state, text, paylo
     if intent_name not in AMBIGUOUS_COMPLETED_FOLLOWUP_INTENTS:
         return False
     if intent_name == "book_appointment" and contains_normalized_hint(text, BOOKING_ACTION_HINTS):
+        return False
+    if contains_normalized_hint(text, NATURAL_BOOKING_REQUEST_HINTS):
         return False
     return bool(payload.get("date") or payload.get("time") or text_has_date_hint(text) or parse_requested_time(text))
 
@@ -1473,8 +1627,10 @@ def build_text_response(business_client, intent, tool_output):
                 suggestions=suggestions,
             )
         if status == "time_unavailable":
+            if tool_output.get("is_outside_work_hours"):
+                return localized_outside_work_hours_response(language, tool_output, business_client)
             if not suggestions:
-                return localized_no_available_booking_response(language, tool_output)
+                return localized_no_available_booking_response(language, tool_output, business_client=business_client)
             return localized_status_response(
                 BOOKING_RESPONSE_TEMPLATES,
                 "time_unavailable",
@@ -1486,6 +1642,13 @@ def build_text_response(business_client, intent, tool_output):
 
     if intent == "cancel_appointment":
         if tool_output.get("status") == "cancelled":
+            cancelled_count = int(tool_output.get("cancelled_count") or 1)
+            if cancelled_count > 1:
+                if language == "sr":
+                    return f"Otkazala sam {cancelled_count} termina i oslobodila slotove. Javite se kada budete zeleli novi termin."
+                if language == "de":
+                    return f"Ich habe {cancelled_count} Termine abgesagt und die Zeitfenster freigegeben."
+                return f"I cancelled {cancelled_count} appointments and released the slots."
             return localized_status_response(CANCEL_RESPONSE_TEMPLATES, "cancelled", language)
         return localized_status_response(CANCEL_RESPONSE_TEMPLATES, "target_missing", language)
 
@@ -1500,11 +1663,26 @@ def build_text_response(business_client, intent, tool_output):
                 time=tool_output.get("time"),
             )
         if tool_output.get("status") == "needs_time":
+            if not suggestions:
+                return localized_no_available_booking_response(language, tool_output, business_client=business_client)
             return localized_status_response(
                 RESCHEDULE_RESPONSE_TEMPLATES,
                 "needs_time",
                 language,
                 date=tool_output.get("date"),
+                suggestions=suggestions,
+            )
+        if tool_output.get("status") == "time_unavailable":
+            if tool_output.get("is_outside_work_hours"):
+                return localized_outside_work_hours_response(language, tool_output, business_client)
+            if not suggestions:
+                return localized_no_available_booking_response(language, tool_output, business_client=business_client)
+            return localized_status_response(
+                BOOKING_RESPONSE_TEMPLATES,
+                "time_unavailable",
+                language,
+                date=tool_output.get("date"),
+                time=tool_output.get("time"),
                 suggestions=suggestions,
             )
         return localized_status_response(RESCHEDULE_RESPONSE_TEMPLATES, "missing_new_time", language)
@@ -1641,6 +1819,13 @@ def handle_inbound_text(
             planner_raw_response = {"engine": "keyword-fallback", "planner_error": str(exc)}
 
     payload = merge_payloads(planner_payload, payload)
+    if should_treat_bare_number_as_date(previous_state, text):
+        bare_date = parse_bare_day_of_month_date(text, reference_date=client_local_today(business_client))
+        if bare_date:
+            payload["date"] = bare_date
+            payload.pop("time", None)
+            payload["_suppress_time_inference"] = True
+            planner_raw_response["bare_number_as_date"] = bare_date.isoformat()
     if is_greeting_text(text) and intent_name in {"unknown", "support_handoff"}:
         intent_name = "business_info"
         confidence = max(confidence, 0.86)
@@ -1661,6 +1846,8 @@ def handle_inbound_text(
         payload = attach_last_appointment_to_payload(payload, previous_state)
         planner_raw_response["resumed_from_completed_appointment"] = True
     payload = infer_payload_from_text(business_client, text, payload)
+    if planner_raw_response.get("bare_number_as_date"):
+        payload.pop("time", None)
     if should_assume_booking_from_natural_text(intent_name, text, payload):
         intent_name = "book_appointment"
         confidence = max(confidence, 0.72)

@@ -39,6 +39,71 @@ DAY_AFTER_TOMORROW_KEYWORDS = (
     "ubermorgen",
 )
 
+SERBIAN_CYRILLIC_TRANSLITERATION = str.maketrans(
+    {
+        "а": "a",
+        "б": "b",
+        "в": "v",
+        "г": "g",
+        "д": "d",
+        "ђ": "dj",
+        "е": "e",
+        "ж": "z",
+        "з": "z",
+        "и": "i",
+        "ј": "j",
+        "к": "k",
+        "л": "l",
+        "љ": "lj",
+        "м": "m",
+        "н": "n",
+        "њ": "nj",
+        "о": "o",
+        "п": "p",
+        "р": "r",
+        "с": "s",
+        "т": "t",
+        "ћ": "c",
+        "у": "u",
+        "ф": "f",
+        "х": "h",
+        "ц": "c",
+        "ч": "c",
+        "џ": "dz",
+        "ш": "s",
+        "А": "a",
+        "Б": "b",
+        "В": "v",
+        "Г": "g",
+        "Д": "d",
+        "Ђ": "dj",
+        "Е": "e",
+        "Ж": "z",
+        "З": "z",
+        "И": "i",
+        "Ј": "j",
+        "К": "k",
+        "Л": "l",
+        "Љ": "lj",
+        "М": "m",
+        "Н": "n",
+        "Њ": "nj",
+        "О": "o",
+        "П": "p",
+        "Р": "r",
+        "С": "s",
+        "Т": "t",
+        "Ћ": "c",
+        "У": "u",
+        "Ф": "f",
+        "Х": "h",
+        "Ц": "c",
+        "Ч": "c",
+        "Џ": "dz",
+        "Ш": "s",
+    }
+)
+
 
 MONTH_NAME_NUMBERS = {
     "januar": 1,
@@ -76,12 +141,46 @@ MONTH_NAME_NUMBERS = {
     "decembra": 12,
     "dec": 12,
 }
+WEEKDAY_NUMBERS = {
+    "ponedeljak": 0,
+    "ponedeljka": 0,
+    "pon": 0,
+    "monday": 0,
+    "utorak": 1,
+    "utorka": 1,
+    "uto": 1,
+    "tuesday": 1,
+    "sreda": 2,
+    "sredu": 2,
+    "srede": 2,
+    "sre": 2,
+    "wednesday": 2,
+    "cetvrtak": 3,
+    "cetvrtka": 3,
+    "cet": 3,
+    "thursday": 3,
+    "petak": 4,
+    "petka": 4,
+    "pet": 4,
+    "friday": 4,
+    "subota": 5,
+    "subotu": 5,
+    "subote": 5,
+    "sub": 5,
+    "saturday": 5,
+    "nedelja": 6,
+    "nedelju": 6,
+    "nedelje": 6,
+    "ned": 6,
+    "sunday": 6,
+}
 MONTH_NAME_PATTERN = re.compile(
     r"\b(\d{1,2})(?:\.|-)?(?:og|tog|te|ti)?\s*("
     + "|".join(sorted(MONTH_NAME_NUMBERS, key=len, reverse=True))
     + r")\b"
 )
 DAY_OF_MONTH_PATTERN = re.compile(r"\b([1-9]|[12]\d|3[01])\s*(?:\.|og|tog|ti|te|st|nd|rd|th)\b")
+WEEKDAY_PATTERN = re.compile(r"\b(" + "|".join(sorted(WEEKDAY_NUMBERS, key=len, reverse=True)) + r")\b")
 
 
 PHONE_PATTERN = re.compile(r"(?<!\w)(\+?\d[\d\s().-]{6,}\d)(?!\w)")
@@ -114,6 +213,11 @@ def next_date_for_day_of_month(base_date, day):
         if candidate >= base_date:
             return candidate
     return base_date
+
+
+def next_date_for_weekday(base_date, weekday):
+    days_ahead = (weekday - base_date.weekday()) % 7
+    return base_date + timedelta(days=days_ahead)
 
 
 def parse_requested_date(text, explicit_date=None, reference_date=None):
@@ -151,11 +255,23 @@ def parse_requested_date(text, explicit_date=None, reference_date=None):
             candidate = date_cls(base_date.year + 1, month, day)
         return candidate
 
+    weekday_match = WEEKDAY_PATTERN.search(normalized)
+    if weekday_match:
+        return next_date_for_weekday(base_date, WEEKDAY_NUMBERS[weekday_match.group(1)])
+
     day_of_month_match = DAY_OF_MONTH_PATTERN.search(normalized)
     if day_of_month_match:
         return next_date_for_day_of_month(base_date, int(day_of_month_match.group(1)))
 
     return base_date
+
+
+def parse_bare_day_of_month_date(text, reference_date=None):
+    normalized = normalize_lookup(text)
+    match = re.fullmatch(r"\s*([1-9]|[12]\d|3[01])\s*", normalized)
+    if not match:
+        return None
+    return next_date_for_day_of_month(reference_date or date_cls.today(), int(match.group(1)))
 
 
 def text_has_parseable_date(text):
@@ -169,6 +285,7 @@ def text_has_parseable_date(text):
         or re.search(r"\b(20\d{2})-(\d{2})-(\d{2})\b", normalized)
         or re.search(r"\b(\d{1,2})[.\-/](\d{1,2})[.\-/](20\d{2})\b", normalized)
         or MONTH_NAME_PATTERN.search(normalized)
+        or WEEKDAY_PATTERN.search(normalized)
         or DAY_OF_MONTH_PATTERN.search(normalized)
     )
 
@@ -225,6 +342,13 @@ def parse_requested_time(text, explicit_time=None):
     return ""
 
 
+def parse_requested_time_from_payload(text, payload=None):
+    payload = payload or {}
+    if payload.get("_suppress_time_inference") and not payload.get("time"):
+        return ""
+    return parse_requested_time(text, payload.get("time"))
+
+
 def as_time(value):
     if hasattr(value, "hour") and hasattr(value, "minute"):
         return value
@@ -239,9 +363,18 @@ def normalize_requested_time_for_work_hours(business_client, requested_time):
     if shifted_hour > 23:
         return requested_time
     shifted = parsed.replace(hour=shifted_hour)
-    if business_client.work_start <= shifted < business_client.work_end:
+    if parsed < business_client.work_start and shifted >= business_client.work_start:
         return shifted.strftime("%H:%M")
     return requested_time
+
+
+def requested_time_outside_work_window(requested_time, work_start, work_end):
+    if not requested_time:
+        return False
+    parsed = as_time(requested_time)
+    start = as_time(work_start)
+    end = as_time(work_end)
+    return not (start <= parsed < end)
 
 
 def first_free_slots(business_client, target_date, duration_minutes=None, staff_member_id=None, limit=5):
@@ -268,9 +401,11 @@ def scoped_service(business_client, service_id):
 
 
 def normalize_lookup(value):
-    value = unicodedata.normalize("NFKD", str(value or ""))
+    value = str(value or "").translate(SERBIAN_CYRILLIC_TRANSLITERATION)
+    value = unicodedata.normalize("NFKD", value)
     value = "".join(ch for ch in value if not unicodedata.combining(ch))
-    return re.sub(r"\s+", " ", value.lower()).strip()
+    value = value.lower().replace("đ", "dj").replace("Đ", "dj")
+    return re.sub(r"\s+", " ", value).strip()
 
 
 def text_contains_phrase(text, phrase):
@@ -411,7 +546,7 @@ def infer_payload_from_text(business_client, text, payload=None):
         if customer_name:
             inferred["customer_name"] = customer_name
 
-    if not inferred.get("time"):
+    if not inferred.get("time") and not inferred.get("_suppress_time_inference"):
         parsed_time = parse_requested_time(text)
         if parsed_time:
             inferred["time"] = parsed_time
@@ -584,7 +719,7 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
     target_date = parse_requested_date(text, payload.get("date"), reference_date=client_local_today(business_client))
     requested_time = normalize_requested_time_for_work_hours(
         business_client,
-        parse_requested_time(text, payload.get("time")),
+        parse_requested_time_from_payload(text, payload),
     )
     service = scoped_service(business_client, payload.get("service_id")) or resolve_service_by_hint(business_client, payload.get("service_hint"))
     staff_member = scoped_staff_member(business_client, payload.get("staff_member_id")) or resolve_staff_member_by_hint(business_client, payload.get("staff_hint"))
@@ -597,6 +732,11 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
         staff_member=staff_member,
     )
     suggested_slots = aggregate_availability["suggested_slots"]
+    is_outside_work_hours = requested_time_outside_work_window(
+        requested_time,
+        aggregate_availability["work_start"],
+        aggregate_availability["work_end"],
+    )
 
     if not requested_time:
         return {
@@ -631,6 +771,7 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
             "suggested_slots_detail": aggregate_availability["suggested_slots_detail"],
             "free_count": aggregate_availability["free_count"],
             "is_closed": aggregate_availability["is_closed"],
+            "is_outside_work_hours": is_outside_work_hours,
             "work_start": aggregate_availability["work_start"],
             "work_end": aggregate_availability["work_end"],
         }
@@ -724,8 +865,67 @@ def find_target_appointment(business_client, customer=None, payload=None, text="
     return queryset.order_by("date", "start_time").first()
 
 
+def wants_to_cancel_all_appointments(text):
+    normalized = normalize_lookup(text)
+    return any(
+        phrase in normalized
+        for phrase in (
+            "sve termine",
+            "sve rezervacije",
+            "sve zakazane",
+            "all appointments",
+            "all bookings",
+            "all reservations",
+        )
+    )
+
+
+def customer_from_cancel_payload(business_client, customer=None, payload=None):
+    if customer:
+        return customer
+    payload = payload or {}
+    if payload.get("customer_id"):
+        found = Customer.objects.filter(id=payload["customer_id"], business_client=business_client).first()
+        if found:
+            return found
+    phone = payload.get("phone") or ""
+    if phone:
+        phone_digits = re.sub(r"\D+", "", phone)
+        phone_query = phone_digits[-6:] if len(phone_digits) >= 6 else phone
+        found = Customer.objects.filter(business_client=business_client, phone__icontains=phone_query).first()
+        if found:
+            return found
+    email = payload.get("email") or ""
+    if email:
+        return Customer.objects.filter(business_client=business_client, email__iexact=email).first()
+    return None
+
+
 def cancel_appointment_tool(business_client, text="", customer=None, payload=None):
     payload = payload or {}
+    if wants_to_cancel_all_appointments(text):
+        target_customer = customer_from_cancel_payload(business_client, customer=customer, payload=payload)
+        if not target_customer:
+            return {"status": "needs_target", "message": "customer_not_found_for_cancel_all"}
+        appointments = list(
+            Appointment.objects.filter(
+                business_client=business_client,
+                customer=target_customer,
+                status__in=ACTIVE_STATUSES,
+            ).order_by("date", "start_time")
+        )
+        if not appointments:
+            return {"status": "needs_target", "message": "appointments_not_found_for_cancel_all"}
+        for appointment in appointments:
+            appointment.status = Appointment.STATUS_CANCELLED
+            appointment.cancelled_reason = payload.get("reason") or payload.get("cancelled_reason") or "Cancelled by Kaleya AI"
+            appointment.save(update_fields=["status", "cancelled_reason", "updated_at"])
+        return {
+            "status": "cancelled",
+            "cancelled_count": len(appointments),
+            "customer": target_customer.full_name,
+        }
+
     appointment = find_target_appointment(business_client, customer=customer, payload=payload, text=text)
     if not appointment:
         return {"status": "needs_target", "message": "appointment_not_found"}
@@ -750,7 +950,7 @@ def reschedule_appointment_tool(business_client, text="", customer=None, channel
     target_date = parse_requested_date(text, payload.get("date"), reference_date=client_local_today(business_client))
     requested_time = normalize_requested_time_for_work_hours(
         business_client,
-        parse_requested_time(text, payload.get("time")),
+        parse_requested_time_from_payload(text, payload),
     )
     if not requested_time:
         availability, suggested_slots = first_free_slots(
@@ -765,6 +965,35 @@ def reschedule_appointment_tool(business_client, text="", customer=None, channel
             "date": target_date.isoformat(),
             "suggested_slots": suggested_slots,
             "free_count": availability["free_count"],
+            "is_closed": availability["is_closed"],
+            "work_start": availability["work_start"],
+            "work_end": availability["work_end"],
+        }
+
+    availability, suggested_slots = first_free_slots(
+        business_client,
+        target_date,
+        duration_minutes=appointment.duration_minutes,
+        staff_member_id=appointment.staff_member_id,
+    )
+    is_outside_work_hours = requested_time_outside_work_window(
+        requested_time,
+        availability["work_start"],
+        availability["work_end"],
+    )
+    requested_time_available = requested_time in [slot["time"] for slot in availability["slots"] if slot["available"]]
+    if is_outside_work_hours or not requested_time_available:
+        return {
+            "status": "time_unavailable",
+            "appointment_id": appointment.id,
+            "date": target_date.isoformat(),
+            "requested_time": requested_time,
+            "suggested_slots": suggested_slots,
+            "free_count": availability["free_count"],
+            "is_closed": availability["is_closed"],
+            "is_outside_work_hours": is_outside_work_hours,
+            "work_start": availability["work_start"],
+            "work_end": availability["work_end"],
         }
 
     old_date = appointment.date
