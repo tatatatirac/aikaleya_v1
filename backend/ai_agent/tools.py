@@ -182,6 +182,22 @@ MONTH_NAME_PATTERN = re.compile(
 )
 DAY_OF_MONTH_PATTERN = re.compile(r"\b([1-9]|[12]\d|3[01])\s*(?:\.|og|tog|ti|te|st|nd|rd|th)\b")
 WEEKDAY_PATTERN = re.compile(r"\b(" + "|".join(sorted(WEEKDAY_NUMBERS, key=len, reverse=True)) + r")\b")
+SHORT_DATE_PATTERN = re.compile(r"\b([1-9]|[12]\d|3[01])[.\-/](0?[1-9]|1[0-2])\.?\b")
+COMPACT_DATE_PATTERN = re.compile(r"\b(0?[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])\b")
+WEEK_RANGE_PHRASES = (
+    "ove nedelje",
+    "ovu nedelju",
+    "ove sedmice",
+    "ovu sedmicu",
+    "sledece nedelje",
+    "sledecu nedelju",
+    "sljedece sedmice",
+    "sljedecu sedmicu",
+    "naredne nedelje",
+    "narednu nedelju",
+    "next week",
+    "this week",
+)
 
 
 PHONE_PATTERN = re.compile(r"(?<!\w)(\+?\d[\d\s().-]{6,}\d)(?!\w)")
@@ -221,6 +237,24 @@ def next_date_for_weekday(base_date, weekday):
     return base_date + timedelta(days=days_ahead)
 
 
+def make_date_in_current_or_next_year(base_date, day, month):
+    candidate = date_cls(base_date.year, month, day)
+    if candidate < base_date:
+        candidate = date_cls(base_date.year + 1, month, day)
+    return candidate
+
+
+def week_range_request(text):
+    normalized = normalize_lookup(text or "")
+    matched_phrase = next((phrase for phrase in WEEK_RANGE_PHRASES if phrase in normalized), "")
+    if not matched_phrase:
+        return ""
+    stripped = normalized.replace(matched_phrase, " ")
+    if WEEKDAY_PATTERN.search(stripped):
+        return ""
+    return "next_week" if "slede" in matched_phrase or "sljede" in matched_phrase or "nared" in matched_phrase or matched_phrase == "next week" else "this_week"
+
+
 def parse_requested_date(text, explicit_date=None, reference_date=None):
     base_date = reference_date or date_cls.today()
     if explicit_date:
@@ -247,6 +281,11 @@ def parse_requested_date(text, explicit_date=None, reference_date=None):
         day, month, year = map(int, eu_match.groups())
         return date_cls(year, month, day)
 
+    short_date_match = SHORT_DATE_PATTERN.search(normalized)
+    if short_date_match:
+        day, month = map(int, short_date_match.groups())
+        return make_date_in_current_or_next_year(base_date, day, month)
+
     month_name_match = MONTH_NAME_PATTERN.search(normalized)
     if month_name_match:
         day = int(month_name_match.group(1))
@@ -263,6 +302,11 @@ def parse_requested_date(text, explicit_date=None, reference_date=None):
     day_of_month_match = DAY_OF_MONTH_PATTERN.search(normalized)
     if day_of_month_match:
         return next_date_for_day_of_month(base_date, int(day_of_month_match.group(1)))
+
+    compact_date_match = COMPACT_DATE_PATTERN.search(normalized)
+    if compact_date_match:
+        day, month = map(int, compact_date_match.groups())
+        return make_date_in_current_or_next_year(base_date, day, month)
 
     return base_date
 
@@ -285,15 +329,22 @@ def text_has_parseable_date(text):
         or any(normalize_lookup(keyword) in normalized for keyword in tomorrow_keywords)
         or re.search(r"\b(20\d{2})-(\d{2})-(\d{2})\b", normalized)
         or re.search(r"\b(\d{1,2})[.\-/](\d{1,2})[.\-/](20\d{2})\b", normalized)
+        or SHORT_DATE_PATTERN.search(normalized)
         or MONTH_NAME_PATTERN.search(normalized)
         or WEEKDAY_PATTERN.search(normalized)
         or DAY_OF_MONTH_PATTERN.search(normalized)
+        or COMPACT_DATE_PATTERN.search(normalized)
     )
 
 
 def parse_requested_time(text, explicit_time=None):
     if explicit_time:
         return str(explicit_time)[:5]
+
+    raw_normalized = normalize_lookup(text or "")
+    if SHORT_DATE_PATTERN.search(raw_normalized) or COMPACT_DATE_PATTERN.search(raw_normalized):
+        if not re.search(r"\b(?:u|at|um|alle|oko|around|about)\s*(?:[01]?\d|2[0-3])(?:[:]\d{2}|\s*h)\b", raw_normalized):
+            return ""
 
     normalized = normalize_lookup((text or "").replace(".", ":"))
     match = re.search(r"\b([01]?\d|2[0-3]):([0-5]\d)\b", normalized)
@@ -798,7 +849,18 @@ def ensure_customer(business_client, customer=None, payload=None):
 
 
 def check_availability_tool(business_client, text="", payload=None):
+    requested_week_range = week_range_request(text)
     payload = infer_payload_from_text(business_client, text, payload)
+    if requested_week_range and not (payload or {}).get("_explicit_date"):
+        return {
+            "status": "needs_weekday",
+            "date_range": requested_week_range,
+            "free_count": 0,
+            "busy_count": 0,
+            "is_closed": False,
+            "suggested_slots": [],
+            "slots": [],
+        }
     target_date = parse_requested_date(text, payload.get("date"), reference_date=client_local_today(business_client))
     requested_time = normalize_requested_time_for_work_hours(
         business_client,

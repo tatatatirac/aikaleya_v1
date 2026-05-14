@@ -131,6 +131,9 @@ AVAILABILITY_HINTS = (
     "ima li slobod",
     "ima li sta",
     "ima li nesto",
+    "ima li termina",
+    "ima termina",
+    "ima li termin",
     "ima nesto",
     "ima neki",
     "sta ima",
@@ -1317,7 +1320,7 @@ def save_conversation_ai_state(conversation, intent_name, payload, tool_output, 
         unknown_count = int(previous_state.get("unknown_count") or 0)
 
     tool_status = (tool_output or {}).get("status", "")
-    waiting_statuses = {"needs_more_details", "needs_time", "needs_target", "time_unavailable", "failed"}
+    waiting_statuses = {"needs_more_details", "needs_time", "needs_target", "needs_weekday", "time_unavailable", "failed"}
     state_status = "handoff" if intent_name == "support_handoff" else "open"
     if missing_fields or tool_status in waiting_statuses:
         state_status = "waiting_for_customer"
@@ -2014,6 +2017,10 @@ def build_text_response(business_client, intent, tool_output):
         count = tool_output.get("free_count", 0)
         suggestions = ", ".join(tool_output.get("suggested_slots", [])[:3])
         requested_time = tool_output.get("requested_time") or ""
+        if tool_output.get("status") == "needs_weekday":
+            if language == "sr":
+                return "Koji dan vam odgovara? Mogu da proverim ponedeljak, utorak, sredu, cetvrtak ili petak."
+            return "Which day works for you? I can check Monday, Tuesday, Wednesday, Thursday or Friday."
         if tool_output.get("is_closed"):
             return localized_no_available_booking_response(language, tool_output, business_client=business_client)
         if requested_time:

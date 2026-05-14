@@ -7,6 +7,8 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 
+from ai_agent.prompts import build_salon_planner_prompt
+
 
 class ProviderError(Exception):
     pass
@@ -131,18 +133,7 @@ def generate_anthropic_plan(business_client, user_text, context=None):
         raise ProviderError("ANTHROPIC_API_KEY nije podesen.")
 
     context_text = json.dumps(context or {}, ensure_ascii=False, default=str)
-    system_prompt = (
-        "You are Kaleya's scheduling planner. "
-        "Your only job is to convert the user's message into one valid JSON object. "
-        "Do not answer conversationally. Do not use Markdown. "
-        "Allowed intents: book_appointment, reschedule_appointment, cancel_appointment, "
-        "check_availability, business_info, support_handoff, unknown. "
-        "Use null when a value is missing. Dates must be YYYY-MM-DD. Times must be HH:MM in 24h format. "
-        "If the user asks for the first available slot, leave staff_member_id null and set staff_hint to null. "
-        "If the user mentions a service or employee by name, put that text in service_hint or staff_hint. "
-        "Return keys: intent, confidence, date, time, duration_minutes, customer_name, phone, email, "
-        "appointment_id, service_id, service_hint, staff_member_id, staff_hint, title, reason, cancelled_reason, needs_human_support."
-    )
+    system_prompt = build_salon_planner_prompt(business_client)
     payload = {
         "model": config["model"],
         "max_tokens": 700,

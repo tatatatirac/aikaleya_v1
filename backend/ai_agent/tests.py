@@ -7,7 +7,9 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from ai_agent.models import CustomerMemory
+from ai_agent.prompts import build_salon_planner_prompt
 from ai_agent.services import build_planner_context, handle_inbound_text
+from ai_agent.tools import parse_requested_date, parse_requested_time
 from accounts.models import Profile
 from appointments.services import aware_client_datetime
 from audit_log.models import AuditLog
@@ -22,6 +24,13 @@ from support.models import SupportTicket
 
 class AIAppointmentToolTests(TestCase):
     def setUp(self):
+        fixed_now = datetime(2026, 5, 14, 6, 0, tzinfo=dt_timezone.utc)
+        self.tools_now_patcher = mock.patch("ai_agent.tools.timezone.now", return_value=fixed_now)
+        self.appointments_now_patcher = mock.patch("appointments.services.timezone.now", return_value=fixed_now)
+        self.tools_now_patcher.start()
+        self.appointments_now_patcher.start()
+        self.addCleanup(self.tools_now_patcher.stop)
+        self.addCleanup(self.appointments_now_patcher.stop)
         self.user = User.objects.create_user(username="client@example.com", email="client@example.com", password="test12345")
         self.client = BusinessClient.objects.create(
             owner=self.user,
@@ -29,7 +38,7 @@ class AIAppointmentToolTests(TestCase):
             package=Plan.CODE_PRO,
             interface_language="en",
             language="en",
-            timezone="Pacific/Honolulu",
+            timezone="UTC",
             work_start=time(9, 0),
             work_end=time(16, 0),
             slot_interval_minutes=30,
@@ -83,6 +92,62 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["intent"], "check_availability")
         self.assertEqual(result["tool_output"]["free_count"], 14)
         self.assertIn("Ima 14 slobodnih termina", result["response_text"])
+
+    def test_ai_understands_generic_termina_availability_question(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+
+        result = handle_inbound_text(
+            self.client,
+            "ima li termina",
+            channel="telegram",
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "check_availability")
+        self.assertEqual(result["tool_output"]["free_count"], 14)
+
+    def test_week_range_availability_asks_for_day_instead_of_guessing_sunday(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+
+        result = handle_inbound_text(
+            self.client,
+            "ima li sta sledece nedelje",
+            channel="telegram",
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "check_availability")
+        self.assertEqual(result["tool_output"]["status"], "needs_weekday")
+        self.assertIn("Koji dan", result["response_text"])
+
+    def test_short_serbian_date_is_not_parsed_as_time(self):
+        reference_date = date(2026, 5, 14)
+
+        self.assertEqual(parse_requested_date("ima li sta 20.05.", reference_date=reference_date), date(2026, 5, 20))
+        self.assertEqual(parse_requested_time("ima li sta 20.05."), "")
+        self.assertEqual(parse_requested_date("ima li sta 2005", reference_date=reference_date), date(2026, 5, 20))
+        self.assertEqual(parse_requested_time("ima li sta 2005"), "")
+        self.assertEqual(parse_requested_time("moze u 1430"), "14:30")
+
+    def test_salon_planner_prompt_contains_safety_rules_and_business_context(self):
+        Service.objects.create(
+            business_client=self.client,
+            name="Šišanje",
+            duration_minutes=30,
+            price=25,
+        )
+
+        prompt = build_salon_planner_prompt(self.client)
+
+        self.assertIn("digitalna sekretarica salona", prompt)
+        self.assertIn("Vrati samo jedan JSON objekat", prompt)
+        self.assertIn("AI Test Business", prompt)
+        self.assertIn("Šišanje", prompt)
+        self.assertIn("Django backend proverava kalendar", prompt)
 
     def test_ai_availability_keeps_response_language_across_supported_languages(self):
         cases = (
@@ -2249,6 +2314,13 @@ class AIAppointmentToolTests(TestCase):
 
 class AIAppointmentApiTests(TestCase):
     def setUp(self):
+        fixed_now = datetime(2026, 5, 14, 6, 0, tzinfo=dt_timezone.utc)
+        self.tools_now_patcher = mock.patch("ai_agent.tools.timezone.now", return_value=fixed_now)
+        self.appointments_now_patcher = mock.patch("appointments.services.timezone.now", return_value=fixed_now)
+        self.tools_now_patcher.start()
+        self.appointments_now_patcher.start()
+        self.addCleanup(self.tools_now_patcher.stop)
+        self.addCleanup(self.appointments_now_patcher.stop)
         self.api = APIClient()
         self.owner = User.objects.create_user(
             username="owner@example.com",
@@ -2263,7 +2335,7 @@ class AIAppointmentApiTests(TestCase):
             package=Plan.CODE_BUSINESS_PLUS,
             interface_language="en",
             language="en",
-            timezone="Pacific/Honolulu",
+            timezone="UTC",
             work_start=time(9, 0),
             work_end=time(16, 0),
             slot_interval_minutes=30,
