@@ -124,6 +124,69 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["tool_output"]["status"], "needs_weekday")
         self.assertIn("Koji dan", result["response_text"])
 
+    def test_week_range_availability_after_booking_is_not_reschedule(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+        appointment = Appointment.objects.create(
+            business_client=self.client,
+            date=date(2026, 5, 15),
+            start_time=time(15, 30),
+            duration_minutes=30,
+            title="Farbanje",
+        )
+        conversation = Conversation.objects.create(
+            business_client=self.client,
+            channel="telegram",
+            language="sr",
+            metadata={
+                "ai_state": {
+                    "status": "completed",
+                    "last_intent": "book_appointment",
+                    "last_tool_status": "booked",
+                    "last_appointment_id": appointment.id,
+                    "last_appointment_date": "2026-05-15",
+                    "last_appointment_time": "15:30",
+                }
+            },
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Ima li termin sledece nedelje",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "check_availability")
+        self.assertEqual(result["tool_output"]["status"], "needs_weekday")
+        self.assertIn("Koji dan", result["response_text"])
+
+    def test_natural_serbian_booking_with_service_typo_asks_for_date(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+        Service.objects.create(
+            business_client=self.client,
+            name="Farbanje",
+            duration_minutes=30,
+            price=25,
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Hocu da zalažem farbanje",
+            channel="telegram",
+            payload={"customer_name": "Ana"},
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "book_appointment")
+        self.assertEqual(result["tool_output"]["status"], "needs_more_details")
+        self.assertEqual(result["decision"]["missing_fields"], ["date"])
+        self.assertIn("datum", result["response_text"].lower())
+
     def test_short_serbian_date_is_not_parsed_as_time(self):
         reference_date = date(2026, 5, 14)
 
@@ -1174,6 +1237,7 @@ class AIAppointmentToolTests(TestCase):
 
     def test_greeting_does_not_escalate_to_support(self):
         for greeting in (
+            "/start",
             "hi",
             "alooo",
             "helo",
@@ -1219,7 +1283,7 @@ class AIAppointmentToolTests(TestCase):
         self.client.language = "sr"
         self.client.save(update_fields=["interface_language", "language", "updated_at"])
 
-        for greeting in ("zdravo🙋‍♂️", "dobar dan", "alooo"):
+        for greeting in ("/start", "zdravo🙋‍♂️", "dobar dan", "alooo"):
             with self.subTest(greeting=greeting):
                 result = handle_inbound_text(
                     self.client,

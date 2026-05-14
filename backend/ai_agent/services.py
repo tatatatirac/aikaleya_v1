@@ -160,6 +160,8 @@ AVAILABILITY_HINTS = (
 )
 BOOKING_ACTION_HINTS = (
     "zakazi",
+    "zalazem",
+    "zalažem",
     "zakaži",
     "zakazivanje",
     "rezervisi",
@@ -225,6 +227,7 @@ SHORT_CONFIRMATION_HINTS = (
     "ok yes",
 )
 GREETING_HINTS = (
+    "start",
     "hi",
     "alo",
     "aloo",
@@ -1966,17 +1969,21 @@ def should_treat_bare_number_as_date(previous_state, text):
 def should_assume_booking_from_natural_text(intent_name, text, payload):
     if intent_name != "unknown":
         return False
-    if not has_fresh_date_or_time(text):
-        return False
     has_service = bool((payload or {}).get("service_id") or (payload or {}).get("service_hint"))
     has_date = bool((payload or {}).get("date"))
     has_time = bool((payload or {}).get("time"))
     has_natural_booking_hint = contains_normalized_hint(text, NATURAL_BOOKING_REQUEST_HINTS)
+    if has_natural_booking_hint and has_service:
+        return True
+    if not has_fresh_date_or_time(text):
+        return False
     return bool((has_date and has_time) or (has_service and (has_date or has_time)) or (has_natural_booking_hint and (has_date or has_time or has_service)))
 
 
 def should_treat_as_reschedule_followup(intent_name, previous_state, text, payload):
     if not previous_state or previous_state.get("status") != "completed":
+        return False
+    if intent_name == "check_availability":
         return False
     if previous_state.get("last_intent") not in {"book_appointment", "reschedule_appointment"}:
         return False
