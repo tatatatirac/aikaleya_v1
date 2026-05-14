@@ -1175,6 +1175,7 @@ class AIAppointmentToolTests(TestCase):
     def test_greeting_does_not_escalate_to_support(self):
         for greeting in (
             "hi",
+            "alooo",
             "helo",
             "helloo",
             "hello",
@@ -1210,6 +1211,25 @@ class AIAppointmentToolTests(TestCase):
                 self.assertEqual(result["tool_output"]["status"], "greeting")
                 self.assertNotEqual(conversation.status, "handoff")
                 self.assertEqual(SupportTicket.objects.count(), 0)
+
+    @mock.patch("ai_agent.services.generate_anthropic_plan")
+    def test_greeting_skips_paid_ai_planner(self, planner_mock):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+
+        for greeting in ("zdravo🙋‍♂️", "dobar dan", "alooo"):
+            with self.subTest(greeting=greeting):
+                result = handle_inbound_text(
+                    self.client,
+                    greeting,
+                    channel="telegram",
+                    use_ai=True,
+                )
+
+                self.assertEqual(result["intent"], "business_info")
+                self.assertEqual(result["tool_output"]["status"], "greeting")
+        planner_mock.assert_not_called()
 
     def test_gratitude_closes_conversation_without_unknown_prompt(self):
         self.client.interface_language = "sr"

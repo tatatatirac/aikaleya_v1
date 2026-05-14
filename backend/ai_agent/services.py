@@ -226,6 +226,9 @@ SHORT_CONFIRMATION_HINTS = (
 )
 GREETING_HINTS = (
     "hi",
+    "alo",
+    "aloo",
+    "alooo",
     "hello",
     "helo",
     "hey",
@@ -1977,6 +1980,14 @@ def should_use_last_appointment_date(intent_name, previous_state, text, payload)
     return bool(payload.get("time") or parse_requested_time(text))
 
 
+def should_skip_ai_planner_for_simple_text(text, previous_state):
+    return bool(
+        is_greeting_text(text)
+        or is_conversation_closing_text(text, previous_state)
+        or is_customer_info_question(text, previous_state)
+    )
+
+
 def apply_confirmed_memory_service(payload, previous_state, text, customer_memory):
     payload = {**(payload or {})}
     if payload.get("service_id") or payload.get("service_hint"):
@@ -2233,7 +2244,9 @@ def handle_inbound_text(
             raw_payload={"channel": channel, "payload": json_safe(payload), "external_thread_id": external_thread_id},
         )
 
-    if use_ai:
+    if use_ai and should_skip_ai_planner_for_simple_text(text, previous_state):
+        planner_raw_response = {"engine": "deterministic-small-talk", "skipped_ai": True}
+    elif use_ai:
         try:
             planner = generate_anthropic_plan(
                 business_client,
