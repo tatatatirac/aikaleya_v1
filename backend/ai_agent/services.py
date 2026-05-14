@@ -1600,6 +1600,10 @@ def handle_inbound_text(
         payload = attach_last_appointment_to_payload(payload, previous_state)
         planner_raw_response["resumed_from_completed_appointment"] = True
     payload = infer_payload_from_text(business_client, text, payload)
+    if intent_name == "unknown" and payload.get("date") and payload.get("time"):
+        intent_name = "book_appointment"
+        confidence = max(confidence, 0.72)
+        planner_raw_response["assumed_booking_from_date_time"] = True
     preprocess = build_preprocess_context(
         business_client,
         text,

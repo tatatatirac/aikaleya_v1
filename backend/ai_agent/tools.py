@@ -25,6 +25,21 @@ DATE_KEYWORDS = {
     "tomorrow": ("sutra", "tomorrow", "manana", "mañana", "amanha", "amanhã", "demain", "domani", "завтра", "morgen"),
 }
 
+DAY_AFTER_TOMORROW_KEYWORDS = (
+    "prekosutra",
+    "day after tomorrow",
+    "after tomorrow",
+    "pasado manana",
+    "pasado manana",
+    "apos amanha",
+    "apres demain",
+    "apres-demain",
+    "dopodomani",
+    "uebermorgen",
+    "ubermorgen",
+)
+
+
 MONTH_NAME_NUMBERS = {
     "januar": 1,
     "januara": 1,
@@ -66,6 +81,7 @@ MONTH_NAME_PATTERN = re.compile(
     + "|".join(sorted(MONTH_NAME_NUMBERS, key=len, reverse=True))
     + r")\b"
 )
+DAY_OF_MONTH_PATTERN = re.compile(r"\b([1-9]|[12]\d|3[01])\s*(?:\.|og|tog|ti|te|st|nd|rd|th)\b")
 
 
 PHONE_PATTERN = re.compile(r"(?<!\w)(\+?\d[\d\s().-]{6,}\d)(?!\w)")
@@ -86,6 +102,20 @@ def client_local_today(business_client):
     return timezone.localtime(timezone.now(), client_timezone(business_client)).date()
 
 
+def next_date_for_day_of_month(base_date, day):
+    for month_offset in range(13):
+        month_index = base_date.month + month_offset - 1
+        year = base_date.year + month_index // 12
+        month = month_index % 12 + 1
+        try:
+            candidate = date_cls(year, month, day)
+        except ValueError:
+            continue
+        if candidate >= base_date:
+            return candidate
+    return base_date
+
+
 def parse_requested_date(text, explicit_date=None, reference_date=None):
     base_date = reference_date or date_cls.today()
     if explicit_date:
@@ -98,6 +128,8 @@ def parse_requested_date(text, explicit_date=None, reference_date=None):
     tomorrow_keywords = DATE_KEYWORDS["tomorrow"] + ("mañana", "amanhã", "завтра")
     if any(normalize_lookup(keyword) in normalized for keyword in today_keywords):
         return base_date
+    if any(normalize_lookup(keyword) in normalized for keyword in DAY_AFTER_TOMORROW_KEYWORDS):
+        return base_date + timedelta(days=2)
     if any(normalize_lookup(keyword) in normalized for keyword in tomorrow_keywords):
         return base_date + timedelta(days=1)
 
@@ -119,6 +151,10 @@ def parse_requested_date(text, explicit_date=None, reference_date=None):
             candidate = date_cls(base_date.year + 1, month, day)
         return candidate
 
+    day_of_month_match = DAY_OF_MONTH_PATTERN.search(normalized)
+    if day_of_month_match:
+        return next_date_for_day_of_month(base_date, int(day_of_month_match.group(1)))
+
     return base_date
 
 
@@ -128,10 +164,12 @@ def text_has_parseable_date(text):
     tomorrow_keywords = DATE_KEYWORDS["tomorrow"] + ("mañana", "amanhã", "завтра")
     return bool(
         any(normalize_lookup(keyword) in normalized for keyword in today_keywords)
+        or any(normalize_lookup(keyword) in normalized for keyword in DAY_AFTER_TOMORROW_KEYWORDS)
         or any(normalize_lookup(keyword) in normalized for keyword in tomorrow_keywords)
         or re.search(r"\b(20\d{2})-(\d{2})-(\d{2})\b", normalized)
         or re.search(r"\b(\d{1,2})[.\-/](\d{1,2})[.\-/](20\d{2})\b", normalized)
         or MONTH_NAME_PATTERN.search(normalized)
+        or DAY_OF_MONTH_PATTERN.search(normalized)
     )
 
 
@@ -361,7 +399,7 @@ def infer_payload_from_text(business_client, text, payload=None):
         if parsed_time:
             inferred["time"] = parsed_time
 
-    if not inferred.get("date") and text_has_parseable_date(text):
+    if text_has_parseable_date(text):
         inferred["date"] = parse_requested_date(text, reference_date=client_local_today(business_client))
 
     return inferred

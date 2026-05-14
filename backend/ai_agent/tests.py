@@ -409,6 +409,84 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(appointment.start_time, time(11, 30))
 
     @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_books_day_after_tomorrow_with_compact_half_hour(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 14, 0, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.save(update_fields=["timezone", "updated_at"])
+
+        booked = handle_inbound_text(
+            self.client,
+            "moze li prekosutra u pola1",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic", "phone": "+38160123456"},
+            external_thread_id="telegram:test-prekosutra-booking",
+            use_ai=False,
+        )
+
+        appointment = Appointment.objects.get()
+        self.assertEqual(booked["intent"], "book_appointment")
+        self.assertEqual(booked["tool_output"]["status"], "booked")
+        self.assertEqual(appointment.date, date(2026, 5, 16))
+        self.assertEqual(appointment.start_time, time(12, 30))
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_reschedule_day_number_overrides_previous_date(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 14, 0, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.save(update_fields=["timezone", "updated_at"])
+        customer = self.client.customers.create(first_name="Bane", last_name="Kostic", phone="+38160123456")
+        appointment = Appointment.objects.create(
+            business_client=self.client,
+            customer=customer,
+            title="AI booking request",
+            status=Appointment.STATUS_CONFIRMED,
+            date=date(2026, 5, 15),
+            start_time=time(12, 30),
+            duration_minutes=30,
+            channel="telegram",
+            source="ai_agent",
+        )
+        conversation = Conversation.objects.create(
+            business_client=self.client,
+            customer=customer,
+            channel="telegram",
+            language="sr",
+            metadata={
+                "ai_state": {
+                    "status": "completed",
+                    "last_intent": "book_appointment",
+                    "last_confidence": 0.9,
+                    "last_appointment_id": appointment.id,
+                    "last_appointment_date": "2026-05-15",
+                    "last_appointment_time": "12:30",
+                }
+            },
+        )
+
+        date_change = handle_inbound_text(
+            self.client,
+            "16ti",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+        rescheduled = handle_inbound_text(
+            self.client,
+            "9:30",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+
+        appointment.refresh_from_db()
+        self.assertEqual(date_change["intent"], "reschedule_appointment")
+        self.assertEqual(date_change["tool_output"]["status"], "needs_time")
+        self.assertEqual(date_change["tool_output"]["date"], "2026-05-16")
+        self.assertEqual(rescheduled["tool_output"]["status"], "rescheduled")
+        self.assertEqual(appointment.date, date(2026, 5, 16))
+        self.assertEqual(appointment.start_time, time(9, 30))
+
+    @mock.patch("ai_agent.tools.timezone.now")
     def test_ai_reschedules_last_booked_appointment_from_date_followup(self, now_mock):
         now_mock.return_value = datetime(2026, 5, 12, 22, 30, tzinfo=dt_timezone.utc)
         self.client.timezone = "Europe/Belgrade"
