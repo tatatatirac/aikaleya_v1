@@ -430,6 +430,77 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(appointment.start_time, time(12, 30))
 
     @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_interprets_daytime_bare_hour_inside_working_hours(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 14, 0, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.save(update_fields=["timezone", "updated_at"])
+
+        booked = handle_inbound_text(
+            self.client,
+            "zakazi mi prekosutra u 3",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic", "phone": "+38160123456"},
+            external_thread_id="telegram:test-daytime-hour",
+            use_ai=False,
+        )
+
+        appointment = Appointment.objects.get()
+        self.assertEqual(booked["tool_output"]["status"], "booked")
+        self.assertEqual(appointment.date, date(2026, 5, 16))
+        self.assertEqual(appointment.start_time, time(15, 0))
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_closed_day_response_has_no_empty_suggestions_and_no_loop(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 14, 0, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.save(update_fields=["timezone", "updated_at"])
+        Service.objects.create(
+            business_client=self.client,
+            name="AI zakazivanje",
+            category="Osnovno",
+            duration_minutes=30,
+            price=59,
+        )
+        WorkingHours.objects.create(
+            business_client=self.client,
+            weekday=date(2026, 5, 16).weekday(),
+            start_time=time(9, 0),
+            end_time=time(16, 0),
+            is_closed=True,
+        )
+        external_thread_id = "telegram:test-closed-day-no-loop"
+
+        first = handle_inbound_text(
+            self.client,
+            "da ako moze za prekosutra u pola 3",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic", "phone": "+38160123456"},
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        second = handle_inbound_text(
+            self.client,
+            "zakazivanje",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        third = handle_inbound_text(
+            self.client,
+            "stvarno",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        self.assertIn("service", first["decision"]["missing_fields"])
+        self.assertEqual(second["tool_output"]["status"], "time_unavailable")
+        self.assertIn("zatvoren", second["response_text"])
+        self.assertNotIn("Predlozi su: .", second["response_text"])
+        self.assertEqual(third["intent"], "unknown")
+        self.assertNotEqual(third["tool_output"].get("status"), "time_unavailable")
+
+    @mock.patch("ai_agent.tools.timezone.now")
     def test_ai_reschedule_day_number_overrides_previous_date(self, now_mock):
         now_mock.return_value = datetime(2026, 5, 14, 0, 30, tzinfo=dt_timezone.utc)
         self.client.timezone = "Europe/Belgrade"

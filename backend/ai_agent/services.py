@@ -663,6 +663,28 @@ def localized_greeting_response(language):
     return "Hi, this is Kaleya. I can help you book, cancel, reschedule or check an appointment."
 
 
+def localized_no_available_booking_response(language, tool_output):
+    date_value = tool_output.get("date") or ""
+    requested_time = tool_output.get("requested_time") or tool_output.get("time") or ""
+    if language == "sr":
+        if tool_output.get("is_closed"):
+            return f"Taj dan je zatvoren za zakazivanje ({date_value}). Napisite drugi datum ili pitajte za slobodne termine."
+        if requested_time:
+            return f"Termin u {requested_time} nije slobodan za {date_value}. Napisite drugo vreme ili pitajte za slobodne termine tog dana."
+        return f"Za {date_value} nema slobodnih termina. Napisite drugi datum."
+    if language == "de":
+        if tool_output.get("is_closed"):
+            return f"An diesem Tag ist keine Buchung moeglich ({date_value}). Bitte nennen Sie ein anderes Datum."
+        if requested_time:
+            return f"Der Termin um {requested_time} ist fuer {date_value} nicht frei. Bitte nennen Sie eine andere Uhrzeit."
+        return f"Fuer {date_value} gibt es keine freien Termine. Bitte nennen Sie ein anderes Datum."
+    if tool_output.get("is_closed"):
+        return f"That day is closed for booking ({date_value}). Please choose another date."
+    if requested_time:
+        return f"The slot at {requested_time} is not available for {date_value}. Please choose another time or ask for free slots."
+    return f"There are no available slots for {date_value}. Please choose another date."
+
+
 def service_clarifying_response(business_client, language, customer_memory=None):
     options = service_options_text(business_client)
     memory_service = customer_memory_service_prompt(customer_memory)
@@ -1337,11 +1359,13 @@ def merge_payloads(ai_payload, explicit_payload):
     return merged
 
 
-def should_resume_previous_intent(intent_name, previous_state):
+def should_resume_previous_intent(intent_name, previous_state, text=""):
     if intent_name != "unknown":
         return False
     if not previous_state or previous_state.get("status") != "waiting_for_customer":
         return False
+    if previous_state.get("last_tool_status") == "time_unavailable":
+        return has_fresh_date_or_time(text)
     return previous_state.get("last_intent") in RESUMABLE_INTENTS
 
 
@@ -1357,6 +1381,10 @@ def should_book_from_availability_followup(intent_name, previous_state, text, pa
     if intent_name not in {"unknown", "book_appointment", "check_availability"}:
         return False
     return bool((payload or {}).get("time") or parse_requested_time(text))
+
+
+def has_fresh_date_or_time(text):
+    return bool(text_has_parseable_date(text) or parse_requested_time(text))
 
 
 def should_treat_as_reschedule_followup(intent_name, previous_state, text, payload):
@@ -1414,6 +1442,8 @@ def build_text_response(business_client, intent, tool_output):
                 suggestions=suggestions,
             )
         if status == "time_unavailable":
+            if not suggestions:
+                return localized_no_available_booking_response(language, tool_output)
             return localized_status_response(
                 BOOKING_RESPONSE_TEMPLATES,
                 "time_unavailable",
@@ -1589,7 +1619,7 @@ def handle_inbound_text(
         intent_name = "book_appointment"
         confidence = max(confidence, 0.76)
         planner_raw_response["resumed_from_availability"] = True
-    elif should_resume_previous_intent(intent_name, previous_state):
+    elif should_resume_previous_intent(intent_name, previous_state, text):
         intent_name, confidence = resume_previous_intent(previous_state)
         planner_raw_response["resumed_from_previous_state"] = True
     if intent_name == "reschedule_appointment":
@@ -1600,7 +1630,7 @@ def handle_inbound_text(
         payload = attach_last_appointment_to_payload(payload, previous_state)
         planner_raw_response["resumed_from_completed_appointment"] = True
     payload = infer_payload_from_text(business_client, text, payload)
-    if intent_name == "unknown" and payload.get("date") and payload.get("time"):
+    if intent_name == "unknown" and payload.get("date") and payload.get("time") and has_fresh_date_or_time(text):
         intent_name = "book_appointment"
         confidence = max(confidence, 0.72)
         planner_raw_response["assumed_booking_from_date_time"] = True

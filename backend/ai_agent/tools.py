@@ -227,6 +227,19 @@ def as_time(value):
     return datetime.strptime(str(value)[:5], "%H:%M").time()
 
 
+def normalize_requested_time_for_work_hours(business_client, requested_time):
+    if not requested_time:
+        return requested_time
+    parsed = as_time(requested_time)
+    shifted_hour = parsed.hour + 12
+    if shifted_hour > 23:
+        return requested_time
+    shifted = parsed.replace(hour=shifted_hour)
+    if business_client.work_start <= shifted < business_client.work_end:
+        return shifted.strftime("%H:%M")
+    return requested_time
+
+
 def first_free_slots(business_client, target_date, duration_minutes=None, staff_member_id=None, limit=5):
     availability = availability_for_date(
         business_client,
@@ -565,7 +578,10 @@ def check_availability_tool(business_client, text="", payload=None):
 def book_appointment_tool(business_client, text="", customer=None, channel="web", payload=None):
     payload = infer_payload_from_text(business_client, text, payload)
     target_date = parse_requested_date(text, payload.get("date"), reference_date=client_local_today(business_client))
-    requested_time = parse_requested_time(text, payload.get("time"))
+    requested_time = normalize_requested_time_for_work_hours(
+        business_client,
+        parse_requested_time(text, payload.get("time")),
+    )
     service = scoped_service(business_client, payload.get("service_id")) or resolve_service_by_hint(business_client, payload.get("service_hint"))
     staff_member = scoped_staff_member(business_client, payload.get("staff_member_id")) or resolve_staff_member_by_hint(business_client, payload.get("staff_hint"))
     duration = int(payload.get("duration_minutes") or (service.duration_minutes if service else business_client.slot_interval_minutes))
@@ -610,6 +626,9 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
             "suggested_slots": suggested_slots,
             "suggested_slots_detail": aggregate_availability["suggested_slots_detail"],
             "free_count": aggregate_availability["free_count"],
+            "is_closed": aggregate_availability["is_closed"],
+            "work_start": aggregate_availability["work_start"],
+            "work_end": aggregate_availability["work_end"],
         }
 
     customer = ensure_customer(business_client, customer=customer, payload={**payload, "channel": channel})
@@ -725,7 +744,10 @@ def reschedule_appointment_tool(business_client, text="", customer=None, channel
         return {"status": "needs_target", "message": "appointment_not_found"}
 
     target_date = parse_requested_date(text, payload.get("date"), reference_date=client_local_today(business_client))
-    requested_time = parse_requested_time(text, payload.get("time"))
+    requested_time = normalize_requested_time_for_work_hours(
+        business_client,
+        parse_requested_time(text, payload.get("time")),
+    )
     if not requested_time:
         availability, suggested_slots = first_free_slots(
             business_client,
