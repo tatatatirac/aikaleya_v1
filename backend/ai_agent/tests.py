@@ -1129,6 +1129,33 @@ class AIAppointmentToolTests(TestCase):
                 self.assertNotEqual(conversation.status, "handoff")
                 self.assertEqual(SupportTicket.objects.count(), 0)
 
+    def test_gratitude_closes_conversation_without_unknown_prompt(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+        conversation = Conversation.objects.create(
+            business_client=self.client,
+            channel="telegram",
+            language="sr",
+            metadata={"ai_state": {"unknown_count": 1}},
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "hvala ......",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+
+        conversation.refresh_from_db()
+        self.assertEqual(result["intent"], "business_info")
+        self.assertEqual(result["tool_output"]["status"], "gratitude")
+        self.assertEqual(result["response_text"], "Hvala vama, doviđenja.")
+        self.assertNotIn("zakazivanje", result["response_text"].lower())
+        self.assertNotEqual(conversation.status, "handoff")
+        self.assertEqual(SupportTicket.objects.count(), 0)
+
     @mock.patch("ai_agent.services.timezone.now")
     def test_greeting_uses_business_name_and_local_day_part(self, now_mock):
         now_mock.return_value = datetime(2026, 5, 14, 6, 0, tzinfo=dt_timezone.utc)

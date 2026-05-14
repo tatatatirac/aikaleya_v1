@@ -243,6 +243,23 @@ GREETING_HINTS = (
     "hallo",
     "privet",
 )
+GRATITUDE_HINTS = (
+    "hvala",
+    "hvala vam",
+    "hvala vama",
+    "hvala puno",
+    "zahvaljujem",
+    "thanks",
+    "thank you",
+    "thankyou",
+    "tnx",
+    "danke",
+    "gracias",
+    "merci",
+    "grazie",
+    "obrigado",
+    "obrigada",
+)
 CUSTOMER_INFO_HINTS = (
     "imate li moj telefon",
     "imas li moj telefon",
@@ -565,6 +582,19 @@ def is_greeting_text(text):
         "good evening",
         "goodevening",
     ))
+
+
+def is_gratitude_text(text):
+    compact = normalized_compact_words(text)
+    if not compact:
+        return False
+    compact_alnum = normalized_alnum(text)
+    gratitude_phrases = tuple(normalize_intent_text(hint) for hint in GRATITUDE_HINTS)
+    gratitude_compact = tuple(normalized_alnum(hint) for hint in GRATITUDE_HINTS)
+    if compact in gratitude_phrases or compact_alnum in gratitude_compact:
+        return True
+    tokens = re.findall(r"[a-z0-9]+", compact_alnum)
+    return any(token in gratitude_compact for token in tokens)
 
 
 def is_short_confirmation_text(text):
@@ -992,6 +1022,22 @@ def localized_greeting_response(language, business_client=None):
     if language == "ru":
         return f"{greeting}, {business_name}, chem mogu pomoch?"
     return f"{greeting}, {business_name}, how can I help?"
+
+
+def localized_gratitude_response(language):
+    if language == "sr":
+        return "Hvala vama, doviđenja."
+    if language == "de":
+        return "Danke Ihnen, auf Wiedersehen."
+    if language == "es":
+        return "Gracias a usted, hasta luego."
+    if language == "pt":
+        return "Obrigado, ate logo."
+    if language == "fr":
+        return "Merci a vous, au revoir."
+    if language == "it":
+        return "Grazie a lei, arrivederci."
+    return "Thank you, goodbye."
 
 
 SERBIAN_WEEKDAY_GENITIVE = {
@@ -2018,6 +2064,8 @@ def build_text_response(business_client, intent, tool_output):
     if intent == "business_info":
         if tool_output.get("status") == "greeting":
             return localized_greeting_response(language, business_client=business_client)
+        if tool_output.get("status") == "gratitude":
+            return localized_gratitude_response(language)
         if tool_output.get("status") == "customer_profile":
             return localized_customer_profile_response(language, tool_output.get("customer_profile") or {})
         matched_knowledge = tool_output.get("matched_knowledge") or {}
@@ -2153,6 +2201,10 @@ def handle_inbound_text(
         intent_name = "business_info"
         confidence = max(confidence, 0.86)
         planner_raw_response["greeting"] = True
+    if is_gratitude_text(text) and intent_name in {"unknown", "support_handoff"}:
+        intent_name = "business_info"
+        confidence = max(confidence, 0.86)
+        planner_raw_response["gratitude"] = True
     if is_customer_info_question(text, previous_state):
         intent_name = "business_info"
         confidence = max(confidence, 0.8)
@@ -2283,6 +2335,8 @@ def handle_inbound_text(
         }
         if planner_raw_response.get("greeting"):
             tool_output["status"] = "greeting"
+        if planner_raw_response.get("gratitude"):
+            tool_output["status"] = "gratitude"
         if planner_raw_response.get("customer_profile_question"):
             tool_output["status"] = "customer_profile"
             tool_output["customer_profile"] = customer_profile_payload(customer=customer, payload=payload)
