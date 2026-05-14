@@ -191,7 +191,7 @@ def validate_telegram_connection(connection):
     enforce_channel_allowed(connection.business_client, "telegram")
     if not connection.enabled:
         raise serializers.ValidationError({"integration": "Telegram integracija nije ukljucena."})
-    if connection.status != "connected":
+    if connection.status not in {"connected", "error"}:
         raise serializers.ValidationError({"integration": "Telegram integracija nije povezana."})
     missing = missing_config_keys("telegram", connection)
     if missing:

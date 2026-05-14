@@ -223,6 +223,43 @@ class IntegrationStatusTests(TestCase):
         reply_mock.assert_not_called()
 
     @mock.patch("integrations.services.send_telegram_message", return_value={"ok": True})
+    def test_telegram_webhook_recovers_from_error_status(self, send_mock):
+        self.business_client.interface_language = "sr"
+        self.business_client.language = "sr"
+        self.business_client.save(update_fields=["interface_language", "language", "updated_at"])
+        connection = IntegrationConnection.objects.create(
+            business_client=self.business_client,
+            provider="telegram",
+            enabled=True,
+            status="error",
+            public_number="@kaleya_test_bot",
+            config={"bot_token": "secret-token", "webhook_secret": "correct-secret"},
+            last_error="Prethodna prolazna greska.",
+        )
+
+        response = self.api.post(
+            f"/api/integrations/telegram/webhook/{connection.id}/",
+            {
+                "update_id": 1005,
+                "message": {
+                    "message_id": 14,
+                    "chat": {"id": 12345, "type": "private"},
+                    "from": {"id": 222, "first_name": "Liam"},
+                    "text": "zdravo",
+                },
+            },
+            format="json",
+            HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN="correct-secret",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["processed"])
+        connection.refresh_from_db()
+        self.assertEqual(connection.status, "connected")
+        self.assertEqual(connection.last_error, "")
+        send_mock.assert_called_once()
+
+    @mock.patch("integrations.services.send_telegram_message", return_value={"ok": True})
     def test_telegram_webhook_ignores_emoji_only_message(self, send_mock):
         self.business_client.is_demo = True
         self.business_client.save(update_fields=["is_demo", "updated_at"])
