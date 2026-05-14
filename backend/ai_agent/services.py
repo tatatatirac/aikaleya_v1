@@ -661,6 +661,11 @@ def is_conversation_closing_text(text, previous_state=None):
     return compact in completed_phrases or compact_alnum in completed_compact
 
 
+def is_see_you_text(text):
+    compact_alnum = normalized_alnum(text)
+    return "vidimose" in compact_alnum or "seeyou" in compact_alnum
+
+
 def is_short_confirmation_text(text):
     compact = normalized_compact_words(text)
     compact_alnum = normalized_alnum(text)
@@ -1102,6 +1107,22 @@ def localized_gratitude_response(language):
     if language == "it":
         return "Grazie a lei, arrivederci."
     return "Thank you, goodbye."
+
+
+def localized_see_you_response(language):
+    if language == "sr":
+        return "Vidimo se."
+    if language == "de":
+        return "Bis bald."
+    if language == "es":
+        return "Nos vemos."
+    if language == "pt":
+        return "Ate logo."
+    if language == "fr":
+        return "A bientot."
+    if language == "it":
+        return "A presto."
+    return "See you."
 
 
 SERBIAN_WEEKDAY_GENITIVE = {
@@ -2140,6 +2161,8 @@ def build_text_response(business_client, intent, tool_output):
     if intent == "business_info":
         if tool_output.get("status") == "greeting":
             return localized_greeting_response(language, business_client=business_client)
+        if tool_output.get("status") == "see_you":
+            return localized_see_you_response(language)
         if tool_output.get("status") == "gratitude":
             return localized_gratitude_response(language)
         if tool_output.get("status") == "customer_profile":
@@ -2279,7 +2302,10 @@ def handle_inbound_text(
     if is_conversation_closing_text(text, previous_state) and intent_name in {"unknown", "support_handoff"}:
         intent_name = "business_info"
         confidence = max(confidence, 0.86)
-        planner_raw_response["gratitude"] = True
+        if is_see_you_text(text):
+            planner_raw_response["see_you"] = True
+        else:
+            planner_raw_response["gratitude"] = True
     elif is_greeting_text(text) and intent_name in {"unknown", "support_handoff"}:
         intent_name = "business_info"
         confidence = max(confidence, 0.86)
@@ -2414,6 +2440,8 @@ def handle_inbound_text(
         }
         if planner_raw_response.get("greeting"):
             tool_output["status"] = "greeting"
+        if planner_raw_response.get("see_you"):
+            tool_output["status"] = "see_you"
         if planner_raw_response.get("gratitude"):
             tool_output["status"] = "gratitude"
         if planner_raw_response.get("customer_profile_question"):

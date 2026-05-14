@@ -1237,7 +1237,7 @@ class AIAppointmentToolTests(TestCase):
         self.client.interface_language = "sr"
         self.client.language = "sr"
         self.client.save(update_fields=["interface_language", "language", "updated_at"])
-        for message in ("hvala", "ok hvala", "fala", "fala vi", "okfala", "okhvala", "doviđenja", "vidimo se"):
+        for message in ("hvala", "ok hvala", "fala", "fala vi", "okfala", "okhvala", "doviđenja"):
             with self.subTest(message=message):
                 conversation = Conversation.objects.create(
                     business_client=self.client,
@@ -1262,11 +1262,36 @@ class AIAppointmentToolTests(TestCase):
                 self.assertNotEqual(conversation.status, "handoff")
         self.assertEqual(SupportTicket.objects.count(), 0)
 
+    def test_see_you_has_short_mirrored_response(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+        for message in ("vidimo se", "dovidenja vidimo se", "dovidjenja vidimo se", "vidimo se cao", "cao vidimo se"):
+            with self.subTest(message=message):
+                conversation = Conversation.objects.create(
+                    business_client=self.client,
+                    channel="telegram",
+                    language="sr",
+                    metadata={"ai_state": {"unknown_count": 1}},
+                )
+
+                result = handle_inbound_text(
+                    self.client,
+                    message,
+                    conversation=conversation,
+                    channel="telegram",
+                    use_ai=False,
+                )
+
+                self.assertEqual(result["intent"], "business_info")
+                self.assertEqual(result["tool_output"]["status"], "see_you")
+                self.assertEqual(result["response_text"], "Vidimo se.")
+
     def test_combined_closing_words_close_conversation_without_handoff(self):
         self.client.interface_language = "sr"
         self.client.language = "sr"
         self.client.save(update_fields=["interface_language", "language", "updated_at"])
-        for message in ("dovidenja vidimo se", "dovidjenja vidimo se", "vidimo se cao", "cao vidimo se"):
+        for message in ("dovidenja", "dovidjenja", "cao cao"):
             with self.subTest(message=message):
                 conversation = Conversation.objects.create(
                     business_client=self.client,
@@ -1314,6 +1339,29 @@ class AIAppointmentToolTests(TestCase):
                 self.assertEqual(result["intent"], "business_info")
                 self.assertEqual(result["tool_output"]["status"], "gratitude")
                 self.assertEqual(result["response_text"], "Hvala vama, doviđenja.")
+
+    def test_cao_after_closed_smalltalk_starts_new_greeting(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+        conversation = Conversation.objects.create(
+            business_client=self.client,
+            channel="telegram",
+            language="sr",
+            metadata={"ai_state": {"last_tool_status": "gratitude", "last_intent": "business_info"}},
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "cao",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "business_info")
+        self.assertEqual(result["tool_output"]["status"], "greeting")
+        self.assertIn("izvolite", result["response_text"].lower())
 
     def test_unknown_serbian_response_avoids_form_like_intent_prompt(self):
         self.client.interface_language = "sr"
