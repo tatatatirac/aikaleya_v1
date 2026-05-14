@@ -244,6 +244,9 @@ GREETING_HINTS = (
     "privet",
 )
 GRATITUDE_HINTS = (
+    "fala",
+    "fala vi",
+    "fala vam",
     "hvala",
     "hvala vam",
     "hvala vama",
@@ -615,6 +618,8 @@ def is_gratitude_text(text):
     gratitude_phrases = tuple(normalize_intent_text(hint) for hint in GRATITUDE_HINTS)
     gratitude_compact = tuple(normalized_alnum(hint) for hint in GRATITUDE_HINTS)
     if compact in gratitude_phrases or compact_alnum in gratitude_compact:
+        return True
+    if "hvala" in compact_alnum or compact_alnum.endswith("fala") or compact_alnum.startswith("fala"):
         return True
     tokens = compact.split()
     return any(token in gratitude_phrases for token in tokens)

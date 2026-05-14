@@ -29,6 +29,7 @@ class AIAppointmentToolTests(TestCase):
             package=Plan.CODE_PRO,
             interface_language="en",
             language="en",
+            timezone="Pacific/Honolulu",
             work_start=time(9, 0),
             work_end=time(16, 0),
             slot_interval_minutes=30,
@@ -1133,7 +1134,7 @@ class AIAppointmentToolTests(TestCase):
         self.client.interface_language = "sr"
         self.client.language = "sr"
         self.client.save(update_fields=["interface_language", "language", "updated_at"])
-        for message in ("hvala ......", "ok hvala", "doviđenja", "vidimo se"):
+        for message in ("hvala ......", "ok hvala", "fala", "fala vi", "okfala", "okhvala", "doviđenja", "vidimo se"):
             with self.subTest(message=message):
                 conversation = Conversation.objects.create(
                     business_client=self.client,
@@ -1198,6 +1199,40 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["intent"], "unknown")
         self.assertIn("Nisam sigurna", result["response_text"])
         self.assertNotIn("zakazivanje, otkazivanje, pomeranje", result["response_text"])
+
+    @mock.patch("appointments.services.timezone.now")
+    def test_today_availability_excludes_past_slots(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 14, 16, 13, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+
+        availability = handle_inbound_text(
+            self.client,
+            "ima li danas slobodnih termina?",
+            channel="telegram",
+            payload={"date": date(2026, 5, 14)},
+            use_ai=False,
+        )
+        booking = handle_inbound_text(
+            self.client,
+            "Book appointment",
+            channel="telegram",
+            payload={
+                "date": date(2026, 5, 14),
+                "time": time(14, 0),
+                "customer_name": "Bane Kostic",
+                "phone": "+38160123456",
+            },
+            use_ai=False,
+        )
+
+        self.assertEqual(availability["intent"], "check_availability")
+        self.assertEqual(availability["tool_output"]["free_count"], 0)
+        self.assertEqual(booking["intent"], "book_appointment")
+        self.assertEqual(booking["tool_output"]["status"], "time_unavailable")
+        self.assertEqual(Appointment.objects.count(), 0)
 
     @mock.patch("ai_agent.services.timezone.now")
     def test_greeting_uses_business_name_and_local_day_part(self, now_mock):
@@ -2184,6 +2219,7 @@ class AIAppointmentApiTests(TestCase):
             package=Plan.CODE_BUSINESS_PLUS,
             interface_language="en",
             language="en",
+            timezone="Pacific/Honolulu",
             work_start=time(9, 0),
             work_end=time(16, 0),
             slot_interval_minutes=30,

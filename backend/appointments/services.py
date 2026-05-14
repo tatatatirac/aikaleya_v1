@@ -101,10 +101,17 @@ def blocked_times_for_date(business_client, target_date, staff_member_id=None):
     return list(query.order_by("start_at"))
 
 
-def availability_for_date(business_client, target_date, duration_minutes=None, staff_member_id=None):
+def availability_for_date(
+    business_client,
+    target_date,
+    duration_minutes=None,
+    staff_member_id=None,
+    exclude_past_slots=False,
+):
     duration = int(duration_minutes or business_client.slot_interval_minutes)
     work_window = effective_working_hours(business_client, target_date, staff_member_id=staff_member_id)
     blocked_times = blocked_times_for_date(business_client, target_date, staff_member_id=staff_member_id)
+    now = timezone.localtime(timezone.now(), client_timezone(business_client)) if exclude_past_slots else None
     appointments_query = Appointment.objects.select_related("customer", "staff_member", "service").filter(
         business_client=business_client,
         date=target_date,
@@ -129,6 +136,8 @@ def availability_for_date(business_client, target_date, duration_minutes=None, s
         }
 
     for slot_time in iter_work_slots(business_client, target_date, duration, staff_member_id=staff_member_id):
+        slot_start = aware_client_datetime(business_client, target_date, slot_time)
+        is_past_slot = bool(exclude_past_slots and target_date == now.date() and slot_start <= now)
         blocking_appointment = next(
             (appointment for appointment in active if appointment_overlaps(slot_time, duration, appointment)),
             None,
@@ -140,14 +149,18 @@ def availability_for_date(business_client, target_date, duration_minutes=None, s
         slots.append(
             {
                 "time": slot_time.strftime("%H:%M"),
-                "available": blocking_appointment is None and blocking_time is None,
+                "available": not is_past_slot and blocking_appointment is None and blocking_time is None,
                 "appointment_id": blocking_appointment.id if blocking_appointment else None,
                 "blocked_time_id": blocking_time.id if blocking_time else None,
-                "status": blocking_appointment.status if blocking_appointment else ("blocked_time" if blocking_time else "available"),
+                "status": (
+                    blocking_appointment.status
+                    if blocking_appointment
+                    else ("blocked_time" if blocking_time else ("past" if is_past_slot else "available"))
+                ),
                 "customer": blocking_appointment.customer.full_name if blocking_appointment and blocking_appointment.customer else "",
                 "staff_member": blocking_appointment.staff_member.full_name if blocking_appointment and blocking_appointment.staff_member else "",
                 "service": blocking_appointment.service.name if blocking_appointment and blocking_appointment.service else "",
-                "reason": blocking_time.reason if blocking_time else "",
+                "reason": blocking_time.reason if blocking_time else ("Termin je prosao." if is_past_slot else ""),
             }
         )
 
@@ -169,4 +182,9 @@ def availability_for_date(business_client, target_date, duration_minutes=None, s
 
 def today_availability_summary(business_client, staff_member_id=None):
     target_date = timezone.localtime(timezone.now(), client_timezone(business_client)).date()
-    return availability_for_date(business_client, target_date, staff_member_id=staff_member_id)
+    return availability_for_date(
+        business_client,
+        target_date,
+        staff_member_id=staff_member_id,
+        exclude_past_slots=True,
+    )

@@ -399,12 +399,20 @@ def requested_time_outside_work_window(requested_time, work_start, work_end):
     return not (start <= parsed < end)
 
 
-def first_free_slots(business_client, target_date, duration_minutes=None, staff_member_id=None, limit=5):
+def first_free_slots(
+    business_client,
+    target_date,
+    duration_minutes=None,
+    staff_member_id=None,
+    limit=5,
+    exclude_past_slots=False,
+):
     availability = availability_for_date(
         business_client,
         target_date,
         duration_minutes=duration_minutes,
         staff_member_id=staff_member_id,
+        exclude_past_slots=exclude_past_slots,
     )
     slots = [slot["time"] for slot in availability["slots"] if slot["available"]]
     return availability, slots[:limit]
@@ -636,7 +644,16 @@ def prioritize_suggested_details(suggested_details, requested_time="", limit=5):
     return sorted(details, key=sort_key)[:limit]
 
 
-def aggregate_staff_availability(business_client, target_date, duration_minutes, service=None, staff_member=None, limit=5, requested_time=""):
+def aggregate_staff_availability(
+    business_client,
+    target_date,
+    duration_minutes,
+    service=None,
+    staff_member=None,
+    limit=5,
+    requested_time="",
+    exclude_past_slots=False,
+):
     total_free = 0
     total_busy = 0
     is_closed = True
@@ -651,6 +668,7 @@ def aggregate_staff_availability(business_client, target_date, duration_minutes,
             duration_minutes=duration_minutes,
             staff_member_id=candidate.id if candidate else None,
             limit=lookup_limit,
+            exclude_past_slots=exclude_past_slots,
         )
         total_free += availability["free_count"]
         total_busy += availability["busy_count"]
@@ -703,6 +721,7 @@ def next_available_slot_after(business_client, start_date, duration_minutes, ser
             service=service,
             staff_member=staff_member,
             limit=1,
+            exclude_past_slots=True,
         )
         suggestions = availability.get("suggested_slots_detail") or []
         if suggestions:
@@ -801,6 +820,7 @@ def check_availability_tool(business_client, text="", payload=None):
             service=service,
             staff_member=None,
             requested_time=requested_time,
+            exclude_past_slots=True,
         )
     availability, suggested_slots = first_free_slots(
         business_client,
@@ -808,6 +828,7 @@ def check_availability_tool(business_client, text="", payload=None):
         duration_minutes=duration,
         staff_member_id=staff_member.id if staff_member else None,
         limit=100 if requested_time else 5,
+        exclude_past_slots=True,
     )
     availability["suggested_slots"] = prioritize_suggested_slots(suggested_slots, requested_time=requested_time, limit=5)
     availability["requested_time"] = requested_time or ""
@@ -838,6 +859,7 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
         service=service,
         staff_member=staff_member,
         requested_time=suggestion_time,
+        exclude_past_slots=True,
     )
     suggested_slots = aggregate_availability["suggested_slots"]
     is_outside_work_hours = requested_time_outside_work_window(
@@ -875,6 +897,7 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
             target_date,
             duration_minutes=duration,
             staff_member_id=candidate.id if candidate else None,
+            exclude_past_slots=True,
         )
         if requested_time in [slot["time"] for slot in availability["slots"] if slot["available"]]:
             selected_staff_member = candidate
@@ -1092,6 +1115,7 @@ def reschedule_appointment_tool(business_client, text="", customer=None, channel
             duration_minutes=appointment.duration_minutes,
             staff_member_id=appointment.staff_member_id,
             limit=100 if suggestion_time else 5,
+            exclude_past_slots=True,
         )
         suggested_slots = prioritize_suggested_slots(suggested_slots, requested_time=suggestion_time, limit=5)
         return {
@@ -1110,6 +1134,7 @@ def reschedule_appointment_tool(business_client, text="", customer=None, channel
         target_date,
         duration_minutes=appointment.duration_minutes,
         staff_member_id=appointment.staff_member_id,
+        exclude_past_slots=True,
     )
     is_outside_work_hours = requested_time_outside_work_window(
         requested_time,
