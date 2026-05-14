@@ -2244,7 +2244,8 @@ def handle_inbound_text(
             raw_payload={"channel": channel, "payload": json_safe(payload), "external_thread_id": external_thread_id},
         )
 
-    if use_ai and should_skip_ai_planner_for_simple_text(text, previous_state):
+    skip_ai_for_simple_text = use_ai and should_skip_ai_planner_for_simple_text(text, previous_state)
+    if skip_ai_for_simple_text:
         planner_raw_response = {"engine": "deterministic-small-talk", "skipped_ai": True}
     elif use_ai:
         try:
@@ -2474,7 +2475,7 @@ def handle_inbound_text(
     response_text = build_text_response(business_client, intent.intent, tool_output)
     ai_provider_used = "fallback"
 
-    if use_ai:
+    if use_ai and not skip_ai_for_simple_text:
         try:
             response_text = generate_anthropic_reply(
                 business_client,

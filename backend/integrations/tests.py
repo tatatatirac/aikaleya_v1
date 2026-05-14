@@ -183,6 +183,46 @@ class IntegrationStatusTests(TestCase):
         self.assertEqual(send_mock.call_args.args[1], 12345)
 
     @mock.patch("integrations.services.send_telegram_message", return_value={"ok": True})
+    @mock.patch("ai_agent.services.generate_anthropic_reply")
+    @mock.patch("ai_agent.services.generate_anthropic_plan")
+    def test_telegram_webhook_greeting_replies_without_ai(self, plan_mock, reply_mock, send_mock):
+        self.business_client.interface_language = "sr"
+        self.business_client.language = "sr"
+        self.business_client.save(update_fields=["interface_language", "language", "updated_at"])
+        connection = IntegrationConnection.objects.create(
+            business_client=self.business_client,
+            provider="telegram",
+            enabled=True,
+            status="connected",
+            public_number="@kaleya_test_bot",
+            config={"bot_token": "secret-token", "webhook_secret": "correct-secret"},
+        )
+
+        response = self.api.post(
+            f"/api/integrations/telegram/webhook/{connection.id}/",
+            {
+                "update_id": 1004,
+                "message": {
+                    "message_id": 13,
+                    "chat": {"id": 12345, "type": "private"},
+                    "from": {"id": 222, "first_name": "Liam"},
+                    "text": "dobar dan",
+                },
+            },
+            format="json",
+            HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN="correct-secret",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.data["processed"])
+        self.assertEqual(response.data["intent"], "business_info")
+        self.assertEqual(response.data["tool_status"], "greeting")
+        send_mock.assert_called_once()
+        self.assertIn("izvolite", send_mock.call_args.args[2].lower())
+        plan_mock.assert_not_called()
+        reply_mock.assert_not_called()
+
+    @mock.patch("integrations.services.send_telegram_message", return_value={"ok": True})
     def test_telegram_webhook_ignores_emoji_only_message(self, send_mock):
         self.business_client.is_demo = True
         self.business_client.save(update_fields=["is_demo", "updated_at"])
