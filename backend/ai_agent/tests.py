@@ -1133,28 +1133,71 @@ class AIAppointmentToolTests(TestCase):
         self.client.interface_language = "sr"
         self.client.language = "sr"
         self.client.save(update_fields=["interface_language", "language", "updated_at"])
-        conversation = Conversation.objects.create(
-            business_client=self.client,
-            channel="telegram",
-            language="sr",
-            metadata={"ai_state": {"unknown_count": 1}},
-        )
+        for message in ("hvala ......", "ok hvala", "doviđenja", "vidimo se"):
+            with self.subTest(message=message):
+                conversation = Conversation.objects.create(
+                    business_client=self.client,
+                    channel="telegram",
+                    language="sr",
+                    metadata={"ai_state": {"unknown_count": 1}},
+                )
+
+                result = handle_inbound_text(
+                    self.client,
+                    message,
+                    conversation=conversation,
+                    channel="telegram",
+                    use_ai=False,
+                )
+
+                conversation.refresh_from_db()
+                self.assertEqual(result["intent"], "business_info")
+                self.assertEqual(result["tool_output"]["status"], "gratitude")
+                self.assertEqual(result["response_text"], "Hvala vama, doviđenja.")
+                self.assertNotIn("zakazivanje", result["response_text"].lower())
+                self.assertNotEqual(conversation.status, "handoff")
+        self.assertEqual(SupportTicket.objects.count(), 0)
+
+    def test_completed_flow_closing_words_close_conversation(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+        for message in ("dogovoreno", "u redu", "ok"):
+            with self.subTest(message=message):
+                conversation = Conversation.objects.create(
+                    business_client=self.client,
+                    channel="telegram",
+                    language="sr",
+                    metadata={"ai_state": {"last_tool_status": "booked", "last_intent": "book_appointment"}},
+                )
+
+                result = handle_inbound_text(
+                    self.client,
+                    message,
+                    conversation=conversation,
+                    channel="telegram",
+                    use_ai=False,
+                )
+
+                self.assertEqual(result["intent"], "business_info")
+                self.assertEqual(result["tool_output"]["status"], "gratitude")
+                self.assertEqual(result["response_text"], "Hvala vama, doviđenja.")
+
+    def test_unknown_serbian_response_avoids_form_like_intent_prompt(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
 
         result = handle_inbound_text(
             self.client,
-            "hvala ......",
-            conversation=conversation,
+            "plava stolica banana",
             channel="telegram",
             use_ai=False,
         )
 
-        conversation.refresh_from_db()
-        self.assertEqual(result["intent"], "business_info")
-        self.assertEqual(result["tool_output"]["status"], "gratitude")
-        self.assertEqual(result["response_text"], "Hvala vama, doviđenja.")
-        self.assertNotIn("zakazivanje", result["response_text"].lower())
-        self.assertNotEqual(conversation.status, "handoff")
-        self.assertEqual(SupportTicket.objects.count(), 0)
+        self.assertEqual(result["intent"], "unknown")
+        self.assertIn("Nisam sigurna", result["response_text"])
+        self.assertNotIn("zakazivanje, otkazivanje, pomeranje", result["response_text"])
 
     @mock.patch("ai_agent.services.timezone.now")
     def test_greeting_uses_business_name_and_local_day_part(self, now_mock):

@@ -260,6 +260,28 @@ GRATITUDE_HINTS = (
     "obrigado",
     "obrigada",
 )
+CLOSING_HINTS = (
+    "dovidjenja",
+    "doviđenja",
+    "vidimo se",
+    "prijatno",
+    "cao cao",
+    "bye",
+    "goodbye",
+    "see you",
+)
+COMPLETED_FLOW_CLOSING_HINTS = (
+    "ok",
+    "okej",
+    "u redu",
+    "uredu",
+    "vazi",
+    "važi",
+    "dogovoreno",
+    "super",
+    "odlicno",
+    "odlično",
+)
 CUSTOMER_INFO_HINTS = (
     "imate li moj telefon",
     "imas li moj telefon",
@@ -496,6 +518,7 @@ def json_safe(value):
 
 def normalize_intent_text(value):
     normalized = str(value or "").translate(SERBIAN_CYRILLIC_TRANSLITERATION)
+    normalized = normalized.replace("đ", "dj").replace("Đ", "dj")
     normalized = unicodedata.normalize("NFKD", normalized).casefold()
     normalized = "".join(char for char in normalized if not unicodedata.combining(char))
     normalized = normalized.replace("đ", "dj")
@@ -593,8 +616,23 @@ def is_gratitude_text(text):
     gratitude_compact = tuple(normalized_alnum(hint) for hint in GRATITUDE_HINTS)
     if compact in gratitude_phrases or compact_alnum in gratitude_compact:
         return True
-    tokens = re.findall(r"[a-z0-9]+", compact_alnum)
-    return any(token in gratitude_compact for token in tokens)
+    tokens = compact.split()
+    return any(token in gratitude_phrases for token in tokens)
+
+
+def is_conversation_closing_text(text, previous_state=None):
+    compact = normalized_compact_words(text)
+    compact_alnum = normalized_alnum(text)
+    closing_phrases = tuple(normalize_intent_text(hint) for hint in CLOSING_HINTS)
+    closing_compact = tuple(normalized_alnum(hint) for hint in CLOSING_HINTS)
+    if is_gratitude_text(text) or compact in closing_phrases or compact_alnum in closing_compact:
+        return True
+    previous_state = previous_state or {}
+    if previous_state.get("last_tool_status") not in {"booked", "cancelled", "rescheduled"}:
+        return False
+    completed_phrases = tuple(normalize_intent_text(hint) for hint in COMPLETED_FLOW_CLOSING_HINTS)
+    completed_compact = tuple(normalized_alnum(hint) for hint in COMPLETED_FLOW_CLOSING_HINTS)
+    return compact in completed_phrases or compact_alnum in completed_compact
 
 
 def is_short_confirmation_text(text):
@@ -1192,7 +1230,7 @@ def build_clarifying_response(business_client, intent, missing_fields, tool_outp
         if "new_time" in missing:
             return "U koje vreme zelite novi termin?"
         if "intent" in missing:
-            return "Mozete li napisati da li zelite zakazivanje, otkazivanje, pomeranje ili proveru termina?"
+            return "Nisam sigurna da sam dobro razumela. Napišite mi malo konkretnije."
         if suggestions:
             return f"Mogu da ponudim ove termine: {suggestions}. Koji vam odgovara?"
         return "Treba mi jos jedan podatak da bih nastavila."
@@ -2090,7 +2128,7 @@ def build_text_response(business_client, intent, tool_output):
 
     if intent == "unknown":
         if language == "sr":
-            return "Nisam sigurna da sam dobro razumela. Mozete li napisati da li zelite zakazivanje, otkazivanje, pomeranje ili proveru termina?"
+            return "Nisam sigurna da sam dobro razumela. Napišite mi malo konkretnije."
         if language == "de":
             return "Ich bin nicht sicher, ob ich richtig verstanden habe. Geht es um Buchen, Absagen, Verschieben oder Pruefen eines Termins?"
         return "I am not fully sure I understood. Do you want to book, cancel, reschedule or check an appointment?"
@@ -2201,7 +2239,7 @@ def handle_inbound_text(
         intent_name = "business_info"
         confidence = max(confidence, 0.86)
         planner_raw_response["greeting"] = True
-    if is_gratitude_text(text) and intent_name in {"unknown", "support_handoff"}:
+    if is_conversation_closing_text(text, previous_state) and intent_name in {"unknown", "support_handoff"}:
         intent_name = "business_info"
         confidence = max(confidence, 0.86)
         planner_raw_response["gratitude"] = True
