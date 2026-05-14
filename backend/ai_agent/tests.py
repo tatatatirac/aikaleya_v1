@@ -22,13 +22,6 @@ from support.models import SupportTicket
 
 class AIAppointmentToolTests(TestCase):
     def setUp(self):
-        fixed_now = datetime(2026, 5, 14, 6, 0, tzinfo=dt_timezone.utc)
-        self.tools_now_patcher = mock.patch("ai_agent.tools.timezone.now", return_value=fixed_now)
-        self.appointments_now_patcher = mock.patch("appointments.services.timezone.now", return_value=fixed_now)
-        self.tools_now_patcher.start()
-        self.appointments_now_patcher.start()
-        self.addCleanup(self.tools_now_patcher.stop)
-        self.addCleanup(self.appointments_now_patcher.stop)
         self.user = User.objects.create_user(username="client@example.com", email="client@example.com", password="test12345")
         self.client = BusinessClient.objects.create(
             owner=self.user,
@@ -36,7 +29,7 @@ class AIAppointmentToolTests(TestCase):
             package=Plan.CODE_PRO,
             interface_language="en",
             language="en",
-            timezone="UTC",
+            timezone="Pacific/Honolulu",
             work_start=time(9, 0),
             work_end=time(16, 0),
             slot_interval_minutes=30,
@@ -90,44 +83,6 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["intent"], "check_availability")
         self.assertEqual(result["tool_output"]["free_count"], 14)
         self.assertIn("Ima 14 slobodnih termina", result["response_text"])
-
-    @mock.patch("appointments.services.timezone.now")
-    @mock.patch("ai_agent.tools.timezone.now")
-    def test_ai_understands_generic_termina_availability_question(self, tools_now_mock, appointments_now_mock):
-        tools_now_mock.return_value = datetime(2026, 5, 14, 6, 0, tzinfo=dt_timezone.utc)
-        appointments_now_mock.return_value = datetime(2026, 5, 14, 6, 0, tzinfo=dt_timezone.utc)
-        self.client.interface_language = "sr"
-        self.client.language = "sr"
-        self.client.timezone = "UTC"
-        self.client.save(update_fields=["interface_language", "language", "timezone", "updated_at"])
-
-        result = handle_inbound_text(
-            self.client,
-            "ima li termina",
-            channel="telegram",
-            use_ai=False,
-        )
-
-        self.assertEqual(result["intent"], "check_availability")
-        self.assertEqual(result["tool_output"]["free_count"], 14)
-
-    @mock.patch("ai_agent.tools.timezone.now")
-    def test_ai_understands_next_week_as_monday_not_sunday(self, now_mock):
-        now_mock.return_value = datetime(2026, 5, 14, 12, 0, tzinfo=dt_timezone.utc)
-        self.client.interface_language = "sr"
-        self.client.language = "sr"
-        self.client.save(update_fields=["interface_language", "language", "updated_at"])
-
-        result = handle_inbound_text(
-            self.client,
-            "ima li sta sledece nedelje",
-            channel="telegram",
-            use_ai=False,
-        )
-
-        self.assertEqual(result["intent"], "check_availability")
-        self.assertEqual(result["tool_output"]["date"], "2026-05-18")
-        self.assertFalse(result["tool_output"]["is_closed"])
 
     def test_ai_availability_keeps_response_language_across_supported_languages(self):
         cases = (
@@ -2294,13 +2249,6 @@ class AIAppointmentToolTests(TestCase):
 
 class AIAppointmentApiTests(TestCase):
     def setUp(self):
-        fixed_now = datetime(2026, 5, 14, 6, 0, tzinfo=dt_timezone.utc)
-        self.tools_now_patcher = mock.patch("ai_agent.tools.timezone.now", return_value=fixed_now)
-        self.appointments_now_patcher = mock.patch("appointments.services.timezone.now", return_value=fixed_now)
-        self.tools_now_patcher.start()
-        self.appointments_now_patcher.start()
-        self.addCleanup(self.tools_now_patcher.stop)
-        self.addCleanup(self.appointments_now_patcher.stop)
         self.api = APIClient()
         self.owner = User.objects.create_user(
             username="owner@example.com",
@@ -2315,7 +2263,7 @@ class AIAppointmentApiTests(TestCase):
             package=Plan.CODE_BUSINESS_PLUS,
             interface_language="en",
             language="en",
-            timezone="UTC",
+            timezone="Pacific/Honolulu",
             work_start=time(9, 0),
             work_end=time(16, 0),
             slot_interval_minutes=30,

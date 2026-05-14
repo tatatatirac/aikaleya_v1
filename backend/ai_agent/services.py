@@ -131,9 +131,6 @@ AVAILABILITY_HINTS = (
     "ima li slobod",
     "ima li sta",
     "ima li nesto",
-    "ima li termina",
-    "ima termina",
-    "ima li termin",
     "ima nesto",
     "ima neki",
     "sta ima",
@@ -226,14 +223,11 @@ SHORT_CONFIRMATION_HINTS = (
 )
 GREETING_HINTS = (
     "hi",
-    "alo",
     "hello",
     "helo",
     "hey",
     "pozdrav",
     "cao",
-    "rekao sam cao",
-    "rekao sam ćao",
     "zdravo",
     "bardan",
     "dobar dan",
@@ -321,12 +315,6 @@ DATE_HINT_PATTERN = re.compile(r"\b(20\d{2}-\d{2}-\d{2}|\d{1,2}[.\-/]\d{1,2}[.\-
 DATE_HINT_WORDS = (
     "danas",
     "sutra",
-    "ove nedelje",
-    "ovu nedelju",
-    "sledece nedelje",
-    "sledecu nedelju",
-    "sljedece sedmice",
-    "next week",
     "today",
     "tomorrow",
     "hoy",
@@ -2027,8 +2015,6 @@ def build_text_response(business_client, intent, tool_output):
         suggestions = ", ".join(tool_output.get("suggested_slots", [])[:3])
         requested_time = tool_output.get("requested_time") or ""
         if tool_output.get("is_closed"):
-            return localized_no_available_booking_response(language, tool_output, business_client=business_client)
-        if int(count or 0) == 0 and tool_output.get("next_available_slot"):
             return localized_no_available_booking_response(language, tool_output, business_client=business_client)
         if requested_time:
             return localized_time_availability_response(
