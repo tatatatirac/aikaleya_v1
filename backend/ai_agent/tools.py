@@ -575,12 +575,46 @@ def format_suggested_slot(slot_time, staff_member=None):
     return slot_time
 
 
-def aggregate_staff_availability(business_client, target_date, duration_minutes, service=None, staff_member=None, limit=5):
+def suggested_slot_time(label):
+    return str(label or "").split(" - ", 1)[0]
+
+
+def prioritize_suggested_slots(slot_labels, requested_time="", limit=5):
+    labels = list(slot_labels or [])
+    if not requested_time:
+        return labels[:limit]
+    target_minutes = as_time(requested_time).hour * 60 + as_time(requested_time).minute
+
+    def sort_key(label):
+        slot_time = as_time(suggested_slot_time(label))
+        slot_minutes = slot_time.hour * 60 + slot_time.minute
+        # Prefer exact/later nearby slots before earlier ones with the same distance.
+        return (abs(slot_minutes - target_minutes), slot_minutes < target_minutes, slot_minutes, str(label))
+
+    return sorted(labels, key=sort_key)[:limit]
+
+
+def prioritize_suggested_details(suggested_details, requested_time="", limit=5):
+    details = list(suggested_details or [])
+    if not requested_time:
+        return sorted(details, key=lambda item: (item["time"], item["staff_member"]))[:limit]
+    target_minutes = as_time(requested_time).hour * 60 + as_time(requested_time).minute
+
+    def sort_key(item):
+        slot_time = as_time(item["time"])
+        slot_minutes = slot_time.hour * 60 + slot_time.minute
+        return (abs(slot_minutes - target_minutes), slot_minutes < target_minutes, slot_minutes, item["staff_member"])
+
+    return sorted(details, key=sort_key)[:limit]
+
+
+def aggregate_staff_availability(business_client, target_date, duration_minutes, service=None, staff_member=None, limit=5, requested_time=""):
     total_free = 0
     total_busy = 0
     is_closed = True
     suggested_details = []
     per_staff = []
+    lookup_limit = 100 if requested_time else limit
 
     for candidate in eligible_staff_members(business_client, service=service, preferred_staff_member=staff_member):
         availability, slots = first_free_slots(
@@ -588,7 +622,7 @@ def aggregate_staff_availability(business_client, target_date, duration_minutes,
             target_date,
             duration_minutes=duration_minutes,
             staff_member_id=candidate.id if candidate else None,
-            limit=limit,
+            limit=lookup_limit,
         )
         total_free += availability["free_count"]
         total_busy += availability["busy_count"]
@@ -612,7 +646,7 @@ def aggregate_staff_availability(business_client, target_date, duration_minutes,
                 }
             )
 
-    suggested_details = sorted(suggested_details, key=lambda item: (item["time"], item["staff_member"]))[:limit]
+    suggested_details = prioritize_suggested_details(suggested_details, requested_time=requested_time, limit=limit)
     return {
         "date": target_date.isoformat(),
         "work_start": business_client.work_start.strftime("%H:%M"),
@@ -626,6 +660,8 @@ def aggregate_staff_availability(business_client, target_date, duration_minutes,
         "per_staff": per_staff,
         "suggested_slots": [item["label"] for item in suggested_details],
         "suggested_slots_detail": suggested_details,
+        "requested_time": requested_time or "",
+        "requested_time_available": bool(requested_time and any(item["time"] == requested_time for item in suggested_details)),
     }
 
 
@@ -693,6 +729,10 @@ def ensure_customer(business_client, customer=None, payload=None):
 def check_availability_tool(business_client, text="", payload=None):
     payload = infer_payload_from_text(business_client, text, payload)
     target_date = parse_requested_date(text, payload.get("date"), reference_date=client_local_today(business_client))
+    requested_time = normalize_requested_time_for_work_hours(
+        business_client,
+        parse_requested_time_from_payload(text, payload),
+    )
     service = scoped_service(business_client, payload.get("service_id")) or resolve_service_by_hint(business_client, payload.get("service_hint"))
     staff_member = scoped_staff_member(business_client, payload.get("staff_member_id")) or resolve_staff_member_by_hint(business_client, payload.get("staff_hint"))
     duration = int(payload.get("duration_minutes") or (service.duration_minutes if service else business_client.slot_interval_minutes))
@@ -703,14 +743,20 @@ def check_availability_tool(business_client, text="", payload=None):
             duration_minutes=duration,
             service=service,
             staff_member=None,
+            requested_time=requested_time,
         )
     availability, suggested_slots = first_free_slots(
         business_client,
         target_date,
         duration_minutes=duration,
         staff_member_id=staff_member.id if staff_member else None,
+        limit=100 if requested_time else 5,
     )
-    availability["suggested_slots"] = suggested_slots
+    availability["suggested_slots"] = prioritize_suggested_slots(suggested_slots, requested_time=requested_time, limit=5)
+    availability["requested_time"] = requested_time or ""
+    availability["requested_time_available"] = bool(
+        requested_time and requested_time in [slot["time"] for slot in availability["slots"] if slot["available"]]
+    )
     return availability
 
 

@@ -644,6 +644,60 @@ class AIAppointmentToolTests(TestCase):
         self.assertIn("od ponedeljka do petka", outside_hours["response_text"])
 
     @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_availability_focuses_suggestions_around_requested_time(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 14, 10, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        service = Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            category="Osnovno",
+            duration_minutes=30,
+            price=25,
+        )
+        external_thread_id = "telegram:test-availability-around-time"
+
+        first = handle_inbound_text(
+            self.client,
+            "imate li sutra slobodnih termina oko 14h",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic", "phone": "+38160123456"},
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        refined = handle_inbound_text(
+            self.client,
+            "ali oko 14",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        booked = handle_inbound_text(
+            self.client,
+            "sisanje mi treba",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        appointment = Appointment.objects.get()
+        self.assertEqual(first["intent"], "check_availability")
+        self.assertEqual(first["tool_output"]["requested_time"], "14:00")
+        self.assertTrue(first["tool_output"]["requested_time_available"])
+        self.assertEqual(first["tool_output"]["suggested_slots"][0], "14:00")
+        self.assertIn("oko 14:00", first["response_text"])
+        self.assertEqual(refined["intent"], "check_availability")
+        self.assertEqual(refined["decision"]["missing_fields"], [])
+        self.assertIn("14:00", refined["response_text"])
+        self.assertEqual(booked["intent"], "book_appointment")
+        self.assertEqual(booked["tool_output"]["status"], "booked")
+        self.assertEqual(appointment.service, service)
+        self.assertEqual(appointment.date, date(2026, 5, 15))
+        self.assertEqual(appointment.start_time, time(14, 0))
+
+    @mock.patch("ai_agent.tools.timezone.now")
     def test_ai_cancels_all_customer_appointments_from_conversation_memory(self, now_mock):
         now_mock.return_value = datetime(2026, 5, 14, 0, 30, tzinfo=dt_timezone.utc)
         self.client.interface_language = "sr"

@@ -181,6 +181,25 @@ NATURAL_BOOKING_REQUEST_HINTS = (
     "can i",
     "could i",
 )
+AVAILABILITY_REFINEMENT_HINTS = (
+    "ali",
+    "oko",
+    "around",
+    "about",
+    "near",
+    "blizu",
+)
+BOOKING_CONFIRMATION_HINTS = (
+    "moze",
+    "moze li",
+    "odgovara",
+    "zakazi",
+    "rezervisi",
+    "rezervisati",
+    "book",
+    "reserve",
+    "yes",
+)
 GREETING_HINTS = (
     "hi",
     "hello",
@@ -467,6 +486,26 @@ def localized_availability_response(language, count, suggestions):
     templates = AVAILABILITY_RESPONSE_TEMPLATES.get(language) or AVAILABILITY_RESPONSE_TEMPLATES["en"]
     template = templates[0] if suggestions else templates[1]
     return template.format(count=count, suggestions=suggestions)
+
+
+def localized_time_availability_response(language, requested_time, suggestions, exact_available):
+    if language == "sr":
+        if exact_available:
+            return f"Da, oko {requested_time} ima slobodno. Mogu da ponudim: {suggestions}."
+        if suggestions:
+            return f"Oko {requested_time} nije slobodno, najblize mogu da ponudim: {suggestions}."
+        return f"Oko {requested_time} nema slobodnih termina."
+    if language == "de":
+        if exact_available:
+            return f"Ja, um {requested_time} ist ein Termin frei. Ich kann anbieten: {suggestions}."
+        if suggestions:
+            return f"Um {requested_time} ist nichts frei. Nahe Optionen: {suggestions}."
+        return f"Um {requested_time} gibt es keine freien Termine."
+    if exact_available:
+        return f"Yes, around {requested_time} is available. I can offer: {suggestions}."
+    if suggestions:
+        return f"Around {requested_time} is not available. The nearest options are: {suggestions}."
+    return f"There are no available slots around {requested_time}."
 
 
 def localized_status_response(templates_by_status, status, language, **context):
@@ -1539,6 +1578,20 @@ def should_book_from_availability_followup(intent_name, previous_state, text, pa
     return bool((payload or {}).get("time") or parse_requested_time(text))
 
 
+def should_refine_availability_followup(intent_name, previous_state, text, payload):
+    if not previous_state or previous_state.get("last_intent") != "check_availability":
+        return False
+    if previous_state.get("status") not in {"open", "waiting_for_customer"}:
+        return False
+    if intent_name not in {"unknown", "book_appointment", "check_availability"}:
+        return False
+    if not ((payload or {}).get("time") or parse_requested_time(text)):
+        return False
+    if contains_normalized_hint(text, BOOKING_CONFIRMATION_HINTS):
+        return False
+    return contains_normalized_hint(text, AVAILABILITY_REFINEMENT_HINTS)
+
+
 def has_fresh_date_or_time(text):
     return bool(text_has_parseable_date(text) or parse_requested_time(text))
 
@@ -1603,6 +1656,14 @@ def build_text_response(business_client, intent, tool_output):
     if intent == "check_availability":
         count = tool_output.get("free_count", 0)
         suggestions = ", ".join(tool_output.get("suggested_slots", [])[:3])
+        requested_time = tool_output.get("requested_time") or ""
+        if requested_time:
+            return localized_time_availability_response(
+                language,
+                requested_time,
+                suggestions,
+                bool(tool_output.get("requested_time_available")),
+            )
         return localized_availability_response(language, count, suggestions)
 
     if intent == "book_appointment":
@@ -1830,7 +1891,12 @@ def handle_inbound_text(
         intent_name = "business_info"
         confidence = max(confidence, 0.86)
         planner_raw_response["greeting"] = True
-    if should_book_from_availability_followup(intent_name, previous_state, text, payload):
+    if should_refine_availability_followup(intent_name, previous_state, text, payload):
+        payload = merge_payloads(previous_state.get("pending_payload") or {}, payload)
+        intent_name = "check_availability"
+        confidence = max(confidence, 0.78)
+        planner_raw_response["refined_previous_availability"] = True
+    elif should_book_from_availability_followup(intent_name, previous_state, text, payload):
         payload = merge_payloads(previous_state.get("pending_payload") or {}, payload)
         intent_name = "book_appointment"
         confidence = max(confidence, 0.76)
