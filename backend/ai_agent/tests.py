@@ -68,6 +68,22 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["decision"]["missing_fields"], [])
         self.assertIn("Ima 14 slobodnih termina", result["response_text"])
 
+    def test_ai_understands_short_serbian_availability_question(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+
+        result = handle_inbound_text(
+            self.client,
+            "ima li sta sutra",
+            channel="telegram",
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "check_availability")
+        self.assertEqual(result["tool_output"]["free_count"], 14)
+        self.assertIn("Ima 14 slobodnih termina", result["response_text"])
+
     def test_ai_availability_keeps_response_language_across_supported_languages(self):
         cases = (
             ("en", "Are there available slots today?", "There are 14 available slots"),
@@ -1159,11 +1175,39 @@ class AIAppointmentToolTests(TestCase):
                 self.assertNotEqual(conversation.status, "handoff")
         self.assertEqual(SupportTicket.objects.count(), 0)
 
+    def test_combined_closing_words_close_conversation_without_handoff(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+        for message in ("dovidenja vidimo se", "dovidjenja vidimo se", "vidimo se cao", "cao vidimo se"):
+            with self.subTest(message=message):
+                conversation = Conversation.objects.create(
+                    business_client=self.client,
+                    channel="telegram",
+                    language="sr",
+                    metadata={"ai_state": {"unknown_count": 1}},
+                )
+
+                result = handle_inbound_text(
+                    self.client,
+                    message,
+                    conversation=conversation,
+                    channel="telegram",
+                    use_ai=False,
+                )
+
+                conversation.refresh_from_db()
+                self.assertEqual(result["intent"], "business_info")
+                self.assertEqual(result["tool_output"]["status"], "gratitude")
+                self.assertIn("Hvala vama", result["response_text"])
+                self.assertNotEqual(conversation.status, "handoff")
+        self.assertEqual(SupportTicket.objects.count(), 0)
+
     def test_completed_flow_closing_words_close_conversation(self):
         self.client.interface_language = "sr"
         self.client.language = "sr"
         self.client.save(update_fields=["interface_language", "language", "updated_at"])
-        for message in ("dogovoreno", "u redu", "ok"):
+        for message in ("dogovoreno", "u redu", "ok", "cao"):
             with self.subTest(message=message):
                 conversation = Conversation.objects.create(
                     business_client=self.client,

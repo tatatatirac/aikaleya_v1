@@ -129,6 +129,11 @@ AVAILABILITY_HINTS = (
     "слободан термин",
     "ima slobodnih",
     "ima li slobod",
+    "ima li sta",
+    "ima li nesto",
+    "ima nesto",
+    "ima neki",
+    "sta ima",
     "da li ima slobod",
     "има слободних",
     "да ли има слобод",
@@ -264,9 +269,13 @@ GRATITUDE_HINTS = (
     "obrigada",
 )
 CLOSING_HINTS = (
+    "dovidenja",
     "dovidjenja",
     "doviđenja",
+    "doviđenja",
     "vidimo se",
+    "vidimo se cao",
+    "cao vidimo se",
     "prijatno",
     "cao cao",
     "bye",
@@ -274,6 +283,8 @@ CLOSING_HINTS = (
     "see you",
 )
 COMPLETED_FLOW_CLOSING_HINTS = (
+    "cao",
+    "ćao",
     "ok",
     "okej",
     "u redu",
@@ -631,6 +642,10 @@ def is_conversation_closing_text(text, previous_state=None):
     closing_phrases = tuple(normalize_intent_text(hint) for hint in CLOSING_HINTS)
     closing_compact = tuple(normalized_alnum(hint) for hint in CLOSING_HINTS)
     if is_gratitude_text(text) or compact in closing_phrases or compact_alnum in closing_compact:
+        return True
+    if any(phrase and len(phrase) >= 5 and phrase in compact for phrase in closing_phrases):
+        return True
+    if any(phrase and len(phrase) >= 5 and phrase in compact_alnum for phrase in closing_compact):
         return True
     previous_state = previous_state or {}
     if previous_state.get("last_tool_status") not in {"booked", "cancelled", "rescheduled"}:
@@ -2240,14 +2255,14 @@ def handle_inbound_text(
             payload.pop("time", None)
             payload["_suppress_time_inference"] = True
             planner_raw_response["bare_number_as_date"] = bare_date.isoformat()
-    if is_greeting_text(text) and intent_name in {"unknown", "support_handoff"}:
-        intent_name = "business_info"
-        confidence = max(confidence, 0.86)
-        planner_raw_response["greeting"] = True
     if is_conversation_closing_text(text, previous_state) and intent_name in {"unknown", "support_handoff"}:
         intent_name = "business_info"
         confidence = max(confidence, 0.86)
         planner_raw_response["gratitude"] = True
+    elif is_greeting_text(text) and intent_name in {"unknown", "support_handoff"}:
+        intent_name = "business_info"
+        confidence = max(confidence, 0.86)
+        planner_raw_response["greeting"] = True
     if is_customer_info_question(text, previous_state):
         intent_name = "business_info"
         confidence = max(confidence, 0.8)
