@@ -346,11 +346,28 @@ def parse_requested_time(text, explicit_time=None):
     return ""
 
 
+def parse_time_period_preference(text, payload=None):
+    payload = payload or {}
+    if payload.get("time_preference"):
+        return str(payload["time_preference"])[:5]
+    normalized = normalize_lookup(text or "")
+    if any(phrase in normalized for phrase in ("popodne", "poslepodne", "posle podne", "afternoon")):
+        return "14:00"
+    if any(phrase in normalized for phrase in ("prepodne", "pre podne", "ujutru", "morning")):
+        return "10:00"
+    if any(phrase in normalized for phrase in ("uvece", "vece", "evening")):
+        return "15:00"
+    return ""
+
+
 def parse_requested_time_from_payload(text, payload=None):
     payload = payload or {}
     if payload.get("_suppress_time_inference") and not payload.get("time"):
         return ""
-    return parse_requested_time(text, payload.get("time"))
+    parsed_from_text = parse_requested_time(text)
+    if parsed_from_text:
+        return parsed_from_text
+    return parse_requested_time("", payload.get("time"))
 
 
 def as_time(value):
@@ -737,6 +754,11 @@ def check_availability_tool(business_client, text="", payload=None):
         business_client,
         parse_requested_time_from_payload(text, payload),
     )
+    if not requested_time:
+        requested_time = normalize_requested_time_for_work_hours(
+            business_client,
+            parse_time_period_preference(text, payload),
+        )
     service = scoped_service(business_client, payload.get("service_id")) or resolve_service_by_hint(business_client, payload.get("service_hint"))
     staff_member = scoped_staff_member(business_client, payload.get("staff_member_id")) or resolve_staff_member_by_hint(business_client, payload.get("staff_hint"))
     duration = int(payload.get("duration_minutes") or (service.duration_minutes if service else business_client.slot_interval_minutes))
@@ -771,6 +793,10 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
         business_client,
         parse_requested_time_from_payload(text, payload),
     )
+    suggestion_time = requested_time or normalize_requested_time_for_work_hours(
+        business_client,
+        parse_time_period_preference(text, payload),
+    )
     service = scoped_service(business_client, payload.get("service_id")) or resolve_service_by_hint(business_client, payload.get("service_hint"))
     staff_member = scoped_staff_member(business_client, payload.get("staff_member_id")) or resolve_staff_member_by_hint(business_client, payload.get("staff_hint"))
     duration = int(payload.get("duration_minutes") or (service.duration_minutes if service else business_client.slot_interval_minutes))
@@ -780,6 +806,7 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
         duration_minutes=duration,
         service=service,
         staff_member=staff_member,
+        requested_time=suggestion_time,
     )
     suggested_slots = aggregate_availability["suggested_slots"]
     is_outside_work_hours = requested_time_outside_work_window(
@@ -1002,13 +1029,19 @@ def reschedule_appointment_tool(business_client, text="", customer=None, channel
         business_client,
         parse_requested_time_from_payload(text, payload),
     )
+    suggestion_time = requested_time or normalize_requested_time_for_work_hours(
+        business_client,
+        parse_time_period_preference(text, payload),
+    )
     if not requested_time:
         availability, suggested_slots = first_free_slots(
             business_client,
             target_date,
             duration_minutes=appointment.duration_minutes,
             staff_member_id=appointment.staff_member_id,
+            limit=100 if suggestion_time else 5,
         )
+        suggested_slots = prioritize_suggested_slots(suggested_slots, requested_time=suggestion_time, limit=5)
         return {
             "status": "needs_time",
             "appointment_id": appointment.id,

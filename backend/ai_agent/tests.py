@@ -1045,7 +1045,7 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(ticket.metadata["conversation_id"], conversation.id)
 
     def test_greeting_does_not_escalate_to_support(self):
-        for greeting in ("hi", "pozdrav", "cao", "dobardan"):
+        for greeting in ("hi", "pozdrav", "cao", "dobardan", "dobrovece", "dobrojutro"):
             with self.subTest(greeting=greeting):
                 conversation = Conversation.objects.create(
                     business_client=self.client,
@@ -1067,6 +1067,99 @@ class AIAppointmentToolTests(TestCase):
                 self.assertEqual(result["tool_output"]["status"], "greeting")
                 self.assertNotEqual(conversation.status, "handoff")
                 self.assertEqual(SupportTicket.objects.count(), 0)
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_uses_afternoon_context_and_new_time_overrides_previous_time(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 14, 10, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            category="Osnovno",
+            duration_minutes=30,
+            price=25,
+        )
+        external_thread_id = "telegram:test-afternoon-natural-flow"
+
+        needs_time = handle_inbound_text(
+            self.client,
+            "ttreba mi sisanje sreda popodne",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic", "phone": "+38160123456"},
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        availability = handle_inbound_text(
+            self.client,
+            "popodne da li ima slobodnih termina",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        refined = handle_inbound_text(
+            self.client,
+            "oko 3",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        booked = handle_inbound_text(
+            self.client,
+            "ok u pola 4",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        appointment = Appointment.objects.get()
+        self.assertEqual(needs_time["intent"], "book_appointment")
+        self.assertEqual(needs_time["tool_output"]["status"], "needs_time")
+        self.assertEqual(needs_time["tool_output"]["suggested_slots"][0], "14:00")
+        self.assertEqual(availability["intent"], "check_availability")
+        self.assertEqual(availability["tool_output"]["date"], "2026-05-20")
+        self.assertEqual(availability["tool_output"]["requested_time"], "14:00")
+        self.assertEqual(availability["tool_output"]["suggested_slots"][0], "14:00")
+        self.assertEqual(refined["tool_output"]["requested_time"], "15:00")
+        self.assertEqual(refined["tool_output"]["suggested_slots"][0], "15:00")
+        self.assertEqual(booked["tool_output"]["status"], "booked")
+        self.assertEqual(appointment.date, date(2026, 5, 20))
+        self.assertEqual(appointment.start_time, time(15, 30))
+
+    def test_customer_profile_question_does_not_escalate_to_support(self):
+        customer = self.client.customers.create(first_name="Bane", last_name="Kostic", phone="+38160123456")
+        conversation = Conversation.objects.create(
+            business_client=self.client,
+            customer=customer,
+            channel="telegram",
+            language="sr",
+            external_thread_id="telegram:test-customer-profile-info",
+        )
+
+        phone_result = handle_inbound_text(
+            self.client,
+            "imate li moj telefon",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+        name_result = handle_inbound_text(
+            self.client,
+            "ime",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+
+        self.assertEqual(phone_result["intent"], "business_info")
+        self.assertEqual(phone_result["tool_output"]["status"], "customer_profile")
+        self.assertIn("+38160123456", phone_result["response_text"])
+        self.assertEqual(name_result["intent"], "business_info")
+        self.assertEqual(name_result["tool_output"]["status"], "customer_profile")
+        self.assertIn("Bane Kostic", name_result["response_text"])
+        self.assertEqual(SupportTicket.objects.count(), 0)
 
     def test_ai_writes_tool_audit_log(self):
         result = handle_inbound_text(

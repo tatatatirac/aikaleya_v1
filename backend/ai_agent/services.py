@@ -210,7 +210,9 @@ GREETING_HINTS = (
     "dobar dan",
     "dobardan",
     "dobro jutro",
+    "dobrojutro",
     "dobro vece",
+    "dobrovece",
     "good morning",
     "good afternoon",
     "good evening",
@@ -219,6 +221,20 @@ GREETING_HINTS = (
     "ciao",
     "hallo",
     "privet",
+)
+CUSTOMER_INFO_HINTS = (
+    "imate li moj telefon",
+    "imas li moj telefon",
+    "moj telefon",
+    "moj broj",
+    "koji je moj telefon",
+    "koji je moj broj",
+    "moje ime",
+    "kako se zovem",
+    "moji podaci",
+    "my phone",
+    "my number",
+    "my name",
 )
 
 DATE_HINT_PATTERN = re.compile(r"\b(20\d{2}-\d{2}-\d{2}|\d{1,2}[.\-/]\d{1,2}[.\-/]20\d{2})\b")
@@ -479,7 +495,73 @@ def is_greeting_text(text):
     }
     if tokens and tokens[0] in first_token_greetings:
         return True
-    return compact.startswith(("dobar dan", "dobro jutro", "dobro vece", "good morning", "good afternoon", "good evening"))
+    return compact.startswith((
+        "dobar dan",
+        "dobardan",
+        "dobro jutro",
+        "dobrojutro",
+        "dobro vece",
+        "dobrovece",
+        "good morning",
+        "good afternoon",
+        "good evening",
+    ))
+
+
+def is_customer_info_question(text, previous_state=None):
+    normalized = normalize_intent_text(text)
+    compact = re.sub(r"[\s,!.?;:]+", " ", normalized).strip()
+    if not compact:
+        return False
+    if any(normalize_intent_text(hint) in compact for hint in CUSTOMER_INFO_HINTS):
+        return True
+    if compact in {"ime", "telefon", "broj", "podaci"}:
+        previous_state = previous_state or {}
+        return previous_state.get("last_intent") == "business_info"
+    return False
+
+
+def customer_profile_payload(customer=None, payload=None):
+    payload = payload or {}
+    name = ""
+    phone = ""
+    email = ""
+    if customer:
+        name = customer.full_name
+        phone = customer.phone
+        email = customer.email
+    return {
+        "name": name or payload.get("customer_name") or "",
+        "phone": phone or payload.get("phone") or "",
+        "email": email or payload.get("email") or "",
+    }
+
+
+def localized_customer_profile_response(language, profile):
+    name = (profile or {}).get("name") or ""
+    phone = (profile or {}).get("phone") or ""
+    email = (profile or {}).get("email") or ""
+    if language == "sr":
+        parts = []
+        if name:
+            parts.append(f"ime vodim kao {name}")
+        if phone:
+            parts.append(f"telefon kao {phone}")
+        if email:
+            parts.append(f"email kao {email}")
+        if parts:
+            return "Da, u sistemu " + ", ".join(parts) + "."
+        return "Trenutno nemam sacuvane vase kontakt podatke u ovom razgovoru."
+    if name or phone or email:
+        parts = []
+        if name:
+            parts.append(f"name as {name}")
+        if phone:
+            parts.append(f"phone as {phone}")
+        if email:
+            parts.append(f"email as {email}")
+        return "Yes, I have your " + ", ".join(parts) + "."
+    return "I do not have your contact details saved in this conversation yet."
 
 
 def localized_availability_response(language, count, suggestions):
@@ -1782,6 +1864,8 @@ def build_text_response(business_client, intent, tool_output):
     if intent == "business_info":
         if tool_output.get("status") == "greeting":
             return localized_greeting_response(language)
+        if tool_output.get("status") == "customer_profile":
+            return localized_customer_profile_response(language, tool_output.get("customer_profile") or {})
         matched_knowledge = tool_output.get("matched_knowledge") or {}
         if matched_knowledge.get("answer"):
             return matched_knowledge["answer"]
@@ -1915,6 +1999,10 @@ def handle_inbound_text(
         intent_name = "business_info"
         confidence = max(confidence, 0.86)
         planner_raw_response["greeting"] = True
+    if is_customer_info_question(text, previous_state):
+        intent_name = "business_info"
+        confidence = max(confidence, 0.8)
+        planner_raw_response["customer_profile_question"] = True
     if should_refine_availability_followup(intent_name, previous_state, text, payload):
         payload = merge_payloads(previous_state.get("pending_payload") or {}, payload)
         intent_name = "check_availability"
@@ -2033,6 +2121,9 @@ def handle_inbound_text(
         }
         if planner_raw_response.get("greeting"):
             tool_output["status"] = "greeting"
+        if planner_raw_response.get("customer_profile_question"):
+            tool_output["status"] = "customer_profile"
+            tool_output["customer_profile"] = customer_profile_payload(customer=customer, payload=payload)
         status = "success"
     elif intent_name == "unknown":
         tool_name = "clarify_intent"
