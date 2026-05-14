@@ -1048,6 +1048,7 @@ class AIAppointmentToolTests(TestCase):
         for greeting in (
             "hi",
             "helo",
+            "helloo",
             "hello",
             "pozdrav",
             "cao",
@@ -1081,6 +1082,45 @@ class AIAppointmentToolTests(TestCase):
                 self.assertEqual(result["tool_output"]["status"], "greeting")
                 self.assertNotEqual(conversation.status, "handoff")
                 self.assertEqual(SupportTicket.objects.count(), 0)
+
+    @mock.patch("ai_agent.services.timezone.now")
+    def test_greeting_uses_business_name_and_local_day_part(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 14, 6, 0, tzinfo=dt_timezone.utc)
+        self.client.name = "Salon Black"
+        self.client.public_name = "Salon Black"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.timezone = "Europe/Belgrade"
+        self.client.save(update_fields=["name", "public_name", "interface_language", "language", "timezone", "updated_at"])
+
+        cases = (
+            (datetime(2026, 5, 14, 6, 0, tzinfo=dt_timezone.utc), "Dobro jutro, Salon Black, izvolite."),
+            (datetime(2026, 5, 14, 12, 0, tzinfo=dt_timezone.utc), "Dobar dan, Salon Black, izvolite."),
+            (datetime(2026, 5, 14, 21, 0, tzinfo=dt_timezone.utc), "Dobro vece, Salon Black, izvolite."),
+            (datetime(2026, 5, 14, 0, 0, tzinfo=dt_timezone.utc), "Dobro vece, Salon Black, izvolite."),
+        )
+
+        for now_value, expected_response in cases:
+            with self.subTest(expected_response=expected_response):
+                now_mock.return_value = now_value
+                conversation = Conversation.objects.create(
+                    business_client=self.client,
+                    channel="telegram",
+                    language="sr",
+                    metadata={"ai_state": {"unknown_count": 1}},
+                )
+
+                result = handle_inbound_text(
+                    self.client,
+                    "dobar dan",
+                    conversation=conversation,
+                    channel="telegram",
+                    use_ai=False,
+                )
+
+                self.assertEqual(result["intent"], "business_info")
+                self.assertEqual(result["tool_output"]["status"], "greeting")
+                self.assertEqual(result["response_text"], expected_response)
 
     @mock.patch("ai_agent.tools.timezone.now")
     def test_ai_uses_afternoon_context_and_new_time_overrides_previous_time(self, now_mock):

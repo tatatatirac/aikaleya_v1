@@ -21,6 +21,7 @@ from ai_agent.tools import (
     text_has_parseable_date,
 )
 from accounts.permissions import user_role
+from appointments.services import client_timezone
 from audit_log.services import write_audit_log
 from appointments.models import Appointment, Customer
 from clients.models import BusinessKnowledgeEntry, ClientApiSettings
@@ -474,6 +475,26 @@ def contains_normalized_hint(text, hints):
     return any(normalize_intent_text(hint) in normalized for hint in hints)
 
 
+def edit_distance_at_most_one(left, right):
+    if left == right:
+        return True
+    if abs(len(left) - len(right)) > 1:
+        return False
+    if len(left) == len(right):
+        return sum(1 for left_char, right_char in zip(left, right) if left_char != right_char) <= 1
+    shorter, longer = (left, right) if len(left) < len(right) else (right, left)
+    index_short = 0
+    skipped = 0
+    for char in longer:
+        if index_short < len(shorter) and shorter[index_short] == char:
+            index_short += 1
+            continue
+        skipped += 1
+        if skipped > 1:
+            return False
+    return True
+
+
 def is_greeting_text(text):
     normalized = normalize_intent_text(text)
     compact = re.sub(r"[\s,!.?;:]+", " ", normalized).strip()
@@ -485,6 +506,8 @@ def is_greeting_text(text):
     compact_alnum = re.sub(r"[^a-z0-9]+", "", compact)
     greeting_compact_phrases = tuple(re.sub(r"[^a-z0-9]+", "", phrase) for phrase in greeting_phrases)
     if compact_alnum in greeting_compact_phrases:
+        return True
+    if 2 <= len(compact_alnum) <= 18 and any(edit_distance_at_most_one(compact_alnum, phrase) for phrase in greeting_compact_phrases):
         return True
     tokens = compact.split()
     if len(tokens) > 4:
@@ -876,22 +899,50 @@ def memory_prioritized_suggestions(tool_output):
     return ", ".join(suggestions[:3])
 
 
-def localized_greeting_response(language):
+def local_greeting_part(language, business_client):
+    local_hour = timezone.localtime(timezone.now(), client_timezone(business_client)).hour if business_client else timezone.localtime().hour
+    if 3 <= local_hour < 10:
+        part = "morning"
+    elif 10 <= local_hour < 18:
+        part = "day"
+    else:
+        part = "evening"
+
     if language == "sr":
-        return "Zdravo, ovde Kaleya. Mogu da pomognem oko zakazivanja, otkazivanja, pomeranja ili provere termina."
+        return {"morning": "Dobro jutro", "day": "Dobar dan", "evening": "Dobro vece"}[part]
     if language == "de":
-        return "Hallo, hier ist Kaleya. Ich kann beim Buchen, Absagen, Verschieben oder Pruefen von Terminen helfen."
+        return {"morning": "Guten Morgen", "day": "Guten Tag", "evening": "Guten Abend"}[part]
     if language == "es":
-        return "Hola, soy Kaleya. Puedo ayudar con reservas, cancelaciones, cambios o disponibilidad."
+        return {"morning": "Buenos dias", "day": "Buenas tardes", "evening": "Buenas noches"}[part]
     if language == "pt":
-        return "Ola, aqui e a Kaleya. Posso ajudar com agendamentos, cancelamentos, alteracoes ou disponibilidade."
+        return {"morning": "Bom dia", "day": "Boa tarde", "evening": "Boa noite"}[part]
     if language == "fr":
-        return "Bonjour, ici Kaleya. Je peux aider a reserver, annuler, deplacer ou verifier un rendez-vous."
+        return {"morning": "Bonjour", "day": "Bonjour", "evening": "Bonsoir"}[part]
     if language == "it":
-        return "Ciao, sono Kaleya. Posso aiutare con prenotazioni, cancellazioni, modifiche o disponibilita."
+        return {"morning": "Buongiorno", "day": "Buongiorno", "evening": "Buonasera"}[part]
     if language == "ru":
-        return "Zdravstvujte, eto Kaleya. Ya pomogu zapisat, otmenit, perenesti ili proverit termin."
-    return "Hi, this is Kaleya. I can help you book, cancel, reschedule or check an appointment."
+        return {"morning": "Dobroye utro", "day": "Dobryy den", "evening": "Dobryy vecher"}[part]
+    return {"morning": "Good morning", "day": "Good afternoon", "evening": "Good evening"}[part]
+
+
+def localized_greeting_response(language, business_client=None):
+    business_name = str(business_client or "Kaleya").strip() if business_client else "Kaleya"
+    greeting = local_greeting_part(language, business_client)
+    if language == "sr":
+        return f"{greeting}, {business_name}, izvolite."
+    if language == "de":
+        return f"{greeting}, {business_name}, bitte."
+    if language == "es":
+        return f"{greeting}, {business_name}, en que puedo ayudarle?"
+    if language == "pt":
+        return f"{greeting}, {business_name}, como posso ajudar?"
+    if language == "fr":
+        return f"{greeting}, {business_name}, je vous ecoute."
+    if language == "it":
+        return f"{greeting}, {business_name}, come posso aiutarla?"
+    if language == "ru":
+        return f"{greeting}, {business_name}, chem mogu pomoch?"
+    return f"{greeting}, {business_name}, how can I help?"
 
 
 SERBIAN_WEEKDAY_GENITIVE = {
@@ -1877,7 +1928,7 @@ def build_text_response(business_client, intent, tool_output):
 
     if intent == "business_info":
         if tool_output.get("status") == "greeting":
-            return localized_greeting_response(language)
+            return localized_greeting_response(language, business_client=business_client)
         if tool_output.get("status") == "customer_profile":
             return localized_customer_profile_response(language, tool_output.get("customer_profile") or {})
         matched_knowledge = tool_output.get("matched_knowledge") or {}
