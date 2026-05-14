@@ -907,15 +907,34 @@ def workflow_missing_fields(business_client, intent_name, text, payload, custome
     return []
 
 
-def service_options_text(business_client, limit=6):
+def service_options_text(business_client, limit=6, language=None):
+    language = language or business_client.interface_language or business_client.language
     services = Service.objects.filter(business_client=business_client, is_active=True).order_by("category", "name")[:limit]
-    return ", ".join(service.name for service in services)
+    return ", ".join(localized_service_name(service.name, language) for service in services)
+
+
+SERBIAN_SERVICE_DISPLAY_REPLACEMENTS = {
+    "sisanje": "Šišanje",
+    "sredjivanje": "Sređivanje",
+    "sminkanje": "Šminkanje",
+}
+
+
+def localized_service_name(name, language):
+    if language != "sr":
+        return name
+    normalized = normalize_intent_text(name)
+    return SERBIAN_SERVICE_DISPLAY_REPLACEMENTS.get(normalized, name)
 
 
 def customer_memory_service_prompt(customer_memory):
     if not customer_memory:
         return ""
     return customer_memory.get("favorite_service") or customer_memory.get("last_service") or ""
+
+
+def customer_memory_service_display(customer_memory, language):
+    return localized_service_name(customer_memory_service_prompt(customer_memory), language)
 
 
 def memory_prioritized_suggestions(tool_output):
@@ -1005,10 +1024,13 @@ def sr_work_schedule_summary(business_client):
 def localized_no_available_booking_response(language, tool_output, business_client=None):
     date_value = tool_output.get("date") or ""
     requested_time = tool_output.get("requested_time") or tool_output.get("time") or ""
+    next_slot = tool_output.get("next_available_slot") or {}
     if language == "sr":
         if tool_output.get("is_closed"):
             schedule = sr_work_schedule_summary(business_client) if business_client else "u podeseno radno vreme"
             return f"Izvinite, taj dan je neradan ({date_value}). Radno vreme je {schedule}."
+        if next_slot:
+            return f"Izvinjavam se, za {date_value} je sve zauzeto. Prvi slobodan termin je {next_slot.get('date')} u {next_slot.get('time')}."
         if requested_time:
             return f"Termin u {requested_time} nije slobodan za {date_value}. Napisite drugo vreme ili pitajte za slobodne termine tog dana."
         return f"Za {date_value} nema slobodnih termina. Napisite drugi datum."
@@ -1020,9 +1042,27 @@ def localized_no_available_booking_response(language, tool_output, business_clie
         return f"Fuer {date_value} gibt es keine freien Termine. Bitte nennen Sie ein anderes Datum."
     if tool_output.get("is_closed"):
         return f"That day is closed for booking ({date_value}). Please choose another date."
+    if next_slot:
+        return f"Sorry, {date_value} is fully booked. The first available slot is {next_slot.get('date')} at {next_slot.get('time')}."
     if requested_time:
         return f"The slot at {requested_time} is not available for {date_value}. Please choose another time or ask for free slots."
     return f"There are no available slots for {date_value}. Please choose another date."
+
+
+def localized_time_preference_question(language):
+    if language == "sr":
+        return "Kada vam odgovara da proverim koji su slobodni termini?"
+    if language == "de":
+        return "Welche Uhrzeit wuerde Ihnen passen, damit ich freie Termine pruefen kann?"
+    if language == "es":
+        return "Que hora le viene bien para que revise los horarios libres?"
+    if language == "pt":
+        return "Que horario prefere para eu verificar os horarios livres?"
+    if language == "fr":
+        return "Quel horaire vous conviendrait pour que je verifie les creneaux disponibles?"
+    if language == "it":
+        return "Che orario preferisce, cosi controllo gli slot disponibili?"
+    return "What time works for you so I can check the available slots?"
 
 
 def localized_outside_work_hours_response(language, tool_output, business_client):
@@ -1046,11 +1086,11 @@ def localized_outside_work_hours_response(language, tool_output, business_client
 
 
 def service_clarifying_response(business_client, language, customer_memory=None):
-    options = service_options_text(business_client)
-    memory_service = customer_memory_service_prompt(customer_memory)
+    options = service_options_text(business_client, language=language)
+    memory_service = customer_memory_service_display(customer_memory, language)
     if language == "sr":
         if memory_service:
-            return f"Da li zelite opet {memory_service}? Dostupne usluge: {options}." if options else f"Da li zelite opet {memory_service}?"
+            return f"Da li zelite opet {memory_service}? Ako ne, napisite koju uslugu zelite."
         return f"Za koju uslugu zelite termin? Dostupne usluge: {options}." if options else "Za koju uslugu zelite termin?"
     if language == "de":
         if memory_service:
@@ -1894,6 +1934,11 @@ def build_text_response(business_client, intent, tool_output):
                 suggestions=suggestions,
             )
         if status == "needs_time":
+            favorite_time = (tool_output.get("customer_memory") or {}).get("favorite_time") or ""
+            if not tool_output.get("suggestion_time") and not favorite_time and tool_output.get("suggested_slots"):
+                return localized_time_preference_question(language)
+            if not suggestions and tool_output.get("next_available_slot"):
+                return localized_no_available_booking_response(language, tool_output, business_client=business_client)
             return localized_status_response(
                 BOOKING_RESPONSE_TEMPLATES,
                 "needs_time",

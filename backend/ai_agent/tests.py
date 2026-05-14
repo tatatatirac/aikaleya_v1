@@ -16,7 +16,7 @@ from billing.models import Plan
 from clients.models import BusinessClient, BusinessKnowledgeEntry
 from communications.models import Conversation, Message
 from notifications.models import NotificationJob
-from staff_services.models import BlockedTime, Service, StaffMember, WorkingHours
+from staff_services.models import BlockedTime, Service, StaffMember, StaffService, WorkingHours
 from support.models import SupportTicket
 
 
@@ -322,7 +322,7 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(second["intent"], "book_appointment")
         self.assertEqual(second["preprocess"]["language"], "sr")
         self.assertEqual(second["tool_output"]["status"], "needs_time")
-        self.assertIn("Mogu da ponudim", second["response_text"])
+        self.assertIn("Kada vam odgovara", second["response_text"])
         self.assertEqual(third["intent"], "book_appointment")
         self.assertEqual(third["tool_output"]["status"], "booked")
         appointment = Appointment.objects.get()
@@ -367,12 +367,13 @@ class AIAppointmentToolTests(TestCase):
         )
 
         self.assertEqual(first["intent"], "book_appointment")
-        self.assertIn("Da li zelite opet Sisanje", first["response_text"])
+        self.assertIn("Da li zelite opet Šišanje", first["response_text"])
         self.assertEqual(confirmed["intent"], "book_appointment")
         self.assertEqual(confirmed["tool_output"]["status"], "needs_time")
         self.assertNotIn("service", confirmed["decision"]["missing_fields"])
         self.assertEqual(confirmed["conversation_state"]["pending_payload"]["service_hint"], "Sisanje")
-        self.assertIn("Mogu da ponudim", confirmed["response_text"])
+        self.assertIn("Kada vam odgovara", confirmed["response_text"])
+        self.assertNotIn("Dostupne usluge", first["response_text"])
 
     def test_ai_resumes_booking_with_natural_serbian_time_answers(self):
         for text_value, expected_time in (
@@ -549,7 +550,7 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["intent"], "book_appointment")
         self.assertEqual(result["tool_output"]["status"], "needs_time")
         self.assertEqual(result["decision"]["missing_fields"], [])
-        self.assertIn("Mogu da ponudim", result["response_text"])
+        self.assertIn("Kada vam odgovara", result["response_text"])
 
     @mock.patch("ai_agent.tools.timezone.now")
     def test_ai_closed_day_response_has_no_empty_suggestions_and_no_loop(self, now_mock):
@@ -1419,6 +1420,90 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["tool_output"]["status"], "time_unavailable")
         self.assertEqual(result["tool_output"]["requested_time"], "14:30")
         self.assertEqual(Appointment.objects.count(), 1)
+
+    def test_basic_booking_rejects_staff_slot_as_global_capacity(self):
+        self.client.package = Plan.CODE_BASIC
+        self.client.save(update_fields=["package", "updated_at"])
+        service = Service.objects.create(
+            business_client=self.client,
+            name="Farbanje",
+            duration_minutes=30,
+            price=45,
+        )
+        staff_member = StaffMember.objects.create(
+            business_client=self.client,
+            full_name="Ana Stylist",
+            role_title="Stylist",
+            is_active=True,
+        )
+        StaffService.objects.create(staff_member=staff_member, service=service, is_active=True)
+        existing_customer = self.client.customers.create(first_name="Existing", phone="+15550101")
+        target_date = date(2026, 5, 18)
+        Appointment.objects.create(
+            business_client=self.client,
+            customer=existing_customer,
+            staff_member=staff_member,
+            service=service,
+            title="Existing booking",
+            status=Appointment.STATUS_CONFIRMED,
+            date=target_date,
+            start_time=time(12, 0),
+            duration_minutes=30,
+            channel="telegram",
+            source="ai_agent",
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "moze li farbanje u 12",
+            channel="telegram",
+            payload={
+                "date": target_date,
+                "service_id": service.id,
+                "customer_name": "Bane Kostic",
+                "phone": "+38160123456",
+            },
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "book_appointment")
+        self.assertEqual(result["tool_output"]["status"], "time_unavailable")
+        self.assertEqual(result["tool_output"]["requested_time"], "12:00")
+        self.assertEqual(Appointment.objects.count(), 1)
+
+    def test_ai_offers_next_available_when_day_is_full(self):
+        service = Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            duration_minutes=30,
+            price=25,
+        )
+        target_date = date(2026, 5, 18)
+        BlockedTime.objects.create(
+            business_client=self.client,
+            start_at=aware_client_datetime(self.client, target_date, time(9, 0)),
+            end_at=aware_client_datetime(self.client, target_date, time(16, 0)),
+            reason="Fully booked",
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Book appointment",
+            channel="web",
+            payload={
+                "date": target_date,
+                "time": time(12, 0),
+                "service_id": service.id,
+                "customer_name": "Bane Kostic",
+                "phone": "+38160123456",
+            },
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "book_appointment")
+        self.assertEqual(result["tool_output"]["status"], "time_unavailable")
+        self.assertEqual(result["tool_output"]["next_available_slot"]["date"], "2026-05-19")
+        self.assertIn("first available slot", result["response_text"])
 
     def test_ai_booking_uses_available_employee_when_another_employee_is_blocked(self):
         target_date = date(2026, 5, 11)

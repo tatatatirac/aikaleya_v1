@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from appointments.models import Appointment, Customer
 from appointments.services import availability_for_date, client_timezone
+from clients.models import BusinessClient
 from staff_services.models import Service, StaffMember
 
 
@@ -579,6 +580,8 @@ def infer_payload_from_text(business_client, text, payload=None):
 
 
 def eligible_staff_members(business_client, service=None, preferred_staff_member=None):
+    if is_single_capacity_client(business_client):
+        return [None]
     if preferred_staff_member:
         return [preferred_staff_member]
 
@@ -588,6 +591,10 @@ def eligible_staff_members(business_client, service=None, preferred_staff_member
 
     staff_members = list(queryset.distinct().order_by("full_name"))
     return staff_members or [None]
+
+
+def is_single_capacity_client(business_client):
+    return getattr(business_client, "package", "") == BusinessClient.PACKAGE_BASIC
 
 
 def format_suggested_slot(slot_time, staff_member=None):
@@ -684,6 +691,30 @@ def aggregate_staff_availability(business_client, target_date, duration_minutes,
         "requested_time": requested_time or "",
         "requested_time_available": bool(requested_time and any(item["time"] == requested_time for item in suggested_details)),
     }
+
+
+def next_available_slot_after(business_client, start_date, duration_minutes, service=None, staff_member=None, max_days=30):
+    for day_offset in range(1, max_days + 1):
+        candidate_date = start_date + timedelta(days=day_offset)
+        availability = aggregate_staff_availability(
+            business_client,
+            candidate_date,
+            duration_minutes=duration_minutes,
+            service=service,
+            staff_member=staff_member,
+            limit=1,
+        )
+        suggestions = availability.get("suggested_slots_detail") or []
+        if suggestions:
+            suggestion = suggestions[0]
+            return {
+                "date": candidate_date.isoformat(),
+                "time": suggestion["time"],
+                "label": suggestion["label"],
+                "staff_member_id": suggestion["staff_member_id"],
+                "staff_member": suggestion["staff_member"],
+            }
+    return {}
 
 
 def resolve_staff_member_by_hint(business_client, hint):
@@ -816,6 +847,15 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
     )
 
     if not requested_time:
+        next_available_slot = {}
+        if not suggested_slots:
+            next_available_slot = next_available_slot_after(
+                business_client,
+                target_date,
+                duration,
+                service=service,
+                staff_member=staff_member,
+            )
         return {
             "status": "needs_time",
             "date": target_date.isoformat(),
@@ -823,6 +863,8 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
             "suggested_slots": suggested_slots,
             "suggested_slots_detail": aggregate_availability["suggested_slots_detail"],
             "free_count": aggregate_availability["free_count"],
+            "suggestion_time": suggestion_time,
+            "next_available_slot": next_available_slot,
         }
 
     selected_staff_member = None
@@ -840,6 +882,15 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
             break
 
     if not requested_time_available:
+        next_available_slot = {}
+        if not suggested_slots:
+            next_available_slot = next_available_slot_after(
+                business_client,
+                target_date,
+                duration,
+                service=service,
+                staff_member=staff_member,
+            )
         return {
             "status": "time_unavailable",
             "date": target_date.isoformat(),
@@ -851,6 +902,7 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
             "is_outside_work_hours": is_outside_work_hours,
             "work_start": aggregate_availability["work_start"],
             "work_end": aggregate_availability["work_end"],
+            "next_available_slot": next_available_slot,
         }
 
     customer = ensure_customer(business_client, customer=customer, payload={**payload, "channel": channel})
