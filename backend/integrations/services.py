@@ -1,4 +1,5 @@
 import json
+import re
 import urllib.parse
 import urllib.request
 
@@ -161,6 +162,10 @@ def telegram_text_from_message(message):
     return (message.get("text") or message.get("caption") or "").strip()
 
 
+def has_meaningful_text(text):
+    return bool(re.search(r"[^\W_]", text or "", flags=re.UNICODE))
+
+
 def telegram_sender_label(message):
     sender = message.get("from") or {}
     first_name = (sender.get("first_name") or "").strip()
@@ -271,6 +276,12 @@ def process_telegram_webhook(connection, update, provided_secret):
             "processed": False,
             "ignored": True,
             "reason": "Telegram update nema tekstualnu poruku.",
+        }
+    if not has_meaningful_text(text):
+        return {
+            "processed": False,
+            "ignored": True,
+            "reason": "Telegram poruka sadrzi samo emoji ili simbole.",
         }
 
     chat = message.get("chat") or {}

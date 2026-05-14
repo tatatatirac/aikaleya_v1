@@ -182,6 +182,41 @@ class IntegrationStatusTests(TestCase):
         send_mock.assert_called_once()
         self.assertEqual(send_mock.call_args.args[1], 12345)
 
+    @mock.patch("integrations.services.send_telegram_message", return_value={"ok": True})
+    def test_telegram_webhook_ignores_emoji_only_message(self, send_mock):
+        self.business_client.is_demo = True
+        self.business_client.save(update_fields=["is_demo", "updated_at"])
+        connection = IntegrationConnection.objects.create(
+            business_client=self.business_client,
+            provider="telegram",
+            enabled=True,
+            status="connected",
+            public_number="@kaleya_test_bot",
+            config={"bot_token": "secret-token", "webhook_secret": "correct-secret"},
+        )
+
+        response = self.api.post(
+            f"/api/integrations/telegram/webhook/{connection.id}/",
+            {
+                "update_id": 1003,
+                "message": {
+                    "message_id": 12,
+                    "chat": {"id": 12345, "type": "private"},
+                    "from": {"id": 222, "first_name": "Liam"},
+                    "text": "🙋‍♂️",
+                },
+            },
+            format="json",
+            HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN="correct-secret",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(response.data["processed"])
+        self.assertTrue(response.data["ignored"])
+        self.assertEqual(Conversation.objects.count(), 0)
+        self.assertEqual(Message.objects.count(), 0)
+        send_mock.assert_not_called()
+
     def test_dashboard_can_save_telegram_configuration_without_exposing_token(self):
         django_client = Client()
         django_client.force_login(self.user)

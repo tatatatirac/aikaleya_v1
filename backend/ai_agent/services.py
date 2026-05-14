@@ -201,6 +201,21 @@ BOOKING_CONFIRMATION_HINTS = (
     "reserve",
     "yes",
 )
+SHORT_CONFIRMATION_HINTS = (
+    "moze",
+    "moze moze",
+    "da",
+    "da moze",
+    "ok",
+    "okej",
+    "u redu",
+    "vazi",
+    "moze to",
+    "odgovara",
+    "yes",
+    "sure",
+    "ok yes",
+)
 GREETING_HINTS = (
     "hi",
     "hello",
@@ -475,6 +490,14 @@ def contains_normalized_hint(text, hints):
     return any(normalize_intent_text(hint) in normalized for hint in hints)
 
 
+def normalized_compact_words(text):
+    return re.sub(r"[\s,!.?;:]+", " ", normalize_intent_text(text)).strip()
+
+
+def normalized_alnum(text):
+    return re.sub(r"[^a-z0-9]+", "", normalize_intent_text(text))
+
+
 def edit_distance_at_most_one(left, right):
     if left == right:
         return True
@@ -496,15 +519,14 @@ def edit_distance_at_most_one(left, right):
 
 
 def is_greeting_text(text):
-    normalized = normalize_intent_text(text)
-    compact = re.sub(r"[\s,!.?;:]+", " ", normalized).strip()
+    compact = normalized_compact_words(text)
     if not compact:
         return False
     greeting_phrases = tuple(normalize_intent_text(hint) for hint in GREETING_HINTS)
     if compact in greeting_phrases:
         return True
-    compact_alnum = re.sub(r"[^a-z0-9]+", "", compact)
-    greeting_compact_phrases = tuple(re.sub(r"[^a-z0-9]+", "", phrase) for phrase in greeting_phrases)
+    compact_alnum = normalized_alnum(compact)
+    greeting_compact_phrases = tuple(normalized_alnum(phrase) for phrase in greeting_phrases)
     if compact_alnum in greeting_compact_phrases:
         return True
     if 2 <= len(compact_alnum) <= 18 and any(edit_distance_at_most_one(compact_alnum, phrase) for phrase in greeting_compact_phrases):
@@ -543,6 +565,14 @@ def is_greeting_text(text):
         "good evening",
         "goodevening",
     ))
+
+
+def is_short_confirmation_text(text):
+    compact = normalized_compact_words(text)
+    compact_alnum = normalized_alnum(text)
+    confirmation_phrases = tuple(normalize_intent_text(hint) for hint in SHORT_CONFIRMATION_HINTS)
+    confirmation_compact = tuple(normalized_alnum(hint) for hint in SHORT_CONFIRMATION_HINTS)
+    return compact in confirmation_phrases or compact_alnum in confirmation_compact
 
 
 def is_customer_info_question(text, previous_state=None):
@@ -1800,6 +1830,20 @@ def should_use_last_appointment_date(intent_name, previous_state, text, payload)
     return bool(payload.get("time") or parse_requested_time(text))
 
 
+def apply_confirmed_memory_service(payload, previous_state, text, customer_memory):
+    payload = {**(payload or {})}
+    if payload.get("service_id") or payload.get("service_hint"):
+        return payload, False
+    previous_missing = set((previous_state or {}).get("missing_fields") or [])
+    if "service" not in previous_missing:
+        return payload, False
+    memory_service = customer_memory_service_prompt(customer_memory)
+    if not memory_service or not is_short_confirmation_text(text):
+        return payload, False
+    payload["service_hint"] = memory_service
+    return payload, True
+
+
 def attach_last_appointment_to_payload(payload, previous_state):
     if not previous_state or not previous_state.get("last_appointment_id"):
         return payload
@@ -2089,6 +2133,15 @@ def handle_inbound_text(
         payload = attach_last_appointment_to_payload(payload, previous_state)
         planner_raw_response["resumed_from_completed_appointment"] = True
     payload = infer_payload_from_text(business_client, text, payload)
+    current_customer_memory = customer_memory_context(customer)
+    payload, confirmed_memory_service = apply_confirmed_memory_service(
+        payload,
+        previous_state,
+        text,
+        current_customer_memory,
+    )
+    if confirmed_memory_service:
+        planner_raw_response["confirmed_memory_service"] = payload.get("service_hint", "")
     if should_use_last_appointment_date(intent_name, previous_state, text, payload):
         payload = attach_last_appointment_date_to_payload(payload, previous_state)
         planner_raw_response["used_last_appointment_date"] = True
@@ -2107,7 +2160,6 @@ def handle_inbound_text(
         language_fallback=conversation.language if conversation else "",
     )
     language = preprocess["language"]
-    current_customer_memory = customer_memory_context(customer)
     matched_knowledge = match_knowledge_entry(business_client, text, language)
     if intent_name == "unknown" and matched_knowledge:
         intent_name = "business_info"

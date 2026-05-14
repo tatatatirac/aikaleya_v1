@@ -329,6 +329,51 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(appointment.service.name, "Sisanje")
         self.assertEqual(appointment.start_time, time(10, 0))
 
+    def test_ai_confirms_memory_service_with_short_yes(self):
+        service = Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            duration_minutes=30,
+            price=25,
+        )
+        customer = self.client.customers.create(
+            first_name="Bane",
+            last_name="Kostic",
+            phone="+38160123456",
+            preferred_channel="telegram",
+        )
+        CustomerMemory.objects.create(
+            business_client=self.client,
+            customer=customer,
+            last_service=service,
+            identifiers={"telegram_user_id": "424242"},
+        )
+        external_thread_id = "telegram:test-memory-service-confirmation"
+
+        first = handle_inbound_text(
+            self.client,
+            "mogu li da zakazem za sutra",
+            channel="telegram",
+            payload={"telegram_user_id": "424242"},
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        confirmed = handle_inbound_text(
+            self.client,
+            "moze",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        self.assertEqual(first["intent"], "book_appointment")
+        self.assertIn("Da li zelite opet Sisanje", first["response_text"])
+        self.assertEqual(confirmed["intent"], "book_appointment")
+        self.assertEqual(confirmed["tool_output"]["status"], "needs_time")
+        self.assertNotIn("service", confirmed["decision"]["missing_fields"])
+        self.assertEqual(confirmed["conversation_state"]["pending_payload"]["service_hint"], "Sisanje")
+        self.assertIn("Mogu da ponudim", confirmed["response_text"])
+
     def test_ai_resumes_booking_with_natural_serbian_time_answers(self):
         for text_value, expected_time in (
             ("moze u pola 10", time(9, 30)),
@@ -1333,6 +1378,47 @@ class AIAppointmentToolTests(TestCase):
         self.assertNotIn("10:00", result["tool_output"]["suggested_slots"])
         self.assertNotIn("10:30", result["tool_output"]["suggested_slots"])
         self.assertEqual(Appointment.objects.count(), 0)
+
+    def test_ai_booking_rejects_occupied_exact_slot(self):
+        service = Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            duration_minutes=30,
+            price=25,
+        )
+        existing_customer = self.client.customers.create(first_name="Existing", phone="+15550101")
+        target_date = date(2026, 5, 19)
+        Appointment.objects.create(
+            business_client=self.client,
+            customer=existing_customer,
+            service=service,
+            title="Existing booking",
+            status=Appointment.STATUS_CONFIRMED,
+            date=target_date,
+            start_time=time(14, 30),
+            duration_minutes=30,
+            channel="telegram",
+            source="ai_agent",
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "Book appointment",
+            channel="web",
+            payload={
+                "date": target_date,
+                "time": time(14, 30),
+                "service_id": service.id,
+                "customer_name": "Bane Kostic",
+                "phone": "+38160123456",
+            },
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "book_appointment")
+        self.assertEqual(result["tool_output"]["status"], "time_unavailable")
+        self.assertEqual(result["tool_output"]["requested_time"], "14:30")
+        self.assertEqual(Appointment.objects.count(), 1)
 
     def test_ai_booking_uses_available_employee_when_another_employee_is_blocked(self):
         target_date = date(2026, 5, 11)
