@@ -203,10 +203,12 @@ BOOKING_CONFIRMATION_HINTS = (
 GREETING_HINTS = (
     "hi",
     "hello",
+    "helo",
     "hey",
     "pozdrav",
     "cao",
     "zdravo",
+    "bardan",
     "dobar dan",
     "dobardan",
     "dobro jutro",
@@ -214,8 +216,11 @@ GREETING_HINTS = (
     "dobro vece",
     "dobrovece",
     "good morning",
+    "goodmorning",
     "good afternoon",
+    "goodafternoon",
     "good evening",
+    "goodevening",
     "hola",
     "bonjour",
     "ciao",
@@ -477,16 +482,22 @@ def is_greeting_text(text):
     greeting_phrases = tuple(normalize_intent_text(hint) for hint in GREETING_HINTS)
     if compact in greeting_phrases:
         return True
+    compact_alnum = re.sub(r"[^a-z0-9]+", "", compact)
+    greeting_compact_phrases = tuple(re.sub(r"[^a-z0-9]+", "", phrase) for phrase in greeting_phrases)
+    if compact_alnum in greeting_compact_phrases:
+        return True
     tokens = compact.split()
     if len(tokens) > 4:
         return False
     first_token_greetings = {
         "hi",
         "hello",
+        "helo",
         "hey",
         "pozdrav",
         "cao",
         "zdravo",
+        "bardan",
         "hola",
         "bonjour",
         "ciao",
@@ -503,8 +514,11 @@ def is_greeting_text(text):
         "dobro vece",
         "dobrovece",
         "good morning",
+        "goodmorning",
         "good afternoon",
+        "goodafternoon",
         "good evening",
+        "goodevening",
     ))
 
 

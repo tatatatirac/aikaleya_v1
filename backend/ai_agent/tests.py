@@ -1045,7 +1045,21 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(ticket.metadata["conversation_id"], conversation.id)
 
     def test_greeting_does_not_escalate_to_support(self):
-        for greeting in ("hi", "pozdrav", "cao", "dobardan", "dobrovece", "dobrojutro"):
+        for greeting in (
+            "hi",
+            "helo",
+            "hello",
+            "pozdrav",
+            "cao",
+            "zdravo",
+            "zdravo❤️",
+            "bardan",
+            "dobardan",
+            "dobrovece",
+            "dobrovece😁",
+            "dobrojutro",
+            "goodafternoon",
+        ):
             with self.subTest(greeting=greeting):
                 conversation = Conversation.objects.create(
                     business_client=self.client,
