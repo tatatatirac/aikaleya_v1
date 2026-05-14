@@ -92,6 +92,26 @@ BOOKING_ACTION_HINTS = (
     "reserve",
     "schedule",
 )
+GREETING_HINTS = (
+    "hi",
+    "hello",
+    "hey",
+    "pozdrav",
+    "cao",
+    "zdravo",
+    "dobar dan",
+    "dobardan",
+    "dobro jutro",
+    "dobro vece",
+    "good morning",
+    "good afternoon",
+    "good evening",
+    "hola",
+    "bonjour",
+    "ciao",
+    "hallo",
+    "privet",
+)
 
 DATE_HINT_PATTERN = re.compile(r"\b(20\d{2}-\d{2}-\d{2}|\d{1,2}[.\-/]\d{1,2}[.\-/]20\d{2})\b")
 DATE_HINT_WORDS = (
@@ -321,6 +341,35 @@ def normalize_intent_text(value):
 def contains_normalized_hint(text, hints):
     normalized = normalize_intent_text(text)
     return any(normalize_intent_text(hint) in normalized for hint in hints)
+
+
+def is_greeting_text(text):
+    normalized = normalize_intent_text(text)
+    compact = re.sub(r"[\s,!.?;:]+", " ", normalized).strip()
+    if not compact:
+        return False
+    greeting_phrases = tuple(normalize_intent_text(hint) for hint in GREETING_HINTS)
+    if compact in greeting_phrases:
+        return True
+    tokens = compact.split()
+    if len(tokens) > 4:
+        return False
+    first_token_greetings = {
+        "hi",
+        "hello",
+        "hey",
+        "pozdrav",
+        "cao",
+        "zdravo",
+        "hola",
+        "bonjour",
+        "ciao",
+        "hallo",
+        "privet",
+    }
+    if tokens and tokens[0] in first_token_greetings:
+        return True
+    return compact.startswith(("dobar dan", "dobro jutro", "dobro vece", "good morning", "good afternoon", "good evening"))
 
 
 def localized_availability_response(language, count, suggestions):
@@ -596,6 +645,24 @@ def memory_prioritized_suggestions(tool_output):
     return ", ".join(suggestions[:3])
 
 
+def localized_greeting_response(language):
+    if language == "sr":
+        return "Zdravo, ovde Kaleya. Mogu da pomognem oko zakazivanja, otkazivanja, pomeranja ili provere termina."
+    if language == "de":
+        return "Hallo, hier ist Kaleya. Ich kann beim Buchen, Absagen, Verschieben oder Pruefen von Terminen helfen."
+    if language == "es":
+        return "Hola, soy Kaleya. Puedo ayudar con reservas, cancelaciones, cambios o disponibilidad."
+    if language == "pt":
+        return "Ola, aqui e a Kaleya. Posso ajudar com agendamentos, cancelamentos, alteracoes ou disponibilidade."
+    if language == "fr":
+        return "Bonjour, ici Kaleya. Je peux aider a reserver, annuler, deplacer ou verifier un rendez-vous."
+    if language == "it":
+        return "Ciao, sono Kaleya. Posso aiutare con prenotazioni, cancellazioni, modifiche o disponibilita."
+    if language == "ru":
+        return "Zdravstvujte, eto Kaleya. Ya pomogu zapisat, otmenit, perenesti ili proverit termin."
+    return "Hi, this is Kaleya. I can help you book, cancel, reschedule or check an appointment."
+
+
 def service_clarifying_response(business_client, language, customer_memory=None):
     options = service_options_text(business_client)
     memory_service = customer_memory_service_prompt(customer_memory)
@@ -727,6 +794,8 @@ def save_conversation_ai_state(conversation, intent_name, payload, tool_output, 
     waiting_statuses = {"needs_more_details", "needs_time", "needs_target", "time_unavailable", "failed"}
     state_status = "handoff" if intent_name == "support_handoff" else "open"
     if missing_fields or tool_status in waiting_statuses:
+        state_status = "waiting_for_customer"
+    if intent_name == "check_availability" and (tool_output or {}).get("free_count", 0) > 0:
         state_status = "waiting_for_customer"
     if tool_status in {"booked", "cancelled", "rescheduled"}:
         state_status = "completed"
@@ -1280,6 +1349,16 @@ def resume_previous_intent(previous_state):
     return previous_state.get("last_intent"), safe_float(previous_state.get("last_confidence"), 0.72)
 
 
+def should_book_from_availability_followup(intent_name, previous_state, text, payload):
+    if not previous_state or previous_state.get("last_intent") != "check_availability":
+        return False
+    if previous_state.get("status") not in {"open", "waiting_for_customer"}:
+        return False
+    if intent_name not in {"unknown", "book_appointment", "check_availability"}:
+        return False
+    return bool((payload or {}).get("time") or parse_requested_time(text))
+
+
 def should_treat_as_reschedule_followup(intent_name, previous_state, text, payload):
     if not previous_state or previous_state.get("status") != "completed":
         return False
@@ -1377,6 +1456,8 @@ def build_text_response(business_client, intent, tool_output):
         return "I understand. I am handing this over to support."
 
     if intent == "business_info":
+        if tool_output.get("status") == "greeting":
+            return localized_greeting_response(language)
         matched_knowledge = tool_output.get("matched_knowledge") or {}
         if matched_knowledge.get("answer"):
             return matched_knowledge["answer"]
@@ -1499,7 +1580,16 @@ def handle_inbound_text(
             planner_raw_response = {"engine": "keyword-fallback", "planner_error": str(exc)}
 
     payload = merge_payloads(planner_payload, payload)
-    if should_resume_previous_intent(intent_name, previous_state):
+    if is_greeting_text(text) and intent_name in {"unknown", "support_handoff"}:
+        intent_name = "business_info"
+        confidence = max(confidence, 0.86)
+        planner_raw_response["greeting"] = True
+    if should_book_from_availability_followup(intent_name, previous_state, text, payload):
+        payload = merge_payloads(previous_state.get("pending_payload") or {}, payload)
+        intent_name = "book_appointment"
+        confidence = max(confidence, 0.76)
+        planner_raw_response["resumed_from_availability"] = True
+    elif should_resume_previous_intent(intent_name, previous_state):
         intent_name, confidence = resume_previous_intent(previous_state)
         planner_raw_response["resumed_from_previous_state"] = True
     if intent_name == "reschedule_appointment":
@@ -1596,6 +1686,8 @@ def handle_inbound_text(
             "slot_interval_minutes": business_client.slot_interval_minutes,
             "matched_knowledge": matched_knowledge or {},
         }
+        if planner_raw_response.get("greeting"):
+            tool_output["status"] = "greeting"
         status = "success"
     elif intent_name == "unknown":
         tool_name = "clarify_intent"

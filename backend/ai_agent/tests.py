@@ -375,6 +375,39 @@ class AIAppointmentToolTests(TestCase):
                 self.assertEqual(result["tool_output"]["status"], "booked")
                 self.assertEqual(appointment.start_time, expected_time)
 
+    def test_ai_books_time_followup_after_availability_check(self):
+        external_thread_id = "telegram:test-availability-followup-booking"
+
+        handle_inbound_text(
+            self.client,
+            "mogu li da zakazem",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic", "phone": "+38160123456"},
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        availability = handle_inbound_text(
+            self.client,
+            "sutra sta ima slobodno",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        booked = handle_inbound_text(
+            self.client,
+            "moze li u pola12",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        appointment = Appointment.objects.get()
+        self.assertEqual(availability["intent"], "check_availability")
+        self.assertEqual(availability["conversation_state"]["status"], "waiting_for_customer")
+        self.assertEqual(booked["intent"], "book_appointment")
+        self.assertEqual(booked["tool_output"]["status"], "booked")
+        self.assertEqual(appointment.start_time, time(11, 30))
+
     @mock.patch("ai_agent.tools.timezone.now")
     def test_ai_reschedules_last_booked_appointment_from_date_followup(self, now_mock):
         now_mock.return_value = datetime(2026, 5, 12, 22, 30, tzinfo=dt_timezone.utc)
@@ -469,6 +502,30 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(ticket.business_client, self.client)
         self.assertEqual(ticket.status, SupportTicket.STATUS_OPEN)
         self.assertEqual(ticket.metadata["conversation_id"], conversation.id)
+
+    def test_greeting_does_not_escalate_to_support(self):
+        for greeting in ("hi", "pozdrav", "cao", "dobardan"):
+            with self.subTest(greeting=greeting):
+                conversation = Conversation.objects.create(
+                    business_client=self.client,
+                    channel="telegram",
+                    language="sr",
+                    metadata={"ai_state": {"unknown_count": 1}},
+                )
+
+                result = handle_inbound_text(
+                    self.client,
+                    greeting,
+                    conversation=conversation,
+                    channel="telegram",
+                    use_ai=False,
+                )
+
+                conversation.refresh_from_db()
+                self.assertEqual(result["intent"], "business_info")
+                self.assertEqual(result["tool_output"]["status"], "greeting")
+                self.assertNotEqual(conversation.status, "handoff")
+                self.assertEqual(SupportTicket.objects.count(), 0)
 
     def test_ai_writes_tool_audit_log(self):
         result = handle_inbound_text(
