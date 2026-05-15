@@ -1298,8 +1298,10 @@ def reschedule_appointment_tool(business_client, text="", customer=None, channel
         target_date,
         duration_minutes=appointment.duration_minutes,
         staff_member_id=appointment.staff_member_id,
+        limit=100 if requested_time else 5,
         exclude_past_slots=True,
     )
+    suggested_slots = prioritize_suggested_slots(suggested_slots, requested_time=requested_time, limit=5)
     is_outside_work_hours = requested_time_outside_work_window(
         requested_time,
         availability["work_start"],

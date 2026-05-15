@@ -17,6 +17,7 @@ from ai_agent.tools import (
     parse_bare_day_of_month_date,
     parse_requested_date,
     parse_requested_time,
+    parse_time_period_preference,
     reschedule_appointment_tool,
     text_has_parseable_date,
 )
@@ -129,6 +130,10 @@ AVAILABILITY_HINTS = (
     "слободан термин",
     "ima slobodnih",
     "ima li slobod",
+    "ima li popodne",
+    "ima li posle podne",
+    "ima li prepodne",
+    "ima li pre podne",
     "ima li sta",
     "ima li nesto",
     "ima li termina",
@@ -225,6 +230,12 @@ SHORT_CONFIRMATION_HINTS = (
     "želim",
     "da zelim",
     "da želim",
+    "da kao i uvek",
+    "da kao i uvijek",
+    "kao i uvek",
+    "kao i uvijek",
+    "da rekao sam vec",
+    "da rekao sam već",
     "ok",
     "okej",
     "u redu",
@@ -238,6 +249,7 @@ SHORT_CONFIRMATION_HINTS = (
 GREETING_HINTS = (
     "start",
     "hi",
+    "ej",
     "alo",
     "aloo",
     "alooo",
@@ -328,6 +340,16 @@ CUSTOMER_INFO_HINTS = (
     "my phone",
     "my number",
     "my name",
+)
+ABUSIVE_HINTS = (
+    "jebi",
+    "odjebi",
+    "jebem",
+    "jebote",
+    "mars",
+    "marš",
+    "idiot",
+    "budalo",
 )
 
 DATE_HINT_PATTERN = re.compile(r"\b(20\d{2}-\d{2}-\d{2}|\d{1,2}[.\-/]\d{1,2}[.\-/]20\d{2})\b")
@@ -677,6 +699,11 @@ def is_conversation_closing_text(text, previous_state=None):
 def is_see_you_text(text):
     compact_alnum = normalized_alnum(text)
     return "vidimose" in compact_alnum or "seeyou" in compact_alnum
+
+
+def is_abusive_text(text):
+    normalized = normalize_intent_text(text)
+    return any(normalize_intent_text(hint) in normalized for hint in ABUSIVE_HINTS)
 
 
 def is_short_confirmation_text(text):
@@ -1963,8 +1990,28 @@ def should_refine_availability_followup(intent_name, previous_state, text, paylo
     return contains_normalized_hint(text, AVAILABILITY_REFINEMENT_HINTS)
 
 
+def should_refine_reschedule_followup(intent_name, previous_state, text, payload):
+    if not previous_state or previous_state.get("last_intent") != "reschedule_appointment":
+        return False
+    if previous_state.get("status") not in {"open", "waiting_for_customer"}:
+        return False
+    if previous_state.get("last_tool_status") not in {"needs_time", "time_unavailable"}:
+        return False
+    if intent_name not in {"unknown", "book_appointment", "check_availability", "reschedule_appointment"}:
+        return False
+    return bool(
+        (payload or {}).get("_explicit_date")
+        or (payload or {}).get("_explicit_time")
+        or text_has_date_hint(text)
+        or parse_requested_time(text)
+        or parse_time_period_preference(text)
+        or contains_normalized_hint(text, AVAILABILITY_REFINEMENT_HINTS)
+        or contains_normalized_hint(text, AVAILABILITY_HINTS)
+    )
+
+
 def has_fresh_date_or_time(text):
-    return bool(text_has_parseable_date(text) or parse_requested_time(text))
+    return bool(text_has_parseable_date(text) or parse_requested_time(text) or parse_time_period_preference(text))
 
 
 def should_treat_bare_number_as_date(previous_state, text):
@@ -2026,6 +2073,15 @@ def previous_suggested_time_from_text(previous_state, text):
         if shifted in suggestions:
             return shifted
     return ""
+
+
+def previous_appointment_time_from_same_time_text(previous_state, text):
+    if not previous_state:
+        return ""
+    normalized = normalize_intent_text(text)
+    if not any(phrase in normalized for phrase in ("isto vreme", "isto vrijeme", "same time")):
+        return ""
+    return str(previous_state.get("last_appointment_time") or "")[:5]
 
 
 def should_assume_booking_from_natural_text(intent_name, text, payload):
@@ -2386,6 +2442,19 @@ def handle_inbound_text(
         payload["time"] = suggested_time
         payload["_explicit_time"] = True
         planner_raw_response["previous_suggested_time"] = suggested_time
+    fresh_text_time = parse_requested_time(text)
+    if fresh_text_time:
+        payload["time"] = fresh_text_time
+        payload["_explicit_time"] = True
+        planner_raw_response["fresh_text_time"] = fresh_text_time
+    elif parse_time_period_preference(text):
+        payload.pop("time", None)
+        planner_raw_response["fresh_time_period_preference"] = parse_time_period_preference(text)
+    same_time = previous_appointment_time_from_same_time_text(previous_state, text)
+    if same_time and not payload.get("time"):
+        payload["time"] = same_time
+        payload["_explicit_time"] = True
+        planner_raw_response["used_same_time_from_previous_appointment"] = same_time
     if should_treat_bare_number_as_date(previous_state, text):
         bare_date = parse_bare_day_of_month_date(text, reference_date=client_local_today(business_client))
         if bare_date:
@@ -2394,7 +2463,11 @@ def handle_inbound_text(
             payload["_suppress_time_inference"] = True
             payload["_explicit_date"] = True
             planner_raw_response["bare_number_as_date"] = bare_date.isoformat()
-    if is_conversation_closing_text(text, previous_state) and intent_name in {"unknown", "support_handoff"}:
+    if is_abusive_text(text) and intent_name in {"unknown", "support_handoff", "business_info"}:
+        intent_name = "support_handoff"
+        confidence = max(confidence, 0.78)
+        planner_raw_response["abusive_language"] = True
+    elif is_conversation_closing_text(text, previous_state) and intent_name in {"unknown", "support_handoff"}:
         intent_name = "business_info"
         confidence = max(confidence, 0.86)
         if is_see_you_text(text):
@@ -2409,7 +2482,14 @@ def handle_inbound_text(
         intent_name = "business_info"
         confidence = max(confidence, 0.8)
         planner_raw_response["customer_profile_question"] = True
-    if should_refine_availability_followup(intent_name, previous_state, text, payload):
+    if should_refine_reschedule_followup(intent_name, previous_state, text, payload):
+        payload = merge_payloads(previous_state.get("pending_payload") or {}, payload)
+        if parse_time_period_preference(text) and not parse_requested_time(text):
+            payload.pop("time", None)
+        intent_name = "reschedule_appointment"
+        confidence = max(confidence, 0.78)
+        planner_raw_response["refined_previous_reschedule"] = True
+    elif should_refine_availability_followup(intent_name, previous_state, text, payload):
         payload = merge_payloads(previous_state.get("pending_payload") or {}, payload)
         intent_name = "check_availability"
         confidence = max(confidence, 0.78)

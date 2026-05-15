@@ -571,7 +571,7 @@ class AIAppointmentToolTests(TestCase):
             identifiers={"telegram_user_id": "424242"},
         )
 
-        for phrase in ("hocu", "zelim", "da želim"):
+        for phrase in ("hocu", "zelim", "da želim", "da kao i uvek", "da rekao sam vec"):
             with self.subTest(phrase=phrase):
                 Conversation.objects.all().delete()
                 external_thread_id = f"telegram:test-memory-service-{phrase}"
@@ -638,6 +638,64 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["tool_output"]["status"], "booked")
         self.assertEqual(appointment.date, date(2026, 5, 21))
         self.assertEqual(appointment.start_time, time(15, 0))
+
+    def test_availability_time_choice_then_memory_service_confirmation_books(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+        service = Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            duration_minutes=30,
+            price=25,
+        )
+        customer = self.client.customers.create(first_name="Bane", last_name="Kostic", phone="+38160123456")
+        CustomerMemory.objects.create(
+            business_client=self.client,
+            customer=customer,
+            last_service=service,
+        )
+        conversation = Conversation.objects.create(
+            business_client=self.client,
+            customer=customer,
+            channel="telegram",
+            language="sr",
+            metadata={
+                "ai_state": {
+                    "status": "waiting_for_customer",
+                    "last_intent": "check_availability",
+                    "last_suggested_slots": ["13:30", "13:00", "15:30"],
+                    "pending_payload": {
+                        "date": "2026-05-20",
+                        "customer_name": "Bane Kostic",
+                        "phone": "+38160123456",
+                    },
+                }
+            },
+        )
+
+        picked_time = handle_inbound_text(
+            self.client,
+            "13 bi bilo ok",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+        confirmed = handle_inbound_text(
+            self.client,
+            "da kao i uvek",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+
+        appointment = Appointment.objects.get()
+        self.assertEqual(picked_time["intent"], "book_appointment")
+        self.assertIn("service", picked_time["decision"]["missing_fields"])
+        self.assertEqual(confirmed["tool_output"]["status"], "booked")
+        self.assertEqual(appointment.service, service)
+        self.assertEqual(appointment.date, date(2026, 5, 20))
+        self.assertEqual(appointment.start_time, time(13, 0))
 
     def test_ai_resumes_booking_with_natural_serbian_time_answers(self):
         for text_value, expected_time in (
@@ -1557,6 +1615,124 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(appointment.date, date(2026, 5, 21))
         self.assertEqual(appointment.start_time, time(14, 0))
 
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_reschedules_with_same_time_phrase(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 15, 14, 40, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        customer = self.client.customers.create(first_name="Bane", last_name="Kostic", phone="+38160123456")
+        appointment = Appointment.objects.create(
+            business_client=self.client,
+            customer=customer,
+            title="Sisanje",
+            status=Appointment.STATUS_CONFIRMED,
+            date=date(2026, 5, 20),
+            start_time=time(13, 0),
+            duration_minutes=30,
+            channel="telegram",
+            source="ai_agent",
+        )
+        conversation = Conversation.objects.create(
+            business_client=self.client,
+            customer=customer,
+            channel="telegram",
+            external_thread_id="telegram:test-reschedule-same-time",
+            language="sr",
+            metadata={
+                "ai_state": {
+                    "status": "completed",
+                    "last_intent": "book_appointment",
+                    "last_confidence": 0.9,
+                    "last_appointment_id": appointment.id,
+                    "last_appointment_date": "2026-05-20",
+                    "last_appointment_time": "13:00",
+                }
+            },
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "greska moze li cetvrtak isto vreme",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+
+        appointment.refresh_from_db()
+        self.assertEqual(result["intent"], "reschedule_appointment")
+        self.assertEqual(result["tool_output"]["status"], "rescheduled")
+        self.assertEqual(appointment.date, date(2026, 5, 21))
+        self.assertEqual(appointment.start_time, time(13, 0))
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_reschedule_unavailable_accepts_afternoon_refinement(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 15, 14, 40, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        customer = self.client.customers.create(first_name="Bane", last_name="Kostic", phone="+38160123456")
+        blocker_customer = self.client.customers.create(first_name="Ana", last_name="Primer", phone="+38160111111")
+        appointment = Appointment.objects.create(
+            business_client=self.client,
+            customer=customer,
+            title="Sisanje",
+            status=Appointment.STATUS_CONFIRMED,
+            date=date(2026, 5, 20),
+            start_time=time(13, 0),
+            duration_minutes=30,
+            channel="telegram",
+            source="ai_agent",
+        )
+        Appointment.objects.create(
+            business_client=self.client,
+            customer=blocker_customer,
+            title="Blokirano",
+            status=Appointment.STATUS_CONFIRMED,
+            date=date(2026, 5, 21),
+            start_time=time(13, 0),
+            duration_minutes=30,
+        )
+        conversation = Conversation.objects.create(
+            business_client=self.client,
+            customer=customer,
+            channel="telegram",
+            external_thread_id="telegram:test-reschedule-afternoon-refinement",
+            language="sr",
+            metadata={
+                "ai_state": {
+                    "status": "completed",
+                    "last_intent": "book_appointment",
+                    "last_confidence": 0.9,
+                    "last_appointment_id": appointment.id,
+                    "last_appointment_date": "2026-05-20",
+                    "last_appointment_time": "13:00",
+                }
+            },
+        )
+
+        unavailable = handle_inbound_text(
+            self.client,
+            "greska moze li cetvrtak isto vreme",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+        refined = handle_inbound_text(
+            self.client,
+            "ima li popodne",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+
+        self.assertEqual(unavailable["tool_output"]["status"], "time_unavailable")
+        self.assertEqual(refined["intent"], "reschedule_appointment")
+        self.assertEqual(refined["tool_output"]["status"], "needs_time")
+        self.assertNotEqual(refined["intent"], "support_handoff")
+
     def test_repeated_unknown_intent_escalates_to_support(self):
         conversation = Conversation.objects.create(
             business_client=self.client,
@@ -1583,10 +1759,27 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(ticket.status, SupportTicket.STATUS_OPEN)
         self.assertEqual(ticket.metadata["conversation_id"], conversation.id)
 
+    def test_abusive_message_with_gratitude_does_not_return_gratitude(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+
+        result = handle_inbound_text(
+            self.client,
+            "hvala ti i odjebi",
+            channel="telegram",
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "support_handoff")
+        self.assertNotIn("Hvala vama", result["response_text"])
+        self.assertEqual(SupportTicket.objects.count(), 1)
+
     def test_greeting_does_not_escalate_to_support(self):
         for greeting in (
             "/start",
             "hi",
+            "ej",
             "alooo",
             "helo",
             "ahoj",
