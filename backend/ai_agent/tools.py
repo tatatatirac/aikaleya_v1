@@ -158,6 +158,8 @@ WEEKDAY_NUMBERS = {
     "wednesday": 2,
     "cetvrtak": 3,
     "cetvrtka": 3,
+    "ctvrtak": 3,
+    "ctvrtka": 3,
     "cet": 3,
     "thursday": 3,
     "petak": 4,
@@ -460,7 +462,7 @@ def parse_requested_time(text, explicit_time=None):
     if hour_suffix:
         return f"{int(hour_suffix.group(1)):02d}:00"
 
-    prefixed = re.search(r"\b(?:u|at|um|alle|a las|às|a)\s+([01]?\d|2[0-3])\b", normalized)
+    prefixed = re.search(r"\b(?:u|at|um|alle|a las|às|a)\s*([01]?\d|2[0-3])\b", normalized)
     if prefixed:
         return f"{int(prefixed.group(1)):02d}:00"
 

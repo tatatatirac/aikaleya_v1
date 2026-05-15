@@ -1506,6 +1506,57 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(appointment.date, date(2026, 5, 19))
         self.assertEqual(appointment.start_time, time(14, 30))
 
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_reschedules_from_typo_weekday_and_compact_u_hour(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 15, 14, 26, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        customer = self.client.customers.create(first_name="Bane", last_name="Kostic", phone="+38160123456")
+        appointment = Appointment.objects.create(
+            business_client=self.client,
+            customer=customer,
+            title="Farbanje",
+            status=Appointment.STATUS_CONFIRMED,
+            date=date(2026, 5, 22),
+            start_time=time(14, 0),
+            duration_minutes=30,
+            channel="telegram",
+            source="ai_agent",
+        )
+        conversation = Conversation.objects.create(
+            business_client=self.client,
+            customer=customer,
+            channel="telegram",
+            external_thread_id="telegram:test-reschedule-typo-weekday",
+            language="sr",
+            metadata={
+                "ai_state": {
+                    "status": "completed",
+                    "last_intent": "book_appointment",
+                    "last_confidence": 0.9,
+                    "last_appointment_id": appointment.id,
+                    "last_appointment_date": "2026-05-22",
+                    "last_appointment_time": "14:00",
+                }
+            },
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "ups ...jel moze u ctvrtak u2",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+
+        appointment.refresh_from_db()
+        self.assertEqual(result["intent"], "reschedule_appointment")
+        self.assertEqual(result["tool_output"]["status"], "rescheduled")
+        self.assertEqual(appointment.date, date(2026, 5, 21))
+        self.assertEqual(appointment.start_time, time(14, 0))
+
     def test_repeated_unknown_intent_escalates_to_support(self):
         conversation = Conversation.objects.create(
             business_client=self.client,
@@ -1538,6 +1589,7 @@ class AIAppointmentToolTests(TestCase):
             "hi",
             "alooo",
             "helo",
+            "ahoj",
             "helloo",
             "hello",
             "pozdrav",

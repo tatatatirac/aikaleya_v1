@@ -243,6 +243,7 @@ GREETING_HINTS = (
     "alooo",
     "hello",
     "helo",
+    "ahoj",
     "hey",
     "pozdrav",
     "cao",
