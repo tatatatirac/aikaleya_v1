@@ -1165,6 +1165,36 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(appointment.date, date(2026, 5, 22))
         self.assertEqual(appointment.start_time, time(15, 0))
 
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_past_weekday_after_work_hours_rolls_to_next_week_without_time(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 15, 14, 18, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        service = Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            duration_minutes=30,
+            price=25,
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "petak",
+            channel="telegram",
+            payload={
+                "service_id": service.id,
+                "customer_name": "Bane Kostic",
+                "phone": "+38160123456",
+            },
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "book_appointment")
+        self.assertEqual(result["tool_output"]["status"], "needs_time")
+        self.assertEqual(result["tool_output"]["date"], "2026-05-22")
+
     def test_ai_first_available_next_week_uses_monday_not_sunday(self):
         self.client.interface_language = "sr"
         self.client.language = "sr"

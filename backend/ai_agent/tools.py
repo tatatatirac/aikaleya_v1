@@ -482,14 +482,16 @@ def explicit_today_request(text):
 
 
 def adjust_past_weekday_request(business_client, text, target_date, requested_time):
-    if not requested_time or not WEEKDAY_PATTERN.search(normalize_lookup(text or "")):
+    if not WEEKDAY_PATTERN.search(normalize_lookup(text or "")):
         return target_date
     if explicit_today_request(text):
         return target_date
     local_now = timezone.localtime(timezone.now(), client_timezone(business_client))
     if target_date != local_now.date():
         return target_date
-    if as_time(requested_time) <= local_now.time():
+    if requested_time and as_time(requested_time) <= local_now.time():
+        return target_date + timedelta(days=7)
+    if not requested_time and local_now.time() >= business_client.work_end:
         return target_date + timedelta(days=7)
     return target_date
 
