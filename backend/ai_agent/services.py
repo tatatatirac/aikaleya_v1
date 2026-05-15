@@ -300,6 +300,9 @@ GRATITUDE_HINTS = (
     "obrigada",
 )
 CLOSING_HINTS = (
+    "aj cao",
+    "ajd cao",
+    "ajde cao",
     "dovidenja",
     "dovidjenja",
     "doviđenja",
@@ -1403,9 +1406,9 @@ def save_conversation_ai_state(conversation, intent_name, payload, tool_output, 
     pending_payload = {}
     if state_status == "waiting_for_customer":
         pending_payload = {key: value for key, value in (payload or {}).items() if not str(key).startswith("_")}
-        if (tool_output or {}).get("date") and not pending_payload.get("date"):
+        if (tool_output or {}).get("date"):
             pending_payload["date"] = (tool_output or {}).get("date")
-        if (tool_output or {}).get("requested_time") and not pending_payload.get("time"):
+        if (tool_output or {}).get("requested_time"):
             pending_payload["time"] = (tool_output or {}).get("requested_time")
     state = {
         "status": state_status,
@@ -2144,6 +2147,9 @@ def apply_confirmed_memory_service(payload, previous_state, text, customer_memor
     memory_service = customer_memory_service_prompt(customer_memory)
     if not memory_service or not is_short_confirmation_text(text):
         return payload, False
+    previous_pending = (previous_state or {}).get("pending_payload") or {}
+    if isinstance(previous_pending, dict):
+        payload = merge_payloads(previous_pending, payload)
     payload["service_hint"] = memory_service
     return payload, True
 

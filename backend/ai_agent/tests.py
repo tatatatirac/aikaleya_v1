@@ -697,6 +697,74 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(appointment.date, date(2026, 5, 20))
         self.assertEqual(appointment.start_time, time(13, 0))
 
+    @mock.patch("ai_agent.tools.timezone.now")
+    @mock.patch("appointments.services.timezone.now")
+    def test_next_week_friday_time_survives_memory_service_confirmation(self, appointments_now_mock, tools_now_mock):
+        fixed_now = datetime(2026, 5, 15, 14, 56, tzinfo=dt_timezone.utc)
+        tools_now_mock.return_value = fixed_now
+        appointments_now_mock.return_value = fixed_now
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.timezone = "Europe/Belgrade"
+        self.client.save(update_fields=["interface_language", "language", "timezone", "updated_at"])
+        service = Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            duration_minutes=30,
+            price=25,
+        )
+        customer = self.client.customers.create(first_name="Bane", last_name="Kostic", phone="+38160123456")
+        CustomerMemory.objects.create(
+            business_client=self.client,
+            customer=customer,
+            last_service=service,
+        )
+        thread_id = "telegram:next-week-friday-context"
+
+        handle_inbound_text(
+            self.client,
+            "ima li sta sledece nedelje slobodno",
+            customer=customer,
+            channel="telegram",
+            external_thread_id=thread_id,
+            use_ai=False,
+        )
+        availability = handle_inbound_text(
+            self.client,
+            "pa petak popodne",
+            customer=customer,
+            channel="telegram",
+            external_thread_id=thread_id,
+            use_ai=False,
+        )
+        picked_time = handle_inbound_text(
+            self.client,
+            "moze li 1430",
+            customer=customer,
+            channel="telegram",
+            external_thread_id=thread_id,
+            use_ai=False,
+        )
+        confirmed = handle_inbound_text(
+            self.client,
+            "da moze",
+            customer=customer,
+            channel="telegram",
+            external_thread_id=thread_id,
+            use_ai=False,
+        )
+
+        self.assertEqual(confirmed["tool_output"]["status"], "booked", confirmed)
+        appointment = Appointment.objects.get()
+        pending_payload = picked_time["conversation_state"]["pending_payload"]
+        self.assertEqual(availability["tool_output"]["date"], "2026-05-22")
+        self.assertEqual(pending_payload["date"], "2026-05-22")
+        self.assertEqual(pending_payload["time"], "14:30")
+        self.assertEqual(picked_time["decision"]["missing_fields"], ["service"])
+        self.assertEqual(appointment.service, service)
+        self.assertEqual(appointment.date, date(2026, 5, 22))
+        self.assertEqual(appointment.start_time, time(14, 30))
+
     def test_ai_resumes_booking_with_natural_serbian_time_answers(self):
         for text_value, expected_time in (
             ("moze u pola 10", time(9, 30)),
@@ -1919,7 +1987,7 @@ class AIAppointmentToolTests(TestCase):
         self.client.interface_language = "sr"
         self.client.language = "sr"
         self.client.save(update_fields=["interface_language", "language", "updated_at"])
-        for message in ("dovidenja", "dovidjenja", "cao cao"):
+        for message in ("dovidenja", "dovidjenja", "cao cao", "aj cao"):
             with self.subTest(message=message):
                 conversation = Conversation.objects.create(
                     business_client=self.client,
