@@ -187,6 +187,29 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["decision"]["missing_fields"], ["date"])
         self.assertIn("datum", result["response_text"].lower())
 
+    def test_natural_serbian_jel_moze_service_asks_for_date(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+        Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            duration_minutes=30,
+            price=25,
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "jel moze sisanje",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic", "phone": "+38160123456"},
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "book_appointment")
+        self.assertEqual(result["tool_output"]["status"], "needs_more_details")
+        self.assertEqual(result["decision"]["missing_fields"], ["date"])
+
     def test_short_serbian_date_is_not_parsed_as_time(self):
         reference_date = date(2026, 5, 14)
 
@@ -195,6 +218,14 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(parse_requested_date("ima li sta 2005", reference_date=reference_date), date(2026, 5, 20))
         self.assertEqual(parse_requested_time("ima li sta 2005"), "")
         self.assertEqual(parse_requested_time("moze u 1430"), "14:30")
+
+    def test_serbian_next_week_dates_do_not_mean_sunday(self):
+        reference_date = date(2026, 5, 15)
+
+        self.assertEqual(parse_requested_date("prvi slobodan sledece nedelje", reference_date=reference_date), date(2026, 5, 18))
+        self.assertEqual(parse_requested_date("petak sledece nedelje", reference_date=reference_date), date(2026, 5, 22))
+        self.assertEqual(parse_requested_date("sledece nedelje petak", reference_date=reference_date), date(2026, 5, 22))
+        self.assertEqual(parse_requested_date("sledeci petak u 3", reference_date=reference_date), date(2026, 5, 22))
 
     def test_salon_planner_prompt_contains_safety_rules_and_business_context(self):
         Service.objects.create(
@@ -1101,6 +1132,66 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(outside_hours["tool_output"]["requested_time"], "17:30")
         self.assertIn("radno vreme", outside_hours["response_text"])
         self.assertIn("od ponedeljka do petka", outside_hours["response_text"])
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_past_weekday_time_rolls_to_next_week(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 15, 13, 53, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        service = Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            duration_minutes=30,
+            price=25,
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "petak u 3",
+            channel="telegram",
+            payload={
+                "service_id": service.id,
+                "customer_name": "Bane Kostic",
+                "phone": "+38160123456",
+            },
+            use_ai=False,
+        )
+
+        appointment = Appointment.objects.get()
+        self.assertEqual(result["intent"], "book_appointment")
+        self.assertEqual(result["tool_output"]["status"], "booked")
+        self.assertEqual(appointment.date, date(2026, 5, 22))
+        self.assertEqual(appointment.start_time, time(15, 0))
+
+    def test_ai_first_available_next_week_uses_monday_not_sunday(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+        service = Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            duration_minutes=30,
+            price=25,
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "prvi slobodan sledece nedelje",
+            channel="telegram",
+            payload={
+                "service_id": service.id,
+                "customer_name": "Bane Kostic",
+                "phone": "+38160123456",
+            },
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "book_appointment")
+        self.assertEqual(result["tool_output"]["status"], "needs_time")
+        self.assertEqual(result["tool_output"]["date"], "2026-05-18")
+        self.assertNotEqual(result["tool_output"]["date"], "2026-05-17")
 
     @mock.patch("ai_agent.tools.timezone.now")
     def test_ai_availability_focuses_suggestions_around_requested_time(self, now_mock):

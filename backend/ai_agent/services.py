@@ -184,6 +184,9 @@ NATURAL_BOOKING_REQUEST_HINTS = (
     "hteo bih",
     "htela bih",
     "moze li",
+    "jel moze",
+    "je l moze",
+    "je li moze",
     "može li",
     "da ako moze",
     "da ako može",
@@ -2051,7 +2054,7 @@ def should_treat_as_reschedule_followup(intent_name, previous_state, text, paylo
         return False
     if intent_name == "book_appointment" and contains_normalized_hint(text, BOOKING_ACTION_HINTS):
         return False
-    if contains_normalized_hint(text, NATURAL_BOOKING_REQUEST_HINTS):
+    if contains_normalized_hint(text, NATURAL_BOOKING_REQUEST_HINTS) and not (text_has_date_hint(text) or parse_requested_time(text)):
         return False
     return bool(payload.get("date") or payload.get("time") or text_has_date_hint(text) or parse_requested_time(text))
 

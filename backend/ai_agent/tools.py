@@ -184,19 +184,37 @@ DAY_OF_MONTH_PATTERN = re.compile(r"\b([1-9]|[12]\d|3[01])\s*(?:\.|og|tog|ti|te|
 WEEKDAY_PATTERN = re.compile(r"\b(" + "|".join(sorted(WEEKDAY_NUMBERS, key=len, reverse=True)) + r")\b")
 SHORT_DATE_PATTERN = re.compile(r"\b([1-9]|[12]\d|3[01])[.\-/](0?[1-9]|1[0-2])\.?\b")
 COMPACT_DATE_PATTERN = re.compile(r"\b(0?[1-9]|[12]\d|3[01])(0[1-9]|1[0-2])\b")
-WEEK_RANGE_PHRASES = (
+THIS_WEEK_PHRASES = (
     "ove nedelje",
     "ovu nedelju",
     "ove sedmice",
     "ovu sedmicu",
+    "this week",
+)
+NEXT_WEEK_PHRASES = (
     "sledece nedelje",
     "sledecu nedelju",
+    "sledece sedmice",
+    "sledecu sedmicu",
     "sljedece sedmice",
     "sljedecu sedmicu",
     "naredne nedelje",
     "narednu nedelju",
+    "naredne sedmice",
+    "narednu sedmicu",
     "next week",
-    "this week",
+)
+WEEK_RANGE_PHRASES = THIS_WEEK_PHRASES + NEXT_WEEK_PHRASES
+STRICT_NEXT_WEEKDAY_WORDS = (
+    "sledeci",
+    "sledeceg",
+    "sljedeci",
+    "sljedeceg",
+    "naredni",
+    "narednog",
+    "iduci",
+    "iduceg",
+    "next",
 )
 
 
@@ -237,11 +255,59 @@ def next_date_for_weekday(base_date, weekday):
     return base_date + timedelta(days=days_ahead)
 
 
+def strict_next_date_for_weekday(base_date, weekday):
+    days_ahead = (weekday - base_date.weekday()) % 7
+    if days_ahead == 0:
+        days_ahead = 7
+    return base_date + timedelta(days=days_ahead)
+
+
+def week_start(base_date):
+    return base_date - timedelta(days=base_date.weekday())
+
+
 def make_date_in_current_or_next_year(base_date, day, month):
     candidate = date_cls(base_date.year, month, day)
     if candidate < base_date:
         candidate = date_cls(base_date.year + 1, month, day)
     return candidate
+
+
+def contains_any_phrase(normalized, phrases):
+    return any(phrase in normalized for phrase in phrases)
+
+
+def weekday_date_from_week_context(normalized, base_date):
+    if contains_any_phrase(normalized, NEXT_WEEK_PHRASES):
+        stripped = normalized
+        for phrase in NEXT_WEEK_PHRASES:
+            stripped = stripped.replace(phrase, " ")
+        weekday_match = WEEKDAY_PATTERN.search(stripped)
+        if not weekday_match:
+            return None
+        weekday = WEEKDAY_NUMBERS[weekday_match.group(1)]
+        return week_start(base_date) + timedelta(days=7 + weekday)
+    if contains_any_phrase(normalized, THIS_WEEK_PHRASES):
+        stripped = normalized
+        for phrase in THIS_WEEK_PHRASES:
+            stripped = stripped.replace(phrase, " ")
+        weekday_match = WEEKDAY_PATTERN.search(stripped)
+        if not weekday_match:
+            return None
+        weekday = WEEKDAY_NUMBERS[weekday_match.group(1)]
+        candidate = week_start(base_date) + timedelta(days=weekday)
+        if candidate < base_date:
+            candidate += timedelta(days=7)
+        return candidate
+    weekday_match = WEEKDAY_PATTERN.search(normalized)
+    if not weekday_match:
+        return None
+    weekday_word = weekday_match.group(1)
+    weekday = WEEKDAY_NUMBERS[weekday_word]
+    strict_next_pattern = r"\b(" + "|".join(STRICT_NEXT_WEEKDAY_WORDS) + r")\s+" + re.escape(weekday_word) + r"\b"
+    if re.search(strict_next_pattern, normalized):
+        return strict_next_date_for_weekday(base_date, weekday)
+    return None
 
 
 def week_range_request(text):
@@ -252,7 +318,7 @@ def week_range_request(text):
     stripped = normalized.replace(matched_phrase, " ")
     if WEEKDAY_PATTERN.search(stripped):
         return ""
-    return "next_week" if "slede" in matched_phrase or "sljede" in matched_phrase or "nared" in matched_phrase or matched_phrase == "next week" else "this_week"
+    return "next_week" if matched_phrase in NEXT_WEEK_PHRASES else "this_week"
 
 
 def parse_requested_date(text, explicit_date=None, reference_date=None):
@@ -271,6 +337,16 @@ def parse_requested_date(text, explicit_date=None, reference_date=None):
         return base_date + timedelta(days=2)
     if any(normalize_lookup(keyword) in normalized for keyword in tomorrow_keywords):
         return base_date + timedelta(days=1)
+
+    contextual_weekday = weekday_date_from_week_context(normalized, base_date)
+    if contextual_weekday:
+        return contextual_weekday
+
+    requested_week_range = week_range_request(normalized)
+    if requested_week_range == "next_week":
+        return week_start(base_date) + timedelta(days=7)
+    if requested_week_range == "this_week":
+        return base_date
 
     iso_match = re.search(r"\b(20\d{2})-(\d{2})-(\d{2})\b", normalized)
     if iso_match:
@@ -327,6 +403,7 @@ def text_has_parseable_date(text):
         any(normalize_lookup(keyword) in normalized for keyword in today_keywords)
         or any(normalize_lookup(keyword) in normalized for keyword in DAY_AFTER_TOMORROW_KEYWORDS)
         or any(normalize_lookup(keyword) in normalized for keyword in tomorrow_keywords)
+        or week_range_request(normalized)
         or re.search(r"\b(20\d{2})-(\d{2})-(\d{2})\b", normalized)
         or re.search(r"\b(\d{1,2})[.\-/](\d{1,2})[.\-/](20\d{2})\b", normalized)
         or SHORT_DATE_PATTERN.search(normalized)
@@ -396,6 +473,25 @@ def parse_requested_time(text, explicit_time=None):
         return f"{int(bare_hour.group(1)):02d}:00"
 
     return ""
+
+
+def explicit_today_request(text):
+    normalized = normalize_lookup(text or "")
+    today_keywords = DATE_KEYWORDS["today"] + ("ÑÐµÐ³Ð¾Ð´Ð½Ñ",)
+    return any(normalize_lookup(keyword) in normalized for keyword in today_keywords)
+
+
+def adjust_past_weekday_request(business_client, text, target_date, requested_time):
+    if not requested_time or not WEEKDAY_PATTERN.search(normalize_lookup(text or "")):
+        return target_date
+    if explicit_today_request(text):
+        return target_date
+    local_now = timezone.localtime(timezone.now(), client_timezone(business_client))
+    if target_date != local_now.date():
+        return target_date
+    if as_time(requested_time) <= local_now.time():
+        return target_date + timedelta(days=7)
+    return target_date
 
 
 def parse_time_period_preference(text, payload=None):
@@ -871,6 +967,7 @@ def check_availability_tool(business_client, text="", payload=None):
             business_client,
             parse_time_period_preference(text, payload),
         )
+    target_date = adjust_past_weekday_request(business_client, text, target_date, requested_time)
     service = scoped_service(business_client, payload.get("service_id")) or resolve_service_by_hint(business_client, payload.get("service_hint"))
     staff_member = scoped_staff_member(business_client, payload.get("staff_member_id")) or resolve_staff_member_by_hint(business_client, payload.get("staff_hint"))
     duration = int(payload.get("duration_minutes") or (service.duration_minutes if service else business_client.slot_interval_minutes))
@@ -911,6 +1008,7 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
         business_client,
         parse_time_period_preference(text, payload),
     )
+    target_date = adjust_past_weekday_request(business_client, text, target_date, requested_time)
     service = scoped_service(business_client, payload.get("service_id")) or resolve_service_by_hint(business_client, payload.get("service_hint"))
     staff_member = scoped_staff_member(business_client, payload.get("staff_member_id")) or resolve_staff_member_by_hint(business_client, payload.get("staff_hint"))
     duration = int(payload.get("duration_minutes") or (service.duration_minutes if service else business_client.slot_interval_minutes))
