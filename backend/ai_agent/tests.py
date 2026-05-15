@@ -520,6 +520,94 @@ class AIAppointmentToolTests(TestCase):
         self.assertIn("Kada vam odgovara", confirmed["response_text"])
         self.assertNotIn("Dostupne usluge", first["response_text"])
 
+    def test_ai_confirms_memory_service_with_natural_yes_words(self):
+        service = Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            duration_minutes=30,
+            price=25,
+        )
+        customer = self.client.customers.create(
+            first_name="Bane",
+            last_name="Kostic",
+            phone="+38160123456",
+            preferred_channel="telegram",
+        )
+        CustomerMemory.objects.create(
+            business_client=self.client,
+            customer=customer,
+            last_service=service,
+            identifiers={"telegram_user_id": "424242"},
+        )
+
+        for phrase in ("hocu", "zelim", "da želim"):
+            with self.subTest(phrase=phrase):
+                Conversation.objects.all().delete()
+                external_thread_id = f"telegram:test-memory-service-{phrase}"
+                handle_inbound_text(
+                    self.client,
+                    "mogu li da zakazem za sutra",
+                    channel="telegram",
+                    payload={"telegram_user_id": "424242"},
+                    external_thread_id=external_thread_id,
+                    use_ai=False,
+                )
+                confirmed = handle_inbound_text(
+                    self.client,
+                    phrase,
+                    channel="telegram",
+                    external_thread_id=external_thread_id,
+                    use_ai=False,
+                )
+
+                self.assertEqual(confirmed["intent"], "book_appointment")
+                self.assertEqual(confirmed["tool_output"]["status"], "needs_time")
+                self.assertNotIn("service", confirmed["decision"]["missing_fields"])
+
+    def test_availability_followup_accepts_suggested_hour_in_sentence(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+        Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            duration_minutes=30,
+            price=25,
+        )
+        conversation = Conversation.objects.create(
+            business_client=self.client,
+            channel="telegram",
+            language="sr",
+            metadata={
+                "ai_state": {
+                    "status": "waiting_for_customer",
+                    "last_intent": "check_availability",
+                    "last_tool_status": "",
+                    "last_suggested_slots": ["14:30", "13:30", "15:00"],
+                    "pending_payload": {
+                        "date": "2026-05-21",
+                        "service_hint": "Sisanje",
+                        "customer_name": "Bane Kostic",
+                        "phone": "+38160123456",
+                    },
+                }
+            },
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "15 je ok",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+
+        appointment = Appointment.objects.get()
+        self.assertEqual(result["intent"], "book_appointment")
+        self.assertEqual(result["tool_output"]["status"], "booked")
+        self.assertEqual(appointment.date, date(2026, 5, 21))
+        self.assertEqual(appointment.start_time, time(15, 0))
+
     def test_ai_resumes_booking_with_natural_serbian_time_answers(self):
         for text_value, expected_time in (
             ("moze u pola 10", time(9, 30)),
@@ -883,6 +971,94 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(new_day["tool_output"]["status"], "needs_time")
         self.assertEqual(new_day["tool_output"]["date"], "2026-05-18")
         self.assertNotEqual(new_day["tool_output"]["date"], closed_day["tool_output"]["date"])
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_contextual_day_in_availability_after_closed_day_changes_date(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 15, 5, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        WorkingHours.objects.create(
+            business_client=self.client,
+            weekday=date(2026, 5, 17).weekday(),
+            start_time=time(9, 0),
+            end_time=time(16, 0),
+            is_closed=True,
+        )
+        conversation = Conversation.objects.create(
+            business_client=self.client,
+            channel="telegram",
+            language="sr",
+            metadata={
+                "ai_state": {
+                    "status": "waiting_for_customer",
+                    "last_intent": "book_appointment",
+                    "last_tool_status": "time_unavailable",
+                    "last_is_closed": True,
+                    "last_appointment_date": "2026-05-17",
+                    "pending_payload": {"date": "2026-05-17"},
+                }
+            },
+        )
+
+        result = handle_inbound_text(
+            self.client,
+            "ima li šta 19",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "check_availability")
+        self.assertEqual(result["tool_output"]["date"], "2026-05-19")
+        self.assertFalse(result["tool_output"].get("is_closed"))
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_ai_next_day_after_closed_day_uses_previous_date(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 15, 5, 30, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            duration_minutes=30,
+            price=25,
+        )
+        WorkingHours.objects.create(
+            business_client=self.client,
+            weekday=date(2026, 5, 17).weekday(),
+            start_time=time(9, 0),
+            end_time=time(16, 0),
+            is_closed=True,
+        )
+        external_thread_id = "telegram:test-next-day-after-closed-day"
+
+        closed_day = handle_inbound_text(
+            self.client,
+            "zakazi sisanje prekosutra u 10",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic", "phone": "+38160123456"},
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        booked = handle_inbound_text(
+            self.client,
+            "može li sledeći dan",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        appointment = Appointment.objects.get()
+        self.assertEqual(closed_day["tool_output"]["status"], "time_unavailable")
+        self.assertEqual(closed_day["tool_output"]["date"], "2026-05-17")
+        self.assertEqual(booked["intent"], "book_appointment")
+        self.assertEqual(booked["tool_output"]["status"], "booked")
+        self.assertEqual(appointment.date, date(2026, 5, 18))
+        self.assertEqual(appointment.start_time, time(10, 0))
 
     @mock.patch("ai_agent.tools.timezone.now")
     def test_ai_availability_time_followup_outside_hours_reports_work_schedule(self, now_mock):
@@ -1295,6 +1471,28 @@ class AIAppointmentToolTests(TestCase):
                 self.assertEqual(result["intent"], "business_info")
                 self.assertEqual(result["tool_output"]["status"], "greeting")
         planner_mock.assert_not_called()
+        reply_mock.assert_not_called()
+
+    @mock.patch("ai_agent.services.generate_anthropic_reply")
+    @mock.patch(
+        "ai_agent.services.generate_anthropic_plan",
+        return_value={"intent": "check_availability", "confidence": 0.92, "payload": {"date": "2026-05-21"}},
+    )
+    def test_telegram_uses_ai_planner_but_backend_response_text(self, planner_mock, reply_mock):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+
+        result = handle_inbound_text(
+            self.client,
+            "ima li sta u cetvrtak",
+            channel="telegram",
+            use_ai=True,
+        )
+
+        self.assertEqual(result["intent"], "check_availability")
+        self.assertIn("Ima", result["response_text"])
+        planner_mock.assert_called_once()
         reply_mock.assert_not_called()
 
     def test_gratitude_closes_conversation_without_unknown_prompt(self):

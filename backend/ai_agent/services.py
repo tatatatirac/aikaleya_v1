@@ -1,7 +1,7 @@
 import json
 import re
 import unicodedata
-from datetime import date
+from datetime import date, timedelta
 
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
@@ -216,6 +216,12 @@ SHORT_CONFIRMATION_HINTS = (
     "moze moze",
     "da",
     "da moze",
+    "hocu",
+    "hoću",
+    "zelim",
+    "želim",
+    "da zelim",
+    "da želim",
     "ok",
     "okej",
     "u redu",
@@ -1909,13 +1915,19 @@ def merge_payloads(ai_payload, explicit_payload):
     return merged
 
 
-def should_resume_previous_intent(intent_name, previous_state, text=""):
+def should_resume_previous_intent(intent_name, previous_state, text="", payload=None):
     if intent_name != "unknown":
         return False
     if not previous_state or previous_state.get("status") != "waiting_for_customer":
         return False
     if previous_state.get("last_tool_status") == "time_unavailable":
-        return has_fresh_date_or_time(text)
+        payload = payload or {}
+        return bool(
+            has_fresh_date_or_time(text)
+            or payload.get("_explicit_date")
+            or payload.get("_explicit_time")
+            or payload.get("_fresh_date_or_time")
+        )
     return previous_state.get("last_intent") in RESUMABLE_INTENTS
 
 
@@ -1964,6 +1976,52 @@ def should_treat_bare_number_as_date(previous_state, text):
             or not previous_state.get("last_suggested_slots")
         )
     return False
+
+
+def contextual_day_of_month_date(previous_state, text, business_client):
+    if not previous_state:
+        return None
+    if parse_requested_time(text):
+        return None
+    normalized = normalize_intent_text(text)
+    if not contains_normalized_hint(normalized, AVAILABILITY_HINTS):
+        return None
+    match = re.search(r"\b([1-9]|[12]\d|3[01])\b", normalized)
+    if not match:
+        return None
+    return parse_bare_day_of_month_date(match.group(1), reference_date=client_local_today(business_client))
+
+
+def next_day_from_previous_state(previous_state, text):
+    if not previous_state:
+        return None
+    normalized = normalize_intent_text(text)
+    if not any(phrase in normalized for phrase in ("sledeci dan", "sljedeci dan", "naredni dan", "dan posle", "next day")):
+        return None
+    previous_date = previous_state.get("last_appointment_date")
+    if not previous_date:
+        return None
+    try:
+        return date.fromisoformat(str(previous_date)) + timedelta(days=1)
+    except ValueError:
+        return None
+
+
+def previous_suggested_time_from_text(previous_state, text):
+    if not previous_state:
+        return ""
+    suggestions = set(previous_state.get("last_suggested_slots") or [])
+    if not suggestions:
+        return ""
+    normalized = normalize_intent_text(text)
+    for match in re.finditer(r"\b([01]?\d|2[0-3])\b", normalized):
+        candidate = f"{int(match.group(1)):02d}:00"
+        shifted = f"{int(match.group(1)) + 12:02d}:00" if int(match.group(1)) <= 11 else ""
+        if candidate in suggestions:
+            return candidate
+        if shifted in suggestions:
+            return shifted
+    return ""
 
 
 def should_assume_booking_from_natural_text(intent_name, text, payload):
@@ -2240,7 +2298,8 @@ def handle_inbound_text(
     record_messages=True,
     actor=None,
 ):
-    payload = payload or {}
+    incoming_payload = dict(payload or {})
+    payload = incoming_payload
     if not customer:
         customer = find_customer_by_payload_identity(business_client, payload)
     planner_raw_response = {"engine": "keyword-fallback"}
@@ -2258,6 +2317,8 @@ def handle_inbound_text(
     if not customer and conversation and conversation.customer:
         customer = conversation.customer
     payload = merge_conversation_payload(conversation, payload)
+    if incoming_payload.get("date") or incoming_payload.get("time"):
+        payload["_fresh_date_or_time"] = True
     if not customer:
         customer = find_customer_by_payload_identity(business_client, payload)
         if customer and conversation and conversation.customer_id != customer.id:
@@ -2299,12 +2360,35 @@ def handle_inbound_text(
             planner_raw_response = {"engine": "keyword-fallback", "planner_error": str(exc)}
 
     payload = merge_payloads(planner_payload, payload)
+    next_day_date = next_day_from_previous_state(previous_state, text)
+    if next_day_date:
+        payload["date"] = next_day_date
+        payload.pop("time", None)
+        payload["_explicit_date"] = True
+        planner_raw_response["next_day_from_previous_state"] = next_day_date.isoformat()
+    contextual_date = contextual_day_of_month_date(previous_state, text, business_client)
+    if contextual_date:
+        if previous_state.get("pending_payload"):
+            payload = merge_payloads(previous_state.get("pending_payload") or {}, payload)
+        payload["date"] = contextual_date
+        payload.pop("time", None)
+        payload["_suppress_time_inference"] = True
+        payload["_explicit_date"] = True
+        planner_raw_response["contextual_day_of_month_date"] = contextual_date.isoformat()
+    if next_day_date and previous_state.get("pending_payload"):
+        payload = merge_payloads(previous_state.get("pending_payload") or {}, payload)
+    suggested_time = previous_suggested_time_from_text(previous_state, text)
+    if suggested_time and not payload.get("time"):
+        payload["time"] = suggested_time
+        payload["_explicit_time"] = True
+        planner_raw_response["previous_suggested_time"] = suggested_time
     if should_treat_bare_number_as_date(previous_state, text):
         bare_date = parse_bare_day_of_month_date(text, reference_date=client_local_today(business_client))
         if bare_date:
             payload["date"] = bare_date
             payload.pop("time", None)
             payload["_suppress_time_inference"] = True
+            payload["_explicit_date"] = True
             planner_raw_response["bare_number_as_date"] = bare_date.isoformat()
     if is_conversation_closing_text(text, previous_state) and intent_name in {"unknown", "support_handoff"}:
         intent_name = "business_info"
@@ -2331,7 +2415,7 @@ def handle_inbound_text(
         intent_name = "book_appointment"
         confidence = max(confidence, 0.76)
         planner_raw_response["resumed_from_availability"] = True
-    elif should_resume_previous_intent(intent_name, previous_state, text):
+    elif should_resume_previous_intent(intent_name, previous_state, text, payload):
         intent_name, confidence = resume_previous_intent(previous_state)
         planner_raw_response["resumed_from_previous_state"] = True
     if intent_name == "reschedule_appointment":
@@ -2510,7 +2594,7 @@ def handle_inbound_text(
     response_text = build_text_response(business_client, intent.intent, tool_output)
     ai_provider_used = "fallback"
 
-    if use_ai and not skip_ai_for_simple_text:
+    if use_ai and not skip_ai_for_simple_text and channel not in {"telegram", "whatsapp", "viber", "sms"}:
         try:
             response_text = generate_anthropic_reply(
                 business_client,
