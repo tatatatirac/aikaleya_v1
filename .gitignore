@@ -1,16 +1,41 @@
+# Environment & secrets
 .env
+.env.*
+!.env.example
+!.env.production.example
+
+# Python
 .venv/
 venv/
 __pycache__/
 *.py[cod]
+*$py.class
+
+# Django
 *.sqlite3
 db.sqlite3
 media/
 staticfiles/
+
+# Local backups
 backups/
+*.sql
+*.sql.gz
+*.dump
+
+# Testing
 .pytest_cache/
 .mypy_cache/
 .coverage
 htmlcov/
+
+# OS
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
