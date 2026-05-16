@@ -207,6 +207,27 @@ NEXT_WEEK_PHRASES = (
     "next week",
 )
 WEEK_RANGE_PHRASES = THIS_WEEK_PHRASES + NEXT_WEEK_PHRASES
+WEEK_CONTEXT_NOUNS = (
+    "nedelje",
+    "nedelju",
+    "sedmice",
+    "sedmicu",
+    "week",
+)
+NEXT_WEEK_MODIFIERS = (
+    "sledece",
+    "sledecu",
+    "sljedece",
+    "sljedecu",
+    "naredne",
+    "narednu",
+    "next",
+)
+THIS_WEEK_MODIFIERS = (
+    "ove",
+    "ovu",
+    "this",
+)
 STRICT_NEXT_WEEKDAY_WORDS = (
     "sledeci",
     "sledeceg",
@@ -279,6 +300,28 @@ def contains_any_phrase(normalized, phrases):
     return any(phrase in normalized for phrase in phrases)
 
 
+def token_matches_any(token, candidates):
+    if token in candidates:
+        return True
+    if len(token) < 5:
+        return False
+    return any(SequenceMatcher(None, token, candidate).ratio() >= 0.84 for candidate in candidates)
+
+
+def fuzzy_week_range_context(normalized):
+    tokens = re.findall(r"\w+", normalized or "")
+    for index, token in enumerate(tokens[:-1]):
+        next_token = tokens[index + 1]
+        if next_token not in WEEK_CONTEXT_NOUNS:
+            continue
+        phrase = f"{token} {next_token}"
+        if token_matches_any(token, NEXT_WEEK_MODIFIERS):
+            return "next_week", phrase
+        if token_matches_any(token, THIS_WEEK_MODIFIERS):
+            return "this_week", phrase
+    return "", ""
+
+
 def weekday_date_from_week_context(normalized, base_date):
     if contains_any_phrase(normalized, NEXT_WEEK_PHRASES):
         stripped = normalized
@@ -301,6 +344,19 @@ def weekday_date_from_week_context(normalized, base_date):
         if candidate < base_date:
             candidate += timedelta(days=7)
         return candidate
+    fuzzy_range, fuzzy_phrase = fuzzy_week_range_context(normalized)
+    if fuzzy_range:
+        stripped = normalized.replace(fuzzy_phrase, " ")
+        weekday_match = WEEKDAY_PATTERN.search(stripped)
+        if not weekday_match:
+            return None
+        weekday = WEEKDAY_NUMBERS[weekday_match.group(1)]
+        if fuzzy_range == "next_week":
+            return week_start(base_date) + timedelta(days=7 + weekday)
+        candidate = week_start(base_date) + timedelta(days=weekday)
+        if candidate < base_date:
+            candidate += timedelta(days=7)
+        return candidate
     weekday_match = WEEKDAY_PATTERN.search(normalized)
     if not weekday_match:
         return None
@@ -315,11 +371,18 @@ def weekday_date_from_week_context(normalized, base_date):
 def week_range_request(text):
     normalized = normalize_lookup(text or "")
     matched_phrase = next((phrase for phrase in WEEK_RANGE_PHRASES if phrase in normalized), "")
+    fuzzy_range = ""
+    fuzzy_phrase = ""
+    if not matched_phrase:
+        fuzzy_range, fuzzy_phrase = fuzzy_week_range_context(normalized)
+        matched_phrase = fuzzy_phrase
     if not matched_phrase:
         return ""
     stripped = normalized.replace(matched_phrase, " ")
     if WEEKDAY_PATTERN.search(stripped):
         return ""
+    if fuzzy_range:
+        return fuzzy_range
     return "next_week" if matched_phrase in NEXT_WEEK_PHRASES else "this_week"
 
 
@@ -775,8 +838,7 @@ def prioritize_suggested_slots(slot_labels, requested_time="", limit=5):
     def sort_key(label):
         slot_time = as_time(suggested_slot_time(label))
         slot_minutes = slot_time.hour * 60 + slot_time.minute
-        # Prefer exact/later nearby slots before earlier ones with the same distance.
-        return (abs(slot_minutes - target_minutes), slot_minutes < target_minutes, slot_minutes, str(label))
+        return (abs(slot_minutes - target_minutes), slot_minutes, str(label))
 
     return sorted(labels, key=sort_key)[:limit]
 
@@ -790,7 +852,7 @@ def prioritize_suggested_details(suggested_details, requested_time="", limit=5):
     def sort_key(item):
         slot_time = as_time(item["time"])
         slot_minutes = slot_time.hour * 60 + slot_time.minute
-        return (abs(slot_minutes - target_minutes), slot_minutes < target_minutes, slot_minutes, item["staff_member"])
+        return (abs(slot_minutes - target_minutes), slot_minutes, item["staff_member"])
 
     return sorted(details, key=sort_key)[:limit]
 

@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 from ai_agent.models import CustomerMemory
 from ai_agent.prompts import build_salon_planner_prompt
 from ai_agent.services import build_planner_context, handle_inbound_text
-from ai_agent.tools import parse_requested_date, parse_requested_time
+from ai_agent.tools import parse_requested_date, parse_requested_time, week_range_request
 from accounts.models import Profile
 from appointments.services import aware_client_datetime
 from audit_log.models import AuditLog
@@ -225,7 +225,10 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(parse_requested_date("prvi slobodan sledece nedelje", reference_date=reference_date), date(2026, 5, 18))
         self.assertEqual(parse_requested_date("petak sledece nedelje", reference_date=reference_date), date(2026, 5, 22))
         self.assertEqual(parse_requested_date("sledece nedelje petak", reference_date=reference_date), date(2026, 5, 22))
+        self.assertEqual(parse_requested_date("sledece nedelje u sredu", reference_date=reference_date), date(2026, 5, 20))
+        self.assertEqual(parse_requested_date("slsedece nedelje u sredu", reference_date=reference_date), date(2026, 5, 20))
         self.assertEqual(parse_requested_date("sledeci petak u 3", reference_date=reference_date), date(2026, 5, 22))
+        self.assertEqual(week_range_request("slsedece nedelje ima li nesto"), "next_week")
 
     def test_salon_planner_prompt_contains_safety_rules_and_business_context(self):
         Service.objects.create(
@@ -943,6 +946,42 @@ class AIAppointmentToolTests(TestCase):
         self.assertIn("Kada vam odgovara", result["response_text"])
 
     @mock.patch("ai_agent.tools.timezone.now")
+    def test_next_week_wednesday_booking_request_does_not_read_week_as_sunday(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 16, 15, 13, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            category="Osnovno",
+            duration_minutes=30,
+            price=25,
+        )
+        for weekday in range(7):
+            WorkingHours.objects.create(
+                business_client=self.client,
+                weekday=weekday,
+                start_time=time(9, 0),
+                end_time=time(16, 0),
+                is_closed=weekday >= 5,
+            )
+
+        result = handle_inbound_text(
+            self.client,
+            "mogu li da zakazem sledece nedelje u sredu",
+            channel="telegram",
+            payload={"customer_name": "Ana", "phone": "+38160111222"},
+            use_ai=False,
+        )
+
+        self.assertEqual(result["intent"], "book_appointment")
+        self.assertEqual(result["decision"]["missing_fields"], ["service"])
+        self.assertEqual(result["conversation_state"]["pending_payload"]["date"], "2026-05-20")
+        self.assertNotIn("ne radimo", result["response_text"])
+
+    @mock.patch("ai_agent.tools.timezone.now")
     def test_ai_closed_day_response_has_no_empty_suggestions_and_no_loop(self, now_mock):
         now_mock.return_value = datetime(2026, 5, 14, 0, 30, tzinfo=dt_timezone.utc)
         self.client.timezone = "Europe/Belgrade"
@@ -988,7 +1027,7 @@ class AIAppointmentToolTests(TestCase):
 
         self.assertIn("service", first["decision"]["missing_fields"])
         self.assertEqual(second["tool_output"]["status"], "time_unavailable")
-        self.assertIn("neradan", second["response_text"])
+        self.assertIn("Subotom ne radimo", second["response_text"])
         self.assertIn("Radno vreme", second["response_text"])
         self.assertNotIn("Predlozi su: .", second["response_text"])
         self.assertEqual(third["intent"], "unknown")
@@ -1031,12 +1070,84 @@ class AIAppointmentToolTests(TestCase):
         self.assertTrue(first["tool_output"]["is_closed"])
         self.assertEqual(first["conversation_state"]["status"], "waiting_for_customer")
         self.assertEqual(first["conversation_state"]["pending_payload"]["date"], "2026-05-16")
-        self.assertIn("neradan", first["response_text"])
+        self.assertIn("Subotom ne radimo", first["response_text"])
         self.assertEqual(refined["intent"], "check_availability")
         self.assertEqual(refined["tool_output"]["date"], "2026-05-16")
         self.assertTrue(refined["tool_output"]["is_closed"])
-        self.assertIn("neradan", refined["response_text"])
+        self.assertIn("Subotom ne radimo", refined["response_text"])
         self.assertNotIn("Da, oko 14:00 ima slobodno", refined["response_text"])
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_typo_next_week_request_replaces_closed_sunday_context(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 16, 15, 13, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            category="Osnovno",
+            duration_minutes=30,
+            price=25,
+        )
+        for weekday in range(7):
+            WorkingHours.objects.create(
+                business_client=self.client,
+                weekday=weekday,
+                start_time=time(9, 0),
+                end_time=time(16, 0),
+                is_closed=weekday >= 5,
+            )
+        Appointment.objects.create(
+            business_client=self.client,
+            title="Busy",
+            status=Appointment.STATUS_CONFIRMED,
+            date=date(2026, 5, 19),
+            start_time=time(14, 0),
+            duration_minutes=30,
+        )
+        Appointment.objects.create(
+            business_client=self.client,
+            title="Busy",
+            status=Appointment.STATUS_CONFIRMED,
+            date=date(2026, 5, 19),
+            start_time=time(14, 30),
+            duration_minutes=30,
+        )
+        external_thread_id = "telegram:test-typo-next-week-after-closed-sunday"
+
+        closed_day = handle_inbound_text(
+            self.client,
+            "pa ako moze usutra u 2",
+            channel="telegram",
+            payload={"customer_name": "Bane Kostic", "phone": "+38160123456", "service_hint": "Sisanje"},
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        next_week = handle_inbound_text(
+            self.client,
+            "a slsedece nedelje ima li nesto",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        tuesday = handle_inbound_text(
+            self.client,
+            "ok daj na primer nesto popodne u utorak",
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        self.assertEqual(closed_day["tool_output"]["date"], "2026-05-17")
+        self.assertTrue(closed_day["tool_output"]["is_closed"])
+        self.assertIn("Subotom i nedeljom ne radimo", closed_day["response_text"])
+        self.assertEqual(next_week["tool_output"]["status"], "needs_weekday")
+        self.assertIn("Koji dan", next_week["response_text"])
+        self.assertEqual(tuesday["intent"], "check_availability")
+        self.assertEqual(tuesday["tool_output"]["date"], "2026-05-19")
+        self.assertEqual(tuesday["tool_output"]["suggested_slots"][:3], ["13:30", "13:00", "15:00"])
 
     @mock.patch("ai_agent.tools.timezone.now")
     def test_ai_keeps_requested_time_when_closed_day_moves_to_next_workday(self, now_mock):

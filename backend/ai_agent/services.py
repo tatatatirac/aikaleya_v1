@@ -1177,6 +1177,34 @@ SERBIAN_WEEKDAY_GENITIVE = {
     5: "subote",
     6: "nedelje",
 }
+SERBIAN_WEEKDAY_ADVERB = {
+    0: "Ponedeljkom",
+    1: "Utorkom",
+    2: "Sredom",
+    3: "Cetvrtkom",
+    4: "Petkom",
+    5: "Subotom",
+    6: "Nedeljom",
+}
+
+
+def sr_closed_day_sentence(business_client, date_value):
+    try:
+        target_date = date.fromisoformat(str(date_value))
+    except (TypeError, ValueError):
+        return "Taj dan ne radimo."
+
+    closed_days = set(
+        WorkingHours.objects.filter(
+            business_client=business_client,
+            staff_member__isnull=True,
+            is_closed=True,
+        ).values_list("weekday", flat=True)
+    )
+    target_weekday = target_date.weekday()
+    if target_weekday in {5, 6} and {5, 6}.issubset(closed_days):
+        return "Subotom i nedeljom ne radimo."
+    return f"{SERBIAN_WEEKDAY_ADVERB.get(target_weekday, 'Taj dan')} ne radimo."
 
 
 def sr_work_schedule_summary(business_client):
@@ -1202,7 +1230,8 @@ def localized_no_available_booking_response(language, tool_output, business_clie
     if language == "sr":
         if tool_output.get("is_closed"):
             schedule = sr_work_schedule_summary(business_client) if business_client else "u podeseno radno vreme"
-            return f"Izvinite, taj dan je neradan ({date_value}). Radno vreme je {schedule}."
+            closed_sentence = sr_closed_day_sentence(business_client, date_value) if business_client else "Taj dan ne radimo."
+            return f"{closed_sentence} Radno vreme je {schedule}."
         if next_slot:
             return f"Izvinjavam se, za {date_value} je sve zauzeto. Prvi slobodan termin je {next_slot.get('date')} u {next_slot.get('time')}."
         if requested_time:
