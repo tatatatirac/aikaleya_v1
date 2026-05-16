@@ -2478,13 +2478,15 @@ def handle_inbound_text(
         payload["_explicit_time"] = True
         planner_raw_response["previous_suggested_time"] = suggested_time
     fresh_text_time = parse_requested_time(text)
+    fresh_time_preference = parse_time_period_preference(text)
     if fresh_text_time:
         payload["time"] = fresh_text_time
         payload["_explicit_time"] = True
         planner_raw_response["fresh_text_time"] = fresh_text_time
-    elif parse_time_period_preference(text):
+    elif fresh_time_preference:
         payload.pop("time", None)
-        planner_raw_response["fresh_time_period_preference"] = parse_time_period_preference(text)
+        payload["time_preference"] = fresh_time_preference
+        planner_raw_response["fresh_time_period_preference"] = fresh_time_preference
     same_time = previous_appointment_time_from_same_time_text(previous_state, text)
     if same_time and not payload.get("time"):
         payload["time"] = same_time
@@ -2521,6 +2523,7 @@ def handle_inbound_text(
         payload = merge_payloads(previous_state.get("pending_payload") or {}, payload)
         if parse_time_period_preference(text) and not parse_requested_time(text):
             payload.pop("time", None)
+            payload["time_preference"] = parse_time_period_preference(text)
         intent_name = "reschedule_appointment"
         confidence = max(confidence, 0.78)
         planner_raw_response["refined_previous_reschedule"] = True

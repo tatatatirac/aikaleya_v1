@@ -982,6 +982,106 @@ class AIAppointmentToolTests(TestCase):
         self.assertNotIn("ne radimo", result["response_text"])
 
     @mock.patch("ai_agent.tools.timezone.now")
+    def test_afternoon_preference_survives_memory_service_confirmation(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 16, 15, 38, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        service = Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            category="Osnovno",
+            duration_minutes=30,
+            price=25,
+        )
+        customer = self.client.customers.create(first_name="Bane", last_name="Kostic", phone="+38160123456")
+        CustomerMemory.objects.create(
+            business_client=self.client,
+            customer=customer,
+            last_service=service,
+        )
+        external_thread_id = "telegram:test-afternoon-memory-service"
+
+        first = handle_inbound_text(
+            self.client,
+            "jel moze sledece nedelje u cetvrtak neki termin popodne",
+            customer=customer,
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        confirmed = handle_inbound_text(
+            self.client,
+            "da",
+            customer=customer,
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        self.assertEqual(first["decision"]["missing_fields"], ["service"])
+        self.assertEqual(first["conversation_state"]["pending_payload"]["date"], "2026-05-21")
+        self.assertEqual(first["conversation_state"]["pending_payload"]["time_preference"], "14:00")
+        self.assertEqual(confirmed["intent"], "book_appointment")
+        self.assertEqual(confirmed["tool_output"]["status"], "needs_time")
+        self.assertEqual(confirmed["tool_output"]["suggested_slots"][0], "14:00")
+        self.assertNotEqual(confirmed["tool_output"]["suggested_slots"][0], "09:00")
+
+    @mock.patch("ai_agent.tools.timezone.now")
+    def test_afternoon_preference_survives_alternate_service_answer(self, now_mock):
+        now_mock.return_value = datetime(2026, 5, 16, 15, 41, tzinfo=dt_timezone.utc)
+        self.client.timezone = "Europe/Belgrade"
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["timezone", "interface_language", "language", "updated_at"])
+        last_service = Service.objects.create(
+            business_client=self.client,
+            name="Sisanje",
+            category="Osnovno",
+            duration_minutes=30,
+            price=25,
+        )
+        feniranje = Service.objects.create(
+            business_client=self.client,
+            name="Feniranje",
+            category="Osnovno",
+            duration_minutes=30,
+            price=25,
+        )
+        customer = self.client.customers.create(first_name="Bane", last_name="Kostic", phone="+38160123456")
+        CustomerMemory.objects.create(
+            business_client=self.client,
+            customer=customer,
+            last_service=last_service,
+        )
+        external_thread_id = "telegram:test-afternoon-alternate-service"
+
+        first = handle_inbound_text(
+            self.client,
+            "jel ima sledece nedelje utorak neki termin popodne",
+            customer=customer,
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+        alternate_service = handle_inbound_text(
+            self.client,
+            "jok feniranje",
+            customer=customer,
+            channel="telegram",
+            external_thread_id=external_thread_id,
+            use_ai=False,
+        )
+
+        self.assertEqual(first["conversation_state"]["pending_payload"]["date"], "2026-05-19")
+        self.assertEqual(first["conversation_state"]["pending_payload"]["time_preference"], "14:00")
+        self.assertEqual(alternate_service["tool_output"]["status"], "needs_time")
+        self.assertEqual(alternate_service["conversation_state"]["pending_payload"]["service_hint"], feniranje.name)
+        self.assertEqual(alternate_service["tool_output"]["suggested_slots"][0], "14:00")
+        self.assertNotEqual(alternate_service["tool_output"]["suggested_slots"][0], "09:00")
+
+    @mock.patch("ai_agent.tools.timezone.now")
     def test_ai_closed_day_response_has_no_empty_suggestions_and_no_loop(self, now_mock):
         now_mock.return_value = datetime(2026, 5, 14, 0, 30, tzinfo=dt_timezone.utc)
         self.client.timezone = "Europe/Belgrade"
