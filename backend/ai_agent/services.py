@@ -1428,6 +1428,8 @@ def save_conversation_ai_state(conversation, intent_name, payload, tool_output, 
         state_status = "waiting_for_customer"
     if tool_status in {"booked", "cancelled", "rescheduled"}:
         state_status = "completed"
+    if intent_name == "business_info" and tool_status in {"gratitude", "see_you"}:
+        state_status = "closed"
 
     appointment_id = (tool_output or {}).get("appointment_id") or previous_state.get("last_appointment_id")
     appointment_date = (tool_output or {}).get("date") or previous_state.get("last_appointment_date")
@@ -1464,11 +1466,13 @@ def save_conversation_ai_state(conversation, intent_name, payload, tool_output, 
     conversation.metadata = metadata
     conversation.language = language
     conversation.last_message_at = timezone.now()
-    if state_status == "handoff":
+    if state_status == "closed":
+        conversation.status = "closed"
+    elif state_status == "handoff":
         conversation.status = "handoff"
     elif state_status == "waiting_for_customer":
         conversation.status = "waiting"
-    elif conversation.status != "closed":
+    else:
         conversation.status = "open"
     conversation.save(update_fields=["metadata", "language", "last_message_at", "status", "updated_at"])
     return state

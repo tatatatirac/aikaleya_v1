@@ -2270,6 +2270,43 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["tool_output"]["status"], "greeting")
         self.assertIn("izvolite", result["response_text"].lower())
 
+    def test_pozdrav_after_see_you_starts_new_greeting(self):
+        self.client.interface_language = "sr"
+        self.client.language = "sr"
+        self.client.save(update_fields=["interface_language", "language", "updated_at"])
+        conversation = Conversation.objects.create(
+            business_client=self.client,
+            channel="telegram",
+            language="sr",
+            metadata={"ai_state": {"last_tool_status": "booked", "last_intent": "book_appointment"}},
+        )
+
+        closing = handle_inbound_text(
+            self.client,
+            "vidimo se",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+        conversation.refresh_from_db()
+        greeting = handle_inbound_text(
+            self.client,
+            "pozdrav",
+            conversation=conversation,
+            channel="telegram",
+            use_ai=False,
+        )
+
+        conversation.refresh_from_db()
+        self.assertEqual(closing["tool_output"]["status"], "see_you")
+        self.assertEqual(closing["response_text"], "Vidimo se.")
+        self.assertEqual(closing["conversation_state"]["status"], "closed")
+        self.assertEqual(greeting["intent"], "business_info")
+        self.assertEqual(greeting["tool_output"]["status"], "greeting")
+        self.assertNotIn("Hvala vama", greeting["response_text"])
+        self.assertIn("izvolite", greeting["response_text"].lower())
+        self.assertEqual(conversation.status, "open")
+
     def test_unknown_serbian_response_avoids_form_like_intent_prompt(self):
         self.client.interface_language = "sr"
         self.client.language = "sr"
