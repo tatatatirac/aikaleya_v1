@@ -1,6 +1,7 @@
 import os
 
 from django.contrib.auth import login as django_login, logout as django_logout
+from django.core.mail import send_mail
 from django.core.management import call_command
 from django.http import JsonResponse
 from django.utils import timezone
@@ -157,6 +158,26 @@ class GdprDeleteAccountAPIView(APIView):
 
         Token.objects.filter(user=user).delete()
         django_logout(request._request)
+
+        try:
+            send_mail(
+                subject="Your Kaleya account deletion has been scheduled",
+                message=(
+                    f"Hi {user.first_name or user.username},\n\n"
+                    f"We've received your request to delete your Kaleya account.\n\n"
+                    f"Your account has been deactivated and will be permanently deleted on "
+                    f"{scheduled_at.strftime('%B %d, %Y')}.\n\n"
+                    f"Changed your mind? Contact us at hello@aikaleya.com before that date "
+                    f"and we'll restore your account.\n\n"
+                    f"— The Kaleya Team\n"
+                    f"aikaleya.com"
+                ),
+                from_email=None,
+                recipient_list=[user.email],
+                fail_silently=True,
+            )
+        except Exception:
+            pass
 
         return Response({
             "detail": "Nalog je deaktiviran. Bice trajno obrisan za 30 dana.",
