@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.db import transaction
 from django.utils import timezone
 from rest_framework import serializers
@@ -122,4 +123,24 @@ class ClientRegistrationSerializer(serializers.Serializer):
             status=Subscription.STATUS_TRIAL,
             trial_ends_at=timezone.now() + timedelta(days=plan.trial_days),
         )
+
+        try:
+            send_mail(
+                subject="Welcome to Kaleya — your AI receptionist is ready",
+                message=(
+                    f"Hi {first_name or user.username},\n\n"
+                    f"Welcome to Kaleya! Your account is set up and your {plan.trial_days}-day free trial has started.\n\n"
+                    f"Log in at aikaleya.com, then set up your business profile, working hours, and staff "
+                    f"so Kaleya knows how to handle your calls and messages.\n\n"
+                    f"Questions? We're at hello@aikaleya.com.\n\n"
+                    f"— The Kaleya Team\n"
+                    f"aikaleya.com"
+                ),
+                from_email=None,
+                recipient_list=[user.email],
+                fail_silently=True,
+            )
+        except Exception:
+            pass
+
         return {"user": user, "client": client, "plan": plan}
