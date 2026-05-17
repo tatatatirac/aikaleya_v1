@@ -173,7 +173,7 @@
                     </div>
                     <nav class="hidden md:flex items-center gap-8 text-[14px] font-medium text-slate-600 dark:text-slate-300">
                         <a href="#features" data-i18n="nav_features" class="hover:text-slate-900 dark:hover:text-white transition">Funkcije</a>
-                        <a href="/demo.html" data-i18n="nav_how" class="hover:text-slate-900 dark:hover:text-white transition">Kako radi</a>
+                        <a href="#" onclick="showView('how'); return false;" data-i18n="nav_how" class="hover:text-slate-900 dark:hover:text-white transition">Kako radi</a>
                         <a href="#pricing" data-i18n="nav_pricing" class="hover:text-slate-900 dark:hover:text-white transition">Cene</a>
                     </nav>
                     <div class="flex items-center gap-2">
@@ -226,7 +226,7 @@
                                 </p>
                                 <div class="mt-8 flex flex-col sm:flex-row gap-3">
                                     <button onclick="showView('login'); setDemoClient()" class="h-12 px-7 rounded-full gradient-bg text-white font-semibold shadow-lg shadow-teal-500/20 hover:shadow-xl hover:shadow-teal-500/30 transition-all" data-i18n="hero_cta_demo">Isprobaj besplatno</button>
-                                    <button type="button" onclick="window.location.href='/demo.html'" class="h-12 px-7 rounded-full border border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 transition inline-flex items-center justify-center" data-i18n="hero_cta_how">Pogledaj kako radi</button>
+                                    <button type="button" onclick="showView('how')" class="h-12 px-7 rounded-full border border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 transition inline-flex items-center justify-center" data-i18n="hero_cta_how">Pogledaj kako radi</button>
                                 </div>
                                 <div class="mt-8 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                                     <span class="text-xs text-slate-500 mr-1" data-i18n="integrates_with">Integracije:</span>
@@ -525,15 +525,111 @@
                         </div>
                         <button type="submit" class="w-full h-12 rounded-2xl gradient-bg text-white font-semibold shadow-lg shadow-teal-500/20 hover:shadow-xl transition" data-i18n="login_btn">Prijavi se</button>
                     </form>
-                    <div class="mt-6 rounded-2xl border border-teal-100 dark:border-teal-900/60 bg-teal-50/70 dark:bg-teal-950/20 p-4 text-left">
-                        <p class="text-xs font-bold text-teal-700 dark:text-teal-300" data-i18n="login_demo_title">Test pristup</p>
-                        <p class="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-400" data-i18n="login_demo_help">Za probu kliknite administratora ili radnika ispod, podaci ce se sami upisati, pa zatim pritisnite prijavu.</p>
-                    </div>
-                    <div class="mt-3 grid grid-cols-1 gap-2">
-                        <button onclick="fillLogin('client')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition" data-i18n="login_demo_admin">Demo administrator: administrator@test.com / test123</button>
-                        <button onclick="fillLogin('employee')" class="h-10 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition" data-i18n="login_demo_employee">Demo employee: employee / emp123</button>
-                    </div>
                     <p id="login-error" class="mt-4 text-center text-sm text-red-500 hidden" data-i18n="login_err">Pogrešan email ili lozinka</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- HOW IT WORKS VIEW -->
+        <div id="how-view" class="hidden min-h-screen bg-slate-50 dark:bg-slate-950 py-10 px-4">
+            <div class="max-w-5xl mx-auto">
+                <div class="flex items-center gap-4 mb-8">
+                    <button onclick="showView('landing')" class="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-800 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 transition">← Nazad</button>
+                    <div>
+                        <h1 class="font-display text-2xl font-bold" data-i18n="nav_how">Kako radi</h1>
+                        <p class="text-sm text-slate-500 mt-0.5">Mobilni i laptop prikaz prikazuju stvarnu aplikaciju. Isprobaj demo nalog bez registracije.</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col lg:flex-row items-center justify-center gap-10 mb-12">
+
+                    <!-- Phone -->
+                    <div class="relative shrink-0" style="width:196px">
+                        <div class="rounded-[32px] bg-slate-800 shadow-2xl p-2.5" style="height:420px">
+                            <div class="rounded-[24px] bg-slate-900 h-full overflow-hidden flex flex-col">
+                                <div class="flex justify-between items-center px-4 py-1.5 text-[9px] text-slate-500"><span>9:41</span><span>●●●</span></div>
+                                <div class="flex flex-col items-center mt-3">
+                                    <div class="w-[52px] h-[52px] rounded-full gradient-bg grid place-items-center shadow-lg shadow-teal-500/20"><img src="logo.png" class="w-7 h-7" alt="Kaleya"></div>
+                                    <p class="text-[9px] text-teal-400 mt-1.5" data-i18n="hero_wake">hey Kaleya</p>
+                                </div>
+                                <div class="grid grid-cols-3 gap-1.5 px-3 mt-3">
+                                    <div class="bg-slate-800 rounded-xl p-1.5 text-center"><p class="text-[8px] text-slate-400">Zakaži</p><p class="text-[9px] font-bold text-white">15:00</p></div>
+                                    <div class="bg-slate-800 rounded-xl p-1.5 text-center"><p class="text-[8px] text-slate-400">Otkaži</p><p class="text-[9px] font-bold text-white">Demo</p></div>
+                                    <div class="bg-slate-800 rounded-xl p-1.5 text-center"><p class="text-[8px] text-slate-400">Proveri</p><p class="text-[9px] font-bold text-white">3</p></div>
+                                </div>
+                                <div class="px-3 mt-3 space-y-1.5">
+                                    <div class="flex items-center gap-2 bg-slate-800/80 rounded-xl p-2"><span class="w-5 h-5 rounded-full bg-teal-500/20 text-teal-300 text-[8px] grid place-items-center shrink-0">✓</span><div><p class="text-[9px] font-medium text-white">Ana Jovanović</p><p class="text-[8px] text-slate-400">14:00 · Zakazano</p></div></div>
+                                    <div class="flex items-center gap-2 bg-slate-800/80 rounded-xl p-2"><span class="w-5 h-5 rounded-full bg-blue-500/20 text-blue-300 text-[8px] grid place-items-center shrink-0">i</span><div><p class="text-[9px] font-medium text-white">Marko Petrović</p><p class="text-[8px] text-slate-400">15:30 · Potvrđeno</p></div></div>
+                                    <div class="flex items-center gap-2 bg-slate-800/80 rounded-xl p-2"><span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-300 text-[8px] grid place-items-center shrink-0">!</span><div><p class="text-[9px] font-medium text-white">Nikola Ilić</p><p class="text-[8px] text-slate-400">17:00 · Na čekanju</p></div></div>
+                                </div>
+                                <div class="mt-auto grid grid-cols-3 border-t border-slate-800 py-2">
+                                    <div class="flex flex-col items-center gap-0.5 text-teal-400"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg><span class="text-[7px]">Početna</span></div>
+                                    <div class="flex flex-col items-center gap-0.5 text-slate-600"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3M3 11h18M5 19h14V7H5z"/></svg><span class="text-[7px]">Kalendar</span></div>
+                                    <div class="flex flex-col items-center gap-0.5 text-slate-600"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/></svg><span class="text-[7px]">Podešavanja</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Laptop -->
+                    <div class="shrink-0 w-full max-w-[520px]">
+                        <div class="bg-slate-900 rounded-t-xl overflow-hidden shadow-2xl" style="height:320px">
+                            <div class="flex items-center gap-1 px-3 py-1.5 bg-slate-800 border-b border-slate-700/50">
+                                <span class="w-2.5 h-2.5 rounded-full bg-red-500/60"></span><span class="w-2.5 h-2.5 rounded-full bg-amber-400/60"></span><span class="w-2.5 h-2.5 rounded-full bg-green-500/60"></span>
+                                <div class="ml-2 flex-1 bg-slate-700 rounded text-[8px] text-slate-400 px-2 py-0.5">aikaleya.com/app</div>
+                            </div>
+                            <div class="flex" style="height:calc(100% - 28px)">
+                                <div class="w-[110px] bg-slate-950 p-2.5 flex flex-col gap-0.5 border-r border-slate-800 shrink-0">
+                                    <div class="flex items-center gap-1.5 mb-2 px-1"><img src="logo.png" class="w-4 h-4" alt=""><span class="text-[9px] font-bold text-white">Kaleya</span></div>
+                                    <div class="bg-white text-slate-900 rounded-lg px-2 py-1 text-[8px] font-semibold" data-i18n="ad_dash">Kontrolna tabla</div>
+                                    <div class="text-slate-500 rounded-lg px-2 py-1 text-[8px]" data-i18n="ad_clients">Administratori</div>
+                                    <div class="text-slate-500 rounded-lg px-2 py-1 text-[8px]" data-i18n="ad_alarms">Podrška</div>
+                                    <div class="text-slate-500 rounded-lg px-2 py-1 text-[8px]" data-i18n="ad_integrations">Integracije</div>
+                                    <div class="text-slate-500 rounded-lg px-2 py-1 text-[8px]" data-i18n="ad_set">API</div>
+                                </div>
+                                <div class="flex-1 p-3 overflow-hidden">
+                                    <div class="grid grid-cols-4 gap-1.5 mb-2.5">
+                                        <div class="bg-slate-800 rounded-lg p-2"><p class="text-[7px] text-slate-400" data-i18n="ad_s1">Aktivni pozivi</p><p class="text-[13px] font-bold text-white">3</p><p class="text-[7px] text-green-400">+2 danas</p></div>
+                                        <div class="bg-slate-800 rounded-lg p-2"><p class="text-[7px] text-slate-400" data-i18n="ad_s2">Zakazano</p><p class="text-[13px] font-bold text-white">27</p><p class="text-[7px] text-slate-500">AI 100%</p></div>
+                                        <div class="bg-slate-800 rounded-lg p-2"><p class="text-[7px] text-slate-400" data-i18n="ad_s3">Propušteni</p><p class="text-[13px] font-bold text-white">0</p><p class="text-[7px] text-green-400">-100%</p></div>
+                                        <div class="bg-slate-800 rounded-lg p-2"><p class="text-[7px] text-slate-400" data-i18n="ad_s4">Zadovoljstvo</p><p class="text-[13px] font-bold text-white">4.9</p><p class="text-[7px] text-slate-500">od 5.0</p></div>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-1.5">
+                                        <div class="col-span-2 bg-slate-800 rounded-lg p-2">
+                                            <p class="text-[8px] font-semibold text-white mb-1.5" data-i18n="ad_recent">Poslednji pozivi</p>
+                                            <div class="space-y-1">
+                                                <div class="flex items-center gap-1.5 bg-slate-700/50 rounded-lg p-1.5"><span class="text-[9px]">💬</span><div class="flex-1 min-w-0"><p class="text-[8px] font-medium text-white truncate">Ana Jovanović</p><p class="text-[7px] text-slate-400">WhatsApp · zakazano</p></div><span class="text-[7px] text-slate-500 shrink-0">2m</span></div>
+                                                <div class="flex items-center gap-1.5 bg-slate-700/50 rounded-lg p-1.5"><span class="text-[9px]">✉</span><div class="flex-1 min-w-0"><p class="text-[8px] font-medium text-white truncate">Marko Petrović</p><p class="text-[7px] text-slate-400">SMS · potvrđeno</p></div><span class="text-[7px] text-slate-500 shrink-0">14m</span></div>
+                                                <div class="flex items-center gap-1.5 bg-slate-700/50 rounded-lg p-1.5"><span class="text-[9px]">📞</span><div class="flex-1 min-w-0"><p class="text-[8px] font-medium text-white truncate">Nikola Ilić</p><p class="text-[7px] text-slate-400">Voice · otkazano</p></div><span class="text-[7px] text-slate-500 shrink-0">1h</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="bg-slate-800 rounded-lg p-2">
+                                            <p class="text-[8px] font-semibold text-white mb-1.5">Kaleya status</p>
+                                            <div class="space-y-1 text-[7px]">
+                                                <div class="flex justify-between"><span class="text-slate-400">Glas</span><span class="text-white">ElevenLabs</span></div>
+                                                <div class="flex justify-between"><span class="text-slate-400">Jezik</span><span class="text-white">Srpski</span></div>
+                                                <div class="flex justify-between"><span class="text-slate-400">Status</span><span class="text-green-400">Aktivan ●</span></div>
+                                                <div class="flex justify-between"><span class="text-slate-400">WhatsApp</span><span class="text-teal-400">ON</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-700 h-2.5 rounded-b"></div>
+                        <div class="bg-slate-600 h-1 rounded-b-lg w-4/5 mx-auto"></div>
+                    </div>
+                </div>
+
+                <!-- Demo pristup -->
+                <div class="max-w-md mx-auto rounded-[24px] border border-teal-200 dark:border-teal-800/60 bg-teal-50/80 dark:bg-teal-950/20 p-6">
+                    <p class="text-xs font-bold text-teal-700 dark:text-teal-300 uppercase tracking-wide" data-i18n="login_demo_title">Test pristup</p>
+                    <p class="mt-1.5 text-sm text-slate-600 dark:text-slate-400" data-i18n="login_demo_help">Za probu kliknite administratora ili radnika ispod, podaci ce se sami upisati, pa zatim pritisnite prijavu.</p>
+                    <div class="mt-4 grid gap-2">
+                        <button onclick="enterDemo('admin')" class="h-11 rounded-xl gradient-bg text-white text-[13px] font-semibold hover:opacity-90 transition" data-i18n="login_demo_admin">Demo administrator: administrator@test.com / test123</button>
+                        <button onclick="enterDemo('employee')" class="h-11 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-[13px] font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition" data-i18n="login_demo_employee">Demo radnik: employee / emp123</button>
+                    </div>
+                    <p class="mt-4 text-[11px] text-slate-400 text-center">Svi podaci su lokalni i automatski se brišu po završetku sesije.</p>
                 </div>
             </div>
         </div>
@@ -2776,7 +2872,7 @@ document.getElementById('theme-toggle')?.addEventListener('click', () => {
 
 // ===== NAVIGATION =====
 function showView(view) {
-    ['landing','login','client','admin'].forEach(v => {
+    ['landing','login','client','admin','how'].forEach(v => {
         document.getElementById(v+'-view').classList.toggle('hidden', v !== view);
     });
     window.scrollTo(0,0);
@@ -2970,6 +3066,27 @@ function fillLogin(type) {
     }
 }
 function setDemoClient() { fillLogin('client'); }
+function enterDemo(type) {
+    localStorage.removeItem('kaleya_auth_token');
+    localStorage.setItem('kaleya_demo_mode', '1');
+    if (type === 'admin') {
+        localStorage.setItem('kaleya_user_role', 'client');
+        localStorage.setItem('kaleya_user_email', 'administrator@test.com');
+        localStorage.setItem('kaleya_user_username', 'administrator@test.com');
+        localStorage.setItem('kaleya_user_full_name', 'Demo Administrator');
+    } else {
+        localStorage.setItem('kaleya_user_role', 'employee');
+        localStorage.setItem('kaleya_user_email', 'employee@test.com');
+        localStorage.setItem('kaleya_user_username', 'employee');
+        localStorage.removeItem('kaleya_user_full_name');
+    }
+    showView('client');
+}
+window.addEventListener('beforeunload', () => {
+    if (localStorage.getItem('kaleya_demo_mode')) {
+        ['kaleya_auth_token','kaleya_user_role','kaleya_user_email','kaleya_user_username','kaleya_user_full_name','kaleya_demo_mode'].forEach(k => localStorage.removeItem(k));
+    }
+});
 async function logout() {
     if (getAuthToken() && isBackendServed()) {
         try {
@@ -2984,6 +3101,7 @@ async function logout() {
     localStorage.removeItem('kaleya_user_email');
     localStorage.removeItem('kaleya_user_username');
     localStorage.removeItem('kaleya_user_full_name');
+    localStorage.removeItem('kaleya_demo_mode');
     showView('landing');
 }
 
