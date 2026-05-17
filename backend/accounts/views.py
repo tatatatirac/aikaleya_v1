@@ -74,6 +74,59 @@ class LogoutAPIView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class OnboardingCompleteAPIView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        profile = getattr(request.user, "profile", None)
+        if not profile or profile.role != "client":
+            return Response({"detail": "Only client accounts can complete onboarding."}, status=status.HTTP_403_FORBIDDEN)
+
+        from clients.utils import client_for_request
+        client = client_for_request(request)
+        if not client:
+            return Response({"detail": "Business client not found."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update business name / work hours / slot interval
+        business_name = (request.data.get("business_name") or "").strip()
+        work_start = (request.data.get("work_start") or "").strip()
+        work_end = (request.data.get("work_end") or "").strip()
+        slot_interval = request.data.get("slot_interval")
+        services_data = request.data.get("services") or []
+
+        if business_name:
+            client.name = business_name
+            client.public_name = business_name
+
+        if work_start:
+            client.work_start = work_start
+        if work_end:
+            client.work_end = work_end
+        if slot_interval and int(slot_interval) in (15, 20, 30, 45, 60):
+            client.slot_interval_minutes = int(slot_interval)
+
+        client.save(update_fields=["name", "public_name", "work_start", "work_end", "slot_interval_minutes", "updated_at"])
+
+        # Create services (skip duplicates)
+        if services_data:
+            from staff_services.models import Service
+            for svc in services_data:
+                svc_name = (svc.get("name") or "").strip()
+                svc_duration = svc.get("duration") or 30
+                if svc_name:
+                    Service.objects.get_or_create(
+                        business_client=client,
+                        name=svc_name,
+                        defaults={"duration_minutes": int(svc_duration), "is_active": True},
+                    )
+
+        # Mark profile as onboarded
+        profile.is_onboarded = True
+        profile.save(update_fields=["is_onboarded", "updated_at"])
+
+        return Response({"is_onboarded": True, "user": UserSerializer(request.user).data})
+
+
 class GdprExportAPIView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 

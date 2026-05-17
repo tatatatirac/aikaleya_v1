@@ -38,10 +38,11 @@ class LoginSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     role = serializers.CharField(source="profile.role", read_only=True)
     phone = serializers.CharField(source="profile.phone", read_only=True)
+    is_onboarded = serializers.BooleanField(source="profile.is_onboarded", read_only=True)
 
     class Meta:
         model = User
-        fields = ("id", "email", "username", "first_name", "last_name", "role", "phone", "is_staff")
+        fields = ("id", "email", "username", "first_name", "last_name", "role", "phone", "is_staff", "is_onboarded")
 
 
 class AuthResponseSerializer(serializers.Serializer):
