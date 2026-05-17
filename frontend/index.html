@@ -5380,7 +5380,7 @@ function availabilityMessageFromFreeCount(freeCount) {
         it: free > 0 ? `Hai ${free} slot disponibili oggi.` : 'Non ci sono slot disponibili oggi.',
         de: free > 0 ? `Sie haben heute ${free} freie Termine.` : 'Heute gibt es keine freien Termine.'
     };
-    return messages[currentVoiceLang] || messages[currentLang] || messages.en;
+    return messages[currentLang] || messages[currentVoiceLang] || messages.en;
 }
 
 function availabilityInfoFromFreeCount(freeCount) {
@@ -5416,7 +5416,7 @@ async function todayAvailabilityInfoFromBackend() {
 }
 
 function staticAvailabilityAudioUrl(freeCount, langOverride) {
-    const lang = langOverride === 'sr' ? 'sr' : 'sr';
+    const lang = 'sr'; // only sr static audio files exist currently
     const safeCount = Number(freeCount || 0);
     if (safeCount < 0 || safeCount > 30) return '';
     return `assets/audio/kaleya-slots-${lang}-${safeCount}.mp3?v=${KALEYA_APP_VERSION}`;
