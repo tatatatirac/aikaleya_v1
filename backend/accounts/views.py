@@ -11,12 +11,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.serializers import ClientRegistrationSerializer, LoginSerializer, UserSerializer
+from accounts.throttles import AuthRateThrottle
 from clients.serializers import BusinessClientSerializer
 from clients.utils import client_for_request
 
 
 class LoginAPIView(APIView):
     permission_classes = (permissions.AllowAny,)
+    throttle_classes = (AuthRateThrottle,)
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
@@ -36,6 +38,7 @@ class MeAPIView(APIView):
 
 class RegisterClientAPIView(APIView):
     permission_classes = (permissions.AllowAny,)
+    throttle_classes = (AuthRateThrottle,)
 
     def post(self, request):
         serializer = ClientRegistrationSerializer(data=request.data)
@@ -163,6 +166,7 @@ class GdprDeleteAccountAPIView(APIView):
 
 class GdprCancelDeleteAPIView(APIView):
     permission_classes = (permissions.AllowAny,)
+    throttle_classes = (AuthRateThrottle,)
 
     def post(self, request):
         from django.contrib.auth.models import User as AuthUser
