@@ -3203,12 +3203,18 @@ async function logout() {
         }
     }
     clearVoiceStatusCache();
-    localStorage.removeItem('kaleya_auth_token');
-    localStorage.removeItem('kaleya_user_role');
-    localStorage.removeItem('kaleya_user_email');
-    localStorage.removeItem('kaleya_user_username');
-    localStorage.removeItem('kaleya_user_full_name');
-    localStorage.removeItem('kaleya_demo_mode');
+    const wasDemo = localStorage.getItem('kaleya_demo_mode');
+    if (wasDemo) {
+        const keep = new Set(['theme','kaleya_cookie_consent','kaleya_lang','kaleya_lang_user_set','kaleya_voice_lang','kaleya_voice_lang_user_set']);
+        Object.keys(localStorage).forEach(k => { if (!keep.has(k)) localStorage.removeItem(k); });
+    } else {
+        localStorage.removeItem('kaleya_auth_token');
+        localStorage.removeItem('kaleya_user_role');
+        localStorage.removeItem('kaleya_user_email');
+        localStorage.removeItem('kaleya_user_username');
+        localStorage.removeItem('kaleya_user_full_name');
+        localStorage.removeItem('kaleya_demo_mode');
+    }
     showView('landing');
 }
 
