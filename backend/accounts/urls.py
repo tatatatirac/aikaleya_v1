@@ -1,6 +1,14 @@
 from django.urls import path
 
-from accounts.views import LoginAPIView, LogoutAPIView, MeAPIView, RegisterClientAPIView
+from accounts.views import (
+    GdprCancelDeleteAPIView,
+    GdprDeleteAccountAPIView,
+    GdprExportAPIView,
+    LoginAPIView,
+    LogoutAPIView,
+    MeAPIView,
+    RegisterClientAPIView,
+)
 
 
 urlpatterns = [
@@ -8,4 +16,7 @@ urlpatterns = [
     path("register-client/", RegisterClientAPIView.as_view(), name="register-client"),
     path("me/", MeAPIView.as_view(), name="me"),
     path("logout/", LogoutAPIView.as_view(), name="logout"),
+    path("gdpr/export/", GdprExportAPIView.as_view(), name="gdpr-export"),
+    path("gdpr/delete-account/", GdprDeleteAccountAPIView.as_view(), name="gdpr-delete-account"),
+    path("gdpr/cancel-delete/", GdprCancelDeleteAPIView.as_view(), name="gdpr-cancel-delete"),
 ]
