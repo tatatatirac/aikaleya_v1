@@ -149,9 +149,9 @@ const PAGE_LANGS = {
         god_lead: 'Purchase the complete Kaleya project with frontend, backend, hosting preparation, domain and deployment documentation.',
         god_cta: 'Contact for Buy All',
         privacy_title: 'Privacy Policy',
-        privacy_lead: 'This is a standard starter version and should be legally reviewed before production.',
+        privacy_lead: 'Last updated: May 2026. Please read this policy carefully before using Kaleya.',
         terms_title: 'Terms of Service',
-        terms_lead: 'This is a standard starter version for a SaaS service and should be legally reviewed before production.',
+        terms_lead: 'Last updated: May 2026. By using Kaleya you agree to these Terms of Service.',
         footer_privacy: 'Privacy',
         footer_terms: 'Terms'
     },
@@ -629,11 +629,16 @@ const PAGE_LEGAL = {
             ['Kontakt', 'Za pitanja o privatnosti kontaktirajte hello@aikaleya.com. Ovaj tekst treba pravno proveriti pre javnog lansiranja.']
         ],
         en: [
-            ['Data we collect', 'Kaleya may collect business contact data, account registration data, selected package information and technical data needed to operate the service.'],
-            ['How we use data', 'We use data for registration, service delivery, client communication, billing, support and system security.'],
-            ['API and voice services', 'AI and voice processing runs through backend integrations. API keys must not be stored in frontend code and are kept in a secure backend environment in production.'],
-            ['Data retention', 'Data is kept while the business relationship or legal retention requirement exists. Clients may request correction or deletion where applicable.'],
-            ['Contact', 'For privacy questions contact hello@aikaleya.com. This text should be legally reviewed before public launch.']
+            ['Information We Collect', 'We collect information you provide directly: business name, contact name, email address, phone number, password and country when you register. We also collect usage data (pages visited, features used, session timestamps), technical data (IP address, browser type, device identifiers) and billing information processed by our payment provider. Voice and AI interaction logs may be stored to improve service quality and for audit purposes.'],
+            ['How We Use Your Information', 'We use your information to: create and manage your account; deliver and improve the Kaleya service; process payments and send billing communications; send service notifications and support responses; detect fraud and maintain platform security; comply with legal obligations. We do not sell your personal information to third parties.'],
+            ['Third-Party Services', 'Kaleya uses the following third-party processors who may handle your data: (1) Anthropic — AI language model processing (your messages are sent to Anthropic API to generate responses); (2) ElevenLabs — voice synthesis for AI replies; (3) Lemon Squeezy — payment processing and subscription management (acts as Merchant of Record); (4) Sentry — error monitoring and diagnostics. Each processor is bound by their own data processing agreements and privacy policies.'],
+            ['Cookies and Tracking', 'Kaleya uses essential cookies for authentication (session token) and preference storage (language, theme). If you select "Accept all", we may also use analytics cookies. You can manage your cookie preference at any time using the banner at the bottom of this page. We do not use advertising cookies or cross-site tracking.'],
+            ['Data Retention', 'We retain your account data for as long as your subscription is active, plus up to 30 days after cancellation to allow account recovery. After that period, personal data is permanently deleted. Billing records may be retained for up to 7 years as required by law. You can request immediate deletion by submitting an account deletion request from your dashboard.'],
+            ['Your Rights (GDPR & CCPA)', 'Depending on your location, you have the right to: access a copy of your personal data (use the Export function in your dashboard); correct inaccurate data; request deletion of your data; object to or restrict certain processing; data portability. California residents have the additional right to know what personal information is sold or disclosed (we do not sell personal information). To exercise any right, contact hello@aikaleya.com. We will respond within 30 days.'],
+            ['Data Security', 'We use industry-standard safeguards: HTTPS/TLS encryption in transit, hashed passwords, httpOnly authentication tokens, and server-side secrets management. API keys are never exposed in frontend code. Despite these measures, no system is completely secure. We encourage you to use a strong, unique password.'],
+            ['Children', 'Kaleya is a business service intended for users 18 years of age or older. We do not knowingly collect personal information from children under 13.'],
+            ['Changes to This Policy', 'We may update this Privacy Policy. When we do, we will update the date at the top and notify active users by email. Continued use of the service after changes constitutes acceptance.'],
+            ['Contact', 'For privacy questions, data requests or concerns: hello@aikaleya.com · aikaleya.com. This policy was last updated May 2026 and should be reviewed by a qualified attorney before commercial launch.']
         ],
         es: [
             ['Datos que recopilamos', 'Kaleya puede recopilar datos de contacto empresarial, datos de registro, información del paquete elegido y datos técnicos necesarios para operar el servicio.'],
@@ -666,11 +671,18 @@ const PAGE_LEGAL = {
             ['Promene uslova', 'Uslovi se mogu ažurirati. Nastavak korišćenja servisa nakon promene znači prihvatanje ažuriranih uslova.']
         ],
         en: [
-            ['Service description', 'Kaleya is an AI system for automating communication, scheduling, voice replies and notifications for business users.'],
-            ['Account and access', 'The client is responsible for accurate data, account security and lawful use of the service.'],
-            ['Billing and packages', 'Packages, trial period and billing are activated through the backend registration system and payment provider. Details are confirmed during purchase.'],
-            ['Limitations', 'Kaleya does not guarantee that AI can complete every request. When AI cannot complete a process, the request may be escalated to human support.'],
-            ['Changes to terms', 'Terms may be updated. Continued use after changes means acceptance of the updated terms.']
+            ['Service Description', 'Kaleya ("Service", "we", "us") is a subscription-based AI receptionist platform that automates appointment scheduling, voice replies, client communication and business notifications. The Service is operated by Kaleya AI (aikaleya.com). By creating an account you agree to these Terms of Service.'],
+            ['Eligibility and Account', 'You must be at least 18 years old and authorized to enter contracts on behalf of your business to use Kaleya. You are responsible for: providing accurate registration information; maintaining the confidentiality of your login credentials; all activity that occurs under your account; ensuring your use of the Service complies with applicable laws. Notify us immediately at hello@aikaleya.com if you suspect unauthorized access.'],
+            ['Subscription, Billing and Cancellation', 'Kaleya offers paid subscription plans with a free trial period. Payment is processed by Lemon Squeezy (Merchant of Record — they handle tax, VAT and receipts). Your subscription renews automatically at the end of each billing period unless cancelled. You may cancel at any time from your dashboard; access continues until the end of the current period. Refunds are issued at our discretion for exceptional cases — contact support within 7 days of a charge. Prices may change with 30 days notice to active subscribers.'],
+            ['Acceptable Use', 'You agree not to: use the Service for illegal, fraudulent or harmful purposes; impersonate any person or entity; attempt to reverse-engineer, scrape or overload the platform; use the AI to generate spam, misleading content or content that violates third-party rights; resell or sublicense the Service without written permission. We reserve the right to suspend or terminate accounts that violate these terms without refund.'],
+            ['AI Service and Limitations', 'Kaleya\'s AI is powered by third-party language models (Anthropic Claude). AI responses are generated automatically and may occasionally be inaccurate, incomplete or inappropriate for a given situation. Kaleya does not guarantee that the AI will complete every request correctly. You are responsible for reviewing AI-generated communications before relying on them for critical business decisions. When the AI cannot resolve a request, it may escalate to human support.'],
+            ['Data and Privacy', 'Your use of the Service is governed by our Privacy Policy (aikaleya.com/privacy). By using the Service you consent to the data practices described there. You retain ownership of your business data. You grant Kaleya a limited license to process your data solely to provide the Service.'],
+            ['Intellectual Property', 'Kaleya, its logo, platform design and underlying software are owned by Kaleya AI. You may not copy, modify or distribute any part of the Service without express written permission. You retain full ownership of your business content, customer data and configurations.'],
+            ['Disclaimer of Warranties', 'The Service is provided "as is" and "as available" without warranties of any kind, express or implied, including but not limited to merchantability, fitness for a particular purpose or uninterrupted operation. We do not warrant that the Service will be error-free or that AI responses will always be accurate.'],
+            ['Limitation of Liability', 'To the maximum extent permitted by law, Kaleya AI shall not be liable for indirect, incidental, special, consequential or punitive damages, including lost profits or data, arising from your use of or inability to use the Service. Our total liability to you for any claim shall not exceed the amount you paid for the Service in the 3 months preceding the claim.'],
+            ['Governing Law', 'These Terms are governed by the laws of the State of Delaware, United States, without regard to conflict of law principles. Any disputes shall be resolved by binding arbitration under AAA rules, except that either party may seek injunctive relief in a court of competent jurisdiction.'],
+            ['Changes to Terms', 'We may update these Terms. We will notify active subscribers by email at least 14 days before material changes take effect. Continued use of the Service after the effective date constitutes acceptance. If you do not agree to updated Terms, you may cancel your subscription before they take effect.'],
+            ['Contact', 'Questions about these Terms: hello@aikaleya.com · aikaleya.com. These Terms were last updated May 2026 and should be reviewed by a qualified attorney before commercial launch.']
         ],
         es: [
             ['Descripción del servicio', 'Kaleya es un sistema de IA para automatizar comunicación, agenda, respuestas de voz y notificaciones para empresas.'],
