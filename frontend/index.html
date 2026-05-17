@@ -670,6 +670,10 @@
                             <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z"/></svg>
                             <span data-i18n="nav_support">Support</span>
                         </button>
+                        <button data-sidebar-tab="channels" onclick="switchClientTab('channels')" class="client-sidebar-tab w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium transition text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900">
+                            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            <span data-i18n="nav_channels">Kanali</span>
+                        </button>
                     </nav>
                     <div class="px-2 py-3 border-t border-slate-100 dark:border-slate-900 space-y-0.5">
                         <button onclick="handleClientThirdTab()" class="w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 transition text-left">
@@ -868,6 +872,20 @@
                     <p class="mt-2 text-sm text-slate-500" data-i18n="employee_list_desc">Lista kontakata za zaposlene. Vlasnik je uvek na vrhu.</p>
                     <button data-pwa-install onclick="installKaleyaApp()" class="hidden mt-4 w-full h-11 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold">Install Kaleya</button>
                     <div id="employeeDirectoryList" class="mt-5 space-y-3"></div>
+                </div>
+
+                <!-- CHANNELS SCREEN (desktop sidebar tab) -->
+                <div data-client-screen="channels" class="hidden flex-1 px-5 pt-6 pb-24 max-w-[860px]">
+                    <div class="mb-6">
+                        <p class="text-[12px] font-semibold uppercase tracking-wide text-slate-500 mb-1" data-i18n="nav_channels">Kanali</p>
+                        <h2 class="font-display text-[24px] font-bold leading-tight" data-i18n="cset_integrations">Zakazivanje putem kanala</h2>
+                        <p class="mt-1 text-sm text-slate-500">Poveži kanale na kojima Kaleya prima poruke i zakazuje termine.</p>
+                    </div>
+                    <div id="channelsPanelGrid" class="grid gap-4 sm:grid-cols-2">
+                        <div class="h-28 rounded-[20px] bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
+                        <div class="h-28 rounded-[20px] bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
+                        <div class="h-28 rounded-[20px] bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
+                    </div>
                 </div>
 
                 <!-- Bottom Nav -->
@@ -2147,6 +2165,9 @@ const INTEG_UI_KEYS = {
 };
 Object.entries(INTEG_UI_KEYS).forEach(([lang, values]) => {
     T[lang] = { ...(T[lang] || T.en), ...values };
+});
+['sr','en','es','pt','ru','fr','it','de'].forEach((l,i) => {
+    T[l] = { ...(T[l]||T.en), nav_channels: ['Kanali','Channels','Canales','Canais','Каналы','Canaux','Canali','Kanäle'][i] };
 });
 
 const PUBLIC_DEMO_TRANSLATIONS = {
@@ -6222,6 +6243,7 @@ function switchClientTab(tab) {
         renderClientSupportInbox();
         loadClientSupportTicketsFromBackend();
     }
+    if (tab === 'channels') loadClientIntegrationsStatus();
 }
 
 function moveClientCalendar(delta) {
@@ -7014,13 +7036,16 @@ function configureIntegration(name) {
 // ===== INTEGRATIONS SETUP =====
 
 async function loadClientIntegrationsStatus() {
+    if (!getAuthToken() || location.protocol === 'file:') return;
     const panel = document.getElementById('clientIntegrationsPanel');
-    if (!panel || !getAuthToken() || location.protocol === 'file:') return;
+    const grid = document.getElementById('channelsPanelGrid');
+    if (!panel && !grid) return;
     try {
         const res = await kaleyaApi('/api/integrations/connections/status/');
         if (!res.ok) return;
-        const data = await res.json();
-        renderClientIntegrationsPanel(panel, data.integrations || []);
+        const integrations = (await res.json()).integrations || [];
+        if (panel) renderClientIntegrationsPanel(panel, integrations);
+        if (grid) renderChannelsPanelGrid(grid, integrations);
     } catch (e) { /* silent — keep skeleton */ }
 }
 
@@ -7036,10 +7061,13 @@ function renderClientIntegrationsPanel(panel, integrations) {
                 <span class="text-[10px] text-slate-400 shrink-0">${tr('upgrade_plan')}</span></div>`;
         }
         if (ready || status === 'connected') {
-            const display = (public_number || '').length > 12 ? (public_number || '').slice(0, 12) + '…' : (public_number || '✓');
+            const shortName = (public_number || '').length > 9 ? (public_number || '').slice(0,9)+'…' : (public_number || '✓');
             return `<div class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-teal-300 dark:border-teal-700 flex items-center justify-between gap-1">
                 <span class="truncate text-[12px]">${ICONS[provider] || ''} ${label}</span>
-                <button onclick="openIntegrationManage('${provider}')" class="text-[11px] text-teal-600 dark:text-teal-400 font-semibold shrink-0" title="${public_number || ''}">${display}</button></div>`;
+                <div class="flex items-center gap-1 shrink-0">
+                    <span class="text-[11px] text-teal-600 dark:text-teal-400 font-semibold">${shortName}</span>
+                    <button onclick="if(window.confirm(tr('disconnect_confirm_msg').replace('%s','${label}')))disconnectIntegration('${provider}')" class="text-[11px] text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 ml-0.5 leading-none" title="${tr('disconnect')}">✕</button>
+                </div></div>`;
         }
         if (status === 'error') {
             return `<div class="px-3 py-2 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 flex items-center justify-between gap-1">
@@ -7135,6 +7163,67 @@ async function disconnectIntegration(provider) {
     } catch (e) { showToast(e.message || tr('integration_connect_failed')); }
     loadClientIntegrationsStatus();
     loadAdminIntegrationsStatus();
+}
+
+function renderChannelsPanelGrid(container, integrations) {
+    const SHOW = ['telegram', 'whatsapp', 'viber', 'sms', 'phone', 'instagram'];
+    const ICONS = { telegram: '✈', whatsapp: '💬', viber: '📱', sms: '📩', phone: '📞', instagram: '📸' };
+    const DESC = {
+        telegram: { sr: 'Prima i šalje poruke za zakazivanje termina.', en: 'Receives and sends messages for booking appointments.' },
+        whatsapp: { sr: 'WhatsApp Business API — automatske poruke.', en: 'WhatsApp Business API — automated messaging.' },
+        viber: { sr: 'Lokalna komunikacija i potvrde termina.', en: 'Local messaging and appointment confirmations.' },
+        sms: { sr: 'SMS potvrde i podsetnici za termine.', en: 'SMS confirmations and appointment reminders.' },
+        phone: { sr: 'Telefonski pozivi za zakazivanje (VoIP).', en: 'Phone calls for booking (VoIP).' },
+        instagram: { sr: 'Instagram DM zakazivanje.', en: 'Instagram DM booking.' },
+    };
+    const visible = integrations.filter(i => SHOW.includes(i.provider));
+    if (!visible.length) return;
+    const cards = visible.map(({ provider, label, allowed_by_package, status, public_number, ready, last_error }) => {
+        const active = ready || status === 'connected';
+        const desc = (DESC[provider] || {})[currentLang] || (DESC[provider] || {}).en || '';
+        if (!allowed_by_package) {
+            return `<div class="p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 opacity-60">
+                <div class="flex items-start justify-between gap-3">
+                    <div><h3 class="font-semibold">${ICONS[provider]||''} ${label}</h3><p class="mt-1 text-[13px] text-slate-500">${desc}</p></div>
+                    <span class="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400">${tr('upgrade_plan')}</span>
+                </div></div>`;
+        }
+        if (active) {
+            return `<div class="p-5 rounded-[20px] border border-teal-300 dark:border-teal-700 bg-white dark:bg-slate-900 shadow-sm">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <h3 class="font-semibold">${ICONS[provider]||''} ${label}</h3>
+                        <p class="mt-1 text-[13px] text-slate-500">${desc}</p>
+                        ${public_number ? `<p class="mt-2 text-[12px] font-mono text-teal-600 dark:text-teal-400">${public_number}</p>` : ''}
+                    </div>
+                    <span class="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300">${tr('active')}</span>
+                </div>
+                <div class="mt-4">
+                    <button onclick="if(window.confirm(tr('disconnect_confirm_msg').replace('%s','${label}')))disconnectIntegration('${provider}')" class="h-9 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:border-red-300 hover:text-red-500 text-[12px] transition">${tr('disconnect')}</button>
+                </div></div>`;
+        }
+        if (status === 'error') {
+            return `<div class="p-5 rounded-[20px] border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <h3 class="font-semibold">${ICONS[provider]||''} ${label}</h3>
+                        <p class="mt-1 text-[12px] text-red-500 line-clamp-2">${last_error || 'Connection error'}</p>
+                    </div>
+                    <span class="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-600">Error</span>
+                </div>
+                <div class="mt-4">${provider==='telegram'?`<button onclick="openIntegrationSetup('telegram')" class="h-9 px-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12px] font-medium">${tr('reconnect')}</button>`:''}</div></div>`;
+        }
+        const btn = provider === 'telegram'
+            ? `<button onclick="openIntegrationSetup('telegram')" class="h-9 px-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12px] font-medium">${tr('connect')}</button>`
+            : `<span class="text-[12px] text-slate-400">${tr('coming_soon')}</span>`;
+        return `<div class="p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <div class="flex items-start justify-between gap-3">
+                <div><h3 class="font-semibold">${ICONS[provider]||''} ${label}</h3><p class="mt-1 text-[13px] text-slate-500">${desc}</p></div>
+                <span class="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">${tr('pending')}</span>
+            </div>
+            <div class="mt-4">${btn}</div></div>`;
+    });
+    container.innerHTML = cards.join('');
 }
 
 async function loadAdminIntegrationsStatus() {
