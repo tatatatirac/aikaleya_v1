@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import json
 import re
 import urllib.parse
@@ -263,6 +265,284 @@ def configure_telegram_webhook(connection, webhook_url="", drop_pending_updates=
     connection.last_error = ""
     connection.save(update_fields=["webhook_url", "enabled", "status", "last_error", "updated_at"])
     return response
+
+
+# ===== WHATSAPP =====
+
+def extract_whatsapp_message(data):
+    """Extract the first message object and contact name from a WhatsApp Business API webhook payload."""
+    try:
+        value = data.get("entry", [{}])[0].get("changes", [{}])[0].get("value", {})
+        messages = value.get("messages", [])
+        if not messages:
+            return None, ""
+        message = messages[0]
+        contacts = value.get("contacts", [])
+        contact_name = contacts[0].get("profile", {}).get("name", "") if contacts else ""
+        return message, contact_name
+    except (IndexError, KeyError, TypeError):
+        return None, ""
+
+
+def whatsapp_sender_label(message, contact_name=""):
+    sender_id = message.get("from", "")
+    if contact_name:
+        return contact_name
+    return f"+{sender_id}" if sender_id else "WhatsApp korisnik"
+
+
+def verify_whatsapp_signature(connection, body_bytes, signature_header):
+    """Verify X-Hub-Signature-256 using app_secret from config (optional — skipped if not set)."""
+    app_secret = (connection.config or {}).get("app_secret", "")
+    if not app_secret:
+        return  # signature verification not configured
+    provided = (signature_header or "").removeprefix("sha256=")
+    if not provided:
+        raise PermissionDenied("WhatsApp webhook signature nije pronadjen.")
+    expected = hmac.new(app_secret.encode(), body_bytes, hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expected, provided):
+        raise PermissionDenied("WhatsApp webhook signature nije validan.")
+
+
+def validate_whatsapp_connection(connection):
+    if connection.provider != "whatsapp":
+        raise serializers.ValidationError({"provider": "Integracija nije WhatsApp."})
+    enforce_channel_allowed(connection.business_client, "whatsapp")
+    if not connection.enabled:
+        raise serializers.ValidationError({"integration": "WhatsApp integracija nije ukljucena."})
+    if connection.status not in {"connected", "error"}:
+        raise serializers.ValidationError({"integration": "WhatsApp integracija nije povezana."})
+    missing = missing_config_keys("whatsapp", connection)
+    if missing:
+        raise serializers.ValidationError({"config": f"Nedostaje konfiguracija: {', '.join(missing)}."})
+
+
+def send_whatsapp_message(connection, to_number, text):
+    config = connection.config or {}
+    access_token = config.get("access_token", "")
+    phone_number_id = config.get("phone_number_id", "")
+    if not access_token or not phone_number_id:
+        raise serializers.ValidationError({"config": "WhatsApp access_token ili phone_number_id nije podesen."})
+    payload = json.dumps({
+        "messaging_product": "whatsapp",
+        "to": to_number,
+        "type": "text",
+        "text": {"body": text or ""},
+    }).encode("utf-8")
+    req = urllib.request.Request(
+        f"https://graph.facebook.com/v19.0/{phone_number_id}/messages",
+        data=payload,
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as response:
+            body = response.read().decode("utf-8")
+        return json.loads(body)
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
+def process_whatsapp_webhook(connection, data, body_bytes=b"", signature_header=""):
+    verify_whatsapp_signature(connection, body_bytes, signature_header)
+    validate_whatsapp_connection(connection)
+
+    message, contact_name = extract_whatsapp_message(data)
+    if not message:
+        return {"processed": False, "ignored": True, "reason": "Nema poruke u WhatsApp webhook-u."}
+
+    msg_type = message.get("type", "")
+    if msg_type != "text":
+        return {"processed": False, "ignored": True, "reason": f"WhatsApp poruka tipa '{msg_type}' se ignorise."}
+
+    text = (message.get("text") or {}).get("body", "").strip()
+    if not text or not has_meaningful_text(text):
+        return {"processed": False, "ignored": True, "reason": "WhatsApp poruka nema tekst."}
+
+    sender_id = message.get("from", "")
+    if not sender_id:
+        raise serializers.ValidationError({"from": "WhatsApp sender ID nije pronadjen."})
+
+    business_client = connection.business_client
+    external_thread_id = f"whatsapp:{sender_id}"
+    payload = {
+        "customer_name": whatsapp_sender_label(message, contact_name),
+        "channel": "whatsapp",
+        "whatsapp_sender_id": sender_id,
+        "whatsapp_message_id": message.get("id", ""),
+    }
+
+    result = handle_inbound_text(
+        business_client,
+        text,
+        channel="whatsapp",
+        payload=payload,
+        use_ai=False if getattr(business_client, "is_demo", False) else True,
+        include_voice=False,
+        external_thread_id=external_thread_id,
+        record_messages=True,
+    )
+    wa_response = send_whatsapp_message(connection, sender_id, result["response_text"])
+
+    conversation = Conversation.objects.filter(
+        business_client=business_client,
+        channel="whatsapp",
+        external_thread_id=external_thread_id,
+    ).order_by("-updated_at").first()
+    if conversation:
+        metadata = conversation.metadata or {}
+        metadata["whatsapp"] = {
+            "sender_id": sender_id,
+            "message_id": message.get("id", ""),
+            "connection_id": connection.id,
+        }
+        conversation.metadata = metadata
+        conversation.save(update_fields=["metadata", "updated_at"])
+
+    return {
+        "processed": True,
+        "ignored": False,
+        "conversation_id": result.get("conversation_id"),
+        "intent": result.get("intent"),
+        "tool_status": (result.get("tool_output") or {}).get("status", ""),
+        "whatsapp_sent": "error" not in wa_response,
+    }
+
+
+# ===== VIBER =====
+
+def verify_viber_signature(connection, body_bytes, signature_header):
+    """Verify X-Viber-Content-Signature (HMAC-SHA256 with auth_token as key)."""
+    auth_token = (connection.config or {}).get("auth_token", "")
+    if not auth_token:
+        raise PermissionDenied("Viber auth_token nije podesen.")
+    provided = (signature_header or "").strip()
+    if not provided:
+        raise PermissionDenied("Viber webhook signature nije pronadjen.")
+    expected = hmac.new(auth_token.encode(), body_bytes, hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expected, provided):
+        raise PermissionDenied("Viber webhook signature nije validan.")
+
+
+def validate_viber_connection(connection):
+    if connection.provider != "viber":
+        raise serializers.ValidationError({"provider": "Integracija nije Viber."})
+    enforce_channel_allowed(connection.business_client, "viber")
+    if not connection.enabled:
+        raise serializers.ValidationError({"integration": "Viber integracija nije ukljucena."})
+    if connection.status not in {"connected", "error"}:
+        raise serializers.ValidationError({"integration": "Viber integracija nije povezana."})
+    missing = missing_config_keys("viber", connection)
+    if missing:
+        raise serializers.ValidationError({"config": f"Nedostaje konfiguracija: {', '.join(missing)}."})
+
+
+def viber_sender_label(data):
+    sender = data.get("sender") or {}
+    return sender.get("name") or sender.get("id") or "Viber korisnik"
+
+
+def send_viber_message(connection, receiver_id, text):
+    config = connection.config or {}
+    auth_token = config.get("auth_token", "")
+    sender_name = config.get("sender_name", "Kaleya")
+    if not auth_token:
+        raise serializers.ValidationError({"config": "Viber auth_token nije podesen."})
+    payload = json.dumps({
+        "receiver": receiver_id,
+        "type": "text",
+        "text": text or "",
+        "sender": {"name": sender_name},
+        "min_api_version": 1,
+    }).encode("utf-8")
+    req = urllib.request.Request(
+        "https://chatapi.viber.com/pa/send_message",
+        data=payload,
+        headers={
+            "Content-Type": "application/json",
+            "X-Viber-Auth-Token": auth_token,
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as response:
+            body = response.read().decode("utf-8")
+        return json.loads(body)
+    except Exception as exc:
+        return {"status": -1, "status_message": str(exc)}
+
+
+def process_viber_webhook(connection, data, body_bytes=b"", signature_header=""):
+    verify_viber_signature(connection, body_bytes, signature_header)
+
+    event = data.get("event", "")
+    # Viber sends "webhook" event on successful registration — acknowledge silently
+    if event in {"webhook", "conversation_started", "subscribed", "unsubscribed", "delivered", "seen", "failed"}:
+        return {"processed": False, "ignored": True, "reason": f"Viber event '{event}' se ignorise."}
+    if event != "message":
+        return {"processed": False, "ignored": True, "reason": f"Viber event '{event}' se ignorise."}
+
+    validate_viber_connection(connection)
+
+    msg_type = (data.get("message") or {}).get("type", "")
+    if msg_type != "text":
+        return {"processed": False, "ignored": True, "reason": f"Viber poruka tipa '{msg_type}' se ignorise."}
+
+    text = ((data.get("message") or {}).get("text") or "").strip()
+    if not text or not has_meaningful_text(text):
+        return {"processed": False, "ignored": True, "reason": "Viber poruka nema tekst."}
+
+    sender = data.get("sender") or {}
+    sender_id = sender.get("id", "")
+    if not sender_id:
+        raise serializers.ValidationError({"sender": "Viber sender ID nije pronadjen."})
+
+    business_client = connection.business_client
+    external_thread_id = f"viber:{sender_id}"
+    payload = {
+        "customer_name": viber_sender_label(data),
+        "channel": "viber",
+        "viber_sender_id": sender_id,
+    }
+
+    result = handle_inbound_text(
+        business_client,
+        text,
+        channel="viber",
+        payload=payload,
+        use_ai=False if getattr(business_client, "is_demo", False) else True,
+        include_voice=False,
+        external_thread_id=external_thread_id,
+        record_messages=True,
+    )
+    viber_response = send_viber_message(connection, sender_id, result["response_text"])
+
+    conversation = Conversation.objects.filter(
+        business_client=business_client,
+        channel="viber",
+        external_thread_id=external_thread_id,
+    ).order_by("-updated_at").first()
+    if conversation:
+        metadata = conversation.metadata or {}
+        metadata["viber"] = {
+            "sender_id": sender_id,
+            "message_token": str(data.get("message_token", "")),
+            "connection_id": connection.id,
+        }
+        conversation.metadata = metadata
+        conversation.save(update_fields=["metadata", "updated_at"])
+
+    return {
+        "processed": True,
+        "ignored": False,
+        "conversation_id": result.get("conversation_id"),
+        "intent": result.get("intent"),
+        "tool_status": (result.get("tool_output") or {}).get("status", ""),
+        "viber_sent": viber_response.get("status") == 0,
+    }
 
 
 def process_telegram_webhook(connection, update, provided_secret):

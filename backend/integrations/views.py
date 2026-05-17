@@ -1,3 +1,5 @@
+from django.http import HttpResponse
+
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
@@ -8,7 +10,13 @@ from accounts.permissions import user_role
 from clients.models import BusinessClient, get_active_client_for_user
 from integrations.models import IntegrationConnection
 from integrations.serializers import IntegrationConnectionSerializer
-from integrations.services import integration_rows_for_client, process_telegram_webhook, queue_test_message
+from integrations.services import (
+    integration_rows_for_client,
+    process_telegram_webhook,
+    process_whatsapp_webhook,
+    process_viber_webhook,
+    queue_test_message,
+)
 
 
 class IntegrationConnectionViewSet(viewsets.ModelViewSet):
@@ -95,6 +103,85 @@ class TelegramWebhookAPIView(APIView):
         )
         try:
             result = process_telegram_webhook(connection, request.data, provided_secret)
+        except PermissionDenied as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as exc:
+            connection.status = "error"
+            connection.last_error = str(exc)
+            connection.save(update_fields=["status", "last_error", "updated_at"])
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        if connection.status == "error":
+            connection.status = "connected"
+            connection.last_error = ""
+            connection.save(update_fields=["status", "last_error", "updated_at"])
+        return Response(result, status=status.HTTP_200_OK)
+
+
+class WhatsAppWebhookAPIView(APIView):
+    authentication_classes = ()
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request, connection_id):
+        """Handle Meta's webhook verification challenge (hub.challenge)."""
+        connection = IntegrationConnection.objects.filter(id=connection_id, provider="whatsapp").first()
+        if not connection:
+            return Response({"detail": "WhatsApp integracija nije pronadjena."}, status=status.HTTP_404_NOT_FOUND)
+
+        mode = request.query_params.get("hub.mode", "")
+        verify_token = request.query_params.get("hub.verify_token", "")
+        challenge = request.query_params.get("hub.challenge", "")
+
+        expected_token = (connection.config or {}).get("verify_token", "")
+        if mode == "subscribe" and expected_token and verify_token == expected_token:
+            return HttpResponse(challenge, content_type="text/plain", status=200)
+        return Response({"detail": "Verifikacija nije uspela."}, status=status.HTTP_403_FORBIDDEN)
+
+    def post(self, request, connection_id):
+        connection = (
+            IntegrationConnection.objects.select_related("business_client")
+            .filter(id=connection_id, provider="whatsapp")
+            .first()
+        )
+        if not connection:
+            return Response({"detail": "WhatsApp integracija nije pronadjena."}, status=status.HTTP_404_NOT_FOUND)
+
+        body_bytes = request.body
+        signature = request.headers.get("X-Hub-Signature-256", "")
+        try:
+            result = process_whatsapp_webhook(connection, request.data, body_bytes, signature)
+        except PermissionDenied as exc:
+            return Response({"detail": str(exc)}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as exc:
+            connection.status = "error"
+            connection.last_error = str(exc)
+            connection.save(update_fields=["status", "last_error", "updated_at"])
+            return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
+        if connection.status == "error":
+            connection.status = "connected"
+            connection.last_error = ""
+            connection.save(update_fields=["status", "last_error", "updated_at"])
+        return Response(result, status=status.HTTP_200_OK)
+
+
+class ViberWebhookAPIView(APIView):
+    authentication_classes = ()
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, connection_id):
+        connection = (
+            IntegrationConnection.objects.select_related("business_client")
+            .filter(id=connection_id, provider="viber")
+            .first()
+        )
+        if not connection:
+            return Response({"detail": "Viber integracija nije pronadjena."}, status=status.HTTP_404_NOT_FOUND)
+
+        body_bytes = request.body
+        signature = request.headers.get("X-Viber-Content-Signature", "")
+        try:
+            result = process_viber_webhook(connection, request.data, body_bytes, signature)
         except PermissionDenied as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_403_FORBIDDEN)
         except Exception as exc:
