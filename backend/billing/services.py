@@ -210,6 +210,10 @@ def active_staff_count(business_client):
 
 
 def enforce_staff_limit(business_client, adding=1):
+    # During an active trial users can test all features including staff management
+    subscription = subscription_for_client(business_client)
+    if subscription and subscription.trial_is_active:
+        return
     limits = limits_for_client(business_client)
     if limits.max_staff_members is None:
         return

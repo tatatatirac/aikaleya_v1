@@ -4838,7 +4838,15 @@ async function createClientStaffMember() {
             method: 'POST',
             body: JSON.stringify({ full_name: name, role_title: roleTitle, phone, email: '', login_username: loginUsername, login_password: loginPassword, is_active: true })
         });
-        if (!res.ok) throw new Error(await res.text());
+        if (!res.ok) {
+            const raw = await res.text();
+            let msg = 'Zaposleni nije sacuvan';
+            try {
+                const d = JSON.parse(raw);
+                msg = d.package?.[0] || d.login_username?.[0] || d.detail || d.non_field_errors?.[0] || msg;
+            } catch (_) { if (raw && !raw.startsWith('{')) msg = raw; }
+            throw new Error(msg);
+        }
         const staff = await res.json();
         for (const service of clientServices) await createStaffServiceLink(staff.id, service.id);
         resetClientStaffForm();
@@ -4846,7 +4854,7 @@ async function createClientStaffMember() {
         showToast('Zaposleni je dodat');
     } catch (error) {
         console.warn('Kaleya staff create failed', error);
-        showToast('Zaposleni nije sacuvan');
+        showToast(error.message || 'Zaposleni nije sacuvan');
     }
 }
 
@@ -4916,7 +4924,15 @@ async function updateClientStaffMember(staffId) {
             method: 'PATCH',
             body: JSON.stringify(payload)
         });
-        if (!res.ok) throw new Error(await res.text());
+        if (!res.ok) {
+            const raw = await res.text();
+            let msg = 'Zaposleni nije izmenjen';
+            try {
+                const d = JSON.parse(raw);
+                msg = d.package?.[0] || d.login_username?.[0] || d.detail || d.non_field_errors?.[0] || msg;
+            } catch (_) { if (raw && !raw.startsWith('{')) msg = raw; }
+            throw new Error(msg);
+        }
         const saved = await res.json();
         clientStaffMembers = clientStaffMembers.map(staff => String(staff.id) === String(staffId) ? saved : staff);
         resetClientStaffForm();
@@ -4925,7 +4941,7 @@ async function updateClientStaffMember(staffId) {
         showToast('Zaposleni je izmenjen');
     } catch (error) {
         console.warn('Kaleya staff update failed', error);
-        showToast('Zaposleni nije izmenjen');
+        showToast(error.message || 'Zaposleni nije izmenjen');
     }
 }
 
