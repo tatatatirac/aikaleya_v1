@@ -39,3 +39,5 @@ desktop.ini
 .idea/
 *.swp
 *.swo
+# Claude Code local context (never commit)
+.claude/
