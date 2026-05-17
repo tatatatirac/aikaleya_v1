@@ -1352,9 +1352,49 @@
                                 <p class="text-sm text-slate-600 dark:text-slate-400" data-i18n="ad_integrations_sub">Kanali preko kojih Kaleya može da prima zahteve i zakazuje termine.</p>
                             </div>
                             <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                                <div class="p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"><h3 class="font-semibold">WhatsApp Business API</h3><p class="mt-1 text-[13px] text-slate-500">Poruke, potvrde i zakazivanje.</p><button onclick="configureIntegration('WhatsApp Business API')" class="mt-4 h-9 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px]">Podesi</button></div>
-                                <div class="p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"><h3 class="font-semibold">Viber Bot</h3><p class="mt-1 text-[13px] text-slate-500">Lokalna komunikacija i potvrde termina.</p><button onclick="configureIntegration('Viber Bot')" class="mt-4 h-9 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px]">Podesi</button></div>
-                                <div class="p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"><h3 class="font-semibold">Telegram Bot</h3><p class="mt-1 text-[13px] text-slate-500">Brze poruke i servisni kanali.</p><button onclick="configureIntegration('Telegram Bot')" class="mt-4 h-9 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px]">Podesi</button></div>
+                                <!-- WhatsApp -->
+                                <div id="integ-whatsapp" class="p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div><h3 class="font-semibold">WhatsApp Business API</h3><p class="mt-1 text-[13px] text-slate-500">Kaleya prima i šalje WhatsApp poruke automatski.</p></div>
+                                        <span data-bot-status class="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">Neaktivan</span>
+                                    </div>
+                                    <p data-bot-name class="hidden mt-2 text-[12px] font-mono text-teal-600 dark:text-teal-400"></p>
+                                    <div class="mt-4 flex items-center justify-between">
+                                        <span class="text-[12px] text-slate-500">One-click aktivacija</span>
+                                        <button onclick="toggleBotChannel('whatsapp')" data-bot-toggle class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-slate-300 dark:bg-slate-600" aria-label="Toggle WhatsApp">
+                                            <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform translate-x-1"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Viber -->
+                                <div id="integ-viber" class="p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div><h3 class="font-semibold">Viber Bot</h3><p class="mt-1 text-[13px] text-slate-500">Lokalna komunikacija i potvrde termina.</p></div>
+                                        <span data-bot-status class="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">Neaktivan</span>
+                                    </div>
+                                    <p data-bot-name class="hidden mt-2 text-[12px] font-mono text-teal-600 dark:text-teal-400"></p>
+                                    <div class="mt-4 flex items-center justify-between">
+                                        <span class="text-[12px] text-slate-500">One-click aktivacija</span>
+                                        <button onclick="toggleBotChannel('viber')" data-bot-toggle class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-slate-300 dark:bg-slate-600" aria-label="Toggle Viber">
+                                            <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform translate-x-1"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Telegram -->
+                                <div id="integ-telegram" class="p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all">
+                                    <div class="flex items-start justify-between gap-2">
+                                        <div><h3 class="font-semibold">Telegram Bot</h3><p class="mt-1 text-[13px] text-slate-500">Brze poruke i servisni kanali.</p></div>
+                                        <span data-bot-status class="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">Neaktivan</span>
+                                    </div>
+                                    <p data-bot-name class="hidden mt-2 text-[12px] font-mono text-teal-600 dark:text-teal-400"></p>
+                                    <div class="mt-4 flex items-center justify-between">
+                                        <span class="text-[12px] text-slate-500">One-click aktivacija</span>
+                                        <button onclick="toggleBotChannel('telegram')" data-bot-toggle class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-slate-300 dark:bg-slate-600" aria-label="Toggle Telegram">
+                                            <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform translate-x-1"></span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- Ostali kanali -->
                                 <div class="p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"><h3 class="font-semibold">SMS gateway</h3><p class="mt-1 text-[13px] text-slate-500">SMS potvrde i podsetnici.</p><button onclick="configureIntegration('SMS gateway')" class="mt-4 h-9 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px]">Podesi</button></div>
                                 <div class="p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"><h3 class="font-semibold">Telefonski pozivi</h3><p class="mt-1 text-[13px] text-slate-500">VoIP/SIP povezivanje za dolazne pozive.</p><button onclick="configureIntegration('Telefonski pozivi')" class="mt-4 h-9 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px]">Podesi</button></div>
                                 <div class="p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"><h3 class="font-semibold">Google Calendar</h3><p class="mt-1 text-[13px] text-slate-500">Provera slobodnih termina.</p><button onclick="configureIntegration('Google Calendar')" class="mt-4 h-9 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px]">Podesi</button></div>
@@ -6317,6 +6357,7 @@ function switchAdminTab(tab) {
     document.getElementById('mobileAdminNav')?.classList.add('hidden');
     if (tab === 'settings') loadAdminSettings();
     if (tab === 'dash' || tab === 'alarms') loadAdminConversations();
+    if (tab === 'integrations') initBotChannels();
 }
 
 function loadAdminSettings() {
@@ -6674,6 +6715,49 @@ function answerEmergency() {
 
 function configureIntegration(name) {
     showToast(`${name}: podešavanje će se povezati kroz backend integraciju`);
+}
+
+// ===== BOT CHANNEL TOGGLE =====
+function _botName() {
+    const email = localStorage.getItem('kaleya_user_email') || '';
+    const slug = email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '').slice(0, 15) || 'Kaleya';
+    return '@' + slug.charAt(0).toUpperCase() + slug.slice(1) + 'Bot';
+}
+
+function _renderBotCard(ch, active) {
+    const card = document.getElementById('integ-' + ch);
+    if (!card) return;
+    card.className = `p-5 rounded-[20px] border bg-white dark:bg-slate-900 transition-all ${active ? 'border-teal-400 dark:border-teal-500 shadow-sm shadow-teal-100 dark:shadow-teal-900/20' : 'border-slate-200 dark:border-slate-800'}`;
+    const statusEl = card.querySelector('[data-bot-status]');
+    if (statusEl) {
+        statusEl.textContent = active ? 'Aktivan' : 'Neaktivan';
+        statusEl.className = `shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full ${active ? 'bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'}`;
+    }
+    const toggleEl = card.querySelector('[data-bot-toggle]');
+    if (toggleEl) {
+        toggleEl.className = `relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${active ? 'bg-teal-500' : 'bg-slate-300 dark:bg-slate-600'}`;
+        const knob = toggleEl.querySelector('span');
+        if (knob) knob.className = `inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${active ? 'translate-x-6' : 'translate-x-1'}`;
+    }
+    const nameEl = card.querySelector('[data-bot-name]');
+    if (nameEl) {
+        nameEl.textContent = active ? _botName() : '';
+        nameEl.classList.toggle('hidden', !active);
+    }
+}
+
+function toggleBotChannel(ch) {
+    const key = 'kaleya_bot_' + ch;
+    const active = !localStorage.getItem(key);
+    active ? localStorage.setItem(key, '1') : localStorage.removeItem(key);
+    _renderBotCard(ch, active);
+    showToast(active ? `${ch.charAt(0).toUpperCase() + ch.slice(1)} bot aktiviran` : `${ch.charAt(0).toUpperCase() + ch.slice(1)} bot deaktiviran`);
+}
+
+function initBotChannels() {
+    ['whatsapp', 'viber', 'telegram'].forEach(ch => {
+        _renderBotCard(ch, !!localStorage.getItem('kaleya_bot_' + ch));
+    });
 }
 
 // ===== UTIL =====
