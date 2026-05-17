@@ -173,7 +173,7 @@
                     </div>
                     <nav class="hidden md:flex items-center gap-8 text-[14px] font-medium text-slate-600 dark:text-slate-300">
                         <a href="#features" data-i18n="nav_features" class="hover:text-slate-900 dark:hover:text-white transition">Funkcije</a>
-                        <a href="#login" onclick="event.preventDefault(); showView('login')" data-i18n="nav_how" class="hover:text-slate-900 dark:hover:text-white transition">Kako radi</a>
+                        <a href="/demo.html" data-i18n="nav_how" class="hover:text-slate-900 dark:hover:text-white transition">Kako radi</a>
                         <a href="#pricing" data-i18n="nav_pricing" class="hover:text-slate-900 dark:hover:text-white transition">Cene</a>
                     </nav>
                     <div class="flex items-center gap-2">
@@ -226,14 +226,14 @@
                                 </p>
                                 <div class="mt-8 flex flex-col sm:flex-row gap-3">
                                     <button onclick="showView('login'); setDemoClient()" class="h-12 px-7 rounded-full gradient-bg text-white font-semibold shadow-lg shadow-teal-500/20 hover:shadow-xl hover:shadow-teal-500/30 transition-all" data-i18n="hero_cta_demo">Isprobaj besplatno</button>
-                                    <button type="button" onclick="showView('login')" class="h-12 px-7 rounded-full border border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 transition inline-flex items-center justify-center" data-i18n="hero_cta_how">Pogledaj kako radi</button>
+                                    <button type="button" onclick="window.location.href='/demo.html'" class="h-12 px-7 rounded-full border border-slate-300 dark:border-slate-700 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 transition inline-flex items-center justify-center" data-i18n="hero_cta_how">Pogledaj kako radi</button>
                                 </div>
                                 <div class="mt-8 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
                                     <span class="text-xs text-slate-500 mr-1" data-i18n="integrates_with">Integracije:</span>
                                     <span class="px-3 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[11px] font-semibold">WhatsApp</span>
                                     <span class="px-3 py-1 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 text-[11px] font-semibold">Viber</span>
                                     <span class="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-[11px] font-semibold">Telegram</span>
-                                    <span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-semibold">SMS/Poziv</span>
+                                    <span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-semibold" data-i18n="sms_call">SMS/Poziv</span>
                                 </div>
                             </div>
                             <div class="relative lg:h-[560px] flex items-center justify-center">
@@ -257,7 +257,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <p class="mt-8 font-display font-bold text-xl">hej Kaleya</p>
+                                            <p class="mt-8 font-display font-bold text-xl" data-i18n="hero_wake">hej Kaleya</p>
                                             <p class="text-sm text-slate-500 mt-1" data-i18n="hero_tap">Dodirni logo</p>
                                             <div class="flex items-end gap-1 mt-6 h-8">
                                                 <div class="w-1 h-4 bg-teal-500 rounded-full wave" style="animation-delay:.0s"></div>
@@ -807,7 +807,7 @@
                                     <div class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-between"><span>WhatsApp</span><span id="channelWhatsappStatus" class="text-green-600 font-semibold" data-i18n="active">Aktivno</span></div>
                                     <div class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-between"><span>Viber</span><span id="channelViberStatus" class="text-green-600 font-semibold" data-i18n="active">Aktivno</span></div>
                                     <div class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-between"><span>Telegram</span><span id="channelTelegramStatus" class="text-green-600 font-semibold" data-i18n="active">Aktivno</span></div>
-                                    <div class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-between"><span>SMS/Poziv</span><span id="channelSmsPhoneStatus" class="text-green-600 font-semibold" data-i18n="active">Aktivno</span></div>
+                                    <div class="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-between"><span data-i18n="sms_call">SMS/Poziv</span><span id="channelSmsPhoneStatus" class="text-green-600 font-semibold" data-i18n="active">Aktivno</span></div>
                                 </div>
                             </div>
 
@@ -1596,7 +1596,7 @@ const T = {
         global_ai_desc: 'Ovaj API koristi se za sve firme koje nemaju posebno podešavanje.', save_global_api: 'Sačuvaj globalni API',
         client_api_title: 'API po firmi', save_client_api: 'Sačuvaj za firmu', api_security_note: 'Produkcijski API ključevi se čuvaju u backendu i .env fajlu. Ovaj ekran je UI model za admin kontrolu.',
         alarm_queue_desc: 'Kaleya izgovara: klijent [ime] je sledeći na redu.', alarm_emerg_desc: 'Kaleya izgovara: klijent [ime] želi da razgovara sa vama.',
-        alarm_log_title: 'Dnevnik alarma', alarm_log_empty: 'Još nema aktiviranih alarma.'
+        alarm_log_title: 'Dnevnik alarma', alarm_log_empty: 'Još nema aktiviranih alarma.', hero_wake: 'hej Kaleya', sms_call: 'SMS/Poziv'
     },
     en: {
         nav_features: 'Features', nav_how: 'How it works', nav_pricing: 'Pricing', nav_login: 'Login',
@@ -1640,7 +1640,7 @@ const T = {
         global_ai_desc: 'This API is used for all companies without separate settings.', save_global_api: 'Save global API',
         client_api_title: 'Company API', save_client_api: 'Save for company', api_security_note: 'Production API keys belong in the backend and .env file. This screen is an admin UI model.',
         alarm_queue_desc: 'Kaleya says: client [name] is next in line.', alarm_emerg_desc: 'Kaleya says: client [name] wants to speak with you.',
-        alarm_log_title: 'Alarm log', alarm_log_empty: 'No alarms have been triggered yet.'
+        alarm_log_title: 'Alarm log', alarm_log_empty: 'No alarms have been triggered yet.', hero_wake: 'hey Kaleya', sms_call: 'SMS/Call'
     },
     es: {
         nav_features: 'Funciones', nav_how: 'Cómo funciona', nav_pricing: 'Precios', nav_login: 'Acceso',
@@ -1684,7 +1684,7 @@ const T = {
         global_ai_desc: 'Esta API se usa para empresas sin configuración separada.', save_global_api: 'Guardar API global',
         client_api_title: 'API por empresa', save_client_api: 'Guardar para empresa', api_security_note: 'Las claves de producción se guardan en backend y .env. Esta pantalla es un modelo UI de administración.',
         alarm_queue_desc: 'Kaleya dice: el cliente [nombre] es el siguiente.', alarm_emerg_desc: 'Kaleya dice: el cliente [nombre] quiere hablar con usted.',
-        alarm_log_title: 'Registro de alarmas', alarm_log_empty: 'Aún no hay alarmas activadas.'
+        alarm_log_title: 'Registro de alarmas', alarm_log_empty: 'Aún no hay alarmas activadas.', hero_wake: 'oye Kaleya', sms_call: 'SMS/Llamada'
     },
     pt: {
         nav_features: 'Funcionalidades', nav_how: 'Como funciona', nav_pricing: 'Preços', nav_login: 'Entrar',
@@ -1728,7 +1728,7 @@ const T = {
         global_ai_desc: 'Esta API é usada para empresas sem configuração separada.', save_global_api: 'Salvar API global',
         client_api_title: 'API por empresa', save_client_api: 'Salvar para empresa', api_security_note: 'Chaves de produção ficam no backend e no arquivo .env. Esta tela é um modelo UI admin.',
         alarm_queue_desc: 'Kaleya diz: o cliente [nome] é o próximo.', alarm_emerg_desc: 'Kaleya diz: o cliente [nome] quer falar com você.',
-        alarm_log_title: 'Registro de alarmes', alarm_log_empty: 'Nenhum alarme foi ativado ainda.'
+        alarm_log_title: 'Registro de alarmes', alarm_log_empty: 'Nenhum alarme foi ativado ainda.', hero_wake: 'ei Kaleya', sms_call: 'SMS/Ligação'
     },
     ru: {
         nav_features: 'Функции', nav_how: 'Как работает', nav_pricing: 'Тарифы', nav_login: 'Вход',
@@ -1772,7 +1772,7 @@ const T = {
         global_ai_desc: 'Этот API используется для компаний без отдельной настройки.', save_global_api: 'Сохранить глобальный API',
         client_api_title: 'API по компании', save_client_api: 'Сохранить для компании', api_security_note: 'Продакшн ключи хранятся в backend и .env. Этот экран является UI моделью админ контроля.',
         alarm_queue_desc: 'Kaleya говорит: клиент [имя] следующий в очереди.', alarm_emerg_desc: 'Kaleya говорит: клиент [имя] хочет поговорить с вами.',
-        alarm_log_title: 'Журнал оповещений', alarm_log_empty: 'Оповещений пока нет.'
+        alarm_log_title: 'Журнал оповещений', alarm_log_empty: 'Оповещений пока нет.', hero_wake: 'хей Kaleya', sms_call: 'SMS/Звонок'
     }
 };
 
@@ -1805,7 +1805,7 @@ T.fr = {
     ad_dash: 'Tableau de bord', ad_clients: 'Administrateurs / entreprises', ad_alarms: 'Alertes', ad_integrations: 'Integrations', ad_set: 'Reglages', logout: 'Deconnexion',
     support_alarm_future: 'Alerte support humain plus tard', support_alarm_desc: 'Cet onglet servira quand l IA ne peut pas terminer une demande et doit connecter le client au support.',
     global_ai_settings: 'API IA globale', save_global_api: 'Sauvegarder API globale', client_api_title: 'API par entreprise', save_client_api: 'Sauvegarder pour entreprise',
-    alarm_log_title: 'Journal des alertes', alarm_log_empty: 'Aucune alerte activee.'
+    alarm_log_title: 'Journal des alertes', alarm_log_empty: 'Aucune alerte activee.', hero_wake: 'hé Kaleya', sms_call: 'SMS/Appel'
 };
 
 T.it = {
@@ -1837,7 +1837,7 @@ T.it = {
     ad_dash: 'Dashboard', ad_clients: 'Amministratori / aziende', ad_alarms: 'Allarmi', ad_integrations: 'Integrazioni', ad_set: 'Impostazioni', logout: 'Logout',
     support_alarm_future: 'Allarme supporto umano piu avanti', support_alarm_desc: 'Questo tab servira quando l AI non riesce a completare una richiesta e deve collegare il cliente al supporto.',
     global_ai_settings: 'API AI globale', save_global_api: 'Salva API globale', client_api_title: 'API per azienda', save_client_api: 'Salva per azienda',
-    alarm_log_title: 'Registro allarmi', alarm_log_empty: 'Nessun allarme attivato.'
+    alarm_log_title: 'Registro allarmi', alarm_log_empty: 'Nessun allarme attivato.', hero_wake: 'ehi Kaleya', sms_call: 'SMS/Chiamata'
 };
 
 const EXTRA_TRANSLATIONS = {
@@ -2851,7 +2851,7 @@ function loginErrorMessage(error) {
     if (error.message === 'backend_unavailable') {
         return 'Backend server nije pokrenut. Pokreni server pa probaj ponovo.';
     }
-    return extractBackendLoginError(error.detail) || T.login_err || 'Wrong email or password';
+    return T.login_err || 'Wrong email or password';
 }
 
 document.getElementById('login-form').addEventListener('submit', async (e) => {
