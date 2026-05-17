@@ -2861,6 +2861,10 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
     const error = document.getElementById('login-error');
     error.classList.add('hidden');
 
+    const isDemoFallback =
+        (email === 'administrator@test.com' && pass === 'test123') ||
+        ((email === 'employee@test.com' || email.toLowerCase() === 'employee') && pass === 'emp123');
+
     if (isBackendServed()) {
         try {
             const data = await backendLogin(email, pass);
@@ -2881,9 +2885,12 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
             showView('client');
             return;
         } catch (err) {
-            error.textContent = loginErrorMessage(err);
-            error.classList.remove('hidden');
-            return;
+            if (!isDemoFallback) {
+                error.textContent = loginErrorMessage(err);
+                error.classList.remove('hidden');
+                return;
+            }
+            // Demo credentials not in this backend — fall through to local demo mode
         }
     }
 
