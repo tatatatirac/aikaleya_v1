@@ -7,12 +7,15 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
 
+from accounts.models import Profile
 from ai_core.models import AlarmSettings, VoiceSettings
 from appointments.models import Appointment, Customer
 from billing.models import CheckoutSession, PaymentWebhookEvent, PendingCheckoutRegistration, Plan, Subscription
 from clients.models import BusinessClient, ClientApiSettings
 from integrations.models import IntegrationConnection
 from staff_services.models import Service, StaffMember, StaffService, WorkingHours
+
+STAFF_DEFAULT_PASSWORD = "KaleyaStaff123!"
 
 
 TEMPLATE_CLIENTS = [
@@ -39,9 +42,9 @@ TEMPLATE_CLIENTS = [
         "phone": "+381 60 100 0002",
         "plan_code": Plan.CODE_BUSINESS,
         "staff": [
-            {"name": "Ana Markovic", "role": "Senior specialist", "phone": "+381 60 210 0001", "color": "#14b8a6"},
-            {"name": "Nikola Petrovic", "role": "Specialist", "phone": "+381 60 210 0002", "color": "#3487f5"},
-            {"name": "Milica Jovanovic", "role": "Assistant", "phone": "+381 60 210 0003", "color": "#a855f7"},
+            {"name": "Ana Markovic", "role": "Senior specialist", "phone": "+381 60 210 0001", "color": "#14b8a6", "login": "ana.markovic"},
+            {"name": "Nikola Petrovic", "role": "Specialist", "phone": "+381 60 210 0002", "color": "#3487f5", "login": "nikola.petrovic"},
+            {"name": "Milica Jovanovic", "role": "Assistant", "phone": "+381 60 210 0003", "color": "#a855f7", "login": "milica.jovanovic"},
         ],
         "services": [
             {"name": "Pregled", "category": "Usluge", "duration": 30, "price": 45},
@@ -58,12 +61,12 @@ TEMPLATE_CLIENTS = [
         "phone": "+381 60 100 0003",
         "plan_code": Plan.CODE_BUSINESS_PLUS,
         "staff": [
-            {"name": "Jelena Ilic", "role": "Manager", "phone": "+381 60 310 0001", "color": "#14b8a6"},
-            {"name": "Marko Simic", "role": "Lead specialist", "phone": "+381 60 310 0002", "color": "#3487f5"},
-            {"name": "Ivana Nikolic", "role": "Specialist", "phone": "+381 60 310 0003", "color": "#f59e0b"},
-            {"name": "Stefan Pavlovic", "role": "Specialist", "phone": "+381 60 310 0004", "color": "#a855f7"},
-            {"name": "Tamara Kostic", "role": "Assistant", "phone": "+381 60 310 0005", "color": "#ef4444"},
-            {"name": "Luka Popovic", "role": "Coordinator", "phone": "+381 60 310 0006", "color": "#22c55e"},
+            {"name": "Jelena Ilic", "role": "Manager", "phone": "+381 60 310 0001", "color": "#14b8a6", "login": "jelena.ilic"},
+            {"name": "Marko Simic", "role": "Lead specialist", "phone": "+381 60 310 0002", "color": "#3487f5", "login": "marko.simic"},
+            {"name": "Ivana Nikolic", "role": "Specialist", "phone": "+381 60 310 0003", "color": "#f59e0b", "login": "ivana.nikolic"},
+            {"name": "Stefan Pavlovic", "role": "Specialist", "phone": "+381 60 310 0004", "color": "#a855f7", "login": "stefan.pavlovic"},
+            {"name": "Tamara Kostic", "role": "Assistant", "phone": "+381 60 310 0005", "color": "#ef4444", "login": "tamara.kostic"},
+            {"name": "Luka Popovic", "role": "Coordinator", "phone": "+381 60 310 0006", "color": "#22c55e", "login": "luka.popovic"},
         ],
         "services": [
             {"name": "Premium pregled", "category": "Premium", "duration": 30, "price": 75},
@@ -231,6 +234,27 @@ class Command(BaseCommand):
                 color=staff_data["color"],
                 is_active=True,
             )
+            login_username = staff_data.get("login", "")
+            if login_username:
+                emp_user = User.objects.filter(username__iexact=login_username).first()
+                if emp_user is None:
+                    emp_user = User(username=login_username)
+                emp_user.username = login_username
+                name_parts = staff_data["name"].split(None, 1)
+                emp_user.first_name = name_parts[0]
+                emp_user.last_name = name_parts[1] if len(name_parts) > 1 else ""
+                emp_user.is_active = True
+                emp_user.is_staff = False
+                emp_user.is_superuser = False
+                emp_user.set_password(STAFF_DEFAULT_PASSWORD)
+                emp_user.save()
+                emp_profile, _ = Profile.objects.get_or_create(user=emp_user)
+                emp_profile.role = Profile.ROLE_EMPLOYEE
+                emp_profile.business_client = client
+                emp_profile.phone = staff_data["phone"]
+                emp_profile.save(update_fields=["role", "business_client", "phone", "updated_at"])
+                staff_member.user = emp_user
+                staff_member.save(update_fields=["user", "updated_at"])
             staff_members.append(staff_member)
             for weekday in range(5):
                 WorkingHours.objects.create(

@@ -2155,6 +2155,25 @@ Object.entries(UI_RUNTIME_TRANSLATIONS).forEach(([lang, values]) => {
     T[lang] = { ...(T[lang] || T.en), ...values };
 });
 
+const EXTRA_UI_TRANSLATIONS = {
+    sr: { staff_name_required:'Unesi ime zaposlenog', staff_login_both_required:'Za login unesi i korisnicko ime i lozinku', staff_added:'Zaposleni je dodat', staff_not_saved:'Zaposleni nije sacuvan', staff_password_needs_username:'Za novu lozinku mora postojati korisnicko ime', staff_updated:'Zaposleni je izmenjen', staff_not_updated:'Zaposleni nije izmenjen', staff_deleted:'Zaposleni je obrisan', staff_not_deleted:'Zaposleni nije obrisan', service_name_required:'Unesi naziv usluge', service_added:'Usluga je dodata', service_not_saved:'Usluga nije sacuvana', service_updated:'Usluga je izmenjena', service_not_updated:'Usluga nije izmenjena', service_deleted:'Usluga je obrisana', service_not_deleted:'Usluga nije obrisana', block_end_after_start:'Kraj blokade mora biti posle pocetka', block_within_hours:'Blokada mora biti u okviru radnog vremena', block_date_to_after_from:'Datum do mora biti posle datuma od', block_added:'Blokada je dodata', block_not_saved:'Blokada nije sacuvana', block_deleted:'Blokada je obrisana', block_not_deleted:'Blokada nije obrisana', kaleya_online:'Kaleya online', calendar_settings_saved:'Podesavanja kalendara su sacuvana', settings_saved_local_only:'Podesavanja su sacuvana lokalno, ali ne u bazi', status_not_saved:'Status nije sacuvan u bazi', phone_not_entered:'Broj telefona nije unet', phone_copied:'Broj je kopiran', phone_number_label:'Broj', employee_own_appointments_only:'Zaposleni vidi samo svoje termine', employee_quick_action_only:'Zaposleni menja samo nove termine iz brzih akcija', employee_no_staff_profile:'Zaposleni nema povezan staff profil', admin_ai_saved:'Globalni AI API je sacuvan', admin_elevenlabs_saved:'ElevenLabs podesavanja sacuvana', admin_client_api_saved:'API podesavanja za firmu su sacuvana', emergency_answered:'Hitni razgovor je preuzet', integration_configure_pending:'podesavanje ce se povezati kroz backend integraciju', bot_activated:'bot aktiviran', bot_deactivated:'bot deaktiviran', confirm_delete_staff:'Obrisati zaposlenog: %s?', confirm_delete_service:'Obrisati uslugu: %s?', confirm_delete_block:'Obrisati blokirano vreme?', voice_test_no_voice:'Glas nije konfigurisan — koristim browser TTS', voice_test_ok:'Kaleya glas je aktivan', voice_test_failed:'TTS greska — koristim browser TTS' },
+    en: { staff_name_required:'Enter employee name', staff_login_both_required:'For login enter both username and password', staff_added:'Employee added', staff_not_saved:'Employee was not saved', staff_password_needs_username:'Username is required when setting a password', staff_updated:'Employee updated', staff_not_updated:'Employee was not updated', staff_deleted:'Employee removed', staff_not_deleted:'Employee was not removed', service_name_required:'Enter service name', service_added:'Service added', service_not_saved:'Service was not saved', service_updated:'Service updated', service_not_updated:'Service was not updated', service_deleted:'Service removed', service_not_deleted:'Service was not removed', block_end_after_start:'Block end must be after start', block_within_hours:'Block must be within working hours', block_date_to_after_from:'End date must be after start date', block_added:'Block added', block_not_saved:'Block was not saved', block_deleted:'Block removed', block_not_deleted:'Block was not removed', kaleya_online:'Kaleya online', calendar_settings_saved:'Calendar settings saved', settings_saved_local_only:'Settings saved locally, not in the database', status_not_saved:'Status was not saved in the database', phone_not_entered:'Phone number not entered', phone_copied:'Number copied', phone_number_label:'Number', employee_own_appointments_only:'Employees can only view their own appointments', employee_quick_action_only:'Employees can only add new appointments from quick actions', employee_no_staff_profile:'Employee has no linked staff profile', admin_ai_saved:'Global AI API saved', admin_elevenlabs_saved:'ElevenLabs settings saved', admin_client_api_saved:'Company API settings saved', emergency_answered:'Emergency call answered', integration_configure_pending:'configuration will connect through backend integration', bot_activated:'bot activated', bot_deactivated:'bot deactivated', confirm_delete_staff:'Delete employee: %s?', confirm_delete_service:'Delete service: %s?', confirm_delete_block:'Delete blocked time?', voice_test_no_voice:'Voice not configured — using browser TTS', voice_test_ok:'Kaleya voice is active', voice_test_failed:'TTS error — using browser TTS' },
+    es: { staff_name_required:'Ingresa el nombre del empleado', staff_login_both_required:'Para iniciar sesion ingresa usuario y contrasena', staff_added:'Empleado agregado', staff_not_saved:'Empleado no guardado', staff_password_needs_username:'Se requiere usuario al establecer una contrasena', staff_updated:'Empleado actualizado', staff_not_updated:'Empleado no actualizado', staff_deleted:'Empleado eliminado', staff_not_deleted:'Empleado no eliminado', service_name_required:'Ingresa el nombre del servicio', service_added:'Servicio agregado', service_not_saved:'Servicio no guardado', service_updated:'Servicio actualizado', service_not_updated:'Servicio no actualizado', service_deleted:'Servicio eliminado', service_not_deleted:'Servicio no eliminado', block_end_after_start:'El fin del bloqueo debe ser despues del inicio', block_within_hours:'El bloqueo debe estar dentro del horario laboral', block_date_to_after_from:'La fecha de fin debe ser despues de la fecha de inicio', block_added:'Bloqueo agregado', block_not_saved:'Bloqueo no guardado', block_deleted:'Bloqueo eliminado', block_not_deleted:'Bloqueo no eliminado', kaleya_online:'Kaleya en linea', calendar_settings_saved:'Configuracion del calendario guardada', settings_saved_local_only:'Ajustes guardados localmente, no en la base', status_not_saved:'Estado no guardado en la base', phone_not_entered:'Numero de telefono no ingresado', phone_copied:'Numero copiado', phone_number_label:'Numero', employee_own_appointments_only:'Los empleados solo ven sus propias citas', employee_quick_action_only:'Los empleados solo agregan citas desde acciones rapidas', employee_no_staff_profile:'El empleado no tiene perfil de personal vinculado', admin_ai_saved:'API IA global guardada', admin_elevenlabs_saved:'Configuracion ElevenLabs guardada', admin_client_api_saved:'Configuracion de API de empresa guardada', emergency_answered:'Llamada de emergencia atendida', integration_configure_pending:'la configuracion se conectara a traves de la integracion del backend', bot_activated:'bot activado', bot_deactivated:'bot desactivado', confirm_delete_staff:'Eliminar empleado: %s?', confirm_delete_service:'Eliminar servicio: %s?', confirm_delete_block:'Eliminar tiempo bloqueado?', voice_test_no_voice:'Voz no configurada — usando TTS del navegador', voice_test_ok:'La voz de Kaleya esta activa', voice_test_failed:'Error TTS — usando TTS del navegador' },
+    pt: { staff_name_required:'Digite o nome do funcionario', staff_login_both_required:'Para login digite usuario e senha', staff_added:'Funcionario adicionado', staff_not_saved:'Funcionario nao foi salvo', staff_password_needs_username:'Usuario e obrigatorio ao definir uma senha', staff_updated:'Funcionario atualizado', staff_not_updated:'Funcionario nao foi atualizado', staff_deleted:'Funcionario removido', staff_not_deleted:'Funcionario nao foi removido', service_name_required:'Digite o nome do servico', service_added:'Servico adicionado', service_not_saved:'Servico nao foi salvo', service_updated:'Servico atualizado', service_not_updated:'Servico nao foi atualizado', service_deleted:'Servico removido', service_not_deleted:'Servico nao foi removido', block_end_after_start:'O fim do bloqueio deve ser apos o inicio', block_within_hours:'O bloqueio deve estar dentro do horario de trabalho', block_date_to_after_from:'A data de fim deve ser apos a data de inicio', block_added:'Bloqueio adicionado', block_not_saved:'Bloqueio nao foi salvo', block_deleted:'Bloqueio removido', block_not_deleted:'Bloqueio nao foi removido', kaleya_online:'Kaleya online', calendar_settings_saved:'Configuracoes do calendario salvas', settings_saved_local_only:'Configuracoes salvas localmente, nao no banco', status_not_saved:'Status nao foi salvo no banco', phone_not_entered:'Numero de telefone nao digitado', phone_copied:'Numero copiado', phone_number_label:'Numero', employee_own_appointments_only:'Funcionarios so veem seus proprios agendamentos', employee_quick_action_only:'Funcionarios so adicionam agendamentos de acoes rapidas', employee_no_staff_profile:'Funcionario nao tem perfil de equipe vinculado', admin_ai_saved:'API AI global salva', admin_elevenlabs_saved:'Configuracoes ElevenLabs salvas', admin_client_api_saved:'Configuracoes de API da empresa salvas', emergency_answered:'Chamada de emergencia atendida', integration_configure_pending:'a configuracao se conectara atraves da integracao do backend', bot_activated:'bot ativado', bot_deactivated:'bot desativado', confirm_delete_staff:'Excluir funcionario: %s?', confirm_delete_service:'Excluir servico: %s?', confirm_delete_block:'Excluir tempo bloqueado?', voice_test_no_voice:'Voz nao configurada — usando TTS do navegador', voice_test_ok:'A voz do Kaleya esta ativa', voice_test_failed:'Erro TTS — usando TTS do navegador' },
+    ru: { staff_name_required:'Vvedite imya sotrudnika', staff_login_both_required:'Dlya vhoda vvedite login i parol', staff_added:'Sotrudnik dobavlen', staff_not_saved:'Sotrudnik ne sohranen', staff_password_needs_username:'Login obyazatelen pri zadanii parolya', staff_updated:'Sotrudnik obnovlen', staff_not_updated:'Sotrudnik ne obnovlen', staff_deleted:'Sotrudnik udalyon', staff_not_deleted:'Sotrudnik ne udalyon', service_name_required:'Vvedite nazvanie uslugi', service_added:'Usluga dobavlena', service_not_saved:'Usluga ne sohranena', service_updated:'Usluga obnovlena', service_not_updated:'Usluga ne obnovlena', service_deleted:'Usluga udalena', service_not_deleted:'Usluga ne udalena', block_end_after_start:'Konec blokirovki dolzhen byt posle nachala', block_within_hours:'Blokirovka dolzhna byt v rabochie chasy', block_date_to_after_from:'Data okonchaniya dolzhna byt posle daty nachala', block_added:'Blokirovka dobavlena', block_not_saved:'Blokirovka ne sohranena', block_deleted:'Blokirovka udalena', block_not_deleted:'Blokirovka ne udalena', kaleya_online:'Kaleya online', calendar_settings_saved:'Nastrojki kalendarya sohraneny', settings_saved_local_only:'Nastrojki sohraneny lokalno, ne v baze', status_not_saved:'Status ne sohranen v baze', phone_not_entered:'Nomer telefona ne vveden', phone_copied:'Nomer skopirovan', phone_number_label:'Nomer', employee_own_appointments_only:'Sotrudniki vidyat tolko svoi zapisi', employee_quick_action_only:'Sotrudniki dobavlyayut tolko novye zapisi iz bystrykh dejstvij', employee_no_staff_profile:'Sotrudnik ne imeet privyazannogo profilya', admin_ai_saved:'Globalnyj AI API sohranen', admin_elevenlabs_saved:'Nastrojki ElevenLabs sohraneny', admin_client_api_saved:'Nastrojki API firmy sohraneny', emergency_answered:'Ekstrennyj zvonok prinyat', integration_configure_pending:'nastrojka budet podklyuchena cherez backend', bot_activated:'bot aktivirovan', bot_deactivated:'bot deaktivnrovan', confirm_delete_staff:'Udalit sotrudnika: %s?', confirm_delete_service:'Udalit uslugu: %s?', confirm_delete_block:'Udalit blokirovku?', voice_test_no_voice:'Golos ne nastroyen — ispolzuyu browser TTS', voice_test_ok:'Golos Kaleya aktiven', voice_test_failed:'Oshibka TTS — ispolzuyu browser TTS' },
+    fr: { staff_name_required:"Entrez le nom de l'employe", staff_login_both_required:"Pour la connexion saisissez nom d'utilisateur et mot de passe", staff_added:'Employe ajoute', staff_not_saved:'Employe non enregistre', staff_password_needs_username:"Le nom d'utilisateur est requis pour un mot de passe", staff_updated:'Employe mis a jour', staff_not_updated:'Employe non mis a jour', staff_deleted:'Employe supprime', staff_not_deleted:'Employe non supprime', service_name_required:'Entrez le nom du service', service_added:'Service ajoute', service_not_saved:'Service non enregistre', service_updated:'Service mis a jour', service_not_updated:'Service non mis a jour', service_deleted:'Service supprime', service_not_deleted:'Service non supprime', block_end_after_start:'La fin du blocage doit etre apres le debut', block_within_hours:'Le blocage doit etre dans les heures de travail', block_date_to_after_from:'La date de fin doit etre apres la date de debut', block_added:'Blocage ajoute', block_not_saved:'Blocage non enregistre', block_deleted:'Blocage supprime', block_not_deleted:'Blocage non supprime', kaleya_online:'Kaleya en ligne', calendar_settings_saved:'Parametres du calendrier enregistres', settings_saved_local_only:'Parametres enregistres localement, pas dans la base', status_not_saved:'Statut non enregistre dans la base', phone_not_entered:'Numero de telephone non saisi', phone_copied:'Numero copie', phone_number_label:'Numero', employee_own_appointments_only:'Les employes voient uniquement leurs rendez-vous', employee_quick_action_only:'Les employes ajoutent seulement des rendez-vous depuis les actions rapides', employee_no_staff_profile:"L'employe n'a pas de profil du personnel associe", admin_ai_saved:'API IA globale enregistree', admin_elevenlabs_saved:'Parametres ElevenLabs enregistres', admin_client_api_saved:'Parametres API entreprise enregistres', emergency_answered:"Appel d'urgence pris en charge", integration_configure_pending:"la configuration se connectera via l'integration backend", bot_activated:'bot active', bot_deactivated:'bot desactive', confirm_delete_staff:"Supprimer l'employe: %s?", confirm_delete_service:'Supprimer le service: %s?', confirm_delete_block:'Supprimer le temps bloque?', voice_test_no_voice:'Voix non configuree — TTS navigateur utilise', voice_test_ok:'La voix Kaleya est active', voice_test_failed:'Erreur TTS — TTS navigateur utilise' },
+    it: { staff_name_required:'Inserisci il nome del dipendente', staff_login_both_required:'Per il login inserisci username e password', staff_added:'Dipendente aggiunto', staff_not_saved:'Dipendente non salvato', staff_password_needs_username:'Username richiesto per impostare una password', staff_updated:'Dipendente aggiornato', staff_not_updated:'Dipendente non aggiornato', staff_deleted:'Dipendente rimosso', staff_not_deleted:'Dipendente non rimosso', service_name_required:'Inserisci il nome del servizio', service_added:'Servizio aggiunto', service_not_saved:'Servizio non salvato', service_updated:'Servizio aggiornato', service_not_updated:'Servizio non aggiornato', service_deleted:'Servizio rimosso', service_not_deleted:'Servizio non rimosso', block_end_after_start:"La fine del blocco deve essere dopo l'inizio", block_within_hours:'Il blocco deve essere negli orari di lavoro', block_date_to_after_from:'La data di fine deve essere dopo la data di inizio', block_added:'Blocco aggiunto', block_not_saved:'Blocco non salvato', block_deleted:'Blocco rimosso', block_not_deleted:'Blocco non rimosso', kaleya_online:'Kaleya online', calendar_settings_saved:'Impostazioni calendario salvate', settings_saved_local_only:'Impostazioni salvate localmente, non nel database', status_not_saved:'Stato non salvato nel database', phone_not_entered:'Numero di telefono non inserito', phone_copied:'Numero copiato', phone_number_label:'Numero', employee_own_appointments_only:'I dipendenti vedono solo i propri appuntamenti', employee_quick_action_only:'I dipendenti aggiungono solo nuovi appuntamenti dalle azioni rapide', employee_no_staff_profile:'Il dipendente non ha un profilo staff collegato', admin_ai_saved:'API AI globale salvata', admin_elevenlabs_saved:'Impostazioni ElevenLabs salvate', admin_client_api_saved:'Impostazioni API azienda salvate', emergency_answered:'Chiamata di emergenza gestita', integration_configure_pending:'la configurazione si connette tramite integrazione backend', bot_activated:'bot attivato', bot_deactivated:'bot disattivato', confirm_delete_staff:'Rimuovere dipendente: %s?', confirm_delete_service:'Rimuovere servizio: %s?', confirm_delete_block:'Rimuovere tempo bloccato?', voice_test_no_voice:'Voce non configurata — uso TTS del browser', voice_test_ok:'La voce Kaleya e attiva', voice_test_failed:'Errore TTS — uso TTS del browser' },
+    de: { staff_name_required:'Mitarbeitername eingeben', staff_login_both_required:'Fuer Login Benutzername und Passwort eingeben', staff_added:'Mitarbeiter hinzugefuegt', staff_not_saved:'Mitarbeiter nicht gespeichert', staff_password_needs_username:'Benutzername erforderlich beim Setzen eines Passworts', staff_updated:'Mitarbeiter aktualisiert', staff_not_updated:'Mitarbeiter nicht aktualisiert', staff_deleted:'Mitarbeiter entfernt', staff_not_deleted:'Mitarbeiter nicht entfernt', service_name_required:'Servicename eingeben', service_added:'Service hinzugefuegt', service_not_saved:'Service nicht gespeichert', service_updated:'Service aktualisiert', service_not_updated:'Service nicht aktualisiert', service_deleted:'Service entfernt', service_not_deleted:'Service nicht entfernt', block_end_after_start:'Blockierende muss nach Beginn liegen', block_within_hours:'Blockierung muss innerhalb der Arbeitszeit liegen', block_date_to_after_from:'Enddatum muss nach Startdatum liegen', block_added:'Blockierung hinzugefuegt', block_not_saved:'Blockierung nicht gespeichert', block_deleted:'Blockierung entfernt', block_not_deleted:'Blockierung nicht entfernt', kaleya_online:'Kaleya online', calendar_settings_saved:'Kalendereinstellungen gespeichert', settings_saved_local_only:'Einstellungen lokal gespeichert, nicht in der Datenbank', status_not_saved:'Status nicht in der Datenbank gespeichert', phone_not_entered:'Telefonnummer nicht eingegeben', phone_copied:'Nummer kopiert', phone_number_label:'Nummer', employee_own_appointments_only:'Mitarbeiter sehen nur ihre eigenen Termine', employee_quick_action_only:'Mitarbeiter koennen nur neue Termine ueber Schnellaktionen hinzufuegen', employee_no_staff_profile:'Mitarbeiter hat kein verknuepftes Mitarbeiterprofil', admin_ai_saved:'Globale AI API gespeichert', admin_elevenlabs_saved:'ElevenLabs Einstellungen gespeichert', admin_client_api_saved:'Firmen-API-Einstellungen gespeichert', emergency_answered:'Notfallanruf angenommen', integration_configure_pending:'Konfiguration wird ueber Backend-Integration verbunden', bot_activated:'Bot aktiviert', bot_deactivated:'Bot deaktiviert', confirm_delete_staff:'Mitarbeiter loeschen: %s?', confirm_delete_service:'Service loeschen: %s?', confirm_delete_block:'Blockierung loeschen?', voice_test_no_voice:'Stimme nicht konfiguriert — Browser-TTS wird verwendet', voice_test_ok:'Kaleya-Stimme ist aktiv', voice_test_failed:'TTS-Fehler — Browser-TTS wird verwendet' }
+};
+
+Object.entries(EXTRA_UI_TRANSLATIONS).forEach(([lang, values]) => {
+    T[lang] = { ...(T[lang] || T.en), ...values };
+});
+
+// Demo shortcut messages (admin landing only)
+T.sr = { ...T.sr, demo_god_mode_ready: 'God Mode demo podaci su spremni', demo_admin_ready: 'Demo administrator podaci su spremni' };
+T.en = { ...T.en, demo_god_mode_ready: 'God Mode demo data ready', demo_admin_ready: 'Demo administrator data ready' };
+
 const PUBLIC_DEMO_TRANSLATIONS = {
     sr: {
         chat_client: "Klijent:", chat_kaleya: "Kaleya:", how_chat_c1: "Zdravo, treba mi termin za sutra", how_chat_k1: "Izvolite. Za koju uslugu?", how_chat_c2: "Šišanje, oko 17h", how_chat_k2: "Imam slobodno u 17:00 i 17:30. Koje vam odgovara?",
@@ -2971,6 +2990,10 @@ function updateHowViewLocale() {
 
 // ===== NAVIGATION =====
 function showView(view) {
+    // Auth guard — never show protected views without a token
+    if ((view === 'client' || view === 'admin') && !localStorage.getItem('kaleya_auth_token')) {
+        view = 'landing';
+    }
     ['landing','login','client','admin','how'].forEach(v => {
         document.getElementById(v+'-view').classList.toggle('hidden', v !== view);
     });
@@ -3002,7 +3025,7 @@ function showView(view) {
 function goDemo(type) {
     fillLogin(type === 'admin' ? 'admin' : 'client');
     showView('login');
-    showToast(type === 'admin' ? 'God Mode demo podaci su spremni' : 'Demo administrator podaci su spremni');
+    showToast(type === 'admin' ? tr('demo_god_mode_ready') : tr('demo_admin_ready'));
 }
 
 async function logoTap() {
@@ -4823,14 +4846,14 @@ async function createClientStaffMember() {
     const phone = phoneInput?.value.trim() || '';
     const loginUsername = usernameInput?.value.trim() || '';
     const loginPassword = passwordInput?.value || '';
-    if (!name) return showToast('Unesi ime zaposlenog');
-    if ((loginUsername && !loginPassword) || (!loginUsername && loginPassword)) return showToast('Za login unesi i korisnicko ime i lozinku');
+    if (!name) return showToast(tr('staff_name_required'));
+    if ((loginUsername && !loginPassword) || (!loginUsername && loginPassword)) return showToast(tr('staff_login_both_required'));
     if (!getAuthToken() || location.protocol === 'file:') {
         clientStaffMembers.push({ id: `local-staff-${Date.now()}`, full_name: name, role_title: roleTitle, phone, user_username: loginUsername, is_active: true });
         resetClientStaffForm();
         renderClientOperationalSettings();
         populateAppointmentStaffServiceFields();
-        showToast('Zaposleni je dodat');
+        showToast(tr('staff_added'));
         return;
     }
     try {
@@ -4840,7 +4863,7 @@ async function createClientStaffMember() {
         });
         if (!res.ok) {
             const raw = await res.text();
-            let msg = 'Zaposleni nije sacuvan';
+            let msg = tr('staff_not_saved');
             try {
                 const d = JSON.parse(raw);
                 msg = d.package?.[0] || d.login_username?.[0] || d.detail || d.non_field_errors?.[0] || msg;
@@ -4851,10 +4874,10 @@ async function createClientStaffMember() {
         for (const service of clientServices) await createStaffServiceLink(staff.id, service.id);
         resetClientStaffForm();
         await loadClientOperationalDataFromBackend();
-        showToast('Zaposleni je dodat');
+        showToast(tr('staff_added'));
     } catch (error) {
         console.warn('Kaleya staff create failed', error);
-        showToast(error.message || 'Zaposleni nije sacuvan');
+        showToast(error.message || tr('staff_not_saved'));
     }
 }
 
@@ -4865,13 +4888,13 @@ async function createClientService() {
     const name = nameInput?.value.trim();
     const duration = Number(durationInput?.value || 30);
     const price = Math.max(0, Number(String(priceInput?.value || '0').replace(',', '.')) || 0).toFixed(2);
-    if (!name) return showToast('Unesi naziv usluge');
+    if (!name) return showToast(tr('service_name_required'));
     if (!getAuthToken() || location.protocol === 'file:') {
         clientServices.push({ id: `local-service-${Date.now()}`, name, duration_minutes: duration, currency: 'EUR', price, is_active: true });
         resetClientServiceForm();
         renderClientOperationalSettings();
         populateAppointmentStaffServiceFields();
-        showToast('Usluga je dodata');
+        showToast(tr('service_added'));
         return;
     }
     try {
@@ -4884,10 +4907,10 @@ async function createClientService() {
         for (const staff of clientStaffMembers) await createStaffServiceLink(staff.id, service.id);
         resetClientServiceForm();
         await loadClientOperationalDataFromBackend();
-        showToast('Usluga je dodata');
+        showToast(tr('service_added'));
     } catch (error) {
         console.warn('Kaleya service create failed', error);
-        showToast('Usluga nije sacuvana');
+        showToast(tr('service_not_saved'));
     }
 }
 
@@ -4902,8 +4925,8 @@ async function updateClientStaffMember(staffId) {
     const phone = phoneInput?.value.trim() || '';
     const loginUsername = usernameInput?.value.trim() || '';
     const loginPassword = passwordInput?.value || '';
-    if (!name) return showToast('Unesi ime zaposlenog');
-    if (!loginUsername && loginPassword) return showToast('Za novu lozinku mora postojati korisnicko ime');
+    if (!name) return showToast(tr('staff_name_required'));
+    if (!loginUsername && loginPassword) return showToast(tr('staff_password_needs_username'));
 
     if (!getAuthToken() || location.protocol === 'file:') {
         clientStaffMembers = clientStaffMembers.map(staff => String(staff.id) === String(staffId)
@@ -4912,7 +4935,7 @@ async function updateClientStaffMember(staffId) {
         resetClientStaffForm();
         renderClientOperationalSettings();
         populateAppointmentStaffServiceFields();
-        showToast('Zaposleni je izmenjen');
+        showToast(tr('staff_updated'));
         return;
     }
 
@@ -4926,7 +4949,7 @@ async function updateClientStaffMember(staffId) {
         });
         if (!res.ok) {
             const raw = await res.text();
-            let msg = 'Zaposleni nije izmenjen';
+            let msg = tr('staff_not_updated');
             try {
                 const d = JSON.parse(raw);
                 msg = d.package?.[0] || d.login_username?.[0] || d.detail || d.non_field_errors?.[0] || msg;
@@ -4938,10 +4961,10 @@ async function updateClientStaffMember(staffId) {
         resetClientStaffForm();
         renderClientOperationalSettings();
         populateAppointmentStaffServiceFields();
-        showToast('Zaposleni je izmenjen');
+        showToast(tr('staff_updated'));
     } catch (error) {
         console.warn('Kaleya staff update failed', error);
-        showToast(error.message || 'Zaposleni nije izmenjen');
+        showToast(error.message || tr('staff_not_updated'));
     }
 }
 
@@ -4952,7 +4975,7 @@ async function updateClientService(serviceId) {
     const name = nameInput?.value.trim();
     const duration = Number(durationInput?.value || 30);
     const price = Math.max(0, Number(String(priceInput?.value || '0').replace(',', '.')) || 0).toFixed(2);
-    if (!name) return showToast('Unesi naziv usluge');
+    if (!name) return showToast(tr('service_name_required'));
 
     if (!getAuthToken() || location.protocol === 'file:') {
         clientServices = clientServices.map(service => String(service.id) === String(serviceId)
@@ -4961,7 +4984,7 @@ async function updateClientService(serviceId) {
         resetClientServiceForm();
         renderClientOperationalSettings();
         populateAppointmentStaffServiceFields();
-        showToast('Usluga je izmenjena');
+        showToast(tr('service_updated'));
         return;
     }
 
@@ -4976,17 +4999,17 @@ async function updateClientService(serviceId) {
         resetClientServiceForm();
         renderClientOperationalSettings();
         populateAppointmentStaffServiceFields();
-        showToast('Usluga je izmenjena');
+        showToast(tr('service_updated'));
     } catch (error) {
         console.warn('Kaleya service update failed', error);
-        showToast('Usluga nije izmenjena');
+        showToast(tr('service_not_updated'));
     }
 }
 
 async function deleteClientStaffMember(staffId) {
     const staff = clientStaffMembers.find(item => String(item.id) === String(staffId));
     if (!staff) return;
-    if (!window.confirm(`Obrisati zaposlenog: ${staff.full_name}?`)) return;
+    if (!window.confirm(tr('confirm_delete_staff').replace('%s', staff.full_name))) return;
 
     if (!getAuthToken() || location.protocol === 'file:') {
         clientStaffMembers = clientStaffMembers.filter(item => String(item.id) !== String(staffId));
@@ -4994,7 +5017,7 @@ async function deleteClientStaffMember(staffId) {
         if (document.getElementById('editingStaffId')?.value === String(staffId)) resetClientStaffForm();
         renderClientOperationalSettings();
         populateAppointmentStaffServiceFields();
-        showToast('Zaposleni je obrisan');
+        showToast(tr('staff_deleted'));
         return;
     }
 
@@ -5009,17 +5032,17 @@ async function deleteClientStaffMember(staffId) {
         if (document.getElementById('editingStaffId')?.value === String(staffId)) resetClientStaffForm();
         renderClientOperationalSettings();
         populateAppointmentStaffServiceFields();
-        showToast('Zaposleni je obrisan');
+        showToast(tr('staff_deleted'));
     } catch (error) {
         console.warn('Kaleya staff delete failed', error);
-        showToast('Zaposleni nije obrisan');
+        showToast(tr('staff_not_deleted'));
     }
 }
 
 async function deleteClientService(serviceId) {
     const service = clientServices.find(item => String(item.id) === String(serviceId));
     if (!service) return;
-    if (!window.confirm(`Obrisati uslugu: ${service.name}?`)) return;
+    if (!window.confirm(tr('confirm_delete_service').replace('%s', service.name))) return;
 
     if (!getAuthToken() || location.protocol === 'file:') {
         clientServices = clientServices.filter(item => String(item.id) !== String(serviceId));
@@ -5027,7 +5050,7 @@ async function deleteClientService(serviceId) {
         if (document.getElementById('editingServiceId')?.value === String(serviceId)) resetClientServiceForm();
         renderClientOperationalSettings();
         populateAppointmentStaffServiceFields();
-        showToast('Usluga je obrisana');
+        showToast(tr('service_deleted'));
         return;
     }
 
@@ -5042,10 +5065,10 @@ async function deleteClientService(serviceId) {
         if (document.getElementById('editingServiceId')?.value === String(serviceId)) resetClientServiceForm();
         renderClientOperationalSettings();
         populateAppointmentStaffServiceFields();
-        showToast('Usluga je obrisana');
+        showToast(tr('service_deleted'));
     } catch (error) {
         console.warn('Kaleya service delete failed', error);
-        showToast('Usluga nije obrisana');
+        showToast(tr('service_not_deleted'));
     }
 }
 
@@ -5091,15 +5114,15 @@ async function createClientBlockedTime() {
     const reason = document.getElementById('blockedReason')?.value.trim() || 'Blokirano vreme';
 
     if (mode === 'single' && timeToMinutes(end) <= timeToMinutes(start)) {
-        showToast('Kraj blokade mora biti posle pocetka');
+        showToast(tr('block_end_after_start'));
         return;
     }
     if (mode === 'single' && (timeToMinutes(start) < timeToMinutes(settings.start) || timeToMinutes(end) > timeToMinutes(settings.end))) {
-        showToast('Blokada mora biti u okviru radnog vremena');
+        showToast(tr('block_within_hours'));
         return;
     }
     if (mode === 'multi' && new Date(`${dateTo}T00:00:00`) < new Date(`${date}T00:00:00`)) {
-        showToast('Datum do mora biti posle datuma od');
+        showToast(tr('block_date_to_after_from'));
         return;
     }
 
@@ -5115,7 +5138,7 @@ async function createClientBlockedTime() {
         clientBlockedTimes.push({ id: `local-block-${Date.now()}`, staff_member: staffId || null, staff_member_name: staffNameById(staffId), ...payload });
         renderClientOperationalSettings();
         renderClientCalendar();
-        showToast('Blokada je dodata');
+        showToast(tr('block_added'));
         return;
     }
 
@@ -5136,23 +5159,23 @@ async function createClientBlockedTime() {
         }
         renderClientOperationalSettings();
         renderClientCalendar();
-        showToast('Blokada je dodata');
+        showToast(tr('block_added'));
     } catch (error) {
         console.warn('Kaleya blocked time create failed', error);
-        showToast('Blokada nije sacuvana');
+        showToast(tr('block_not_saved'));
     }
 }
 
 async function deleteClientBlockedTime(blockId) {
     const block = clientBlockedTimes.find(item => String(item.id) === String(blockId));
     if (!block) return;
-    if (!window.confirm('Obrisati blokirano vreme?')) return;
+    if (!window.confirm(tr('confirm_delete_block'))) return;
 
     if (!getAuthToken() || location.protocol === 'file:') {
         clientBlockedTimes = clientBlockedTimes.filter(item => String(item.id) !== String(blockId));
         renderClientOperationalSettings();
         renderClientCalendar();
-        showToast('Blokada je obrisana');
+        showToast(tr('block_deleted'));
         return;
     }
 
@@ -5162,10 +5185,10 @@ async function deleteClientBlockedTime(blockId) {
         clientBlockedTimes = clientBlockedTimes.filter(item => String(item.id) !== String(blockId));
         renderClientOperationalSettings();
         renderClientCalendar();
-        showToast('Blokada je obrisana');
+        showToast(tr('block_deleted'));
     } catch (error) {
         console.warn('Kaleya blocked time delete failed', error);
-        showToast('Blokada nije obrisana');
+        showToast(tr('block_not_deleted'));
     }
 }
 
@@ -5228,7 +5251,7 @@ function toggleKaleyaPower() {
     saveClientSettingsToBackend({ kaleya_enabled: kaleyaEnabled }).catch(error => {
         console.warn('Kaleya power save failed', error);
     });
-    showToast(kaleyaEnabled ? 'Kaleya online' : tr('kaleya_disabled'));
+    showToast(kaleyaEnabled ? tr('kaleya_online') : tr('kaleya_disabled'));
 }
 
 function updateKaleyaPowerUI() {
@@ -5849,10 +5872,10 @@ async function saveClientCalendarSettings() {
             date_format: dateFormatToBackend(dateFormat),
             week_start: weekStartToBackend(weekStart)
         });
-        showToast('Podesavanja kalendara su sacuvana');
+        showToast(tr('calendar_settings_saved'));
     } catch (error) {
         console.warn('Kaleya calendar settings save failed', error);
-        showToast('Podesavanja su sacuvana lokalno, ali ne u bazi');
+        showToast(tr('settings_saved_local_only'));
     }
 }
 
@@ -5918,7 +5941,7 @@ async function changeAppointmentStatus(id, status) {
             if (saved) Object.assign(item, saved);
         } catch (e) {
             console.warn('Kaleya status update failed', e);
-            showToast('Status nije sacuvan u bazi');
+            showToast(tr('status_not_saved'));
             return;
         }
     }
@@ -5973,14 +5996,14 @@ function personInitials(name = '') {
 async function copyPhoneNumber(phone, silent = false) {
     const normalized = normalizePhone(phone || '');
     if (!normalized) {
-        showToast('Broj telefona nije unet');
+        showToast(tr('phone_not_entered'));
         return;
     }
     try {
         await navigator.clipboard.writeText(normalized);
-        if (!silent) showToast('Broj je kopiran');
+        if (!silent) showToast(tr('phone_copied'));
     } catch (error) {
-        showToast(`Broj: ${normalized}`);
+        showToast(`${tr('phone_number_label')}: ${normalized}`);
     }
 }
 
@@ -6372,7 +6395,7 @@ function renderClientDaySlots() {
 
 function openAppointmentEditor(id = '', date = '', time = '', employeeQuickAction = false) {
     if (isEmployeeUser() && (!employeeQuickAction || id)) {
-        showToast('Zaposleni vidi samo svoje termine');
+        showToast(tr('employee_own_appointments_only'));
         return;
     }
     syncClientCalendarSettingsUI();
@@ -6415,7 +6438,7 @@ function closeAppointmentEditor() {
 async function saveAppointmentEdit() {
     const id = document.getElementById('apptId').value;
     if (isEmployeeUser() && id) {
-        showToast('Zaposleni menja samo nove termine iz brzih akcija');
+        showToast(tr('employee_quick_action_only'));
         return;
     }
     const serviceId = document.getElementById('apptService')?.value || '';
@@ -6424,7 +6447,7 @@ async function saveAppointmentEdit() {
         ? (employeeStaff ? String(employeeStaff.id) : '')
         : (document.getElementById('apptStaff')?.value || '');
     if (isEmployeeUser() && !staffMemberId) {
-        showToast('Zaposleni nema povezan staff profil');
+        showToast(tr('employee_no_staff_profile'));
         return;
     }
     const selectedService = clientServices.find(service => String(service.id) === String(serviceId));
@@ -6593,7 +6616,45 @@ async function testVoice() {
         it: 'Ciao, sono Kaleya. Come posso aiutare?',
         de: 'Hallo, hier ist Kaleya. Wie kann ich helfen?'
     };
-    await speakPreset('client_greeting', text[currentVoiceLang] || text.en, currentVoiceLang);
+    const sayText = text[currentVoiceLang] || text.en;
+
+    if (!getAuthToken() || location.protocol === 'file:') {
+        showToast(tr('voice_test_no_voice'));
+        browserSpeak(sayText, currentVoiceLang);
+        return;
+    }
+
+    const voiceStatus = await getBackendVoiceStatus();
+    if (!canUseBackendVoice(voiceStatus)) {
+        showToast(tr('voice_test_no_voice'));
+        browserSpeak(sayText, currentVoiceLang);
+        return;
+    }
+
+    try {
+        const res = await kaleyaApi('/api/ai-agent/tts/', {
+            method: 'POST',
+            body: JSON.stringify({ text: sayText })
+        });
+        if (!res.ok) {
+            const raw = await res.text();
+            let errMsg = tr('voice_test_failed');
+            try {
+                const d = JSON.parse(raw);
+                if (d.detail) errMsg = `${tr('voice_test_failed')}: ${d.detail}`;
+            } catch (_) { if (raw && raw.length < 200) errMsg = `${tr('voice_test_failed')}: ${raw}`; }
+            showToast(errMsg);
+            browserSpeak(sayText, currentVoiceLang);
+            return;
+        }
+        const data = await res.json();
+        showToast(tr('voice_test_ok'));
+        await playAudioUrl(data.audio_url);
+    } catch (e) {
+        console.warn('Kaleya test voice failed', e);
+        showToast(`${tr('voice_test_failed')}: ${e.message || ''}`);
+        browserSpeak(sayText, currentVoiceLang);
+    }
 }
 
 // ===== ADMIN =====
@@ -6837,14 +6898,14 @@ function toggleKeyVis(id = 'elevenKey') {
 }
 function saveGlobalAiSettings() {
     updateAdminProviderStatus();
-    showToast('Globalni AI API je sačuvan');
+    showToast(tr('admin_ai_saved'));
 }
 function saveElevenLabs() {
     updateAdminProviderStatus();
     document.getElementById('saveStatus')?.classList.remove('hidden');
     setTimeout(()=>document.getElementById('saveStatus')?.classList.add('hidden'),2000);
     loadAdminSettings();
-    showToast('ElevenLabs podešavanja sačuvana');
+    showToast(tr('admin_elevenlabs_saved'));
 }
 async function testElevenVoice() { await testVoice(); }
 
@@ -6861,7 +6922,7 @@ function closeClientApiModal() {
 function saveClientApiKey() {
     if (!activeClientForApi) return;
     closeClientApiModal();
-    showToast('API podešavanja za firmu su sačuvana');
+    showToast(tr('admin_client_api_saved'));
 }
 
 function playAlarmSound(type) {
@@ -6968,11 +7029,11 @@ function dismissNotif(id) {
 
 function answerEmergency() {
     dismissNotif('notifEmergency');
-    showToast('Hitni razgovor je preuzet');
+    showToast(tr('emergency_answered'));
 }
 
 function configureIntegration(name) {
-    showToast(`${name}: podešavanje će se povezati kroz backend integraciju`);
+    showToast(`${name}: ${tr('integration_configure_pending')}`);
 }
 
 // ===== BOT CHANNEL TOGGLE =====
@@ -7009,7 +7070,7 @@ function toggleBotChannel(ch) {
     const active = !localStorage.getItem(key);
     active ? localStorage.setItem(key, '1') : localStorage.removeItem(key);
     _renderBotCard(ch, active);
-    showToast(active ? `${ch.charAt(0).toUpperCase() + ch.slice(1)} bot aktiviran` : `${ch.charAt(0).toUpperCase() + ch.slice(1)} bot deaktiviran`);
+    showToast(`${ch.charAt(0).toUpperCase() + ch.slice(1)} ${active ? tr('bot_activated') : tr('bot_deactivated')}`);
 }
 
 function initBotChannels() {
@@ -7358,6 +7419,14 @@ handlePaymentReturn();
 if (new URLSearchParams(window.location.search).get('login') === 'admin') {
     showView('login');
 }
+
+// bfcache guard: if browser restores page from back/forward cache, re-check auth
+window.addEventListener('pageshow', (e) => {
+    if (e.persisted && !localStorage.getItem('kaleya_auth_token')) {
+        hideOnboarding();
+        showView('landing');
+    }
+});
 
 // Preload wake word listener on client view idle
 if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
