@@ -1136,6 +1136,23 @@
             </div>
         </div>
 
+        <!-- Conversation Detail Modal -->
+        <div id="conv-detail-modal" class="fixed inset-0 z-50 hidden">
+            <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeConvModal()"></div>
+            <div class="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+                <div class="pointer-events-auto w-full max-w-lg bg-white dark:bg-slate-900 rounded-[28px] shadow-2xl flex flex-col max-h-[82vh]">
+                    <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
+                        <div>
+                            <p id="conv-modal-title" class="font-semibold text-base"></p>
+                            <p id="conv-modal-sub" class="text-[11px] text-slate-500 mt-0.5 capitalize"></p>
+                        </div>
+                        <button onclick="closeConvModal()" class="w-8 h-8 grid place-items-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500">✕</button>
+                    </div>
+                    <div id="conv-modal-messages" class="flex-1 overflow-y-auto px-5 py-4 space-y-3"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- ADMIN VIEW -->
         <div id="admin-view" class="hidden min-h-screen">
             <div class="flex min-h-screen">
@@ -1234,20 +1251,7 @@
                             <div class="mt-6 grid lg:grid-cols-3 gap-4">
                                 <div class="lg:col-span-2 p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                                     <h3 class="font-semibold" data-i18n="ad_recent">Poslednji pozivi Kaleye</h3>
-                                    <div class="mt-4 space-y-3 text-[13px]">
-                                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
-                                            <div class="flex items-center gap-3"><span class="w-8 h-8 rounded-full bg-teal-500/20 grid place-items-center text-teal-700 dark:text-teal-300">✓</span><div><p class="font-medium">+381 64 123 4567</p><p class="text-[11px] text-slate-500">Zakazano za sutra 14:00</p></div></div>
-                                            <span class="text-[11px] text-slate-500">pre 2 min</span>
-                                        </div>
-                                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
-                                            <div class="flex items-center gap-3"><span class="w-8 h-8 rounded-full bg-blue-500/20 grid place-items-center text-blue-700 dark:text-blue-300">i</span><div><p class="font-medium">+381 63 987 6543</p><p class="text-[11px] text-slate-500">Provera termina</p></div></div>
-                                            <span class="text-[11px] text-slate-500">pre 14 min</span>
-                                        </div>
-                                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50">
-                                            <div class="flex items-center gap-3"><span class="w-8 h-8 rounded-full bg-red-500/20 grid place-items-center text-red-700 dark:text-red-300">x</span><div><p class="font-medium">+381 61 555 333</p><p class="text-[11px] text-slate-500">Otkazano - Kaleya obavestila</p></div></div>
-                                            <span class="text-[11px] text-slate-500">pre 1h</span>
-                                        </div>
-                                    </div>
+                                    <div id="admin-conv-list" class="mt-4 space-y-2 text-[13px] max-h-[320px] overflow-y-auto pr-1"></div>
                                 </div>
                                 <div class="p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                                     <h3 class="font-semibold">Kaleya status</h3>
@@ -1326,19 +1330,17 @@
                             </div>
                         </div>
 
-                        <!-- ALARMS -->
+                        <!-- ALARMS / PODRŠKA -->
                         <div id="admin-alarms" class="admin-pane hidden">
-                            <div class="mb-5">
-                                <h2 class="font-display text-xl font-bold" data-i18n="ad_alarms">Alarmi</h2>
-                                <p class="text-sm text-slate-600 dark:text-slate-400" data-i18n="ad_alarms_sub">Rezervisano za buduću human support eskalaciju.</p>
-                            </div>
-                            <div class="min-h-[280px] rounded-[24px] border border-dashed border-slate-300 dark:border-slate-700 bg-white/60 dark:bg-slate-900/60 p-8 flex items-center justify-center text-center">
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
                                 <div>
-                                    <div class="mx-auto w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 grid place-items-center text-slate-500">
-                                        <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8a6 6 0 00-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-                                    </div>
-                                    <h3 class="mt-4 font-semibold" data-i18n="support_alarm_future">Human support alarm dolazi kasnije</h3>
-                                    <p class="mt-2 max-w-md text-sm text-slate-500" data-i18n="support_alarm_desc">Ovaj tab će služiti kada AI ne može da završi zahtev firme koja je kupila paket i treba povezivanje sa podrškom.</p>
+                                    <h2 class="font-display text-xl font-bold" data-i18n="ad_alarms">Podrška</h2>
+                                    <p class="text-sm text-slate-600 dark:text-slate-400" data-i18n="ad_alarms_sub">Razgovori koji čekaju vašu pažnju.</p>
+                                </div>
+                            </div>
+                            <div class="rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
+                                <div id="alarm-conv-list" class="space-y-2 text-[13px]">
+                                    <p class="text-[12px] text-slate-400 py-4 text-center">Učitavam...</p>
                                 </div>
                             </div>
                         </div>
@@ -2752,7 +2754,7 @@ function showView(view) {
         updatePwaInstallButtons();
         switchClientTab('home');
     }
-    if (view === 'admin') loadAdminSettings();
+    if (view === 'admin') { loadAdminSettings(); loadAdminConversations(); }
 }
 
 function goDemo(type) {
@@ -6314,6 +6316,7 @@ function switchAdminTab(tab) {
     document.getElementById('adminTitle').textContent = titles[tab] || tr('ad_dash');
     document.getElementById('mobileAdminNav')?.classList.add('hidden');
     if (tab === 'settings') loadAdminSettings();
+    if (tab === 'dash' || tab === 'alarms') loadAdminConversations();
 }
 
 function loadAdminSettings() {
@@ -6345,6 +6348,153 @@ function loadAdminSettings() {
     const voiceStatus = document.getElementById('adminVoiceStatus');
     if (voiceStatus) voiceStatus.textContent = key ? 'ElevenLabs' : 'Browser TTS';
 }
+// ===== CONVERSATIONS =====
+let _convStore = [];
+const _DEMO_CONVS = [
+    {
+        id: 1,
+        customer: { full_name: 'Marko Petrović', phone: '+381 64 123 4567' },
+        channel: 'whatsapp',
+        status: 'resolved',
+        last_message_at: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+        messages: [
+            { direction: 'inbound',  sender_label: 'Klijent', body: 'Zdravo, hoću da zakažem termin za sutra.', created_at: new Date(Date.now() - 15 * 60 * 1000).toISOString() },
+            { direction: 'outbound', sender_label: 'Kaleya',  body: 'Zdravo! Slobodan termin je sutra u 14:00. Da li vam odgovara?', created_at: new Date(Date.now() - 14 * 60 * 1000).toISOString() },
+            { direction: 'inbound',  sender_label: 'Klijent', body: 'Savršeno, potvrđujem 14:00.', created_at: new Date(Date.now() - 13 * 60 * 1000).toISOString() },
+            { direction: 'outbound', sender_label: 'Kaleya',  body: 'Termin zakazan! Vidimo se sutra u 14:00.', created_at: new Date(Date.now() - 12 * 60 * 1000).toISOString() }
+        ]
+    },
+    {
+        id: 2,
+        customer: { full_name: 'Ana Jovanović', phone: '+381 63 987 6543' },
+        channel: 'sms',
+        status: 'open',
+        last_message_at: new Date(Date.now() - 14 * 60 * 1000).toISOString(),
+        messages: [
+            { direction: 'inbound',  sender_label: 'Klijent', body: 'Da li imate slobodan termin danas posle 17h?', created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString() },
+            { direction: 'outbound', sender_label: 'Kaleya',  body: 'Nažalost, danas su svi termini zauzeti. Mogu da ponudim sutra od 9h ili prekosutra posle 15h.', created_at: new Date(Date.now() - 25 * 60 * 1000).toISOString() },
+            { direction: 'inbound',  sender_label: 'Klijent', body: 'Može sutra u 9h.', created_at: new Date(Date.now() - 14 * 60 * 1000).toISOString() }
+        ]
+    },
+    {
+        id: 3,
+        customer: { full_name: 'Nikola Ilić', phone: '+381 61 555 333' },
+        channel: 'voice',
+        status: 'cancelled',
+        last_message_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+        messages: [
+            { direction: 'inbound',  sender_label: 'Klijent', body: 'Moram da otkažem termin za danas.', created_at: new Date(Date.now() - 75 * 60 * 1000).toISOString() },
+            { direction: 'outbound', sender_label: 'Kaleya',  body: 'Razumem. Termin je otkazan. Da li želite da zakazemo drugi termin?', created_at: new Date(Date.now() - 70 * 60 * 1000).toISOString() },
+            { direction: 'inbound',  sender_label: 'Klijent', body: 'Ne, hvala. Javiću se.', created_at: new Date(Date.now() - 65 * 60 * 1000).toISOString() }
+        ]
+    }
+];
+
+async function loadAdminConversations() {
+    const listDash  = document.getElementById('admin-conv-list');
+    const listAlarm = document.getElementById('alarm-conv-list');
+    const loading = '<p class="text-[12px] text-slate-400 py-4 text-center">Učitavam...</p>';
+    if (listDash)  listDash.innerHTML  = loading;
+    if (listAlarm) listAlarm.innerHTML = loading;
+
+    let convs;
+    try {
+        const token = localStorage.getItem('kaleya_token');
+        if (!token) throw new Error('no_token');
+        const res = await fetch('/api/conversations/', { headers: { 'Authorization': 'Token ' + token } });
+        if (!res.ok) throw new Error('api_error');
+        const data = await res.json();
+        convs = Array.isArray(data) ? data : (data.results || []);
+    } catch {
+        convs = _DEMO_CONVS;
+    }
+
+    _convStore = convs;
+    const empty = '<p class="text-[12px] text-slate-400 py-4 text-center">Nema razgovora</p>';
+    const rendered = convs.length ? convs.map((c, i) => _renderConvRow(c, i)).join('') : empty;
+    if (listDash)  listDash.innerHTML  = rendered;
+    if (listAlarm) listAlarm.innerHTML = rendered;
+}
+
+function _convChannelMeta(ch) {
+    const map = {
+        whatsapp: { bg: 'bg-green-500/15',  color: 'text-green-700 dark:text-green-300',   icon: '💬' },
+        sms:      { bg: 'bg-blue-500/15',   color: 'text-blue-700 dark:text-blue-300',     icon: '✉' },
+        voice:    { bg: 'bg-purple-500/15', color: 'text-purple-700 dark:text-purple-300', icon: '📞' },
+        viber:    { bg: 'bg-violet-500/15', color: 'text-violet-700 dark:text-violet-300', icon: '📱' },
+        telegram: { bg: 'bg-sky-500/15',    color: 'text-sky-700 dark:text-sky-300',       icon: '✈' }
+    };
+    return map[ch] || { bg: 'bg-slate-100 dark:bg-slate-800', color: 'text-slate-600', icon: '💬' };
+}
+
+function _convStatusDot(status) {
+    if (status === 'open')      return 'bg-amber-400';
+    if (status === 'resolved')  return 'bg-teal-500';
+    if (status === 'cancelled') return 'bg-red-400';
+    return 'bg-slate-400';
+}
+
+function _convTimeAgo(iso) {
+    const diff = Math.floor((Date.now() - new Date(iso)) / 1000);
+    if (diff < 60)    return 'upravo';
+    if (diff < 3600)  return 'pre ' + Math.floor(diff / 60) + ' min';
+    if (diff < 86400) return 'pre ' + Math.floor(diff / 3600) + 'h';
+    return 'pre ' + Math.floor(diff / 86400) + 'd';
+}
+
+function _escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function _renderConvRow(c, idx) {
+    const ch = _convChannelMeta(c.channel);
+    const lastMsg = c.messages && c.messages.length ? c.messages[c.messages.length - 1] : null;
+    const preview = lastMsg ? _escHtml(lastMsg.body).slice(0, 60) + (lastMsg.body.length > 60 ? '…' : '') : '';
+    const name = _escHtml(c.customer?.full_name || c.customer?.phone || '—');
+    const time = _convTimeAgo(c.last_message_at || c.created_at);
+    return `<button onclick="openConvModal(${idx})" class="w-full text-left flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+        <span class="w-8 h-8 rounded-full ${ch.bg} grid place-items-center ${ch.color} shrink-0 text-base">${ch.icon}</span>
+        <div class="flex-1 min-w-0">
+            <p class="font-medium truncate">${name}</p>
+            <p class="text-[11px] text-slate-500 truncate mt-0.5">${preview}</p>
+        </div>
+        <div class="shrink-0 text-right">
+            <span class="text-[11px] text-slate-500">${time}</span>
+            <span class="mt-1 w-2 h-2 rounded-full ${_convStatusDot(c.status)} block ml-auto"></span>
+        </div>
+    </button>`;
+}
+
+function openConvModal(idx) {
+    const c = _convStore[idx];
+    if (!c) return;
+    const modal = document.getElementById('conv-detail-modal');
+    const title = document.getElementById('conv-modal-title');
+    const sub   = document.getElementById('conv-modal-sub');
+    const msgs  = document.getElementById('conv-modal-messages');
+    if (!modal || !title || !sub || !msgs) return;
+
+    title.textContent = c.customer?.full_name || c.customer?.phone || '—';
+    sub.textContent   = (c.channel || '') + (c.status ? ' · ' + c.status : '');
+
+    msgs.innerHTML = (c.messages || []).map(m => {
+        const isOut = m.direction === 'outbound';
+        return `<div class="flex ${isOut ? 'justify-end' : 'justify-start'}">
+            <div class="max-w-[78%] px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed ${isOut ? 'gradient-bg text-white rounded-br-sm' : 'bg-slate-100 dark:bg-slate-800 rounded-bl-sm'}">
+                ${_escHtml(m.body)}
+                <p class="text-[10px] mt-1 opacity-60 text-right">${_escHtml(m.sender_label || '')}</p>
+            </div>
+        </div>`;
+    }).join('');
+
+    modal.classList.remove('hidden');
+    requestAnimationFrame(() => { msgs.scrollTop = msgs.scrollHeight; });
+}
+
+function closeConvModal() {
+    document.getElementById('conv-detail-modal')?.classList.add('hidden');
+}
+
 document.getElementById('voiceSelect')?.addEventListener('change', (e) => {
     document.getElementById('customVoice')?.classList.toggle('hidden', e.target.value !== 'custom');
 });
