@@ -25,6 +25,7 @@ class Profile(models.Model):
         blank=True,
     )
     phone = models.CharField(max_length=40, blank=True)
+    deletion_scheduled_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

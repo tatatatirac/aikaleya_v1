@@ -6673,5 +6673,31 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     // gentle background listener could start after login
 }
 </script>
+
+<div id="cookieBanner" class="fixed bottom-0 left-0 right-0 z-50 p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 shadow-lg" style="display:none">
+    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <p class="flex-1 text-[13px] text-slate-600 dark:text-slate-300">
+            Koristimo kolačiće za prijavu i osnovne funkcije platforme. Možete prihvatiti sve kolačiće ili samo nužne.
+            <a href="/frontend/privacy.html" class="underline ml-1">Politika privatnosti</a>
+        </p>
+        <div class="flex gap-2 shrink-0">
+            <button onclick="cookieConsent('essential')" class="h-9 px-4 rounded-xl border border-slate-300 dark:border-slate-600 text-[12px] font-semibold text-slate-700 dark:text-slate-200">Samo nužni</button>
+            <button onclick="cookieConsent('all')" class="h-9 px-5 rounded-xl gradient-bg text-white text-[12px] font-semibold">Prihvati sve</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    function cookieConsent(choice) {
+        localStorage.setItem('kaleya_cookie_consent', choice);
+        document.getElementById('cookieBanner').style.display = 'none';
+    }
+    window.cookieConsent = cookieConsent;
+    if (!localStorage.getItem('kaleya_cookie_consent')) {
+        document.getElementById('cookieBanner').style.display = 'block';
+    }
+})();
+</script>
 </body>
 </html>
