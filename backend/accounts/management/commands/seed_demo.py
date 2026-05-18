@@ -203,7 +203,7 @@ class Command(BaseCommand):
             {
                 "code": Plan.CODE_PRO,
                 "name": "Pro",
-                "monthly_price": 119,
+                "monthly_price": 99,
                 "currency": "USD",
                 "sort_order": 2,
                 "max_staff_members": 1,

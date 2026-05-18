@@ -165,11 +165,8 @@
         #landing-view #langDropdown .lang-btn { color: #FFF !important; }
         #landing-view #langDropdown .lang-btn:hover { background: #18181B !important; }
         #landing-view #theme-toggle {
-            width: 36px; height: 36px; border-radius: 50%;
-            background: #111113 !important; border: 1px solid #27272A !important; color: #FFF !important;
-            display: grid; place-items: center; cursor: pointer; transition: background .2s;
+            display: none !important;
         }
-        #landing-view #theme-toggle:hover { background: #18181B !important; }
         .kv-login-btn {
             background: #2563EB; color: #fff; border: none; border-radius: 10px;
             padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s;
@@ -384,7 +381,7 @@
         .kv-sms-label { font-size: 11px; color: #64748B; text-transform: uppercase; font-weight: 600; letter-spacing: .05em; margin-bottom: 4px; }
 
         /* Pricing */
-        .kv-pricing-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 16px; }
+        .kv-pricing-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; max-width: 960px; margin-left: auto; margin-right: auto; }
         .kv-price-card {
             background: linear-gradient(180deg,#141416 0%,#111113 100%); border: 1px solid #27272A;
             border-radius: 20px; padding: 26px; position: relative; transition: all .3s;
@@ -453,7 +450,7 @@
             .kv-features-grid { grid-template-columns: 1fr; }
             .kv-how-grid { grid-template-columns: 1fr; }
             .kv-noshow-inner { grid-template-columns: 1fr; gap: 40px; }
-            .kv-pricing-grid { grid-template-columns: repeat(2,1fr); }
+            .kv-pricing-grid { grid-template-columns: 1fr; max-width: 420px; }
         }
         @media (max-width: 640px) {
             .kv-header-inner { height: 60px; padding: 0 16px; }
@@ -807,7 +804,7 @@
                         <div class="kv-section-head">
                             <p class="kv-eyebrow">PLANS</p>
                             <h2 class="kv-section-title" data-i18n="price_t">Simple pricing</h2>
-                            <p class="kv-section-sub" data-i18n="price_s">Five packages for different automation levels.</p>
+                            <p class="kv-section-sub" data-i18n="price_s">Choose the plan that fits your business.</p>
                         </div>
                         <div class="kv-pricing-grid">
                             <!-- Basic -->
@@ -841,37 +838,10 @@
                                 </ul>
                                 <a href="register-pro.html" class="kv-price-btn kv-price-btn-blue" data-i18n="trial_btn">Try 14 days</a>
                             </div>
-                            <!-- Business -->
-                            <div class="kv-price-card">
-                                <div class="kv-price-name">Business</div>
-                                <div class="kv-price-desc" data-i18n="p_business_d">Up to 5 staff</div>
-                                <div class="kv-price-amount">$349<span>/mo</span></div>
-                                <ul class="kv-price-feats">
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p_business_f1">All from Basic + Pro</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p_business_f2">Up to 5 staff</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p_business_f3">Staff Kaleya APP</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p_business_f4">More languages by agreement</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p_business_f5">Company API</span></li>
-                                </ul>
-                                <a href="register-business.html" class="kv-price-btn" data-i18n="trial_btn">Try 14 days</a>
-                            </div>
-                            <!-- Business+ -->
-                            <div class="kv-price-card">
-                                <div class="kv-price-name">Business+</div>
-                                <div class="kv-price-desc" data-i18n="p_business_plus_d">Up to 15 staff</div>
-                                <div class="kv-price-amount">$579<span>/mo</span></div>
-                                <ul class="kv-price-feats">
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p_business_plus_f1">All from Basic + Pro + Business</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p_business_plus_f2">Up to 15 staff</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p_business_plus_f3">Phone calls &amp; SMS</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p_business_plus_f4">ElevenLabs AI voice</span></li>
-                                </ul>
-                                <a href="register-business-plus.html" class="kv-price-btn" data-i18n="trial_btn">Try 14 days</a>
-                            </div>
-                            <!-- BusinessPro+ -->
+                            <!-- Business (was BusinessPro+) -->
                             <div class="kv-price-card kv-price-card-dark">
-                                <div class="kv-price-name">BusinessPro+</div>
-                                <div class="kv-price-desc" data-i18n="p_business_pro_d">15+ staff</div>
+                                <div class="kv-price-name">Business</div>
+                                <div class="kv-price-desc" data-i18n="p_business_pro_d">5+ staff</div>
                                 <div class="kv-price-amount" data-i18n="custom_price">Custom</div>
                                 <ul class="kv-price-feats">
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span data-i18n="p_business_pro_f1">All from previous plans</span></li>
@@ -2221,7 +2191,7 @@ const T = {
         how_t: 'Kaleya uči vaš posao za 1 dan', how1_t: 'Poveži kanal', how1_d: 'Telefon, WhatsApp, Telegram, Viber ili SMS.',
         how2_t: 'Nauči Kaleyu', how2_d: 'Upiši radno vreme, usluge i pravila zakazivanja.',
         how3_t: 'Izaberi jezik i glas', how3_d: 'Kaleya govori jezikom koji klijent izabere.',
-        price_t: 'Jednostavne cene', price_s: 'Pet paketa za različite nivoe automatizacije.',
+        price_t: 'Jednostavne cene', price_s: 'Izaberite plan koji odgovara vasem biznisu.',
         p1_d: 'Za male timove', p1_f1: '2 jezika', p1_f2: 'Zakazivanje termina', p2_d: 'Za rastuće firme', p2_f1: '5 jezika', p2_f3: 'Alarmi i obaveštenja',
         p3_d: 'Za pozivne centre', p3_f1: 'Neograničeni jezici prema dogovoru', p3_f2: 'Napredni admin i SLA', p3_f4: 'Integracije po meri',
         p4_d: 'Kompletan projekat', p4_note: 'Sve detalje prikazujemo na posebnoj Buy All strani.', custom_price: 'Po dogovoru',
@@ -2265,7 +2235,7 @@ const T = {
         how_t: 'Kaleya learns your business in 1 day', how1_t: 'Connect a channel', how1_d: 'Phone, WhatsApp, Telegram, Viber or SMS.',
         how2_t: 'Teach Kaleya', how2_d: 'Add working hours, services and scheduling rules.',
         how3_t: 'Choose language and voice', how3_d: 'Kaleya speaks the language the client selects.',
-        price_t: 'Simple pricing', price_s: 'Five packages for different automation levels.',
+        price_t: 'Simple pricing', price_s: 'Choose the plan that fits your business.',
         p1_d: 'For small teams', p1_f1: '2 languages', p1_f2: 'Appointment scheduling', p2_d: 'For growing companies', p2_f1: '5 languages', p2_f3: 'Alarms and notifications',
         p3_d: 'For call centers', p3_f1: 'More languages by agreement', p3_f2: 'Advanced admin and SLA', p3_f4: 'Custom integrations',
         p4_d: 'Complete project', p4_note: 'All details are shown on the dedicated Buy All page.', custom_price: 'By agreement',
@@ -2309,7 +2279,7 @@ const T = {
         how_t: 'Kaleya aprende tu negocio en 1 día', how1_t: 'Conecta un canal', how1_d: 'Teléfono, WhatsApp, Telegram, Viber o SMS.',
         how2_t: 'Entrena a Kaleya', how2_d: 'Añade horarios, servicios y reglas de agenda.',
         how3_t: 'Elige idioma y voz', how3_d: 'Kaleya habla el idioma que el cliente elige.',
-        price_t: 'Precios simples', price_s: 'Cinco paquetes para distintos niveles de automatización.',
+        price_t: 'Precios simples', price_s: 'Elige el plan que se adapte a tu negocio.',
         p1_d: 'Para equipos pequeños', p1_f1: '2 idiomas', p1_f2: 'Agenda de citas', p2_d: 'Para empresas en crecimiento', p2_f1: '5 idiomas', p2_f3: 'Alarmas y notificaciones',
         p3_d: 'Para centros de llamadas', p3_f1: 'Más idiomas bajo acuerdo', p3_f2: 'Admin avanzado y SLA', p3_f4: 'Integraciones a medida',
         p4_d: 'Proyecto completo', p4_note: 'Todos los detalles están en la página Buy All.', custom_price: 'A convenir',
@@ -2353,7 +2323,7 @@ const T = {
         how_t: 'Kaleya aprende seu negócio em 1 dia', how1_t: 'Conecte um canal', how1_d: 'Telefone, WhatsApp, Telegram, Viber ou SMS.',
         how2_t: 'Ensine a Kaleya', how2_d: 'Adicione horários, serviços e regras de agenda.',
         how3_t: 'Escolha idioma e voz', how3_d: 'Kaleya fala o idioma escolhido pelo cliente.',
-        price_t: 'Preços simples', price_s: 'Cinco pacotes para diferentes níveis de automação.',
+        price_t: 'Precos simples', price_s: 'Escolha o plano ideal para o seu negocio.',
         p1_d: 'Para equipes pequenas', p1_f1: '2 idiomas', p1_f2: 'Agendamento', p2_d: 'Para empresas em crescimento', p2_f1: '5 idiomas', p2_f3: 'Alarmes e notificações',
         p3_d: 'Para call centers', p3_f1: 'Mais idiomas sob acordo', p3_f2: 'Admin avançado e SLA', p3_f4: 'Integrações sob medida',
         p4_d: 'Projeto completo', p4_note: 'Todos os detalhes aparecem na página Buy All.', custom_price: 'Sob acordo',
@@ -2397,7 +2367,7 @@ const T = {
         how_t: 'Kaleya изучает бизнес за 1 день', how1_t: 'Подключите канал', how1_d: 'Телефон, WhatsApp, Telegram, Viber или SMS.',
         how2_t: 'Обучите Kaleya', how2_d: 'Добавьте часы работы, услуги и правила записи.',
         how3_t: 'Выберите язык и голос', how3_d: 'Kaleya говорит на языке, выбранном клиентом.',
-        price_t: 'Простые тарифы', price_s: 'Пять пакетов для разных уровней автоматизации.',
+        price_t: 'Простые тарифы', price_s: 'Выберите план, подходящий вашему бизнесу.',
         p1_d: 'Для малых команд', p1_f1: '2 языка', p1_f2: 'Запись на прием', p2_d: 'Для растущих компаний', p2_f1: '5 языков', p2_f3: 'Оповещения и уведомления',
         p3_d: 'Для колл-центров', p3_f1: 'Больше языков по договоренности', p3_f2: 'Расширенный админ и SLA', p3_f4: 'Индивидуальные интеграции',
         p4_d: 'Полный проект', p4_note: 'Все детали находятся на отдельной странице Buy All.', custom_price: 'По договоренности',
@@ -2440,7 +2410,7 @@ T.fr = {
     f_alarm_t: 'Alertes equipe', f_alarm_d: 'Annonce du prochain client et demande urgente de conversation.',
     f_msg_t: 'Canaux de messages', f_msg_d: 'WhatsApp, Viber, Telegram, SMS et appels telephoniques.',
     how_t: 'Kaleya apprend votre activite en 1 jour', how1_t: 'Connecter un canal', how2_t: 'Former Kaleya', how3_t: 'Choisir langue et voix',
-    price_t: 'Tarifs simples', price_s: 'Cinq forfaits pour differents niveaux d automatisation.',
+    price_t: 'Tarifs simples', price_s: 'Choisissez le forfait adapte a votre activite.',
     p1_d: 'Pour petites equipes', p2_d: 'Pour entreprises en croissance', p3_d: 'Pour centres d appels', p4_d: 'Projet complet',
     popular: 'POPULAIRE', price_btn: 'Commencer', price_btn2: 'Essayer 14 jours', trial_btn: 'Essayer 14 jours', price_contact: 'Contact',
     footer_privacy: 'Confidentialite', footer_terms: 'Conditions',
@@ -2472,7 +2442,7 @@ T.it = {
     f_alarm_t: 'Allarmi team', f_alarm_d: 'Annuncio del prossimo cliente e richiesta urgente di conversazione.',
     f_msg_t: 'Canali messaggi', f_msg_d: 'WhatsApp, Viber, Telegram, SMS e chiamate.',
     how_t: 'Kaleya impara la tua attivita in 1 giorno', how1_t: 'Collega un canale', how2_t: 'Istruisci Kaleya', how3_t: 'Scegli lingua e voce',
-    price_t: 'Prezzi semplici', price_s: 'Cinque pacchetti per diversi livelli di automazione.',
+    price_t: 'Prezzi semplici', price_s: 'Scegli il piano adatto alla tua attivita.',
     p1_d: 'Per piccoli team', p2_d: 'Per aziende in crescita', p3_d: 'Per call center', p4_d: 'Progetto completo',
     popular: 'POPOLARE', price_btn: 'Inizia', price_btn2: 'Prova 14 giorni', trial_btn: 'Prova 14 giorni', price_contact: 'Contatto',
     footer_privacy: 'Privacy', footer_terms: 'Termini',
@@ -2498,7 +2468,7 @@ const EXTRA_TRANSLATIONS = {
         p_pro_d: 'Vlasnik + 1 radnik', p_pro_f1: 'Sve iz Basic', p_pro_f2: '1 radnik', p_pro_f3: 'Radnik zakazivanja', p_pro_f4: 'Radnik Kaleya APP', p_pro_f5: 'Blokiranje termina po satu/danu/višednevno', p_pro_f6: 'Instagram DM + TikTok DM',
         p_business_d: 'Do 5 radnika', p_business_f1: 'Sve iz Basic + Pro', p_business_f2: 'Do 5 radnika', p_business_f3: 'Radnik Kaleya APP', p_business_f4: 'Više jezika po dogovoru', p_business_f5: 'API po firmi',
         p_business_plus_d: 'Do 15 radnika', p_business_plus_f1: 'Sve iz Basic + Pro + Business', p_business_plus_f2: 'Do 15 radnika', p_business_plus_f3: 'Telefonski pozivi i SMS', p_business_plus_f4: 'ElevenLabs AI voice',
-        p_business_pro_d: '15+ radnika', p_business_pro_f1: 'Sve iz Basic + Pro + Business + Business+', p_business_pro_f2: '15+ radnika', p_business_pro_f3: 'Custom integracije', p_business_pro_f4: 'Napredna arhitektura po dogovoru', custom_price: 'Custom',
+        p_business_pro_d: '5+ radnika', p_business_pro_f1: 'Sve iz Basic + Pro + Business + Business+', p_business_pro_f2: '15+ radnika', p_business_pro_f3: 'Custom integracije', p_business_pro_f4: 'Napredna arhitektura po dogovoru', custom_price: 'Custom',
         team_label: 'Tim', employee_list_title: 'Zaposleni', employee_list_desc: 'Lista kontakata za zaposlene. Vlasnik je uvek na vrhu.', calendar_settings: 'Podešavanja kalendara', work_from: 'Rad od', work_to: 'Rad do', interval_label: 'Interval', time_label: 'Vreme', date_label: 'Datum', first_day_label: 'Prvi dan',
         staff_services_title: 'Osoblje i usluge', blocked_time_title: 'Blokirano vreme / pauze', one_day: 'Jednodnevno', multi_day: 'Više dana', all_staff: 'Svi zaposleni', add_block: 'Dodaj blokadu', appointment_title: 'Termin', name_service_label: 'Ime i usluga', service_label: 'Usluga', staff_label: 'Osoblje', no_service: 'Bez usluge', any_staff: 'Bilo ko', channel_label: 'Kanal', status_label: 'Status', status_confirmed: 'Zakazano', status_moved: 'Pomereno', status_cancelled: 'Otkazano', status_pending: 'Na čekanju', duration_label: 'Trajanje termina'
     },
@@ -2508,7 +2478,7 @@ const EXTRA_TRANSLATIONS = {
         p_pro_d: 'Owner + 1 employee', p_pro_f1: 'Everything in Basic', p_pro_f2: '1 employee', p_pro_f3: 'Employee scheduling', p_pro_f4: 'Employee Kaleya APP', p_pro_f5: 'Blocking by hour/day/multiple days', p_pro_f6: 'Instagram DM + TikTok DM',
         p_business_d: 'Up to 5 employees', p_business_f1: 'Everything in Basic + Pro', p_business_f2: 'Up to 5 employees', p_business_f3: 'Employee Kaleya APP', p_business_f4: 'More languages by agreement', p_business_f5: 'Company-specific API',
         p_business_plus_d: 'Up to 15 employees', p_business_plus_f1: 'Everything in Basic + Pro + Business', p_business_plus_f2: 'Up to 15 employees', p_business_plus_f3: 'Phone calls and SMS', p_business_plus_f4: 'ElevenLabs AI voice',
-        p_business_pro_d: '15+ employees', p_business_pro_f1: 'Everything in Basic + Pro + Business + Business+', p_business_pro_f2: '15+ employees', p_business_pro_f3: 'Custom integrations', p_business_pro_f4: 'Advanced architecture by agreement', custom_price: 'Custom',
+        p_business_pro_d: '5+ employees', p_business_pro_f1: 'Everything in Basic + Pro + Business + Business+', p_business_pro_f2: '15+ employees', p_business_pro_f3: 'Custom integrations', p_business_pro_f4: 'Advanced architecture by agreement', custom_price: 'Custom',
         team_label: 'Team', employee_list_title: 'Employees', employee_list_desc: 'Employee contact list. The owner is always at the top.', calendar_settings: 'Calendar settings', work_from: 'Work from', work_to: 'Work until', interval_label: 'Interval', time_label: 'Time', date_label: 'Date', first_day_label: 'First day',
         staff_services_title: 'Staff and services', blocked_time_title: 'Blocked time / breaks', one_day: 'One day', multi_day: 'Multiple days', all_staff: 'All employees', add_block: 'Add block', appointment_title: 'Appointment', name_service_label: 'Name and service', service_label: 'Service', staff_label: 'Staff', no_service: 'No service', any_staff: 'Anyone', channel_label: 'Channel', status_label: 'Status', status_confirmed: 'Scheduled', status_moved: 'Moved', status_cancelled: 'Cancelled', status_pending: 'Pending', duration_label: 'Appointment duration'
     },
@@ -2518,7 +2488,7 @@ const EXTRA_TRANSLATIONS = {
         p_pro_d: 'Propietario + 1 empleado', p_pro_f1: 'Todo de Basic', p_pro_f2: '1 empleado', p_pro_f3: 'Agenda del empleado', p_pro_f4: 'APP Kaleya del empleado', p_pro_f5: 'Bloqueo por hora/día/varios días', p_pro_f6: 'Instagram DM + TikTok DM',
         p_business_d: 'Hasta 5 empleados', p_business_f1: 'Todo de Basic + Pro', p_business_f2: 'Hasta 5 empleados', p_business_f3: 'APP Kaleya del empleado', p_business_f4: 'Más idiomas por acuerdo', p_business_f5: 'API por empresa',
         p_business_plus_d: 'Hasta 15 empleados', p_business_plus_f1: 'Todo de Basic + Pro + Business', p_business_plus_f2: 'Hasta 15 empleados', p_business_plus_f3: 'Llamadas telefónicas y SMS', p_business_plus_f4: 'Voz AI ElevenLabs',
-        p_business_pro_d: '15+ empleados', p_business_pro_f1: 'Todo de Basic + Pro + Business + Business+', p_business_pro_f2: '15+ empleados', p_business_pro_f3: 'Integraciones custom', p_business_pro_f4: 'Arquitectura avanzada por acuerdo', custom_price: 'Custom',
+        p_business_pro_d: '5+ empleados', p_business_pro_f1: 'Todo de Basic + Pro + Business + Business+', p_business_pro_f2: '15+ empleados', p_business_pro_f3: 'Integraciones custom', p_business_pro_f4: 'Arquitectura avanzada por acuerdo', custom_price: 'Custom',
         team_label: 'Equipo', employee_list_title: 'Empleados', employee_list_desc: 'Lista de contactos de empleados. El propietario siempre está arriba.', calendar_settings: 'Ajustes del calendario', work_from: 'Trabajo desde', work_to: 'Trabajo hasta', interval_label: 'Intervalo', time_label: 'Hora', date_label: 'Fecha', first_day_label: 'Primer día',
         staff_services_title: 'Personal y servicios', blocked_time_title: 'Tiempo bloqueado / pausas', one_day: 'Un día', multi_day: 'Varios días', all_staff: 'Todos los empleados', add_block: 'Añadir bloqueo', appointment_title: 'Cita', name_service_label: 'Nombre y servicio', service_label: 'Servicio', staff_label: 'Personal', no_service: 'Sin servicio', any_staff: 'Cualquiera', channel_label: 'Canal', status_label: 'Estado', status_confirmed: 'Agendado', status_moved: 'Movido', status_cancelled: 'Cancelado', status_pending: 'Pendiente', duration_label: 'Duración de la cita'
     },
@@ -2528,7 +2498,7 @@ const EXTRA_TRANSLATIONS = {
         p_pro_d: 'Dono + 1 funcionário', p_pro_f1: 'Tudo do Basic', p_pro_f2: '1 funcionário', p_pro_f3: 'Agendamento do funcionário', p_pro_f4: 'APP Kaleya do funcionário', p_pro_f5: 'Bloqueio por hora/dia/vários dias', p_pro_f6: 'Instagram DM + TikTok DM',
         p_business_d: 'Até 5 funcionários', p_business_f1: 'Tudo do Basic + Pro', p_business_f2: 'Até 5 funcionários', p_business_f3: 'APP Kaleya do funcionário', p_business_f4: 'Mais idiomas por acordo', p_business_f5: 'API por empresa',
         p_business_plus_d: 'Até 15 funcionários', p_business_plus_f1: 'Tudo do Basic + Pro + Business', p_business_plus_f2: 'Até 15 funcionários', p_business_plus_f3: 'Chamadas telefônicas e SMS', p_business_plus_f4: 'Voz AI ElevenLabs',
-        p_business_pro_d: '15+ funcionários', p_business_pro_f1: 'Tudo do Basic + Pro + Business + Business+', p_business_pro_f2: '15+ funcionários', p_business_pro_f3: 'Integrações custom', p_business_pro_f4: 'Arquitetura avançada por acordo', custom_price: 'Custom',
+        p_business_pro_d: '5+ funcionarios', p_business_pro_f1: 'Tudo do Basic + Pro + Business + Business+', p_business_pro_f2: '15+ funcionários', p_business_pro_f3: 'Integrações custom', p_business_pro_f4: 'Arquitetura avançada por acordo', custom_price: 'Custom',
         team_label: 'Equipe', employee_list_title: 'Funcionários', employee_list_desc: 'Lista de contatos dos funcionários. O dono fica sempre no topo.', calendar_settings: 'Configurações do calendário', work_from: 'Trabalho de', work_to: 'Trabalho até', interval_label: 'Intervalo', time_label: 'Hora', date_label: 'Data', first_day_label: 'Primeiro dia',
         staff_services_title: 'Equipe e serviços', blocked_time_title: 'Tempo bloqueado / pausas', one_day: 'Um dia', multi_day: 'Vários dias', all_staff: 'Todos os funcionários', add_block: 'Adicionar bloqueio', appointment_title: 'Agendamento', name_service_label: 'Nome e serviço', service_label: 'Serviço', staff_label: 'Equipe', no_service: 'Sem serviço', any_staff: 'Qualquer pessoa', channel_label: 'Canal', status_label: 'Status', status_confirmed: 'Agendado', status_moved: 'Remarcado', status_cancelled: 'Cancelado', status_pending: 'Pendente', duration_label: 'Duração do agendamento'
     },
@@ -2538,7 +2508,7 @@ const EXTRA_TRANSLATIONS = {
         p_pro_d: 'Владелец + 1 сотрудник', p_pro_f1: 'Все из Basic', p_pro_f2: '1 сотрудник', p_pro_f3: 'Запись сотрудника', p_pro_f4: 'Kaleya APP сотрудника', p_pro_f5: 'Блокировка по часу/дню/нескольким дням', p_pro_f6: 'Instagram DM + TikTok DM',
         p_business_d: 'До 5 сотрудников', p_business_f1: 'Все из Basic + Pro', p_business_f2: 'До 5 сотрудников', p_business_f3: 'Kaleya APP сотрудника', p_business_f4: 'Больше языков по договоренности', p_business_f5: 'API по компании',
         p_business_plus_d: 'До 15 сотрудников', p_business_plus_f1: 'Все из Basic + Pro + Business', p_business_plus_f2: 'До 15 сотрудников', p_business_plus_f3: 'Телефонные звонки и SMS', p_business_plus_f4: 'AI голос ElevenLabs',
-        p_business_pro_d: '15+ сотрудников', p_business_pro_f1: 'Все из Basic + Pro + Business + Business+', p_business_pro_f2: '15+ сотрудников', p_business_pro_f3: 'Custom интеграции', p_business_pro_f4: 'Продвинутая архитектура по договоренности', custom_price: 'Custom',
+        p_business_pro_d: '5+ сотрудников', p_business_pro_f1: 'Все из Basic + Pro + Business + Business+', p_business_pro_f2: '15+ сотрудников', p_business_pro_f3: 'Custom интеграции', p_business_pro_f4: 'Продвинутая архитектура по договоренности', custom_price: 'Custom',
         team_label: 'Команда', employee_list_title: 'Сотрудники', employee_list_desc: 'Список контактов сотрудников. Владелец всегда сверху.', calendar_settings: 'Настройки календаря', work_from: 'Работа с', work_to: 'Работа до', interval_label: 'Интервал', time_label: 'Время', date_label: 'Дата', first_day_label: 'Первый день',
         staff_services_title: 'Сотрудники и услуги', blocked_time_title: 'Заблокированное время / паузы', one_day: 'Один день', multi_day: 'Несколько дней', all_staff: 'Все сотрудники', add_block: 'Добавить блокировку', appointment_title: 'Запись', name_service_label: 'Имя и услуга', service_label: 'Услуга', staff_label: 'Сотрудник', no_service: 'Без услуги', any_staff: 'Любой', channel_label: 'Канал', status_label: 'Статус', status_confirmed: 'Записано', status_moved: 'Перенесено', status_cancelled: 'Отменено', status_pending: 'В ожидании', duration_label: 'Длительность записи'
     },
@@ -2548,7 +2518,7 @@ const EXTRA_TRANSLATIONS = {
         p_pro_d: 'Proprietaire + 1 employe', p_pro_f1: 'Tout Basic', p_pro_f2: '1 employe', p_pro_f3: 'Planification employe', p_pro_f4: 'APP Kaleya employe', p_pro_f5: 'Blocage par heure/jour/plusieurs jours', p_pro_f6: 'Instagram DM + TikTok DM',
         p_business_d: 'Jusqu a 5 employes', p_business_f1: 'Tout Basic + Pro', p_business_f2: 'Jusqu a 5 employes', p_business_f3: 'APP Kaleya employe', p_business_f4: 'Plus de langues sur accord', p_business_f5: 'API par entreprise',
         p_business_plus_d: 'Jusqu a 15 employes', p_business_plus_f1: 'Tout Basic + Pro + Business', p_business_plus_f2: 'Jusqu a 15 employes', p_business_plus_f3: 'Appels telephoniques et SMS', p_business_plus_f4: 'Voix AI ElevenLabs',
-        p_business_pro_d: '15+ employes', p_business_pro_f1: 'Tout Basic + Pro + Business + Business+', p_business_pro_f2: '15+ employes', p_business_pro_f3: 'Integrations custom', p_business_pro_f4: 'Architecture avancee sur accord', custom_price: 'Custom',
+        p_business_pro_d: '5+ employes', p_business_pro_f1: 'Tout Basic + Pro + Business + Business+', p_business_pro_f2: '15+ employes', p_business_pro_f3: 'Integrations custom', p_business_pro_f4: 'Architecture avancee sur accord', custom_price: 'Custom',
         team_label: 'Equipe', employee_list_title: 'Employes', employee_list_desc: 'Liste de contacts des employes. Le proprietaire reste toujours en haut.', calendar_settings: 'Reglages calendrier', work_from: 'Travail de', work_to: 'Travail jusqu a', interval_label: 'Intervalle', time_label: 'Heure', date_label: 'Date', first_day_label: 'Premier jour',
         staff_services_title: 'Equipe et services', blocked_time_title: 'Temps bloque / pauses', one_day: 'Un jour', multi_day: 'Plusieurs jours', all_staff: 'Tous les employes', add_block: 'Ajouter blocage', appointment_title: 'Rendez-vous', name_service_label: 'Nom et service', service_label: 'Service', staff_label: 'Equipe', no_service: 'Sans service', any_staff: 'N importe qui', channel_label: 'Canal', status_label: 'Statut', status_confirmed: 'Planifie', status_moved: 'Deplace', status_cancelled: 'Annule', status_pending: 'En attente', duration_label: 'Duree du rendez-vous'
     },
@@ -2558,7 +2528,7 @@ const EXTRA_TRANSLATIONS = {
         p_pro_d: 'Titolare + 1 dipendente', p_pro_f1: 'Tutto Basic', p_pro_f2: '1 dipendente', p_pro_f3: 'Prenotazioni dipendente', p_pro_f4: 'APP Kaleya dipendente', p_pro_f5: 'Blocco per ora/giorno/piu giorni', p_pro_f6: 'Instagram DM + TikTok DM',
         p_business_d: 'Fino a 5 dipendenti', p_business_f1: 'Tutto Basic + Pro', p_business_f2: 'Fino a 5 dipendenti', p_business_f3: 'APP Kaleya dipendente', p_business_f4: 'Piu lingue su accordo', p_business_f5: 'API per azienda',
         p_business_plus_d: 'Fino a 15 dipendenti', p_business_plus_f1: 'Tutto Basic + Pro + Business', p_business_plus_f2: 'Fino a 15 dipendenti', p_business_plus_f3: 'Chiamate telefoniche e SMS', p_business_plus_f4: 'Voce AI ElevenLabs',
-        p_business_pro_d: '15+ dipendenti', p_business_pro_f1: 'Tutto Basic + Pro + Business + Business+', p_business_pro_f2: '15+ dipendenti', p_business_pro_f3: 'Integrazioni custom', p_business_pro_f4: 'Architettura avanzata su accordo', custom_price: 'Custom',
+        p_business_pro_d: '5+ dipendenti', p_business_pro_f1: 'Tutto Basic + Pro + Business + Business+', p_business_pro_f2: '15+ dipendenti', p_business_pro_f3: 'Integrazioni custom', p_business_pro_f4: 'Architettura avanzata su accordo', custom_price: 'Custom',
         team_label: 'Team', employee_list_title: 'Dipendenti', employee_list_desc: 'Lista contatti dei dipendenti. Il titolare resta sempre in alto.', calendar_settings: 'Impostazioni calendario', work_from: 'Lavora da', work_to: 'Lavora fino a', interval_label: 'Intervallo', time_label: 'Ora', date_label: 'Data', first_day_label: 'Primo giorno',
         staff_services_title: 'Staff e servizi', blocked_time_title: 'Tempo bloccato / pause', one_day: 'Un giorno', multi_day: 'Piu giorni', all_staff: 'Tutti i dipendenti', add_block: 'Aggiungi blocco', appointment_title: 'Appuntamento', name_service_label: 'Nome e servizio', service_label: 'Servizio', staff_label: 'Staff', no_service: 'Nessun servizio', any_staff: 'Chiunque', channel_label: 'Canale', status_label: 'Stato', status_confirmed: 'Prenotato', status_moved: 'Spostato', status_cancelled: 'Annullato', status_pending: 'In attesa', duration_label: 'Durata appuntamento'
     },
@@ -2570,12 +2540,12 @@ const EXTRA_TRANSLATIONS = {
         feat_title: 'Alles, was eine echte Rezeption macht, nur besser', feat_sub: 'Kaleya versteht Kunden, merkt sich Regeln und arbeitet in der gewählten Sprache.', f_lang_t: '8 Sprachen', f_lang_d: 'Serbisch, English, Spanisch, Portugiesisch, Russisch, Französisch, Italienisch und Deutsch mit manueller Auswahl.',
         f2_t: 'Intelligente Terminplanung', f2_d: 'Prüft den Kalender und schlägt freie Termine vor.', f3_t: 'Natürliche Stimme', f3_d: 'ElevenLabs Stimme für natürlichere Gespräche.', f_alarm_t: 'Team-Alarme', f_alarm_d: 'Ansage des nächsten Kunden und dringende Gesprächsanfrage.', f_msg_t: 'Nachrichtenkanäle', f_msg_d: 'WhatsApp, Viber, Telegram, SMS und Telefonanruf.', f6_t: 'Admin-Kontrolle', f6_d: 'Globale API und separate Einstellungen pro Firma.',
         how_t: 'Kaleya lernt Ihr Geschäft an 1 Tag', how1_t: 'Kanal verbinden', how1_d: 'Telefon, WhatsApp, Telegram, Viber oder SMS.', how2_t: 'Kaleya trainieren', how2_d: 'Arbeitszeiten, Services und Buchungsregeln eintragen.', how3_t: 'Sprache und Stimme wählen', how3_d: 'Kaleya spricht die Sprache, die der Kunde auswählt.',
-        price_t: 'Einfache Preise', price_s: 'Fünf Pakete für verschiedene Automatisierungsstufen.', popular: 'BELIEBT', trial_btn: '14 Tage testen', price_contact: 'Kontakt',
+        price_t: 'Einfache Preise', price_s: 'Wahlen Sie den Plan, der zu Ihrem Unternehmen passt.', popular: 'BELIEBT', trial_btn: '14 Tage testen', price_contact: 'Kontakt',
         p_basic_d: 'Fuer Inhaber/Firma', p_basic_f1: 'AI Kaleya Terminplanung', p_basic_f2: 'Inhaber/Firma Kaleya APP', p_basic_f3: 'Inhaber Terminplanung', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'AI voice', p_basic_f6: 'Alarme und Benachrichtigungen',
         p_pro_d: 'Inhaber + 1 Mitarbeiter', p_pro_f1: 'Alles aus Basic', p_pro_f2: '1 Mitarbeiter', p_pro_f3: 'Mitarbeiter Terminplanung', p_pro_f4: 'Mitarbeiter Kaleya APP', p_pro_f5: 'Blockierung nach Stunde/Tag/mehreren Tagen', p_pro_f6: 'Instagram DM + TikTok DM',
         p_business_d: 'Bis zu 5 Mitarbeiter', p_business_f1: 'Alles aus Basic + Pro', p_business_f2: 'Bis zu 5 Mitarbeiter', p_business_f3: 'Mitarbeiter Kaleya APP', p_business_f4: 'Mehr Sprachen nach Vereinbarung', p_business_f5: 'API pro Firma',
         p_business_plus_d: 'Bis zu 15 Mitarbeiter', p_business_plus_f1: 'Alles aus Basic + Pro + Business', p_business_plus_f2: 'Bis zu 15 Mitarbeiter', p_business_plus_f3: 'Telefonanrufe und SMS', p_business_plus_f4: 'ElevenLabs AI voice',
-        p_business_pro_d: '15+ Mitarbeiter', p_business_pro_f1: 'Alles aus Basic + Pro + Business + Business+', p_business_pro_f2: '15+ Mitarbeiter', p_business_pro_f3: 'Custom Integrationen', p_business_pro_f4: 'Erweiterte Architektur nach Vereinbarung', custom_price: 'Custom',
+        p_business_pro_d: '5+ Mitarbeiter', p_business_pro_f1: 'Alles aus Basic + Pro + Business + Business+', p_business_pro_f2: '15+ Mitarbeiter', p_business_pro_f3: 'Custom Integrationen', p_business_pro_f4: 'Erweiterte Architektur nach Vereinbarung', custom_price: 'Custom',
         footer_privacy: 'Datenschutz', footer_terms: 'Bedingungen', back_home: 'Zurück', login_title: 'Willkommen zurück', login_sub: 'Bei Kaleya anmelden', password: 'Passwort', login_btn: 'Anmelden', login_err: 'Falsche E-Mail oder falsches Passwort',
         client_active: 'online', client_greet: 'Guten Morgen', client_how: 'Wie kann ich heute helfen?', say_wake: 'Sagen Sie "hey Kaleya"', tap_to_talk: 'Zum Sprechen tippen', listening: 'Ich höre zu...', quick: 'Schnellaktionen', qa1: 'Buchen', qa1_s: 'Neuer Termin', qa2: 'Stornieren', qa2_s: 'Termin', qa3: 'Prüfen', qa3_s: 'Slots', today: 'Heute', nav_home: 'Start', nav_cal: 'Kalender', nav_set: 'Einst.',
         cset_t: 'Einstellungen', cset_ui_lang: 'Sprache der Oberfläche', cset_voice_lang: 'Kaleya Sprachstimme', cset_el_desc: 'Natürliche Stimme über ElevenLabs', cset_test: 'Kaleya Stimme testen', cset_note: 'Der Kaleya Admin setzt den API-Schlüssel; der Firmenadministrator wählt Sprache und Verhalten.', cset_integrations: 'Buchungskanäle', cset_alarm: 'Team-Alarme', active: 'Aktiv', pending: 'In Vorbereitung',
