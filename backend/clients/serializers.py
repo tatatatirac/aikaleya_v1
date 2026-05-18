@@ -60,6 +60,7 @@ class BusinessClientSerializer(serializers.ModelSerializer):
     owner_name = serializers.SerializerMethodField()
     owner_email = serializers.EmailField(source="owner.email", read_only=True)
     owner_phone = serializers.CharField(source="owner.profile.phone", read_only=True)
+    logo_url = serializers.SerializerMethodField()
 
     class Meta:
         model = BusinessClient
@@ -70,6 +71,8 @@ class BusinessClientSerializer(serializers.ModelSerializer):
             "owner_name",
             "owner_email",
             "owner_phone",
+            "business_phone",
+            "business_email",
             "package",
             "language",
             "interface_language",
@@ -88,15 +91,25 @@ class BusinessClientSerializer(serializers.ModelSerializer):
             "allow_whatsapp",
             "allow_viber",
             "allow_telegram",
+            "logo_url",
             "api_settings",
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("id", "created_at", "updated_at", "api_settings", "is_demo")
+        read_only_fields = ("id", "created_at", "updated_at", "api_settings", "is_demo", "logo_url")
 
     def get_owner_name(self, obj):
         full_name = f"{obj.owner.first_name} {obj.owner.last_name}".strip()
         return full_name or obj.owner.email or obj.owner.username
+
+    def get_logo_url(self, obj):
+        if not obj.logo_image:
+            return None
+        url = obj.logo_image.url
+        request = self.context.get("request")
+        if request is not None:
+            return request.build_absolute_uri(url)
+        return url
 
     def validate(self, attrs):
         work_start = attrs.get("work_start", getattr(self.instance, "work_start", None))

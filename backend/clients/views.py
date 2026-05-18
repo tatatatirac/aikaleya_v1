@@ -1,6 +1,7 @@
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
 from accounts.permissions import IsAdminRole, user_role
@@ -9,9 +10,14 @@ from clients.serializers import BusinessClientSerializer, BusinessKnowledgeEntry
 from clients.utils import client_for_request
 
 
+ALLOWED_LOGO_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "svg"}
+MAX_LOGO_SIZE_BYTES = 2 * 1024 * 1024  # 2 MB
+
+
 class BusinessClientViewSet(viewsets.ModelViewSet):
     serializer_class = BusinessClientSerializer
     permission_classes = (permissions.IsAuthenticated,)
+    parser_classes = (JSONParser, FormParser, MultiPartParser)
 
     def get_queryset(self):
         role = user_role(self.request.user)
@@ -49,6 +55,64 @@ class BusinessClientViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
         return Response(self.get_serializer(client).data)
+
+    @action(
+        detail=False,
+        methods=["post", "delete"],
+        url_path="logo",
+        parser_classes=[MultiPartParser, FormParser, JSONParser],
+    )
+    def logo(self, request):
+        """Upload (POST) or remove (DELETE) the business client logo."""
+        client = client_for_request(request)
+        if client is None:
+            return Response({"detail": "Klijent nije pronadjen."}, status=status.HTTP_404_NOT_FOUND)
+
+        if user_role(request.user) == "employee":
+            return Response(
+                {"detail": "Zaposleni ne moze da menja logo firme."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        if request.method == "DELETE":
+            if client.logo_image:
+                client.logo_image.delete(save=False)
+            client.logo_image = None
+            client.save(update_fields=["logo_image", "updated_at"])
+            return Response({"logo_url": None}, status=status.HTTP_200_OK)
+
+        upload = request.FILES.get("logo") or request.FILES.get("file")
+        if not upload:
+            return Response(
+                {"detail": "Niste poslali fajl. Polje treba da se zove 'logo'."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if upload.size > MAX_LOGO_SIZE_BYTES:
+            return Response(
+                {"detail": "Fajl je prevelik. Maksimum je 2 MB."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        name = (upload.name or "").lower()
+        ext = name.rsplit(".", 1)[-1] if "." in name else ""
+        if ext not in ALLOWED_LOGO_EXTENSIONS:
+            return Response(
+                {"detail": "Dozvoljeni formati: PNG, JPG, WebP, SVG."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if client.logo_image:
+            client.logo_image.delete(save=False)
+
+        client.logo_image = upload
+        client.save()
+
+        serializer = self.get_serializer(client)
+        return Response(
+            {"logo_url": serializer.data.get("logo_url"), "client": serializer.data},
+            status=status.HTTP_200_OK,
+        )
 
 
 class ClientApiSettingsViewSet(viewsets.ModelViewSet):

@@ -1,7 +1,6 @@
-const KALEYA_SW_VERSION = 'kaleya-pwa-2026-05-08-02';
+const KALEYA_SW_VERSION = 'kaleya-pwa-2026-05-18-03';
 const APP_SHELL = [
-  '/logo.png',
-  '/manifest.webmanifest'
+  '/logo.png'
 ];
 
 self.addEventListener('install', event => {
@@ -32,6 +31,17 @@ self.addEventListener('fetch', event => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin || url.pathname.startsWith('/api/')) return;
+
+  // Dynamic per-tenant manifest — always go to network so the logo stays fresh.
+  if (url.pathname === '/manifest.webmanifest') {
+    event.respondWith(fetch(request, { cache: 'no-store' }).catch(() => new Response('{}', { headers: { 'Content-Type': 'application/manifest+json' } })));
+    return;
+  }
+  // Tenant-uploaded logos under /media/ — network-first, never long-cache.
+  if (url.pathname.startsWith('/media/')) {
+    event.respondWith(fetch(request).catch(() => caches.match(request)));
+    return;
+  }
 
   const isHtmlRequest =
     request.mode === 'navigate' ||

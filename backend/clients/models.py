@@ -1,6 +1,15 @@
+import os
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+
+
+def client_logo_upload_path(instance, filename):
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "png"
+    if ext not in {"png", "jpg", "jpeg", "webp", "svg"}:
+        ext = "png"
+    return f"client_logos/client_{instance.id or 'new'}.{ext}"
 
 
 class BusinessClient(models.Model):
@@ -67,6 +76,9 @@ class BusinessClient(models.Model):
     allow_whatsapp = models.BooleanField(default=True)
     allow_viber = models.BooleanField(default=True)
     allow_telegram = models.BooleanField(default=True)
+    business_phone = models.CharField(max_length=40, blank=True, default="")
+    business_email = models.EmailField(blank=True, default="")
+    logo_image = models.FileField(upload_to=client_logo_upload_path, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -9,6 +9,7 @@ from django.views.generic import TemplateView
 from django.views.static import serve
 
 from kaleya_config.dashboard_views import dashboard, dashboard_logout
+from kaleya_config.manifest_view import manifest_webmanifest
 
 
 admin.site.site_header = "Kaleya"
@@ -51,7 +52,7 @@ urlpatterns = [
     path("register-business.html", FrontendTemplateView.as_view(template_name="register-business.html"), name="frontend-register-business"),
     path("register-business-plus.html", FrontendTemplateView.as_view(template_name="register-business-plus.html"), name="frontend-register-business-plus"),
     path("register-business-pro-plus.html", FrontendTemplateView.as_view(template_name="register-business-pro-plus.html"), name="frontend-register-business-pro-plus"),
-    path("manifest.webmanifest", no_cache_static_serve, {"path": "manifest.webmanifest", "document_root": settings.PROJECT_ROOT / "frontend"}),
+    path("manifest.webmanifest", manifest_webmanifest, name="manifest-webmanifest"),
     path("sw.js", no_cache_static_serve, {"path": "sw.js", "document_root": settings.PROJECT_ROOT / "frontend"}),
     path("robots.txt", no_cache_static_serve, {"path": "robots.txt", "document_root": settings.PROJECT_ROOT / "frontend"}),
     path("sitemap.xml", no_cache_static_serve, {"path": "sitemap.xml", "document_root": settings.PROJECT_ROOT / "frontend"}),

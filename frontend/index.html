@@ -999,7 +999,7 @@
                     <div class="kv-container">
                         <div class="kv-section-head">
                             <p class="kv-eyebrow">Your dashboard</p>
-                            <h2 class="kv-section-title">Run your salon from your phone</h2>
+                            <h2 class="kv-section-title">Run your salon from any device</h2>
                             <p class="kv-section-sub">See every booking, every cancellation, every dollar in one place.</p>
                         </div>
                         <div class="kv-dash-mock">
@@ -1851,8 +1851,42 @@
                             <h3 class="font-display font-bold text-lg" data-i18n="cset_t">Podešavanja glasa</h3>
                             <button onclick="closeClientSettings()" class="w-8 h-8 grid place-items-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">✕</button>
                         </div>
-                        <button data-pwa-install onclick="installKaleyaApp()" class="hidden mt-4 w-full h-11 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold">Install Kaleya</button>
+                        <button data-pwa-install onclick="installKaleyaApp()" class="hidden mt-4 w-full h-11 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold">Install Kaleya as app</button>
                         <div class="mt-6 space-y-5">
+
+                            <!-- LOGO UPLOAD -->
+                            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                                <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="cset_logo">Company logo</p>
+                                <div class="flex items-center gap-4">
+                                    <div class="relative w-20 h-20 rounded-2xl bg-slate-100 dark:bg-slate-800 grid place-items-center overflow-hidden border border-slate-200 dark:border-slate-700 flex-shrink-0">
+                                        <img id="clientLogoPreview" src="" alt="Logo" class="w-full h-full object-cover hidden">
+                                        <svg id="clientLogoPlaceholder" class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <input type="file" id="clientLogoFile" accept="image/png,image/jpeg,image/webp,image/svg+xml" class="hidden" onchange="uploadClientLogo(event)">
+                                        <button onclick="document.getElementById('clientLogoFile').click()" class="w-full h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold" data-i18n="cset_logo_upload">Upload logo</button>
+                                        <button id="clientLogoRemoveBtn" onclick="removeClientLogo()" class="mt-2 w-full h-9 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 hidden" data-i18n="cset_logo_remove">Remove logo</button>
+                                        <p class="text-[11px] text-slate-500 mt-2" data-i18n="cset_logo_hint">PNG, JPG, WebP or SVG · max 2MB · shows as app icon when installed</p>
+                                    </div>
+                                </div>
+                                <p id="clientLogoStatus" class="text-[11px] mt-2 hidden"></p>
+                            </div>
+
+                            <!-- BUSINESS CONTACTS -->
+                            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                                <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="cset_business_contacts">Business contacts</p>
+                                <div class="space-y-3">
+                                    <label class="block">
+                                        <span class="text-[11px] text-slate-500" data-i18n="cset_business_phone">Business phone</span>
+                                        <input id="clientBusinessPhone" type="tel" placeholder="+1 (555) 123-4567" onchange="saveClientBusinessContacts()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm outline-none">
+                                    </label>
+                                    <label class="block">
+                                        <span class="text-[11px] text-slate-500" data-i18n="cset_business_email">Business email</span>
+                                        <input id="clientBusinessEmail" type="email" placeholder="hello@yoursalon.com" onchange="saveClientBusinessContacts()" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-sm outline-none">
+                                    </label>
+                                </div>
+                            </div>
+
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                                 <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="cset_ui_lang">Jezik interfejsa</p>
                                 <div class="grid grid-cols-3 gap-2">
@@ -2676,6 +2710,9 @@ const T = {
         cset_t: 'Podešavanja', cset_ui_lang: 'Jezik interfejsa', cset_voice_lang: 'Jezik glasa Kaleye',
         cset_el_desc: 'Prirodan glas preko ElevenLabs sistema', cset_test: 'Testiraj glas Kaleye', cset_note: 'API ključ podešava Kaleya admin; administrator firme bira jezik i ponašanje.',
         cset_integrations: 'Zakazivanje putem kanala', cset_alarm: 'Alarmi za osoblje', active: 'Aktivno', pending: 'U pripremi',
+        cset_logo: 'Logo firme', cset_logo_upload: 'Otpremi logo', cset_logo_remove: 'Ukloni logo',
+        cset_logo_hint: 'PNG, JPG, WebP ili SVG · max 2MB · prikazuje se kao ikona aplikacije',
+        cset_business_contacts: 'Poslovni kontakti', cset_business_phone: 'Poslovni telefon', cset_business_email: 'Poslovni email',
         queue_alarm: 'Alarm za sledećeg klijenta', emergency_alarm: 'Hitni alarm', voice_alarm: 'Uključi glasovnu najavu', test_queue: 'Test sledeći', test_emergency: 'Test hitno',
         ad_dash: 'Kontrolna tabla', ad_clients: 'Administratori / firme', ad_clients_sub: 'API i model mogu biti globalni ili posebni po firmi.',
         ad_alarms: 'Alarmi', ad_alarms_sub: 'Rezervisano za buduću human support eskalaciju.',
@@ -2720,6 +2757,9 @@ const T = {
         cset_t: 'Settings', cset_ui_lang: 'Interface language', cset_voice_lang: 'Kaleya voice language',
         cset_el_desc: 'Natural voice through ElevenLabs', cset_test: 'Test Kaleya voice', cset_note: 'The Kaleya admin sets the API key; the company administrator chooses language and behavior.',
         cset_integrations: 'Scheduling channels', cset_alarm: 'Staff alarms', active: 'Active', pending: 'Pending',
+        cset_logo: 'Company logo', cset_logo_upload: 'Upload logo', cset_logo_remove: 'Remove logo',
+        cset_logo_hint: 'PNG, JPG, WebP or SVG · max 2MB · shows as app icon when installed',
+        cset_business_contacts: 'Business contacts', cset_business_phone: 'Business phone', cset_business_email: 'Business email',
         queue_alarm: 'Next-client alarm', emergency_alarm: 'Urgent alarm', voice_alarm: 'Enable voice announcement', test_queue: 'Test next', test_emergency: 'Test urgent',
         ad_dash: 'Dashboard', ad_clients: 'Administrators / companies', ad_clients_sub: 'API and model can be global or company-specific.',
         ad_alarms: 'Alarms', ad_alarms_sub: 'Reserved for future human support escalation.',
@@ -2764,6 +2804,9 @@ const T = {
         cset_t: 'Ajustes', cset_ui_lang: 'Idioma de interfaz', cset_voice_lang: 'Idioma de voz de Kaleya',
         cset_el_desc: 'Voz natural mediante ElevenLabs', cset_test: 'Probar voz de Kaleya', cset_note: 'El admin de Kaleya configura la API; el administrador de la empresa elige idioma y comportamiento.',
         cset_integrations: 'Canales de agenda', cset_alarm: 'Alarmas para el equipo', active: 'Activo', pending: 'Pendiente',
+        cset_logo: 'Logo de la empresa', cset_logo_upload: 'Subir logo', cset_logo_remove: 'Quitar logo',
+        cset_logo_hint: 'PNG, JPG, WebP o SVG · máx. 2MB · será el ícono de la app',
+        cset_business_contacts: 'Contactos del negocio', cset_business_phone: 'Teléfono del negocio', cset_business_email: 'Email del negocio',
         queue_alarm: 'Alarma de siguiente cliente', emergency_alarm: 'Alarma urgente', voice_alarm: 'Activar anuncio de voz', test_queue: 'Probar siguiente', test_emergency: 'Probar urgente',
         ad_dash: 'Panel', ad_clients: 'Administradores / empresas', ad_clients_sub: 'La API y el modelo pueden ser globales o por empresa.',
         ad_alarms: 'Alarmas', ad_alarms_sub: 'Reservado para futura escalación a soporte humano.',
@@ -4811,6 +4854,151 @@ function applyClientSettingsFromBackend(data = {}) {
     syncClientCalendarSettingsUI();
     updateKaleyaPowerUI();
     renderEmployeeDirectory();
+
+    // === Logo + business contacts UI sync ===
+    applyTenantLogoToUI(data.logo_url || '');
+    const phoneInput = document.getElementById('clientBusinessPhone');
+    if (phoneInput && data.business_phone !== undefined) phoneInput.value = data.business_phone || '';
+    const emailInput = document.getElementById('clientBusinessEmail');
+    if (emailInput && data.business_email !== undefined) emailInput.value = data.business_email || '';
+}
+
+// === Logo handling ===
+function applyTenantLogoToUI(logoUrl) {
+    const preview = document.getElementById('clientLogoPreview');
+    const placeholder = document.getElementById('clientLogoPlaceholder');
+    const removeBtn = document.getElementById('clientLogoRemoveBtn');
+    if (logoUrl) {
+        if (preview) {
+            // Cache-bust: append timestamp so the new logo shows immediately
+            const sep = logoUrl.includes('?') ? '&' : '?';
+            preview.src = logoUrl + sep + 't=' + Date.now();
+            preview.classList.remove('hidden');
+        }
+        if (placeholder) placeholder.classList.add('hidden');
+        if (removeBtn) removeBtn.classList.remove('hidden');
+    } else {
+        if (preview) {
+            preview.src = '';
+            preview.classList.add('hidden');
+        }
+        if (placeholder) placeholder.classList.remove('hidden');
+        if (removeBtn) removeBtn.classList.add('hidden');
+    }
+    // Sprinkle the logo across every brand placeholder that exists in the app
+    document.querySelectorAll('[data-tenant-logo]').forEach(img => {
+        if (logoUrl) img.src = logoUrl;
+    });
+    // Reload manifest so the PWA install icon reflects the new logo
+    reloadDynamicManifest();
+}
+
+function reloadDynamicManifest() {
+    const link = document.querySelector('link[rel="manifest"]');
+    if (!link) return;
+    const base = link.getAttribute('href').split('?')[0];
+    link.setAttribute('href', base + '?v=' + Date.now());
+}
+
+async function uploadClientLogo(event) {
+    const fileInput = event.target;
+    const file = fileInput && fileInput.files && fileInput.files[0];
+    if (!file) return;
+    const status = document.getElementById('clientLogoStatus');
+    const showStatus = (text, isError = false) => {
+        if (!status) return;
+        status.textContent = text;
+        status.className = 'text-[11px] mt-2 ' + (isError ? 'text-red-500' : 'text-emerald-500');
+        status.classList.remove('hidden');
+        setTimeout(() => status.classList.add('hidden'), 4000);
+    };
+
+    if (file.size > 2 * 1024 * 1024) {
+        showStatus('File too large. Max 2MB.', true);
+        fileInput.value = '';
+        return;
+    }
+    const allowed = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
+    if (!allowed.includes(file.type)) {
+        showStatus('Use PNG, JPG, WebP or SVG.', true);
+        fileInput.value = '';
+        return;
+    }
+
+    showStatus('Uploading...', false);
+    try {
+        const form = new FormData();
+        form.append('logo', file);
+        const token = getAuthToken();
+        const headers = {};
+        if (token) headers['Authorization'] = 'Token ' + token;
+        const csrf = getCookie('csrftoken');
+        if (csrf) headers['X-CSRFToken'] = csrf;
+        const res = await fetch('/api/clients/business-clients/logo/', {
+            method: 'POST',
+            headers,
+            body: form,
+            credentials: 'include'
+        });
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(text || 'Upload failed');
+        }
+        const data = await res.json();
+        if (data.client) {
+            applyClientSettingsFromBackend(data.client);
+        } else {
+            applyTenantLogoToUI(data.logo_url || '');
+        }
+        showStatus('Logo updated', false);
+    } catch (err) {
+        console.warn('Logo upload failed', err);
+        showStatus('Upload failed. Try again.', true);
+    } finally {
+        fileInput.value = '';
+    }
+}
+
+async function removeClientLogo() {
+    const status = document.getElementById('clientLogoStatus');
+    const showStatus = (text, isError = false) => {
+        if (!status) return;
+        status.textContent = text;
+        status.className = 'text-[11px] mt-2 ' + (isError ? 'text-red-500' : 'text-emerald-500');
+        status.classList.remove('hidden');
+        setTimeout(() => status.classList.add('hidden'), 4000);
+    };
+    try {
+        const token = getAuthToken();
+        const headers = {};
+        if (token) headers['Authorization'] = 'Token ' + token;
+        const csrf = getCookie('csrftoken');
+        if (csrf) headers['X-CSRFToken'] = csrf;
+        const res = await fetch('/api/clients/business-clients/logo/', {
+            method: 'DELETE',
+            headers,
+            credentials: 'include'
+        });
+        if (!res.ok) throw new Error(await res.text());
+        applyTenantLogoToUI('');
+        showStatus('Logo removed', false);
+    } catch (err) {
+        console.warn('Logo remove failed', err);
+        showStatus('Remove failed.', true);
+    }
+}
+
+async function saveClientBusinessContacts() {
+    const phone = (document.getElementById('clientBusinessPhone') || {}).value || '';
+    const email = (document.getElementById('clientBusinessEmail') || {}).value || '';
+    try {
+        await saveClientSettingsToBackend({
+            business_phone: phone,
+            business_email: email
+        });
+    } catch (err) {
+        console.warn('Saving business contacts failed', err);
+    }
 }
 
 async function loadClientSettingsFromBackend() {
