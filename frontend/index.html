@@ -402,8 +402,11 @@
             display: flex; align-items: center; gap: 16px; margin-top: 24px;
             color: #71717A; font-size: 13px;
         }
-        .kv-trust-bar .kv-trust-stars { color: #FBB724; font-size: 14px; letter-spacing: 1px; }
+        .kv-trust-bar.kv-trust-bar-stack { flex-direction: column; align-items: flex-start; gap: 6px; }
+        .kv-trust-bar .kv-trust-stars { color: #FBB724; font-size: 14px; letter-spacing: 1px; margin-right: 8px; }
         .kv-trust-bar strong { color: #E4E4E7; font-weight: 600; }
+        .kv-trust-channels { color: #A1A1AA; font-size: 13px; }
+        html:not(.dark) #landing-view .kv-trust-channels { color: #475569; }
 
         /* Phone mockup */
         .kv-hero-visual {
@@ -827,17 +830,16 @@
                                 <span id="currentLangLabel">EN</span>
                                 <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M2 3.5l3 3 3-3"/></svg>
                             </button>
-                            <div id="langDropdown" class="absolute right-0 top-10 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl p-2 min-w-[150px]" style="display:none">
-                                <button onclick="setLang('en')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">English</button>
-                                <button onclick="setLang('sr')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Srpski</button>
+                            <div id="langDropdown" class="absolute right-0 top-10 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl p-2 min-w-[170px] max-h-[60vh] overflow-auto" style="display:none">
+                                <button onclick="setLang('en')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">English (US)</button>
+                                <button onclick="setLang('en-gb')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">English (UK)</button>
                                 <button onclick="setLang('es')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Español</button>
-                                <!-- Disabled for now (kept for future expansion):
                                 <button onclick="setLang('pt')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Português</button>
-                                <button onclick="setLang('ru')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Русский</button>
                                 <button onclick="setLang('fr')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Français</button>
                                 <button onclick="setLang('it')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Italiano</button>
                                 <button onclick="setLang('de')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Deutsch</button>
-                                -->
+                                <button onclick="setLang('ru')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Русский</button>
+                                <button onclick="setLang('sr')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">SR / HR / BA</button>
                             </div>
                         </div>
                         <button id="theme-toggle" aria-label="Toggle theme">
@@ -877,9 +879,12 @@
                                 <a href="#kv-pricing" class="kv-btn kv-btn-primary kv-btn-large">Start Free 14-Day Trial</a>
                                 <button class="kv-btn kv-btn-secondary kv-btn-large" onclick="goDemo('client')">Try Live Demo</button>
                             </div>
-                            <div class="kv-trust-bar">
-                                <span class="kv-trust-stars">★★★★★</span>
-                                <span><strong>Built for US salons</strong> · Google Calendar + Square ready · Cancel anytime</span>
+                            <div class="kv-trust-bar kv-trust-bar-stack">
+                                <div>
+                                    <span class="kv-trust-stars">★★★★★</span>
+                                    <span data-i18n="trust_line1"><strong>Built for salons</strong> · Cancel anytime</span>
+                                </div>
+                                <div class="kv-trust-channels" data-i18n="trust_line2">Books via call · SMS · WhatsApp · Viber · Telegram · Instagram DM</div>
                             </div>
                         </div>
 
@@ -983,11 +988,11 @@
                         <div class="kv-problem-grid">
                             <div class="kv-problem-card">
                                 <div class="kv-problem-num">60%</div>
-                                <p class="kv-problem-desc"><strong>of calls go to voicemail after 5PM</strong> — That's $50-$150 per missed call.</p>
+                                <p class="kv-problem-desc"><strong>of calls go to voicemail after 5PM</strong> — every missed call walks past your chair.</p>
                             </div>
                             <div class="kv-problem-card">
-                                <div class="kv-problem-num">$75</div>
-                                <p class="kv-problem-desc"><strong>average no-show cost</strong> — 8 no-shows = $600 burned monthly.</p>
+                                <div class="kv-problem-num" data-lv="no_show">$75</div>
+                                <p class="kv-problem-desc"><strong>average no-show cost</strong> — 8 no-shows = <span data-lv="spa">$600</span> burned monthly.</p>
                             </div>
                             <div class="kv-problem-card">
                                 <div class="kv-problem-num">6 hrs</div>
@@ -1067,11 +1072,11 @@
                                         </div>
                                         <div class="kv-dash-stat">
                                             <div class="kv-dash-stat-label">Revenue today</div>
-                                            <div class="kv-dash-stat-val">$1,290</div>
+                                            <div class="kv-dash-stat-val" data-lv="dash_rev">$1,290</div>
                                         </div>
                                         <div class="kv-dash-stat">
                                             <div class="kv-dash-stat-label">No-shows saved</div>
-                                            <div class="kv-dash-stat-val">3 <span class="kv-up">$225</span></div>
+                                            <div class="kv-dash-stat-val">3 <span class="kv-up" data-lv="dash_saved">$225</span></div>
                                         </div>
                                     </div>
                                     <div class="kv-dash-list">
@@ -1159,7 +1164,7 @@
                                 </div>
                                 <div class="kv-noshow-item">
                                     <div class="kv-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
-                                    <p><strong>If they don't show, charge fee in 1 click</strong> ($25/$50) — you set the policy, we enforce it.</p>
+                                    <p><strong>If they don't show, charge fee in 1 click</strong> (<span data-lv="fee">$25 / $50</span>) — you set the policy, we enforce it.</p>
                                 </div>
                                 <div class="kv-noshow-item">
                                     <div class="kv-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
@@ -1179,7 +1184,7 @@
                             </div>
                             <div class="kv-sms-demo" style="background:#D1FAE5;border-color:#A7F3D0">
                                 <div class="kv-sms-label" style="color:#065F46">Kaleya · 2h before</div>
-                                See you at 3 PM! Card on file for no-show ($25). Street parking in back.
+                                See you at 3 PM! Card on file for no-show. Street parking in back.
                             </div>
                         </div>
                     </div>
@@ -1232,9 +1237,9 @@
                             </div>
                             <div class="kv-vs-row">
                                 <div>Monthly price (starting)</div>
-                                <div class="kv-vs-yes">$29</div>
-                                <div>$30 + per-staff</div>
-                                <div>$30 + per-staff</div>
+                                <div class="kv-vs-yes" data-lv="starter">$29</div>
+                                <div data-lv-text="vs_competitor_price">$30 + per-staff</div>
+                                <div data-lv-text="vs_competitor_price">$30 + per-staff</div>
                             </div>
                         </div>
                         <p class="kv-vs-foot">Use Kaleya alongside Vagaro/Booksy — it just plugs in. Or replace them entirely.</p>
@@ -1253,7 +1258,7 @@
                             <div class="kv-price-card">
                                 <div class="kv-price-name">Starter</div>
                                 <p class="kv-price-desc">Perfect for solo artists</p>
-                                <div class="kv-price-amount">$29<span>/mo</span></div>
+                                <div class="kv-price-amount"><span data-lv="starter">$29</span><span>/mo</span></div>
                                 <ul class="kv-price-feats">
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>300 talk minutes included</li>
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>After-hours only (5PM – 9AM)</li>
@@ -1266,7 +1271,7 @@
                                 <div class="kv-pop-badge">Most Popular</div>
                                 <div class="kv-price-name">Pro</div>
                                 <p class="kv-price-desc">For busy shops & teams</p>
-                                <div class="kv-price-amount">$79<span>/mo</span></div>
+                                <div class="kv-price-amount"><span data-lv="pro">$79</span><span>/mo</span></div>
                                 <ul class="kv-price-feats">
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>1,200 minutes included</li>
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>24/7 answering</li>
@@ -1279,7 +1284,7 @@
                         </div>
                         <p class="kv-price-note">Payments processed by Lemon Squeezy (Merchant of Record handles US sales tax). Stripe support after our Delaware LLC is finalized — current subscriptions migrate automatically.</p>
                         <div class="kv-demo-box">
-                            <p><strong>Free 2-min demo calls.</strong> We limit to 2 minutes so everyone can try. Costs us ~$0.02 per call. Saves you $1,200/month. Fair trade.</p>
+                            <p><strong>Free 2-min demo calls.</strong> We limit to 2 minutes so everyone can try. Saves you <span data-lv="monthly">$1,200</span>/month. Fair trade.</p>
                         </div>
                     </div>
                 </section>
@@ -1348,7 +1353,7 @@
 
                 <!-- FINAL CTA -->
                 <section class="kv-final-cta">
-                    <h2>Stop losing $1,200/month to missed calls and no-shows</h2>
+                    <h2>Stop losing <span data-lv="monthly">$1,200</span>/month to missed calls and no-shows</h2>
                     <p>Set up takes 3 minutes. Cancel anytime in 1 click.</p>
                     <div class="kv-hero-cta" style="justify-content:center">
                         <a href="#kv-pricing" class="kv-btn kv-btn-primary kv-btn-large">Start Free 14-Day Trial</a>
@@ -1385,19 +1390,21 @@
                     document.querySelectorAll('.kv-phone-logo').forEach(function(img){ img.src = ref.src; });
                 }
 
-                // Hero rotating titles + slideshow
+                // Hero rotating titles + slideshow (language-aware)
                 var slides = document.querySelectorAll('#landing-view .kv-slide');
-                var slidesData = [
-                    { title: "AI Receptionist for Busy Salons — Stop No-Shows, Fill Your Books", text: "Kaleya answers at 9PM, books the fade, and texts the confirmation. You wake up to a full chair." },
-                    { title: "Hair salons miss 34% of calls during color jobs", text: "Kaleya books while you're foiling. No voicemail, no lost $85 appointments." },
-                    { title: "Nail studios waste 8 hours/week on phone tag", text: "Kaleya texts back in 2 seconds with real openings. Fill gaps automatically." },
-                    { title: "Massage & spas lose $600/mo to no-shows", text: "Kaleya saves cards at booking. Charge no-show fees in one click." },
-                    { title: "Makeup artists lose $250 bridal trials while with clients", text: "Kaleya captures every inquiry. Even on a wedding day." }
-                ];
                 var titleEl = document.getElementById('kv-hero-title');
                 var textEl = document.getElementById('kv-hero-subtitle');
                 var wrapEl = document.getElementById('kv-hero-text-wrap');
                 var current = 0;
+                window.kvCurrentSlide = function() { return current; };
+                window.kvApplyHeroSlide = function(idx) {
+                    if (!titleEl || !textEl) return;
+                    var data = (window.HERO_SLIDES_BY_LANG && window.HERO_SLIDES_BY_LANG[currentLang]) || (window.HERO_SLIDES_BY_LANG && window.HERO_SLIDES_BY_LANG.en) || [];
+                    if (!data.length) return;
+                    var i = idx % data.length;
+                    titleEl.textContent = data[i].title;
+                    textEl.textContent = data[i].text;
+                };
                 if(slides.length > 1){
                     setInterval(function(){
                         slides[current].classList.remove('kv-active');
@@ -1406,13 +1413,42 @@
                         if(titleEl && textEl && wrapEl){
                             wrapEl.style.opacity = '0';
                             setTimeout(function(){
-                                titleEl.textContent = slidesData[current].title;
-                                textEl.textContent = slidesData[current].text;
+                                window.kvApplyHeroSlide(current);
                                 wrapEl.style.opacity = '1';
                             }, 300);
                         }
                     }, 6000);
                 }
+
+                // Localized currency/value refresher — fills data-lv="key" elements
+                window.kvRefreshLocalizedStats = function() {
+                    var vals = (typeof LOCALIZED_VALUES !== 'undefined' && LOCALIZED_VALUES[currentLang]) || (typeof LOCALIZED_VALUES !== 'undefined' && LOCALIZED_VALUES.en) || {};
+                    document.querySelectorAll('#landing-view [data-lv]').forEach(function(el){
+                        var key = el.getAttribute('data-lv');
+                        if (vals[key]) el.textContent = vals[key];
+                    });
+                    // Competitor pricing string by locale (Vagaro/Booksy comparison)
+                    var compMap = {
+                        'en':    '$30 + per-staff',
+                        'en-gb': '£24 + per-staff',
+                        'es':    '28 € + por miembro',
+                        'pt':    '28 € + por membro',
+                        'fr':    '28 € + par employé',
+                        'it':    '28 € + per dipendente',
+                        'de':    '28 € + pro Mitarbeiter',
+                        'ru':    '2 800 ₽ + за сотрудника',
+                        'sr':    '28 € + po radniku'
+                    };
+                    var comp = compMap[currentLang] || compMap.en;
+                    document.querySelectorAll('#landing-view [data-lv-text="vs_competitor_price"]').forEach(function(el){
+                        el.textContent = comp;
+                    });
+                };
+                // Run once on load
+                if (typeof window.kvApplyHeroSlide === 'function') {
+                    try { window.kvApplyHeroSlide(0); } catch (e) {}
+                }
+                try { window.kvRefreshLocalizedStats(); } catch (e) {}
 
                 // FAQ accordion
                 document.querySelectorAll('#landing-view .kv-faq-q').forEach(function(btn){
@@ -1893,16 +1929,16 @@
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                                 <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="cset_ui_lang">Jezik interfejsa</p>
                                 <div class="grid grid-cols-3 gap-2">
-                                    <button onclick="setLang('en')" id="clientLangEN" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">EN</button>
-                                    <button onclick="setLang('sr')" id="clientLangSR" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">SR</button>
+                                    <button onclick="setLang('en')" id="clientLangEN" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">EN-US</button>
+                                    <button onclick="setLang('en-gb')" id="clientLangENGB" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">EN-UK</button>
                                     <button onclick="setLang('es')" id="clientLangES" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">ES</button>
-                                    <!-- Disabled for now (kept for future expansion):
                                     <button onclick="setLang('pt')" id="clientLangPT" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">PT</button>
-                                    <button onclick="setLang('ru')" id="clientLangRU" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">RU</button>
                                     <button onclick="setLang('fr')" id="clientLangFR" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">FR</button>
                                     <button onclick="setLang('it')" id="clientLangIT" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">IT</button>
                                     <button onclick="setLang('de')" id="clientLangDE" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">DE</button>
-                                    --></div>
+                                    <button onclick="setLang('ru')" id="clientLangRU" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">RU</button>
+                                    <button onclick="setLang('sr')" id="clientLangSR" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">SR/HR/BA</button>
+                                </div>
                             </div>
 
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
@@ -2678,12 +2714,96 @@ const CLIENT_STATUS_TEXT = {
 };
 
 // ===== TRANSLATIONS =====
-const LANG_LABELS = { sr: 'SR', en: 'EN', es: 'ES', pt: 'PT', ru: 'RU', fr: 'FR', it: 'IT', de: 'DE' };
+const LANG_LABELS = { sr: 'SR', en: 'EN-US', 'en-gb': 'EN-UK', es: 'ES', pt: 'PT', ru: 'RU', fr: 'FR', it: 'IT', de: 'DE' };
+
+// Currency + localized amounts for landing page stats.
+// 'en' = USD (US); 'en-gb' = GBP (UK); ru = RUB; everything else = EUR.
+const LOCALIZED_VALUES = {
+    'en':    { cur: '$',  starter: '$29',    pro: '$79',    no_show: '$75',   monthly: '$1,200',   bridal: '$250',   appt: '$85',   spa: '$600',   dash_rev: '$1,290',   dash_saved: '$225',   fee: '$25 / $50' },
+    'en-gb': { cur: '£',  starter: '£25',    pro: '£65',    no_show: '£60',   monthly: '£950',     bridal: '£200',   appt: '£68',   spa: '£480',   dash_rev: '£1,020',   dash_saved: '£180',   fee: '£20 / £40' },
+    'es':    { cur: '€',  starter: '27 €',   pro: '75 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    'pt':    { cur: '€',  starter: '27 €',   pro: '75 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    'fr':    { cur: '€',  starter: '27 €',   pro: '75 €',   no_show: '70 €',  monthly: '1 100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1 220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    'it':    { cur: '€',  starter: '27 €',   pro: '75 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    'de':    { cur: '€',  starter: '27 €',   pro: '75 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    'ru':    { cur: '₽',  starter: '2 700 ₽',pro: '7 200 ₽',no_show: '6 500 ₽',monthly: '100 000 ₽',bridal: '23 000 ₽',appt:'7 000 ₽', spa:'50 000 ₽',dash_rev: '115 000 ₽',dash_saved: '19 000 ₽',fee:'2 000 ₽ / 4 000 ₽' },
+    'sr':    { cur: '€',  starter: '27 €',   pro: '75 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+};
+function lv() { return LOCALIZED_VALUES[currentLang] || LOCALIZED_VALUES.en; }
+
+// Rotating hero titles per language (currency comes from LOCALIZED_VALUES).
+window.HERO_SLIDES_BY_LANG = {
+    'en': [
+        { title: "AI Receptionist for Busy Salons — Stop No-Shows, Fill Your Books", text: "Kaleya answers at 9PM, books the fade, and texts the confirmation. You wake up to a full chair." },
+        { title: "Hair salons miss 34% of calls during color jobs", text: "Kaleya books while you're foiling. No voicemail, no lost $85 appointments." },
+        { title: "Nail studios waste 8 hours/week on phone tag", text: "Kaleya texts back in 2 seconds with real openings. Fill gaps automatically." },
+        { title: "Massage & spas lose $600/mo to no-shows", text: "Kaleya saves cards at booking. Charge no-show fees in one click." },
+        { title: "Makeup artists lose $250 bridal trials while with clients", text: "Kaleya captures every inquiry. Even on a wedding day." }
+    ],
+    'en-gb': [
+        { title: "AI Receptionist for Busy Salons — Stop No-Shows, Fill Your Books", text: "Kaleya answers at 9PM, books the cut, and texts the confirmation. You wake up to a full chair." },
+        { title: "Hair salons miss 34% of calls during colour jobs", text: "Kaleya books while you're foiling. No voicemail, no lost £68 appointments." },
+        { title: "Nail studios waste 8 hours/week on phone tag", text: "Kaleya texts back in 2 seconds with real openings. Fill gaps automatically." },
+        { title: "Massage & spas lose £480/mo to no-shows", text: "Kaleya saves cards at booking. Charge no-show fees in one click." },
+        { title: "Makeup artists lose £200 bridal trials while with clients", text: "Kaleya captures every enquiry. Even on a wedding day." }
+    ],
+    'es': [
+        { title: "Recepcionista IA para salones — adiós a las ausencias, agenda llena", text: "Kaleya contesta a las 9 PM, reserva el corte y envía la confirmación. Despiertas con la silla llena." },
+        { title: "Las peluquerías pierden el 34% de las llamadas durante las coloraciones", text: "Kaleya reserva mientras estás con foils. Sin buzón de voz, sin perder citas de 80 €." },
+        { title: "Los estudios de uñas pierden 8 horas/semana en el teléfono", text: "Kaleya responde por SMS en 2 segundos con huecos reales. Rellena los huecos automáticamente." },
+        { title: "Masaje y spas pierden 560 €/mes por ausencias", text: "Kaleya guarda la tarjeta al reservar. Cobra el cargo con un clic." },
+        { title: "Maquilladoras pierden pruebas de novia de 230 € mientras trabajan", text: "Kaleya captura cada consulta. Incluso el día de la boda." }
+    ],
+    'pt': [
+        { title: "Recepcionista IA para salões — chega de ausências, agenda cheia", text: "A Kaleya atende às 21h, agenda o corte e envia a confirmação. Acordas com a cadeira cheia." },
+        { title: "Cabeleireiros perdem 34% das chamadas durante colorações", text: "A Kaleya agenda enquanto estás com a tinta. Sem voicemail, sem perder marcações de 80 €." },
+        { title: "Estúdios de unhas perdem 8 horas/semana ao telefone", text: "A Kaleya responde por SMS em 2 segundos com horários reais. Preenche os intervalos automaticamente." },
+        { title: "Massagens e spas perdem 560 €/mês com ausências", text: "A Kaleya guarda o cartão na marcação. Cobra a taxa com um clique." },
+        { title: "Maquilhadoras perdem provas de noiva de 230 € enquanto trabalham", text: "A Kaleya capta todas as perguntas. Mesmo num dia de casamento." }
+    ],
+    'fr': [
+        { title: "Standardiste IA pour salons — fini les absences, agenda plein", text: "Kaleya répond à 21 h, prend le rendez-vous et envoie la confirmation. Vous arrivez à un fauteuil rempli." },
+        { title: "Les salons ratent 34% des appels pendant les colorations", text: "Kaleya réserve pendant que vous posez la couleur. Plus de messagerie, plus de rendez-vous à 80 € perdus." },
+        { title: "Les bars à ongles perdent 8 h/semaine au téléphone", text: "Kaleya répond par SMS en 2 secondes avec les créneaux réels. Comble les trous automatiquement." },
+        { title: "Massages & spas perdent 560 €/mois en absences", text: "Kaleya garde la carte à la réservation. Facturez le no-show en un clic." },
+        { title: "Maquilleuses perdent des essais mariées à 230 € pendant les rendez-vous", text: "Kaleya capte chaque demande. Même un jour de mariage." }
+    ],
+    'it': [
+        { title: "Receptionist IA per saloni — basta no-show, agenda piena", text: "Kaleya risponde alle 21, prenota il taglio e manda la conferma. Ti svegli con la sedia piena." },
+        { title: "I parrucchieri perdono il 34% delle chiamate durante i colori", text: "Kaleya prenota mentre fai la tinta. Niente segreteria, niente appuntamenti da 80 € persi." },
+        { title: "Le nail studio perdono 8 ore/settimana al telefono", text: "Kaleya risponde via SMS in 2 secondi con orari reali. Riempie i buchi in automatico." },
+        { title: "Massaggi e spa perdono 560 €/mese in no-show", text: "Kaleya salva la carta alla prenotazione. Addebita il no-show con un clic." },
+        { title: "Le truccatrici perdono prove sposa da 230 € mentre lavorano", text: "Kaleya cattura ogni richiesta. Anche nel giorno del matrimonio." }
+    ],
+    'de': [
+        { title: "KI-Empfangsdame für Salons — Schluss mit No-Shows, voller Kalender", text: "Kaleya nimmt um 21 Uhr ab, vereinbart den Termin und schickt die Bestätigung. Du startest mit vollem Stuhl in den Tag." },
+        { title: "Friseure verpassen 34% der Anrufe während Färbungen", text: "Kaleya bucht, während du foilest. Keine Mailbox, keine verlorenen 80 €-Termine." },
+        { title: "Nagelstudios verlieren 8 Std./Woche am Telefon", text: "Kaleya antwortet per SMS in 2 Sekunden mit echten Slots. Lücken werden automatisch gefüllt." },
+        { title: "Massage & Spa verlieren 560 €/Monat durch No-Shows", text: "Kaleya speichert die Karte bei der Buchung. No-Show-Gebühr mit einem Klick." },
+        { title: "Make-up-Artists verlieren 230 € Brauttermine während der Arbeit", text: "Kaleya nimmt jede Anfrage entgegen. Sogar am Hochzeitstag." }
+    ],
+    'ru': [
+        { title: "ИИ-администратор для салонов — никаких неявок, заполненный график", text: "Kaleya отвечает в 21:00, записывает на стрижку и отправляет подтверждение. Утром у вас полное кресло." },
+        { title: "Парикмахерские теряют 34% звонков во время окрашиваний", text: "Kaleya записывает, пока вы наносите фольгу. Никакой голосовой почты и потерянных записей по 7 000 ₽." },
+        { title: "Маникюрные студии тратят 8 часов в неделю на звонки", text: "Kaleya отвечает SMS за 2 секунды с реальными окнами. Окна заполняются автоматически." },
+        { title: "Массаж и спа теряют 50 000 ₽/месяц из-за неявок", text: "Kaleya сохраняет карту при записи. Списание за неявку — в один клик." },
+        { title: "Визажисты теряют свадебные пробы за 23 000 ₽ во время работы", text: "Kaleya принимает каждый запрос. Даже в день свадьбы." }
+    ],
+    'sr': [
+        { title: "AI recepcioner za salone — bez nedolazaka, popunjen kalendar", text: "Kaleya javlja se i u 21h, zakazuje šišanje i šalje SMS potvrdu. Ujutru — pun salon." },
+        { title: "Frizerski saloni propuste 34% poziva tokom farbanja", text: "Kaleya zakazuje dok ti praviš pramenove. Bez govorne pošte, bez izgubljenih termina od 80 €." },
+        { title: "Nokat studiji troše 8 sati nedeljno na telefon", text: "Kaleya odgovara SMS-om za 2 sekunde sa pravim terminima. Praznine se popunjavaju same." },
+        { title: "Masažni saloni i spa-ovi gube 560 €/mesec na nedolazke", text: "Kaleya čuva karticu pri zakazivanju. Naplata nedolaska jednim klikom." },
+        { title: "Make-up artisti gube probne mladine od 230 € dok rade", text: "Kaleya hvata svaki upit. Čak i na dan venčanja." }
+    ]
+};
 const BROWSER_LANG_MAP = { sr: 'sr-RS', en: 'en-US', es: 'es-ES', pt: 'pt-PT', ru: 'ru-RU', fr: 'fr-FR', it: 'it-IT', de: 'de-DE' };
 
 const T = {
     sr: {
         nav_features: 'Funkcije', nav_how: 'Kako radi', nav_pricing: 'Cene', nav_login: 'Prijava',
+        trust_line1: 'Pravljeno za salone · Otkaži kad god želiš',
+        trust_line2: 'Zakazuje preko poziva · SMS · WhatsApp · Viber · Telegram · Instagram DM',
         hero_badge: 'AI sekretarica · 24/7 aktivna', hero_title_1: 'Kaleya', hero_title_2: 'AI sekretarica 24/7',
         hero_sub: 'Kaleya odgovara, zakazuje, otkazuje i obaveštava osoblje prirodnim glasom. Radi preko poziva, WhatsApp-a, Vibera, Telegrama i SMS-a.',
         hero_cta_demo: 'Isprobaj besplatno', hero_cta_how: 'Pogledaj kako radi', hero_social: '500+ zadovoljnih firmi', hero_tap: 'Dodirni logo',
@@ -2731,6 +2851,8 @@ const T = {
     },
     en: {
         nav_features: 'Features', nav_how: 'How it works', nav_pricing: 'Pricing', nav_login: 'Login',
+        trust_line1: 'Built for salons · Cancel anytime',
+        trust_line2: 'Books via call · SMS · WhatsApp · Viber · Telegram · Instagram DM',
         hero_badge: 'AI receptionist · active 24/7', hero_title_1: 'Kaleya', hero_title_2: 'AI receptionist 24/7',
         hero_sub: 'Kaleya answers, schedules, cancels and alerts staff with a natural voice. It works through calls, WhatsApp, Viber, Telegram and SMS.',
         hero_cta_demo: 'Try for free', hero_cta_how: 'See how it works', hero_social: '500+ happy businesses', hero_tap: 'Tap the logo',
@@ -2778,6 +2900,8 @@ const T = {
     },
     es: {
         nav_features: 'Funciones', nav_how: 'Cómo funciona', nav_pricing: 'Precios', nav_login: 'Acceso',
+        trust_line1: 'Hecho para salones · Cancela cuando quieras',
+        trust_line2: 'Reserva por llamada · SMS · WhatsApp · Viber · Telegram · Instagram DM',
         hero_badge: 'Recepcionista IA · activa 24/7', hero_title_1: 'Kaleya', hero_title_2: 'Recepcionista IA 24/7',
         hero_sub: 'Kaleya responde, agenda, cancela y avisa al personal con voz natural. Funciona por llamadas, WhatsApp, Viber, Telegram y SMS.',
         hero_cta_demo: 'Probar gratis', hero_cta_how: 'Ver cómo funciona', hero_social: '500+ empresas satisfechas', hero_tap: 'Toca el logo',
@@ -2825,6 +2949,8 @@ const T = {
     },
     pt: {
         nav_features: 'Funcionalidades', nav_how: 'Como funciona', nav_pricing: 'Preços', nav_login: 'Entrar',
+        trust_line1: 'Feito para salões · Cancela quando quiseres',
+        trust_line2: 'Marca por chamada · SMS · WhatsApp · Viber · Telegram · Instagram DM',
         hero_badge: 'Recepcionista IA · ativa 24/7', hero_title_1: 'Kaleya', hero_title_2: 'Recepcionista IA 24/7',
         hero_sub: 'Kaleya atende, agenda, cancela e avisa a equipe com voz natural. Funciona por chamadas, WhatsApp, Viber, Telegram e SMS.',
         hero_cta_demo: 'Testar grátis', hero_cta_how: 'Ver como funciona', hero_social: '500+ empresas satisfeitas', hero_tap: 'Toque no logo',
@@ -2869,6 +2995,8 @@ const T = {
     },
     ru: {
         nav_features: 'Функции', nav_how: 'Как работает', nav_pricing: 'Тарифы', nav_login: 'Вход',
+        trust_line1: 'Создано для салонов · Отмена в любой момент',
+        trust_line2: 'Записывает по звонку · SMS · WhatsApp · Viber · Telegram · Instagram DM',
         hero_badge: 'AI администратор · 24/7', hero_title_1: 'Kaleya', hero_title_2: 'AI администратор 24/7',
         hero_sub: 'Kaleya отвечает, записывает, отменяет встречи и уведомляет персонал естественным голосом. Работает через звонки, WhatsApp, Viber, Telegram и SMS.',
         hero_cta_demo: 'Попробовать бесплатно', hero_cta_how: 'Как это работает', hero_social: '500+ довольных компаний', hero_tap: 'Нажмите логотип',
@@ -2916,6 +3044,8 @@ const T = {
 T.fr = {
     ...T.en,
     nav_features: 'Fonctionnalites', nav_how: 'Comment ca marche', nav_pricing: 'Tarifs', nav_login: 'Connexion',
+    trust_line1: 'Conçu pour les salons · Annulez quand vous voulez',
+    trust_line2: 'Prend RDV par appel · SMS · WhatsApp · Viber · Telegram · Instagram DM',
     hero_badge: 'Receptionniste IA · active 24/7', hero_sub: 'Kaleya repond, planifie, annule et alerte votre equipe avec une voix naturelle. Fonctionne avec appels, WhatsApp, Viber, Telegram et SMS.',
     hero_cta_demo: 'Essayer gratuitement', hero_cta_how: 'Voir le fonctionnement', hero_social: '500+ entreprises satisfaites', hero_tap: 'Touchez le logo',
     hero_intro_hint: 'Kaleya se presente', hero_demo_msg: '"Bonjour, comment puis-je aider ?"',
@@ -2948,6 +3078,8 @@ T.fr = {
 T.it = {
     ...T.en,
     nav_features: 'Funzioni', nav_how: 'Come funziona', nav_pricing: 'Prezzi', nav_login: 'Login',
+    trust_line1: 'Pensato per i saloni · Cancella quando vuoi',
+    trust_line2: 'Prenota via chiamata · SMS · WhatsApp · Viber · Telegram · Instagram DM',
     hero_badge: 'Receptionist AI · attiva 24/7', hero_sub: 'Kaleya risponde, prenota, annulla e avvisa il team con voce naturale. Funziona con chiamate, WhatsApp, Viber, Telegram e SMS.',
     hero_cta_demo: 'Prova gratis', hero_cta_how: 'Vedi come funziona', hero_social: '500+ aziende soddisfatte', hero_tap: 'Tocca il logo',
     hero_intro_hint: 'Kaleya si presenta', hero_demo_msg: '"Ciao, come posso aiutare?"',
@@ -2975,6 +3107,18 @@ T.it = {
     support_alarm_future: 'Allarme supporto umano piu avanti', support_alarm_desc: 'Questo tab servira quando l AI non riesce a completare una richiesta e deve collegare il cliente al supporto.',
     global_ai_settings: 'API AI globale', save_global_api: 'Salva API globale', client_api_title: 'API per azienda', save_client_api: 'Salva per azienda',
     alarm_log_title: 'Registro allarmi', alarm_log_empty: 'Nessun allarme attivato.', hero_wake: 'ehi Kaleya', sms_call: 'SMS/Chiamata'
+},
+'en-gb': {
+    nav_features: 'Features', nav_how: 'How it works', nav_pricing: 'Pricing', nav_login: 'Login',
+    trust_line1: 'Built for salons · Cancel anytime',
+    trust_line2: 'Books via call · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+    hero_cta_demo: 'Start free trial', hero_cta_how: 'See how it works',
+    hero_intro_hint: 'Kaleya introduces itself',
+    feat_title: 'Everything a real receptionist does, only better',
+    price_t: 'Simple pricing', price_s: 'Choose the plan that fits your salon.',
+    popular: 'MOST POPULAR', trial_btn: 'Start 14-day free trial', price_contact: 'Contact',
+    p_basic_d: 'Perfect for solo artists', p_pro_d: 'For busy shops & teams',
+    footer_privacy: 'Privacy', footer_terms: 'Terms', custom_price: 'Custom'
 };
 
 const EXTRA_TRANSLATIONS = {
@@ -3051,6 +3195,8 @@ const EXTRA_TRANSLATIONS = {
     de: {
         ...T.en,
         nav_features: 'Funktionen', nav_how: 'So funktioniert es', nav_pricing: 'Preise', nav_login: 'Login',
+        trust_line1: 'Gemacht für Salons · Jederzeit kündbar',
+        trust_line2: 'Bucht per Anruf · SMS · WhatsApp · Viber · Telegram · Instagram DM',
         hero_badge: 'AI Empfang · 24/7 aktiv', hero_title_1: 'Kaleya', hero_title_2: 'AI Empfang 24/7', hero_sub: 'Kaleya beantwortet Anrufe, bucht, storniert und benachrichtigt das Team mit natürlicher Stimme. Funktioniert mit Anrufen, WhatsApp, Viber, Telegram und SMS.',
         hero_cta_demo: 'Kostenlos testen', hero_cta_how: 'So funktioniert es', hero_social: '500+ zufriedene Unternehmen', hero_tap: 'Logo antippen', hero_intro_hint: 'Kaleya stellt sich vor', hero_demo_msg: '"Hallo, wie kann ich helfen?"', integrates_with: 'Integrationen:',
         feat_title: 'Alles, was eine echte Rezeption macht, nur besser', feat_sub: 'Kaleya versteht Kunden, merkt sich Regeln und arbeitet in der gewählten Sprache.', f_lang_t: '8 Sprachen', f_lang_d: 'Serbisch, English, Spanisch, Portugiesisch, Russisch, Französisch, Italienisch und Deutsch mit manueller Auswahl.',
@@ -3845,7 +3991,15 @@ function applyLang() {
     });
     const label = document.getElementById('currentLangLabel');
     if (label) label.textContent = LANG_LABELS[currentLang] || 'EN';
-    document.documentElement.lang = currentLang;
+    document.documentElement.lang = currentLang === 'en-gb' ? 'en-GB' : currentLang;
+    // Refresh hero rotating title with new language
+    if (typeof window.kvApplyHeroSlide === 'function' && typeof window.kvCurrentSlide === 'function') {
+        try { window.kvApplyHeroSlide(window.kvCurrentSlide()); } catch (e) {}
+    }
+    // Refresh all currency-localized stat values
+    if (typeof window.kvRefreshLocalizedStats === 'function') {
+        try { window.kvRefreshLocalizedStats(); } catch (e) {}
+    }
     updateClientLangButtons();
     renderClientOperationalSettings();
     populateAppointmentStaffServiceFields();
