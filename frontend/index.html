@@ -355,13 +355,13 @@
         .kv-slides { position: absolute; inset: 0; z-index: 0; }
         .kv-slide {
             position: absolute; inset: 0; background-size: cover; background-position: center;
-            opacity: 0; transition: opacity 1.2s ease; filter: brightness(0.55) saturate(1.1); transform: scale(1.05);
+            opacity: 0; transition: opacity 1.2s ease; filter: brightness(0.85) saturate(1.1); transform: scale(1.05);
         }
         .kv-slide.kv-active { opacity: 1; transform: scale(1); transition: opacity 1.2s ease, transform 8s linear; }
         .kv-hero::after {
             content: ''; position: absolute; inset: 0; z-index: 1;
-            background: radial-gradient(ellipse at center, transparent 20%, rgba(10,10,11,.58) 100%),
-                        linear-gradient(180deg, rgba(10,10,11,.45) 0%, rgba(10,10,11,.78) 72%, #0A0A0B 100%);
+            background: radial-gradient(ellipse at center, transparent 30%, rgba(10,10,11,.35) 100%),
+                        linear-gradient(180deg, rgba(10,10,11,.20) 0%, rgba(10,10,11,.55) 75%, #0A0A0B 100%);
         }
         .kv-hero-glow { position: absolute; border-radius: 999px; filter: blur(70px); opacity: .55; pointer-events: none; z-index: 1; }
         .kv-glow-l { width: 320px; height: 320px; left: -120px; top: 120px; background: rgba(167,139,250,.12); }
