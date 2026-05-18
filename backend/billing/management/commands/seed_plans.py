@@ -6,8 +6,8 @@ from billing.models import Plan
 PLAN_CATALOG = [
     {
         "code": Plan.CODE_BASIC,
-        "name": "Basic",
-        "monthly_price": 59,
+        "name": "Starter",
+        "monthly_price": 29,
         "currency": "USD",
         "trial_days": 14,
         "sort_order": 1,
@@ -32,7 +32,7 @@ PLAN_CATALOG = [
     {
         "code": Plan.CODE_PRO,
         "name": "Pro",
-        "monthly_price": 99,
+        "monthly_price": 79,
         "currency": "USD",
         "trial_days": 14,
         "sort_order": 2,

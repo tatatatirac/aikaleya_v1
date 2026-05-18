@@ -178,8 +178,8 @@ class Command(BaseCommand):
         plans = [
             {
                 "code": Plan.CODE_BASIC,
-                "name": "Basic",
-                "monthly_price": 59,
+                "name": "Starter",
+                "monthly_price": 29,
                 "currency": "USD",
                 "sort_order": 1,
                 "max_staff_members": 0,
@@ -203,7 +203,7 @@ class Command(BaseCommand):
             {
                 "code": Plan.CODE_PRO,
                 "name": "Pro",
-                "monthly_price": 99,
+                "monthly_price": 79,
                 "currency": "USD",
                 "sort_order": 2,
                 "max_staff_members": 1,
