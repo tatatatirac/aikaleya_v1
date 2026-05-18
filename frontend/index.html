@@ -134,7 +134,167 @@
         #landing-view *, #landing-view *::before, #landing-view *::after { box-sizing: border-box; }
         #landing-view a { color: inherit; text-decoration: none; }
         #landing-view img { max-width: 100%; display: block; }
-        #landing-view #theme-toggle { display: none !important; }
+        #landing-view #theme-toggle {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: #111113 !important; border: 1px solid #27272A !important; color: #FFF !important;
+            display: grid !important; place-items: center; cursor: pointer; transition: background .2s;
+        }
+        #landing-view #theme-toggle:hover { background: #18181B !important; }
+        #landing-view #theme-toggle svg { width: 16px; height: 16px; }
+
+        /* ===== LIGHT MODE OVERRIDES (when html does NOT have .dark) ===== */
+        html:not(.dark) #landing-view {
+            background: #FFFFFF;
+            color: #0F172A;
+        }
+        html:not(.dark) #landing-view .kv-header {
+            background: rgba(255,255,255,0.85);
+            border-bottom: 1px solid #E2E8F0;
+        }
+        html:not(.dark) #landing-view .kv-logo-name { color: #0F172A; }
+        html:not(.dark) #landing-view .kv-logo-name span { color: #64748B; }
+        html:not(.dark) #landing-view .kv-nav a { color: #475569; }
+        html:not(.dark) #landing-view .kv-nav a:hover { color: #0F172A; }
+        html:not(.dark) #landing-view .kv-login-link { color: #475569; }
+        html:not(.dark) #landing-view .kv-login-link:hover { color: #0F172A; }
+        html:not(.dark) #landing-view #langToggleBtn {
+            background: #FFFFFF !important; border-color: #E2E8F0 !important; color: #0F172A !important;
+        }
+        html:not(.dark) #landing-view #langToggleBtn:hover { background: #F8FAFC !important; }
+        html:not(.dark) #landing-view #langDropdown {
+            background: #FFFFFF !important; border-color: #E2E8F0 !important; color: #0F172A !important;
+        }
+        html:not(.dark) #landing-view #langDropdown .lang-btn { color: #0F172A !important; }
+        html:not(.dark) #landing-view #langDropdown .lang-btn:hover { background: #F8FAFC !important; }
+        html:not(.dark) #landing-view #theme-toggle {
+            background: #FFFFFF !important; border-color: #E2E8F0 !important; color: #0F172A !important;
+        }
+        html:not(.dark) #landing-view #theme-toggle:hover { background: #F8FAFC !important; }
+        html:not(.dark) #landing-view .kv-hero-copy h1,
+        html:not(.dark) #landing-view #kv-hero-title { color: #0A0A0B; }
+        html:not(.dark) #landing-view .kv-hero-copy > p,
+        html:not(.dark) #landing-view .kv-hero-text p,
+        html:not(.dark) #landing-view #kv-hero-subtitle { color: #475569; }
+        html:not(.dark) #landing-view .kv-badge {
+            background: rgba(248,250,252,0.92); border-color: #E2E8F0; color: #475569;
+        }
+        html:not(.dark) #landing-view .kv-trust-bar { color: #64748B; }
+        html:not(.dark) #landing-view .kv-trust-bar strong { color: #0F172A; }
+        html:not(.dark) #landing-view .kv-hero::after {
+            background: radial-gradient(ellipse at center, transparent 20%, rgba(255,255,255,.6) 100%),
+                        linear-gradient(180deg, rgba(255,255,255,.5) 0%, rgba(255,255,255,.85) 72%, #FFFFFF 100%);
+        }
+        html:not(.dark) #landing-view .kv-btn-secondary {
+            background: #F8FAFC; border-color: #E2E8F0; color: #0F172A;
+        }
+        html:not(.dark) #landing-view .kv-btn-secondary:hover { background: #F1F5F9; }
+        html:not(.dark) #landing-view .kv-eyebrow { color: #64748B; }
+        html:not(.dark) #landing-view .kv-section-title { color: #0A0A0B; }
+        html:not(.dark) #landing-view .kv-section-sub { color: #475569; }
+        html:not(.dark) #landing-view .kv-works {
+            background: linear-gradient(180deg, #FFFFFF 0%, rgba(105,0,204,.05) 100%);
+            border-top-color: #E2E8F0;
+        }
+        html:not(.dark) #landing-view .kv-work-item {
+            background: #FFFFFF; border-color: #E2E8F0;
+        }
+        html:not(.dark) #landing-view .kv-work-item:hover { border-color: #C4B5FD; }
+        html:not(.dark) #landing-view .kv-work-icon { color: #7C3AED; }
+        html:not(.dark) #landing-view .kv-work-item span { color: #0F172A; }
+        html:not(.dark) #landing-view .kv-problem-card {
+            background: #FFFFFF; border-color: #E2E8F0;
+        }
+        html:not(.dark) #landing-view .kv-problem-num {
+            background: linear-gradient(180deg, #0A0A0B 0%, #64748B 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        html:not(.dark) #landing-view .kv-problem-desc { color: #475569; }
+        html:not(.dark) #landing-view .kv-problem-desc strong { color: #0A0A0B; }
+        html:not(.dark) #landing-view .kv-dash { background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%); }
+        html:not(.dark) #landing-view .kv-dash-mock {
+            background: #FFFFFF; border-color: #E2E8F0;
+            box-shadow: 0 40px 100px rgba(0,0,0,.12);
+        }
+        html:not(.dark) #landing-view .kv-dash-topbar {
+            background: #F8FAFC; border-bottom-color: #E2E8F0;
+        }
+        html:not(.dark) #landing-view .kv-dash-url { color: #64748B; }
+        html:not(.dark) #landing-view .kv-dash-side {
+            background: #F8FAFC; border-right-color: #E2E8F0;
+        }
+        html:not(.dark) #landing-view .kv-dash-side-logo span { color: #0F172A; }
+        html:not(.dark) #landing-view .kv-dash-side-section { color: #94A3B8; }
+        html:not(.dark) #landing-view .kv-dash-side ul li { color: #475569; }
+        html:not(.dark) #landing-view .kv-dash-side ul li.kv-active { background: rgba(37,99,235,.12); color: #1D4ED8; }
+        html:not(.dark) #landing-view .kv-dash-side ul li:hover:not(.kv-active) { background: rgba(0,0,0,.03); color: #0F172A; }
+        html:not(.dark) #landing-view .kv-dash-h h3 { color: #0F172A; }
+        html:not(.dark) #landing-view .kv-dash-pill {
+            background: #F1F5F9; border-color: #E2E8F0; color: #475569;
+        }
+        html:not(.dark) #landing-view .kv-dash-stat { background: #FFFFFF; border-color: #E2E8F0; }
+        html:not(.dark) #landing-view .kv-dash-stat-label { color: #64748B; }
+        html:not(.dark) #landing-view .kv-dash-stat-val { color: #0F172A; }
+        html:not(.dark) #landing-view .kv-dash-list { background: #FFFFFF; border-color: #E2E8F0; }
+        html:not(.dark) #landing-view .kv-dash-row { border-bottom-color: #F1F5F9; }
+        html:not(.dark) #landing-view .kv-dash-row-name { color: #0F172A; }
+        html:not(.dark) #landing-view .kv-dash-row-service { color: #64748B; }
+        html:not(.dark) #landing-view .kv-dash-row-time { color: #1E293B; }
+        html:not(.dark) #landing-view .kv-step { background: #FFFFFF; border-color: #E2E8F0; }
+        html:not(.dark) #landing-view .kv-step h3 { color: #0F172A; }
+        html:not(.dark) #landing-view .kv-step p { color: #475569; }
+        html:not(.dark) #landing-view .kv-vs { background: #F8FAFC; }
+        html:not(.dark) #landing-view .kv-vs-table { background: #FFFFFF; border-color: #E2E8F0; }
+        html:not(.dark) #landing-view .kv-vs-row { border-bottom-color: #F1F5F9; }
+        html:not(.dark) #landing-view .kv-vs-row.kv-vs-head { background: #F1F5F9; }
+        html:not(.dark) #landing-view .kv-vs-row.kv-vs-head > div { color: #64748B; }
+        html:not(.dark) #landing-view .kv-vs-row.kv-vs-head > div:first-child { color: #94A3B8; }
+        html:not(.dark) #landing-view .kv-vs-row.kv-vs-head .kv-vs-us { color: #1D4ED8; }
+        html:not(.dark) #landing-view .kv-vs-row > div { color: #1E293B; }
+        html:not(.dark) #landing-view .kv-vs-row > div:first-child { color: #475569; }
+        html:not(.dark) #landing-view .kv-vs-no { color: #CBD5E1; }
+        html:not(.dark) #landing-view .kv-vs-row.kv-vs-us-row { background: rgba(37,99,235,.04); }
+        html:not(.dark) #landing-view .kv-vs-foot { color: #64748B; }
+        html:not(.dark) #landing-view .kv-price-card {
+            background: #FFFFFF; border-color: #E2E8F0;
+        }
+        html:not(.dark) #landing-view .kv-price-card:hover { border-color: #CBD5E1; }
+        html:not(.dark) #landing-view .kv-pc-popular {
+            border-color: rgba(37,99,235,.5) !important;
+            box-shadow: 0 0 0 1px rgba(37,99,235,.15), 0 20px 60px rgba(37,99,235,.1);
+        }
+        html:not(.dark) #landing-view .kv-price-name { color: #0F172A; }
+        html:not(.dark) #landing-view .kv-price-desc { color: #64748B; }
+        html:not(.dark) #landing-view .kv-price-amount { color: #0F172A; }
+        html:not(.dark) #landing-view .kv-price-amount span { color: #94A3B8; }
+        html:not(.dark) #landing-view .kv-price-feats li { color: #475569; }
+        html:not(.dark) #landing-view .kv-price-btn {
+            background: #F8FAFC; border-color: #E2E8F0; color: #0F172A;
+        }
+        html:not(.dark) #landing-view .kv-price-btn:hover { background: #F1F5F9; }
+        html:not(.dark) #landing-view .kv-price-note { color: #64748B; }
+        html:not(.dark) #landing-view .kv-demo-box {
+            background: #F8FAFC; border-color: #CBD5E1;
+        }
+        html:not(.dark) #landing-view .kv-demo-box p { color: #475569; }
+        html:not(.dark) #landing-view .kv-demo-box strong { color: #0F172A; }
+        html:not(.dark) #landing-view .kv-faq-item { border-bottom-color: #E2E8F0; }
+        html:not(.dark) #landing-view .kv-faq-q { color: #0F172A; }
+        html:not(.dark) #landing-view .kv-faq-q:hover { color: #1E293B; }
+        html:not(.dark) #landing-view .kv-faq-icon { color: #94A3B8; }
+        html:not(.dark) #landing-view .kv-faq-item.kv-open .kv-faq-icon { color: #0F172A; }
+        html:not(.dark) #landing-view .kv-faq-a p { color: #475569; }
+        html:not(.dark) #landing-view .kv-final-cta {
+            background: radial-gradient(600px 300px at 50% 0%, rgba(37,99,235,.08), transparent);
+            border-top-color: #E2E8F0;
+        }
+        html:not(.dark) #landing-view .kv-final-cta h2 { color: #0A0A0B; }
+        html:not(.dark) #landing-view .kv-final-cta p { color: #475569; }
+        html:not(.dark) #landing-view .kv-footer {
+            background: #FFFFFF; border-top-color: #E2E8F0;
+        }
+        html:not(.dark) #landing-view .kv-footer-left { color: #64748B; }
+        html:not(.dark) #landing-view .kv-footer-right a { color: #64748B; }
+        html:not(.dark) #landing-view .kv-footer-right a:hover { color: #0F172A; }
 
         /* Header */
         .kv-header {
@@ -668,11 +828,13 @@
                                 <button onclick="setLang('en')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">English</button>
                                 <button onclick="setLang('sr')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Srpski</button>
                                 <button onclick="setLang('es')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Español</button>
+                                <!-- Disabled for now (kept for future expansion):
                                 <button onclick="setLang('pt')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Português</button>
                                 <button onclick="setLang('ru')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Русский</button>
                                 <button onclick="setLang('fr')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Français</button>
                                 <button onclick="setLang('it')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Italiano</button>
                                 <button onclick="setLang('de')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Deutsch</button>
+                                -->
                             </div>
                         </div>
                         <button id="theme-toggle" aria-label="Toggle theme">
@@ -1693,16 +1855,17 @@
                         <div class="mt-6 space-y-5">
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                                 <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="cset_ui_lang">Jezik interfejsa</p>
-                                <div class="grid grid-cols-4 gap-2">
+                                <div class="grid grid-cols-3 gap-2">
                                     <button onclick="setLang('en')" id="clientLangEN" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">EN</button>
                                     <button onclick="setLang('sr')" id="clientLangSR" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">SR</button>
                                     <button onclick="setLang('es')" id="clientLangES" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">ES</button>
+                                    <!-- Disabled for now (kept for future expansion):
                                     <button onclick="setLang('pt')" id="clientLangPT" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">PT</button>
                                     <button onclick="setLang('ru')" id="clientLangRU" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">RU</button>
                                     <button onclick="setLang('fr')" id="clientLangFR" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">FR</button>
                                     <button onclick="setLang('it')" id="clientLangIT" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">IT</button>
                                     <button onclick="setLang('de')" id="clientLangDE" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">DE</button>
-                                </div>
+                                    --></div>
                             </div>
 
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
