@@ -181,8 +181,11 @@
         html:not(.dark) #landing-view .kv-trust-bar { color: #64748B; }
         html:not(.dark) #landing-view .kv-trust-bar strong { color: #0F172A; }
         html:not(.dark) #landing-view .kv-hero::after {
-            background: radial-gradient(ellipse at center, transparent 20%, rgba(255,255,255,.6) 100%),
-                        linear-gradient(180deg, rgba(255,255,255,.5) 0%, rgba(255,255,255,.85) 72%, #FFFFFF 100%);
+            background: radial-gradient(ellipse at center, transparent 30%, rgba(255,255,255,.30) 100%),
+                        linear-gradient(180deg, rgba(255,255,255,.15) 0%, rgba(255,255,255,.55) 75%, #FFFFFF 100%);
+        }
+        html:not(.dark) #landing-view .kv-slide {
+            filter: brightness(0.95) saturate(1.1);
         }
         html:not(.dark) #landing-view .kv-btn-secondary {
             background: #F8FAFC; border-color: #E2E8F0; color: #0F172A;
