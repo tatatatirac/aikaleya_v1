@@ -5,3 +5,7 @@ class CommunicationsConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "communications"
     verbose_name = "Komunikacije"
+
+    def ready(self):
+        # Wire signal handlers (appointment confirmation SMS, etc.)
+        from communications import appointment_sms  # noqa: F401
