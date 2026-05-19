@@ -141,6 +141,35 @@ def fallback_no_input_text(business_client: BusinessClient) -> str:
     return msgs.get(lang) or msgs["en"]
 
 
+def _try_elevenlabs_audio_url(business_client: BusinessClient, text: str) -> str | None:
+    """Generate ElevenLabs MP3 and return absolute public URL. None if ElevenLabs unavailable."""
+    if not text or not text.strip():
+        return None
+    try:
+        from ai_agent.providers import synthesize_elevenlabs_speech
+        result = synthesize_elevenlabs_speech(business_client, text)
+        rel_url = result.get("audio_url") or ""
+        if not rel_url:
+            return None
+        if rel_url.startswith("http"):
+            return rel_url
+        # Make absolute — Twilio needs full URL for <Play>
+        return f"{public_base_url()}/{rel_url.lstrip('/')}"
+    except Exception as exc:
+        logger.warning("ElevenLabs TTS failed, falling back to Google voice: %s", exc)
+        return None
+
+
+def _say_or_play(business_client: BusinessClient, text: str, polly_voice: str, twilio_lang: str) -> str:
+    """Return either a <Play> tag (ElevenLabs MP3) or <Say> tag (Twilio TTS)."""
+    from xml.sax.saxutils import escape
+
+    audio_url = _try_elevenlabs_audio_url(business_client, text)
+    if audio_url:
+        return f'<Play>{escape(audio_url)}</Play>'
+    return f'<Say voice="{polly_voice}" language="{twilio_lang}">{escape(text or "")}</Say>'
+
+
 def build_voice_response_twiml(
     business_client: BusinessClient,
     text_to_say: str,
@@ -155,13 +184,14 @@ def build_voice_response_twiml(
     polly = POLLY_VOICE_BY_LANG.get(lang, DEFAULT_TWILIO_VOICE)
     twilio_lang = TWILIO_SPEECH_LANG.get(lang, "en-US")
 
-    safe_text = escape(text_to_say or "")
+    main_voice = _say_or_play(business_client, text_to_say, polly, twilio_lang)
+    fallback_voice = _say_or_play(business_client, fallback_no_input_text(business_client), polly, twilio_lang)
 
     if bye:
         return (
             '<?xml version="1.0" encoding="UTF-8"?>'
             "<Response>"
-            f'<Say voice="{polly}" language="{twilio_lang}">{safe_text}</Say>'
+            f'{main_voice}'
             "<Hangup/>"
             "</Response>"
         )
@@ -169,12 +199,12 @@ def build_voice_response_twiml(
     return (
         '<?xml version="1.0" encoding="UTF-8"?>'
         "<Response>"
-        f'<Say voice="{polly}" language="{twilio_lang}">{safe_text}</Say>'
+        f'{main_voice}'
         f'<Gather input="speech" action="{escape(next_action_url)}" method="POST" '
         f'language="{twilio_lang}" speechTimeout="auto" speechModel="experimental_conversations" '
         'timeout="6">'
         '</Gather>'
-        f'<Say voice="{polly}" language="{twilio_lang}">{escape(fallback_no_input_text(business_client))}</Say>'
+        f'{fallback_voice}'
         f'<Redirect method="POST">{escape(next_action_url)}</Redirect>'
         "</Response>"
     )
