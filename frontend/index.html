@@ -134,6 +134,76 @@
         #landing-view *, #landing-view *::before, #landing-view *::after { box-sizing: border-box; }
         #landing-view a { color: inherit; text-decoration: none; }
         #landing-view img { max-width: 100%; display: block; }
+        /* Early-access top banner */
+        .kv-banner {
+            position: relative; z-index: 101;
+            background: linear-gradient(90deg, #7C3AED 0%, #2563EB 50%, #06B6D4 100%);
+            color: #fff; text-align: center;
+            padding: 10px 48px 10px 16px;
+            font-size: 13px; font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+        .kv-banner-emoji { display: inline-block; transform: translateY(-1px); margin-right: 4px; }
+        .kv-banner-spots { background: rgba(255,255,255,0.18); padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; margin: 0 4px; }
+        .kv-banner a { color: #fff; text-decoration: underline; text-underline-offset: 3px; font-weight: 700; margin-left: 6px; }
+        .kv-banner a:hover { text-decoration: none; }
+        .kv-banner-close {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            background: rgba(255,255,255,0.15); border: none; color: #fff;
+            width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+            font-size: 14px; line-height: 1; display: grid; place-items: center;
+        }
+        .kv-banner-close:hover { background: rgba(255,255,255,0.3); }
+        .kv-banner.kv-hidden { display: none; }
+        html:not(.dark) #landing-view .kv-banner { color: #fff; }
+        @media (max-width: 640px) {
+            .kv-banner { font-size: 12px; padding: 10px 36px 10px 12px; }
+            .kv-banner a { display: block; margin-left: 0; margin-top: 4px; }
+        }
+
+        /* Billing-period toggle (Monthly / Yearly) */
+        .kv-billing-toggle {
+            display: inline-flex; gap: 4px; padding: 4px;
+            background: rgba(255,255,255,0.04); border: 1px solid #27272A;
+            border-radius: 999px; margin: 0 auto 32px;
+        }
+        .kv-billing-toggle button {
+            background: transparent; border: none; color: #A1A1AA;
+            padding: 8px 18px; border-radius: 999px;
+            font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+            transition: all .2s;
+        }
+        .kv-billing-toggle button.kv-active {
+            background: #2563EB; color: #fff;
+        }
+        .kv-billing-toggle .kv-save-pill {
+            display: inline-block; margin-left: 6px; padding: 2px 7px;
+            background: #10B981; color: #fff; border-radius: 999px;
+            font-size: 10px; font-weight: 700; vertical-align: middle;
+        }
+        .kv-billing-toggle button.kv-active .kv-save-pill { background: rgba(0,0,0,0.25); }
+        html:not(.dark) #landing-view .kv-billing-toggle { background: #F1F5F9; border-color: #E2E8F0; }
+        html:not(.dark) #landing-view .kv-billing-toggle button { color: #475569; }
+        html:not(.dark) #landing-view .kv-billing-toggle button.kv-active { background: #2563EB; color: #fff; }
+
+        /* Pricing — early-access strike-through */
+        .kv-price-original {
+            display: inline-block; color: #71717A;
+            text-decoration: line-through; font-size: 22px;
+            font-weight: 600; margin-right: 8px; letter-spacing: -0.01em;
+        }
+        html:not(.dark) #landing-view .kv-price-original { color: #94A3B8; }
+        .kv-price-ea-tag {
+            display: inline-block; margin-top: 6px;
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+            color: #7C3AED;
+            background: rgba(124,58,237,0.12);
+            padding: 4px 10px; border-radius: 999px;
+        }
+        html:not(.dark) #landing-view .kv-price-ea-tag { background: rgba(124,58,237,0.10); }
+        .kv-price-billed-note { display: block; font-size: 12px; color: #71717A; margin-top: 6px; }
+        html:not(.dark) #landing-view .kv-price-billed-note { color: #64748B; }
+
         #landing-view #theme-toggle {
             width: 36px; height: 36px; border-radius: 50%;
             background: #111113 !important; border: 1px solid #27272A !important; color: #FFF !important;
@@ -812,6 +882,18 @@
         <!-- LANDING VIEW -->
                         <div id="landing-view" class="">
 
+            <!-- EARLY-ACCESS BANNER -->
+            <div id="kv-early-banner" class="kv-banner">
+                <span class="kv-banner-emoji">🎉</span>
+                <span data-i18n="banner_early1">Early access</span> ·
+                <span data-i18n="banner_early2">first</span>
+                <span class="kv-banner-spots" id="kvBannerSpots">500</span>
+                <span data-i18n="banner_early3">salons get</span>
+                <strong data-i18n="banner_early4">LIFETIME 50% off</strong>
+                <a href="#kv-pricing" data-i18n="banner_early_cta">Claim your spot</a>
+                <button class="kv-banner-close" onclick="kvCloseBanner()" aria-label="Close">×</button>
+            </div>
+
             <!-- HEADER -->
             <header class="kv-header">
                 <div class="kv-header-inner">
@@ -1194,41 +1276,56 @@
                 <section id="kv-pricing" class="kv-section">
                     <div class="kv-container">
                         <div class="kv-section-head">
-                            <p class="kv-eyebrow">Simple pricing</p>
-                            <h2 class="kv-section-title">Start free. Cancel anytime.</h2>
-                            <p class="kv-section-sub">14-day free trial · no credit card required · cancel anytime.</p>
+                            <p class="kv-eyebrow" data-i18n="price_eyebrow">Simple pricing</p>
+                            <h2 class="kv-section-title" data-i18n="price_t">Start free. Cancel anytime.</h2>
+                            <p class="kv-section-sub" data-i18n="price_s">14-day free trial · no credit card required · cancel anytime.</p>
                         </div>
+
+                        <!-- Monthly / Yearly toggle -->
+                        <div style="text-align:center">
+                            <div class="kv-billing-toggle" role="tablist">
+                                <button type="button" id="kvBillMonthly" class="kv-active" onclick="kvSetBilling('monthly')" data-i18n="billing_monthly">Monthly</button>
+                                <button type="button" id="kvBillYearly" onclick="kvSetBilling('yearly')"><span data-i18n="billing_yearly">Yearly</span><span class="kv-save-pill" data-i18n="billing_save">save 2 mo</span></button>
+                            </div>
+                        </div>
+
                         <div class="kv-pricing-grid">
                             <div class="kv-price-card">
                                 <div class="kv-price-name">Starter</div>
-                                <p class="kv-price-desc">Perfect for solo artists</p>
-                                <div class="kv-price-amount"><span data-lv="starter">$59</span><span>/mo</span></div>
-                                <ul class="kv-price-feats">
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>300 talk minutes included</li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>After-hours only (5PM – 9AM)</li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>Google Calendar sync</li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>SMS confirmations</li>
+                                <p class="kv-price-desc" data-i18n="p_basic_desc">Perfect for solo artists</p>
+                                <div class="kv-price-amount">
+                                    <span class="kv-price-original" data-lv="starter">$59</span><span data-lv="starter_ea">$30</span><span data-i18n="per_mo">/mo</span>
+                                </div>
+                                <span class="kv-price-ea-tag" data-i18n="ea_lifetime">Early access · lifetime</span>
+                                <span class="kv-price-billed-note" id="kvStarterBilledNote" style="display:none"><span data-lv="starter_ea_yr">$300</span>/yr · <span data-i18n="billed_yearly">billed yearly</span></span>
+                                <ul class="kv-price-feats" style="margin-top:18px">
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f1">300 talk minutes included</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f2">After-hours only (5PM – 9AM)</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f3">Google Calendar sync</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f4">SMS confirmations</span></li>
                                 </ul>
-                                <a href="register-basic.html" class="kv-price-btn">Start Free 14-Day Trial</a>
+                                <a href="register-basic.html" class="kv-price-btn" data-i18n="trial_btn">Start Free 14-Day Trial</a>
                             </div>
                             <div class="kv-price-card kv-pc-popular">
-                                <div class="kv-pop-badge">Most Popular</div>
+                                <div class="kv-pop-badge" data-i18n="popular">Most Popular</div>
                                 <div class="kv-price-name">Pro</div>
-                                <p class="kv-price-desc">For busy shops & teams</p>
-                                <div class="kv-price-amount"><span data-lv="pro">$89</span><span>/mo</span></div>
-                                <ul class="kv-price-feats">
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>1,200 minutes included</li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>24/7 answering</li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>Square + Google Calendar</li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>No-show card vault via Lemon Squeezy</li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>Priority support 9AM – 6PM ET</li>
+                                <p class="kv-price-desc" data-i18n="p_pro_desc">For busy shops & teams</p>
+                                <div class="kv-price-amount">
+                                    <span class="kv-price-original" data-lv="pro">$89</span><span data-lv="pro_ea">$45</span><span data-i18n="per_mo">/mo</span>
+                                </div>
+                                <span class="kv-price-ea-tag" data-i18n="ea_lifetime">Early access · lifetime</span>
+                                <span class="kv-price-billed-note" id="kvProBilledNote" style="display:none"><span data-lv="pro_ea_yr">$450</span>/yr · <span data-i18n="billed_yearly">billed yearly</span></span>
+                                <ul class="kv-price-feats" style="margin-top:18px">
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f1">1,200 minutes included</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f2">24/7 answering</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f3">Google Calendar sync</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f4">Card-on-file deposits</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f5">Priority support</span></li>
                                 </ul>
-                                <a href="register-pro.html" class="kv-price-btn kv-price-btn-blue">Start Free 14-Day Trial</a>
+                                <a href="register-pro.html" class="kv-price-btn kv-price-btn-blue" data-i18n="trial_btn">Start Free 14-Day Trial</a>
                             </div>
                         </div>
-                        <div class="kv-demo-box">
-                            <p><strong>Free 2-min demo calls.</strong> We limit to 2 minutes so everyone can try. Saves you <span data-lv="monthly">$1,200</span>/month. Fair trade.</p>
-                        </div>
+                        <p style="text-align:center; color:#71717A; font-size:13px; margin-top:24px;" data-i18n="early_access_note">⚡ Lifetime 50% off available for the first 500 salons. Price never goes up — even when you upgrade plans.</p>
                     </div>
                 </section>
 
@@ -1387,6 +1484,47 @@
                         el.textContent = comp;
                     });
                 };
+
+                // Early-access banner close (remembered via localStorage)
+                window.kvCloseBanner = function() {
+                    var el = document.getElementById('kv-early-banner');
+                    if (el) el.classList.add('kv-hidden');
+                    try { localStorage.setItem('kv_banner_closed', '1'); } catch (e) {}
+                };
+                try {
+                    if (localStorage.getItem('kv_banner_closed') === '1') {
+                        var b = document.getElementById('kv-early-banner');
+                        if (b) b.classList.add('kv-hidden');
+                    }
+                } catch (e) {}
+
+                // Monthly / Yearly billing toggle
+                window.kvSetBilling = function(mode) {
+                    var monthlyBtn = document.getElementById('kvBillMonthly');
+                    var yearlyBtn = document.getElementById('kvBillYearly');
+                    var starterAmt = document.querySelector('[data-lv="starter_ea"]');
+                    var proAmt = document.querySelector('[data-lv="pro_ea"]');
+                    var starterNote = document.getElementById('kvStarterBilledNote');
+                    var proNote = document.getElementById('kvProBilledNote');
+                    var vals = (typeof LOCALIZED_VALUES !== 'undefined' && LOCALIZED_VALUES[currentLang]) || (typeof LOCALIZED_VALUES !== 'undefined' && LOCALIZED_VALUES.en) || {};
+                    if (mode === 'yearly') {
+                        if (monthlyBtn) monthlyBtn.classList.remove('kv-active');
+                        if (yearlyBtn) yearlyBtn.classList.add('kv-active');
+                        // When yearly: divide yearly total by 12 visually, but cleaner to just show /yr below
+                        if (starterAmt) starterAmt.textContent = vals.starter_ea || '$30';
+                        if (proAmt) proAmt.textContent = vals.pro_ea || '$45';
+                        if (starterNote) starterNote.style.display = '';
+                        if (proNote) proNote.style.display = '';
+                    } else {
+                        if (yearlyBtn) yearlyBtn.classList.remove('kv-active');
+                        if (monthlyBtn) monthlyBtn.classList.add('kv-active');
+                        if (starterAmt) starterAmt.textContent = vals.starter_ea || '$30';
+                        if (proAmt) proAmt.textContent = vals.pro_ea || '$45';
+                        if (starterNote) starterNote.style.display = 'none';
+                        if (proNote) proNote.style.display = 'none';
+                    }
+                };
+
                 // Run once on load
                 if (typeof window.kvApplyHeroSlide === 'function') {
                     try { window.kvApplyHeroSlide(0); } catch (e) {}
@@ -2662,15 +2800,16 @@ const LANG_LABELS = { sr: 'SR', en: 'EN-US', 'en-gb': 'EN-UK', es: 'ES', pt: 'PT
 // Currency + localized amounts for landing page stats.
 // 'en' = USD (US); 'en-gb' = GBP (UK); ru = RUB; everything else = EUR.
 const LOCALIZED_VALUES = {
-    'en':    { cur: '$',  starter: '$59',    pro: '$89',    no_show: '$75',   monthly: '$1,200',   bridal: '$250',   appt: '$85',   spa: '$600',   dash_rev: '$1,290',   dash_saved: '$225',   fee: '$25 / $50' },
-    'en-gb': { cur: '£',  starter: '£49',    pro: '£75',    no_show: '£60',   monthly: '£950',     bridal: '£200',   appt: '£68',   spa: '£480',   dash_rev: '£1,020',   dash_saved: '£180',   fee: '£20 / £40' },
-    'es':    { cur: '€',  starter: '55 €',   pro: '85 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
-    'pt':    { cur: '€',  starter: '55 €',   pro: '85 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
-    'fr':    { cur: '€',  starter: '55 €',   pro: '85 €',   no_show: '70 €',  monthly: '1 100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1 220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
-    'it':    { cur: '€',  starter: '55 €',   pro: '85 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
-    'de':    { cur: '€',  starter: '55 €',   pro: '85 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
-    'ru':    { cur: '₽',  starter: '5 500 ₽',pro: '8 200 ₽',no_show: '6 500 ₽',monthly: '100 000 ₽',bridal: '23 000 ₽',appt:'7 000 ₽', spa:'50 000 ₽',dash_rev: '115 000 ₽',dash_saved: '19 000 ₽',fee:'2 000 ₽ / 4 000 ₽' },
-    'sr':    { cur: '€',  starter: '55 €',   pro: '85 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    // EA = early access (50% off lifetime); _yr = yearly billed total (2 months free vs monthly EA)
+    'en':    { cur: '$',  starter: '$59',    pro: '$89',    starter_ea: '$30',    pro_ea: '$45',    starter_ea_yr: '$300',    pro_ea_yr: '$450',    no_show: '$75',   monthly: '$1,200',   bridal: '$250',   appt: '$85',   spa: '$600',   dash_rev: '$1,290',   dash_saved: '$225',   fee: '$25 / $50' },
+    'en-gb': { cur: '£',  starter: '£49',    pro: '£75',    starter_ea: '£25',    pro_ea: '£38',    starter_ea_yr: '£250',    pro_ea_yr: '£380',    no_show: '£60',   monthly: '£950',     bridal: '£200',   appt: '£68',   spa: '£480',   dash_rev: '£1,020',   dash_saved: '£180',   fee: '£20 / £40' },
+    'es':    { cur: '€',  starter: '55 €',   pro: '85 €',   starter_ea: '28 €',   pro_ea: '43 €',   starter_ea_yr: '280 €',   pro_ea_yr: '430 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    'pt':    { cur: '€',  starter: '55 €',   pro: '85 €',   starter_ea: '28 €',   pro_ea: '43 €',   starter_ea_yr: '280 €',   pro_ea_yr: '430 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    'fr':    { cur: '€',  starter: '55 €',   pro: '85 €',   starter_ea: '28 €',   pro_ea: '43 €',   starter_ea_yr: '280 €',   pro_ea_yr: '430 €',   no_show: '70 €',  monthly: '1 100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1 220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    'it':    { cur: '€',  starter: '55 €',   pro: '85 €',   starter_ea: '28 €',   pro_ea: '43 €',   starter_ea_yr: '280 €',   pro_ea_yr: '430 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    'de':    { cur: '€',  starter: '55 €',   pro: '85 €',   starter_ea: '28 €',   pro_ea: '43 €',   starter_ea_yr: '280 €',   pro_ea_yr: '430 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    'ru':    { cur: '₽',  starter: '5 500 ₽',pro: '8 200 ₽',starter_ea: '2 800 ₽',pro_ea: '4 100 ₽',starter_ea_yr: '28 000 ₽',pro_ea_yr: '41 000 ₽',no_show: '6 500 ₽',monthly: '100 000 ₽',bridal: '23 000 ₽',appt:'7 000 ₽', spa:'50 000 ₽',dash_rev: '115 000 ₽',dash_saved: '19 000 ₽',fee:'2 000 ₽ / 4 000 ₽' },
+    'sr':    { cur: '€',  starter: '55 €',   pro: '85 €',   starter_ea: '28 €',   pro_ea: '43 €',   starter_ea_yr: '280 €',   pro_ea_yr: '430 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
 };
 function lv() { return LOCALIZED_VALUES[currentLang] || LOCALIZED_VALUES.en; }
 
@@ -2747,6 +2886,14 @@ const T = {
         nav_features: 'Funkcije', nav_how: 'Kako radi', nav_pricing: 'Cene', nav_login: 'Prijava',
         trust_line1: 'Pravljeno za salone · Otkaži kad god želiš',
         trust_line2: 'Zakazuje preko poziva · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+        banner_early1: 'Rani pristup', banner_early2: 'prvih', banner_early3: 'salona dobija', banner_early4: 'DOŽIVOTNIH 50% popusta', banner_early_cta: 'Rezerviši svoje mesto',
+        billing_monthly: 'Mesečno', billing_yearly: 'Godišnje', billing_save: 'ušteda 2 mes.',
+        per_mo: '/mes', billed_yearly: 'naplata godišnje', ea_lifetime: 'Rani pristup · doživotno',
+        early_access_note: '⚡ Doživotnih 50% popusta dostupno za prvih 500 salona. Cena nikad ne raste — čak i kad nadogradiš paket.',
+        price_eyebrow: 'Jednostavna cena',
+        p_basic_desc: 'Idealno za solo majstora', p_pro_desc: 'Za salone i timove',
+        p_basic_f1: '300 minuta razgovora uključeno', p_basic_f2: 'Van radnog vremena (17h – 9h)', p_basic_f3: 'Sinhronizacija sa Google Calendar', p_basic_f4: 'SMS potvrde',
+        p_pro_f1: '1.200 minuta uključeno', p_pro_f2: '24/7 javljanje', p_pro_f3: 'Google Calendar sinhronizacija', p_pro_f4: 'Kartica za depozit', p_pro_f5: 'Prioritetna podrška',
         hero_badge: 'AI sekretarica · 24/7 aktivna', hero_title_1: 'Kaleya', hero_title_2: 'AI sekretarica 24/7',
         hero_sub: 'Kaleya odgovara, zakazuje, otkazuje i obaveštava osoblje prirodnim glasom. Radi preko poziva, WhatsApp-a, Vibera, Telegrama i SMS-a.',
         hero_cta_demo: 'Isprobaj besplatno', hero_cta_how: 'Pogledaj kako radi', hero_social: '500+ zadovoljnih firmi', hero_tap: 'Dodirni logo',
@@ -2796,6 +2943,14 @@ const T = {
         nav_features: 'Features', nav_how: 'How it works', nav_pricing: 'Pricing', nav_login: 'Login',
         trust_line1: 'Built for salons · Cancel anytime',
         trust_line2: 'Books via call · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+        banner_early1: 'Early access', banner_early2: 'first', banner_early3: 'salons get', banner_early4: 'LIFETIME 50% off', banner_early_cta: 'Claim your spot',
+        billing_monthly: 'Monthly', billing_yearly: 'Yearly', billing_save: 'save 2 mo',
+        per_mo: '/mo', billed_yearly: 'billed yearly', ea_lifetime: 'Early access · lifetime',
+        early_access_note: '⚡ Lifetime 50% off available for the first 500 salons. Price never goes up — even when you upgrade plans.',
+        price_eyebrow: 'Simple pricing',
+        p_basic_desc: 'Perfect for solo artists', p_pro_desc: 'For busy shops & teams',
+        p_basic_f1: '300 talk minutes included', p_basic_f2: 'After-hours only (5PM – 9AM)', p_basic_f3: 'Google Calendar sync', p_basic_f4: 'SMS confirmations',
+        p_pro_f1: '1,200 minutes included', p_pro_f2: '24/7 answering', p_pro_f3: 'Google Calendar sync', p_pro_f4: 'Card-on-file deposits', p_pro_f5: 'Priority support',
         hero_badge: 'AI receptionist · active 24/7', hero_title_1: 'Kaleya', hero_title_2: 'AI receptionist 24/7',
         hero_sub: 'Kaleya answers, schedules, cancels and alerts staff with a natural voice. It works through calls, WhatsApp, Viber, Telegram and SMS.',
         hero_cta_demo: 'Try for free', hero_cta_how: 'See how it works', hero_social: '500+ happy businesses', hero_tap: 'Tap the logo',
@@ -2845,6 +3000,14 @@ const T = {
         nav_features: 'Funciones', nav_how: 'Cómo funciona', nav_pricing: 'Precios', nav_login: 'Acceso',
         trust_line1: 'Hecho para salones · Cancela cuando quieras',
         trust_line2: 'Reserva por llamada · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+        banner_early1: 'Acceso anticipado', banner_early2: 'los primeros', banner_early3: 'salones obtienen', banner_early4: '50% DE POR VIDA', banner_early_cta: 'Reserva tu lugar',
+        billing_monthly: 'Mensual', billing_yearly: 'Anual', billing_save: 'ahorra 2 meses',
+        per_mo: '/mes', billed_yearly: 'facturado anualmente', ea_lifetime: 'Acceso anticipado · de por vida',
+        early_access_note: '⚡ 50% de descuento de por vida para los primeros 500 salones. El precio nunca sube — incluso al cambiar de plan.',
+        price_eyebrow: 'Precios simples',
+        p_basic_desc: 'Perfecto para autónomos', p_pro_desc: 'Para salones y equipos',
+        p_basic_f1: '300 minutos de llamadas incluidos', p_basic_f2: 'Solo fuera de horario (17h – 9h)', p_basic_f3: 'Sincronización con Google Calendar', p_basic_f4: 'Confirmaciones SMS',
+        p_pro_f1: '1.200 minutos incluidos', p_pro_f2: 'Atención 24/7', p_pro_f3: 'Google Calendar sync', p_pro_f4: 'Depósitos con tarjeta', p_pro_f5: 'Soporte prioritario',
         hero_badge: 'Recepcionista IA · activa 24/7', hero_title_1: 'Kaleya', hero_title_2: 'Recepcionista IA 24/7',
         hero_sub: 'Kaleya responde, agenda, cancela y avisa al personal con voz natural. Funciona por llamadas, WhatsApp, Viber, Telegram y SMS.',
         hero_cta_demo: 'Probar gratis', hero_cta_how: 'Ver cómo funciona', hero_social: '500+ empresas satisfechas', hero_tap: 'Toca el logo',
@@ -2894,6 +3057,14 @@ const T = {
         nav_features: 'Funcionalidades', nav_how: 'Como funciona', nav_pricing: 'Preços', nav_login: 'Entrar',
         trust_line1: 'Feito para salões · Cancela quando quiseres',
         trust_line2: 'Marca por chamada · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+        banner_early1: 'Acesso antecipado', banner_early2: 'primeiros', banner_early3: 'salões recebem', banner_early4: '50% VITALÍCIO', banner_early_cta: 'Reserva o teu lugar',
+        billing_monthly: 'Mensal', billing_yearly: 'Anual', billing_save: 'poupa 2 meses',
+        per_mo: '/mês', billed_yearly: 'cobrado anualmente', ea_lifetime: 'Acesso antecipado · vitalício',
+        early_access_note: '⚡ 50% vitalício disponível para os primeiros 500 salões. O preço nunca aumenta — mesmo ao mudar de plano.',
+        price_eyebrow: 'Preços simples',
+        p_basic_desc: 'Ideal para profissionais solo', p_pro_desc: 'Para salões e equipas',
+        p_basic_f1: '300 minutos de chamada incluídos', p_basic_f2: 'Só fora de horas (17h – 9h)', p_basic_f3: 'Sincronização com Google Calendar', p_basic_f4: 'Confirmações por SMS',
+        p_pro_f1: '1.200 minutos incluídos', p_pro_f2: 'Atendimento 24/7', p_pro_f3: 'Google Calendar sync', p_pro_f4: 'Depósitos com cartão', p_pro_f5: 'Suporte prioritário',
         hero_badge: 'Recepcionista IA · ativa 24/7', hero_title_1: 'Kaleya', hero_title_2: 'Recepcionista IA 24/7',
         hero_sub: 'Kaleya atende, agenda, cancela e avisa a equipe com voz natural. Funciona por chamadas, WhatsApp, Viber, Telegram e SMS.',
         hero_cta_demo: 'Testar grátis', hero_cta_how: 'Ver como funciona', hero_social: '500+ empresas satisfeitas', hero_tap: 'Toque no logo',
@@ -2940,6 +3111,14 @@ const T = {
         nav_features: 'Функции', nav_how: 'Как работает', nav_pricing: 'Тарифы', nav_login: 'Вход',
         trust_line1: 'Создано для салонов · Отмена в любой момент',
         trust_line2: 'Записывает по звонку · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+        banner_early1: 'Ранний доступ', banner_early2: 'первые', banner_early3: 'салонов получают', banner_early4: 'СКИДКУ 50% НАВСЕГДА', banner_early_cta: 'Забронировать место',
+        billing_monthly: 'Помесячно', billing_yearly: 'Годовая', billing_save: 'экономия 2 мес.',
+        per_mo: '/мес', billed_yearly: 'оплата за год', ea_lifetime: 'Ранний доступ · навсегда',
+        early_access_note: '⚡ Скидка 50% навсегда для первых 500 салонов. Цена никогда не растёт — даже при переходе на другой тариф.',
+        price_eyebrow: 'Простые тарифы',
+        p_basic_desc: 'Идеально для мастера-одиночки', p_pro_desc: 'Для салонов и команд',
+        p_basic_f1: '300 минут звонков включено', p_basic_f2: 'Только вне рабочих часов (17:00 – 9:00)', p_basic_f3: 'Синхронизация с Google Calendar', p_basic_f4: 'Подтверждения по SMS',
+        p_pro_f1: '1 200 минут включено', p_pro_f2: 'Круглосуточный приём', p_pro_f3: 'Google Calendar sync', p_pro_f4: 'Депозиты по карте', p_pro_f5: 'Приоритетная поддержка',
         hero_badge: 'AI администратор · 24/7', hero_title_1: 'Kaleya', hero_title_2: 'AI администратор 24/7',
         hero_sub: 'Kaleya отвечает, записывает, отменяет встречи и уведомляет персонал естественным голосом. Работает через звонки, WhatsApp, Viber, Telegram и SMS.',
         hero_cta_demo: 'Попробовать бесплатно', hero_cta_how: 'Как это работает', hero_social: '500+ довольных компаний', hero_tap: 'Нажмите логотип',
@@ -2989,6 +3168,14 @@ T.fr = {
     nav_features: 'Fonctionnalites', nav_how: 'Comment ca marche', nav_pricing: 'Tarifs', nav_login: 'Connexion',
     trust_line1: 'Conçu pour les salons · Annulez quand vous voulez',
     trust_line2: 'Prend RDV par appel · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+    banner_early1: 'Accès anticipé', banner_early2: 'les premiers', banner_early3: 'salons obtiennent', banner_early4: '50% À VIE', banner_early_cta: 'Réservez votre place',
+    billing_monthly: 'Mensuel', billing_yearly: 'Annuel', billing_save: 'économisez 2 mois',
+    per_mo: '/mois', billed_yearly: 'facturé annuellement', ea_lifetime: 'Accès anticipé · à vie',
+    early_access_note: '⚡ 50% à vie disponible pour les 500 premiers salons. Le prix n\'augmente jamais — même en changeant de forfait.',
+    price_eyebrow: 'Tarifs simples',
+    p_basic_desc: 'Parfait pour solo', p_pro_desc: 'Pour les salons et équipes',
+    p_basic_f1: '300 minutes incluses', p_basic_f2: 'Heures creuses uniquement (17h – 9h)', p_basic_f3: 'Sync Google Calendar', p_basic_f4: 'Confirmations SMS',
+    p_pro_f1: '1 200 minutes incluses', p_pro_f2: 'Accueil 24/7', p_pro_f3: 'Sync Google Calendar', p_pro_f4: 'Acompte par carte', p_pro_f5: 'Support prioritaire',
     hero_badge: 'Receptionniste IA · active 24/7', hero_sub: 'Kaleya repond, planifie, annule et alerte votre equipe avec une voix naturelle. Fonctionne avec appels, WhatsApp, Viber, Telegram et SMS.',
     hero_cta_demo: 'Essayer gratuitement', hero_cta_how: 'Voir le fonctionnement', hero_social: '500+ entreprises satisfaites', hero_tap: 'Touchez le logo',
     hero_intro_hint: 'Kaleya se presente', hero_demo_msg: '"Bonjour, comment puis-je aider ?"',
@@ -3023,6 +3210,14 @@ T.it = {
     nav_features: 'Funzioni', nav_how: 'Come funziona', nav_pricing: 'Prezzi', nav_login: 'Login',
     trust_line1: 'Pensato per i saloni · Cancella quando vuoi',
     trust_line2: 'Prenota via chiamata · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+    banner_early1: 'Accesso anticipato', banner_early2: 'primi', banner_early3: 'saloni ricevono', banner_early4: '50% A VITA', banner_early_cta: 'Prenota il tuo posto',
+    billing_monthly: 'Mensile', billing_yearly: 'Annuale', billing_save: 'risparmia 2 mesi',
+    per_mo: '/mese', billed_yearly: 'fatturato annualmente', ea_lifetime: 'Accesso anticipato · a vita',
+    early_access_note: '⚡ 50% a vita disponibile per i primi 500 saloni. Il prezzo non aumenta mai — anche cambiando piano.',
+    price_eyebrow: 'Prezzi semplici',
+    p_basic_desc: 'Perfetto per autonomi', p_pro_desc: 'Per saloni e team',
+    p_basic_f1: '300 minuti di chiamata inclusi', p_basic_f2: 'Solo fuori orario (17 – 9)', p_basic_f3: 'Sync Google Calendar', p_basic_f4: 'Conferme SMS',
+    p_pro_f1: '1.200 minuti inclusi', p_pro_f2: 'Risposta 24/7', p_pro_f3: 'Sync Google Calendar', p_pro_f4: 'Acconto con carta', p_pro_f5: 'Supporto prioritario',
     hero_badge: 'Receptionist AI · attiva 24/7', hero_sub: 'Kaleya risponde, prenota, annulla e avvisa il team con voce naturale. Funziona con chiamate, WhatsApp, Viber, Telegram e SMS.',
     hero_cta_demo: 'Prova gratis', hero_cta_how: 'Vedi come funziona', hero_social: '500+ aziende soddisfatte', hero_tap: 'Tocca il logo',
     hero_intro_hint: 'Kaleya si presenta', hero_demo_msg: '"Ciao, come posso aiutare?"',
@@ -3128,6 +3323,14 @@ const EXTRA_TRANSLATIONS = {
         nav_features: 'Funktionen', nav_how: 'So funktioniert es', nav_pricing: 'Preise', nav_login: 'Login',
         trust_line1: 'Gemacht für Salons · Jederzeit kündbar',
         trust_line2: 'Bucht per Anruf · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+        banner_early1: 'Early Access', banner_early2: 'die ersten', banner_early3: 'Salons erhalten', banner_early4: '50% AUF LEBENSZEIT', banner_early_cta: 'Platz sichern',
+        billing_monthly: 'Monatlich', billing_yearly: 'Jährlich', billing_save: '2 Mo. sparen',
+        per_mo: '/Monat', billed_yearly: 'jährlich abgerechnet', ea_lifetime: 'Early Access · auf Lebenszeit',
+        early_access_note: '⚡ 50% lebenslang für die ersten 500 Salons. Der Preis steigt nie — auch beim Plan-Upgrade.',
+        price_eyebrow: 'Einfache Preise',
+        p_basic_desc: 'Ideal für Solo-Profis', p_pro_desc: 'Für Salons und Teams',
+        p_basic_f1: '300 Gesprächsminuten inklusive', p_basic_f2: 'Nur außerhalb der Geschäftszeiten (17 – 9 Uhr)', p_basic_f3: 'Google Calendar Sync', p_basic_f4: 'SMS-Bestätigungen',
+        p_pro_f1: '1.200 Minuten inklusive', p_pro_f2: '24/7 Annahme', p_pro_f3: 'Google Calendar Sync', p_pro_f4: 'Anzahlung per Karte', p_pro_f5: 'Vorrangiger Support',
         hero_badge: 'AI Empfang · 24/7 aktiv', hero_title_1: 'Kaleya', hero_title_2: 'AI Empfang 24/7', hero_sub: 'Kaleya beantwortet Anrufe, bucht, storniert und benachrichtigt das Team mit natürlicher Stimme. Funktioniert mit Anrufen, WhatsApp, Viber, Telegram und SMS.',
         hero_cta_demo: 'Kostenlos testen', hero_cta_how: 'So funktioniert es', hero_social: '500+ zufriedene Unternehmen', hero_tap: 'Logo antippen', hero_intro_hint: 'Kaleya stellt sich vor', hero_demo_msg: '"Hallo, wie kann ich helfen?"', integrates_with: 'Integrationen:',
         feat_title: 'Alles, was eine echte Rezeption macht, nur besser', feat_sub: 'Kaleya versteht Kunden, merkt sich Regeln und arbeitet in der gewählten Sprache.', f_lang_t: '8 Sprachen', f_lang_d: 'Serbisch, English, Spanisch, Portugiesisch, Russisch, Französisch, Italienisch und Deutsch mit manueller Auswahl.',
