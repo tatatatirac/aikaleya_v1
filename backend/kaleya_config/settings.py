@@ -177,6 +177,12 @@ KALEYA_OPENAI_MODEL = os.getenv("OPENAI_MODEL", "")
 KALEYA_ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
 KALEYA_ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "")
 
+# Twilio (voice + SMS) — global fallback; per-tenant credentials live on IntegrationConnection
+KALEYA_TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
+KALEYA_TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
+KALEYA_TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER", "")  # +1XXXXXXXXXX
+KALEYA_PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "https://www.aikaleya.com").rstrip("/")
+
 KALEYA_PAYMENT_PROVIDER = os.getenv("PAYMENT_PROVIDER", "manual").strip().lower()
 KALEYA_PAYMENT_SUCCESS_URL = os.getenv("PAYMENT_SUCCESS_URL", "http://127.0.0.1:8000/?payment=success")
 KALEYA_PAYMENT_CANCEL_URL = os.getenv("PAYMENT_CANCEL_URL", "http://127.0.0.1:8000/?payment=cancel")
