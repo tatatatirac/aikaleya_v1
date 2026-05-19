@@ -30,20 +30,23 @@ from integrations.models import IntegrationConnection
 
 logger = logging.getLogger(__name__)
 
-# Default Twilio voice if ElevenLabs is not configured. Polly.Joanna is American English.
-DEFAULT_TWILIO_VOICE = "Polly.Joanna-Neural"
+# Default Twilio voice if ElevenLabs is not configured.
+# Google's Neural2 voices are the most human-sounding TTS Twilio offers (better than Polly).
+DEFAULT_TWILIO_VOICE = "Google.en-US-Neural2-F"
 
-# Polly voice by language (used when ElevenLabs is unavailable)
+# Best-available Twilio neural voice by language (used when ElevenLabs is unavailable).
+# en/en-gb/de/fr/es/it/pt/ru get Google Neural2 — much more natural than Polly.
+# sr/hr/bs has no native Twilio voice — we fall back to a multilingual model.
 POLLY_VOICE_BY_LANG = {
-    "en": "Polly.Joanna-Neural",
-    "en-gb": "Polly.Amy-Neural",
-    "es": "Polly.Lucia-Neural",
-    "pt": "Polly.Camila-Neural",
-    "ru": "Polly.Tatyana",
-    "fr": "Polly.Lea-Neural",
-    "it": "Polly.Bianca-Neural",
-    "de": "Polly.Vicki-Neural",
-    "sr": "Polly.Lucia-Neural",  # fallback to similar Slavic-friendly voice
+    "en":    "Google.en-US-Neural2-F",
+    "en-gb": "Google.en-GB-Neural2-A",
+    "es":    "Google.es-ES-Neural2-A",
+    "pt":    "Google.pt-PT-Wavenet-A",
+    "ru":    "Google.ru-RU-Wavenet-C",
+    "fr":    "Google.fr-FR-Neural2-A",
+    "it":    "Google.it-IT-Neural2-A",
+    "de":    "Google.de-DE-Neural2-C",
+    "sr":    "Google.en-US-Neural2-F",  # No native Serbian; fall back to English voice
 }
 
 # Twilio speech-recognition language codes for <Gather input="speech">
