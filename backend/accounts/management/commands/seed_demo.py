@@ -179,7 +179,7 @@ class Command(BaseCommand):
             {
                 "code": Plan.CODE_BASIC,
                 "name": "Starter",
-                "monthly_price": 29,
+                "monthly_price": 59,
                 "currency": "USD",
                 "sort_order": 1,
                 "max_staff_members": 0,
@@ -203,7 +203,7 @@ class Command(BaseCommand):
             {
                 "code": Plan.CODE_PRO,
                 "name": "Pro",
-                "monthly_price": 79,
+                "monthly_price": 89,
                 "currency": "USD",
                 "sort_order": 2,
                 "max_staff_members": 1,

@@ -1028,8 +1028,8 @@ function renderLegalPage() {
 }
 
 const CHECKOUT_PLAN_DETAILS = {
-    basic: { name: 'Starter', price: '$29 / month', trial: '14 days' },
-    pro: { name: 'Pro', price: '$79 / month', trial: '14 days' },
+    basic: { name: 'Starter', price: '$59 / month', trial: '14 days' },
+    pro: { name: 'Pro', price: '$89 / month', trial: '14 days' },
     business: { name: 'Business', price: '$349 / month', trial: '14 days' },
     business_plus: { name: 'Business+', price: '$579 / month', trial: '14 days' },
     business_pro_plus: { name: 'BusinessPro+', price: 'Custom', trial: 'By agreement' }
