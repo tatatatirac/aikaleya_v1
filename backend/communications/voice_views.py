@@ -13,6 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from ai_agent.services import handle_inbound_text
+from appointments.models import Customer
 from communications.models import CallSession, Message
 from communications.twilio_service import (
     build_voice_response_twiml,
@@ -22,6 +23,25 @@ from communications.twilio_service import (
     localized_greeting,
     status_callback_url,
 )
+
+
+def _resolve_or_create_caller(business_client, phone_number):
+    """Match the caller's phone to a Customer row; create a stub if new."""
+    if not phone_number:
+        return None
+    cleaned = phone_number.strip()
+    customer = (
+        Customer.objects.filter(business_client=business_client, phone=cleaned).first()
+        or Customer.objects.filter(business_client=business_client, phone__endswith=cleaned[-9:]).first()
+    )
+    if customer:
+        return customer
+    return Customer.objects.create(
+        business_client=business_client,
+        phone=cleaned,
+        first_name="Phone Caller",
+        preferred_channel="phone",
+    )
 
 
 logger = logging.getLogger(__name__)
@@ -47,6 +67,9 @@ def voice_incoming(request):
             "<Response><Say>Sorry, this number is not active yet.</Say><Hangup/></Response>"
         )
 
+    # Auto-identify the caller by phone (the whole point of having a phone number)
+    customer = _resolve_or_create_caller(business_client, from_number)
+
     session = CallSession.objects.create(
         business_client=business_client,
         provider="twilio",
@@ -54,10 +77,14 @@ def voice_incoming(request):
         status="active",
         from_number=from_number,
         to_number=to_number,
+        customer=customer,
         started_at=datetime.now(timezone.utc),
         metadata={"raw_incoming": dict(request.POST.items())},
     )
-    ensure_voice_conversation(business_client, session)
+    conv = ensure_voice_conversation(business_client, session)
+    if customer and not conv.customer:
+        conv.customer = customer
+        conv.save(update_fields=["customer"])
 
     greeting = localized_greeting(business_client)
     twiml = build_voice_response_twiml(
@@ -78,12 +105,19 @@ def voice_gather(request, session_id):
     speech_result = request.POST.get("SpeechResult", "").strip()
     confidence = request.POST.get("Confidence", "")
 
-    session = CallSession.objects.select_related("business_client", "conversation").filter(id=session_id).first()
+    session = CallSession.objects.select_related("business_client", "conversation", "customer").filter(id=session_id).first()
     if not session:
         return HttpResponseBadRequest("Unknown session")
 
     business_client = session.business_client
     conversation = session.conversation or ensure_voice_conversation(business_client, session)
+    caller = session.customer or _resolve_or_create_caller(business_client, session.from_number)
+    if caller and not session.customer:
+        session.customer = caller
+        session.save(update_fields=["customer"])
+    if caller and not conversation.customer:
+        conversation.customer = caller
+        conversation.save(update_fields=["customer"])
 
     if not speech_result:
         # Caller stayed silent — ask again
@@ -109,13 +143,30 @@ def voice_gather(request, session_id):
     else:
         session.transcript = transcript_chunk.lstrip()
 
+    # Build a rich payload so the AI agent never has to ask for the phone number
+    payload = {
+        "from_number": session.from_number,
+        "phone": session.from_number,
+        "customer_phone": session.from_number,
+        "caller_known": bool(caller),
+    }
+    if caller:
+        payload.update({
+            "customer_id": caller.id,
+            "customer_first_name": caller.first_name,
+            "customer_last_name": caller.last_name,
+            "customer_name": caller.full_name,
+            "customer_email": caller.email,
+        })
+
     try:
         result = handle_inbound_text(
             business_client,
             speech_result,
             conversation=conversation,
+            customer=caller,
             channel="phone",
-            payload={"from_number": session.from_number},
+            payload=payload,
             include_voice=False,
             external_thread_id=session.external_call_id,
             record_messages=False,  # we record manually above to control flow

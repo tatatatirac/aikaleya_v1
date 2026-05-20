@@ -2363,7 +2363,7 @@ def build_text_response(business_client, intent, tool_output):
     return "I understand the request. The next step is checking the calendar and confirming the appointment."
 
 
-def build_system_prompt(business_client):
+def build_system_prompt(business_client, channel="web", caller_phone="", caller_name=""):
     language = business_client.interface_language or business_client.language or "en"
     prompt = (
         "Ti si Kaleya, profesionalna AI sekretarica za zakazivanje termina. "
@@ -2375,6 +2375,16 @@ def build_system_prompt(business_client):
         "Ako korisnik trazi nesto sto ne mozes da potvrdis kroz tool output, reci da ces proveriti ili prebaciti supportu. "
         f"Jezik odgovora mora biti: {language}."
     )
+    # When the caller is on the phone, we already know their number — don't ask again.
+    if channel == "phone" and caller_phone:
+        name_part = f" (saved as {caller_name})" if caller_name and caller_name != "Phone Caller" else ""
+        prompt += (
+            f"\n\nIMPORTANT: The caller is dialing from {caller_phone}{name_part}. "
+            "You ALREADY KNOW their phone number — DO NOT ask for it again. "
+            "If you need the customer's name and it's not provided, ask only for the name (once), "
+            "never for phone or last name. Proceed straight to booking once you have service and time."
+        )
+
     try:
         master_prompt = (business_client.api_settings.master_prompt or "").strip()
     except ClientApiSettings.DoesNotExist:
@@ -2722,10 +2732,19 @@ def handle_inbound_text(
 
     if use_ai and not skip_ai_for_simple_text and channel not in {"telegram", "whatsapp", "viber", "sms"}:
         try:
+            _caller_phone_for_prompt = ""
+            _caller_name_for_prompt = ""
+            if isinstance(payload, dict):
+                _caller_phone_for_prompt = (payload.get("from_number") or payload.get("phone") or payload.get("customer_phone") or "")
+                _caller_name_for_prompt = (payload.get("customer_name") or payload.get("customer_first_name") or "")
+            if not _caller_phone_for_prompt and customer and customer.phone:
+                _caller_phone_for_prompt = customer.phone
+            if not _caller_name_for_prompt and customer:
+                _caller_name_for_prompt = customer.full_name or customer.first_name or ""
             response_text = generate_anthropic_reply(
                 business_client,
                 text,
-                build_system_prompt(business_client),
+                build_system_prompt(business_client, channel=channel, caller_phone=_caller_phone_for_prompt, caller_name=_caller_name_for_prompt),
                 context={
                     "business": {
                         "name": business_client.public_name or business_client.name,
