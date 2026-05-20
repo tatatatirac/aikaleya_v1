@@ -183,6 +183,14 @@ KALEYA_TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
 KALEYA_TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER", "")  # +1XXXXXXXXXX
 KALEYA_PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "https://www.aikaleya.com").rstrip("/")
 
+# Google OAuth — used to authorize tenants' Google Calendars for appointment sync
+KALEYA_GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")
+KALEYA_GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", "")
+KALEYA_GOOGLE_OAUTH_REDIRECT_URI = os.getenv(
+    "GOOGLE_OAUTH_REDIRECT_URI",
+    f"{KALEYA_PUBLIC_BASE_URL}/api/integrations/google-calendar/callback/",
+)
+
 KALEYA_PAYMENT_PROVIDER = os.getenv("PAYMENT_PROVIDER", "manual").strip().lower()
 KALEYA_PAYMENT_SUCCESS_URL = os.getenv("PAYMENT_SUCCESS_URL", "http://127.0.0.1:8000/?payment=success")
 KALEYA_PAYMENT_CANCEL_URL = os.getenv("PAYMENT_CANCEL_URL", "http://127.0.0.1:8000/?payment=cancel")

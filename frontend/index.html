@@ -2056,6 +2056,23 @@
                                 </div>
                             </div>
 
+                            <!-- GOOGLE CALENDAR -->
+                            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1">
+                                        <p class="text-sm font-semibold flex items-center gap-2" data-i18n="cset_gcal_title">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" fill="#4285F4"/><path d="M7 10h10M7 14h6" stroke="white" stroke-width="2"/></svg>
+                                            Google Calendar
+                                        </p>
+                                        <p class="text-xs text-slate-500 mt-1" data-i18n="cset_gcal_desc">Every booking syncs to your Google Calendar in real time.</p>
+                                        <p id="gcalStatus" class="text-[11px] mt-2 hidden"></p>
+                                    </div>
+                                    <span id="gcalBadge" class="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800" data-i18n="gcal_disconnected">Not connected</span>
+                                </div>
+                                <button id="gcalConnectBtn" onclick="connectGoogleCalendar()" class="mt-3 w-full h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold" data-i18n="cset_gcal_connect">Connect Google Calendar</button>
+                                <button id="gcalDisconnectBtn" onclick="disconnectGoogleCalendar()" class="mt-2 w-full h-9 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 hidden" data-i18n="cset_gcal_disconnect">Disconnect</button>
+                            </div>
+
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                                 <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="calendar_settings">Podešavanja kalendara</p>
                                 <div class="client-settings-grid">
@@ -2926,6 +2943,9 @@ const T = {
         cset_logo: 'Logo firme', cset_logo_upload: 'Otpremi logo', cset_logo_remove: 'Ukloni logo',
         cset_logo_hint: 'PNG, JPG, WebP ili SVG · max 2MB · prikazuje se kao ikona aplikacije',
         cset_business_contacts: 'Poslovni kontakti', cset_business_phone: 'Poslovni telefon', cset_business_email: 'Poslovni email',
+        cset_gcal_title: 'Google Calendar', cset_gcal_desc: 'Svaki termin se automatski upisuje u tvoj Google Calendar.',
+        cset_gcal_connect: 'Poveži Google Calendar', cset_gcal_disconnect: 'Isključi',
+        gcal_disconnected: 'Nije povezan',
         queue_alarm: 'Alarm za sledećeg klijenta', emergency_alarm: 'Hitni alarm', voice_alarm: 'Uključi glasovnu najavu', test_queue: 'Test sledeći', test_emergency: 'Test hitno',
         ad_dash: 'Kontrolna tabla', ad_clients: 'Administratori / firme', ad_clients_sub: 'API i model mogu biti globalni ili posebni po firmi.',
         ad_alarms: 'Alarmi', ad_alarms_sub: 'Rezervisano za buduću human support eskalaciju.',
@@ -2983,6 +3003,9 @@ const T = {
         cset_logo: 'Company logo', cset_logo_upload: 'Upload logo', cset_logo_remove: 'Remove logo',
         cset_logo_hint: 'PNG, JPG, WebP or SVG · max 2MB · shows as app icon when installed',
         cset_business_contacts: 'Business contacts', cset_business_phone: 'Business phone', cset_business_email: 'Business email',
+        cset_gcal_title: 'Google Calendar', cset_gcal_desc: 'Every booking syncs to your Google Calendar in real time.',
+        cset_gcal_connect: 'Connect Google Calendar', cset_gcal_disconnect: 'Disconnect',
+        gcal_disconnected: 'Not connected',
         queue_alarm: 'Next-client alarm', emergency_alarm: 'Urgent alarm', voice_alarm: 'Enable voice announcement', test_queue: 'Test next', test_emergency: 'Test urgent',
         ad_dash: 'Dashboard', ad_clients: 'Administrators / companies', ad_clients_sub: 'API and model can be global or company-specific.',
         ad_alarms: 'Alarms', ad_alarms_sub: 'Reserved for future human support escalation.',
@@ -3040,6 +3063,9 @@ const T = {
         cset_logo: 'Logo de la empresa', cset_logo_upload: 'Subir logo', cset_logo_remove: 'Quitar logo',
         cset_logo_hint: 'PNG, JPG, WebP o SVG · máx. 2MB · será el ícono de la app',
         cset_business_contacts: 'Contactos del negocio', cset_business_phone: 'Teléfono del negocio', cset_business_email: 'Email del negocio',
+        cset_gcal_title: 'Google Calendar', cset_gcal_desc: 'Cada cita se sincroniza con tu Google Calendar en tiempo real.',
+        cset_gcal_connect: 'Conectar Google Calendar', cset_gcal_disconnect: 'Desconectar',
+        gcal_disconnected: 'No conectado',
         queue_alarm: 'Alarma de siguiente cliente', emergency_alarm: 'Alarma urgente', voice_alarm: 'Activar anuncio de voz', test_queue: 'Probar siguiente', test_emergency: 'Probar urgente',
         ad_dash: 'Panel', ad_clients: 'Administradores / empresas', ad_clients_sub: 'La API y el modelo pueden ser globales o por empresa.',
         ad_alarms: 'Alarmas', ad_alarms_sub: 'Reservado para futura escalación a soporte humano.',
@@ -5200,6 +5226,100 @@ function reloadDynamicManifest() {
     const base = link.getAttribute('href').split('?')[0];
     link.setAttribute('href', base + '?v=' + Date.now());
 }
+
+// ===== Google Calendar connect/disconnect =====
+async function connectGoogleCalendar() {
+    const status = document.getElementById('gcalStatus');
+    const showStatus = (text, isError = false) => {
+        if (!status) return;
+        status.textContent = text;
+        status.className = 'text-[11px] mt-2 ' + (isError ? 'text-red-500' : 'text-blue-500');
+        status.classList.remove('hidden');
+    };
+    showStatus('Redirecting to Google...');
+    try {
+        const res = await kaleyaApi('/api/integrations/google-calendar/start/', { method: 'POST' });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        if (data.authorize_url) {
+            window.location.href = data.authorize_url;
+        } else {
+            showStatus('Could not start Google OAuth.', true);
+        }
+    } catch (err) {
+        console.warn('GCal connect failed', err);
+        showStatus('Connection failed. Try again.', true);
+    }
+}
+
+async function disconnectGoogleCalendar() {
+    try {
+        const res = await kaleyaApi('/api/integrations/google-calendar/disconnect/', { method: 'POST' });
+        if (!res.ok) throw new Error(await res.text());
+        applyGcalBadge(false);
+        const status = document.getElementById('gcalStatus');
+        if (status) {
+            status.textContent = 'Disconnected.';
+            status.className = 'text-[11px] mt-2 text-slate-500';
+            status.classList.remove('hidden');
+            setTimeout(() => status.classList.add('hidden'), 3000);
+        }
+    } catch (err) {
+        console.warn('GCal disconnect failed', err);
+    }
+}
+
+function applyGcalBadge(isConnected, email = '') {
+    const badge = document.getElementById('gcalBadge');
+    const connectBtn = document.getElementById('gcalConnectBtn');
+    const disconnectBtn = document.getElementById('gcalDisconnectBtn');
+    if (!badge) return;
+    if (isConnected) {
+        badge.textContent = email || 'Connected';
+        badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300';
+        if (connectBtn) connectBtn.classList.add('hidden');
+        if (disconnectBtn) disconnectBtn.classList.remove('hidden');
+    } else {
+        badge.textContent = tr('gcal_disconnected') || 'Not connected';
+        badge.className = 'px-2.5 py-1 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-slate-800';
+        if (connectBtn) connectBtn.classList.remove('hidden');
+        if (disconnectBtn) disconnectBtn.classList.add('hidden');
+    }
+}
+
+async function refreshGcalStatus() {
+    try {
+        const res = await kaleyaApi('/api/integrations/connections/', { method: 'GET' });
+        if (!res.ok) return;
+        const data = await res.json();
+        const items = Array.isArray(data) ? data : (data.results || []);
+        const gcal = items.find(i => i.provider === 'google_calendar');
+        if (gcal && gcal.enabled && gcal.status === 'connected') {
+            applyGcalBadge(true, gcal.public_number || 'Connected');
+        } else {
+            applyGcalBadge(false);
+        }
+    } catch (e) {
+        applyGcalBadge(false);
+    }
+}
+
+// React to OAuth redirect-back hash flags
+(function detectGcalRedirect() {
+    if (typeof window === 'undefined' || !window.location.hash) return;
+    const hash = window.location.hash;
+    if (hash.includes('gcal=google_calendar_connected')) {
+        setTimeout(() => {
+            try { openClientSettings && openClientSettings(); } catch (e) {}
+            try { refreshGcalStatus(); } catch (e) {}
+        }, 800);
+        // Clean the hash so refresh doesn't re-trigger
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+    } else if (hash.includes('gcal-error=')) {
+        console.warn('Google Calendar connection failed:', hash);
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+})();
 
 async function uploadClientLogo(event) {
     const fileInput = event.target;
@@ -7964,6 +8084,7 @@ async function openClientSettings() {
     syncClientCalendarSettingsUI();
     updatePwaInstallButtons();
     await Promise.all([loadClientEntitlementsFromBackend(), loadClientSettingsFromBackend(), loadClientOperationalDataFromBackend(), loadClientCustomerMemoriesFromBackend(), loadClientSupportTicketsFromBackend(), loadClientIntegrationsStatus()]);
+    try { refreshGcalStatus(); } catch (e) {}
 }
 function closeClientSettings() { document.getElementById('client-settings').classList.add('hidden'); }
 function updateElStatus() {
