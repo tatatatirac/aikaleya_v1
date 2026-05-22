@@ -391,6 +391,15 @@ def dashboard(request):
             except Exception as exc:
                 messages.error(request, f"Greška pri oslobađanju broja: {exc}")
             return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#integrations")
+        elif section == "resend_setup_link" and is_admin_user(request.user):
+            owner = selected_client.owner
+            if owner:
+                from billing.services import _send_setup_email
+                _send_setup_email(owner, selected_client)
+                messages.success(request, f"Setup email poslat na {owner.email}.")
+            else:
+                messages.error(request, "Klijent nema vlasnika — ne mogu da pošaljem email.")
+            return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#clients")
         elif section == "delete_client" and is_admin_user(request.user):
             client_name = str(selected_client)
             selected_client.delete()

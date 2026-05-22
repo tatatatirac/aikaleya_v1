@@ -1192,7 +1192,6 @@ async function createCheckoutSession(payload) {
             email: payload.email,
             company: payload.company,
             full_name: payload.full_name,
-            password: payload.password,
             phone: payload.phone,
             country: payload.country,
             note: payload.note
@@ -1224,7 +1223,6 @@ async function submitRegistrationForm(form) {
         company: form.elements.company?.value.trim() || '',
         full_name: form.elements.name?.value.trim() || '',
         email: form.elements.email?.value.trim() || '',
-        password: form.elements.password?.value || '',
         phone: form.elements.phone?.value.trim() || '',
         country: form.elements.country?.value.trim() || '',
         note: form.elements.note?.value.trim() || ''

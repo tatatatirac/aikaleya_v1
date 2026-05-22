@@ -1317,6 +1317,12 @@
                                                                 <button class="mini-btn success" type="submit">Aktiviraj</button>
                                                             </form>
                                                         {% endif %}
+                                                        <form class="inline-form" method="post" title="Pošalji novi setup email vlasniku">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="section" value="resend_setup_link">
+                                                            <input type="hidden" name="client_id" value="{{ client.id }}">
+                                                            <button class="mini-btn" type="submit">📧 Setup link</button>
+                                                        </form>
                                                         <form class="inline-form" method="post" onsubmit="return confirm('Obrisati klijenta {{ client.public_name|default:client.name }}?');">
                                                             {% csrf_token %}
                                                             <input type="hidden" name="section" value="delete_client">

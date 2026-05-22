@@ -172,7 +172,7 @@ class PendingCheckoutRegistration(models.Model):
     email = models.EmailField()
     company = models.CharField(max_length=160)
     full_name = models.CharField(max_length=160)
-    password_hash = models.CharField(max_length=256)
+    password_hash = models.CharField(max_length=256, blank=True)
     phone = models.CharField(max_length=40, blank=True)
     country = models.CharField(max_length=80, blank=True)
     activated_at = models.DateTimeField(null=True, blank=True)

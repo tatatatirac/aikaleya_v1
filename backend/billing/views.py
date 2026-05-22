@@ -7,7 +7,6 @@ import urllib.parse
 import urllib.request
 
 from django.conf import settings
-from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.utils import timezone
 from rest_framework import permissions, status, viewsets
@@ -180,7 +179,7 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
         plan = Plan.objects.filter(code=payload["plan_code"], active=True).first()
         if not plan:
             return Response({"detail": "Paket nije pronadjen."}, status=status.HTTP_400_BAD_REQUEST)
-        if payload.get("password") and (
+        if payload.get("email") and (
             User.objects.filter(email__iexact=payload.get("email", "")).exists()
             or User.objects.filter(username__iexact=payload.get("email", "")).exists()
         ):
@@ -203,14 +202,14 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
             trial_days=plan.trial_days,
             metadata=metadata,
         )
-        if payload.get("password"):
+        if payload.get("email"):
             PendingCheckoutRegistration.objects.update_or_create(
                 checkout=checkout,
                 defaults={
                     "email": payload.get("email", "").strip().lower(),
                     "company": payload.get("company", "").strip(),
                     "full_name": payload.get("full_name", "").strip(),
-                    "password_hash": make_password(payload.get("password")),
+                    "password_hash": "",  # password is no longer set at checkout — set via /setup/ email link
                     "phone": payload.get("phone", "").strip(),
                     "country": payload.get("country", "").strip(),
                 },
