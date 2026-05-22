@@ -264,6 +264,23 @@ class VoiceStatusAPIView(APIView):
 class PublicChatThrottle(AnonRateThrottle):
     scope = 'public_browser_chat'
 
+    def _client_ip(self, request):
+        forwarded = request.META.get("HTTP_X_FORWARDED_FOR", "")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+        return request.META.get("REMOTE_ADDR", "")
+
+    def allow_request(self, request, view):
+        # IP whitelist (skip throttle for owner / staff testing IPs).
+        # Configure via PUBLIC_CHAT_THROTTLE_WHITELIST=ip1,ip2,ip3 in .env.
+        from django.conf import settings as dj_settings
+        whitelist = getattr(dj_settings, "KALEYA_PUBLIC_CHAT_THROTTLE_WHITELIST", "") or ""
+        whitelist_ips = {ip.strip() for ip in whitelist.split(",") if ip.strip()}
+        client_ip = self._client_ip(request)
+        if client_ip and client_ip in whitelist_ips:
+            return True
+        return super().allow_request(request, view)
+
 
 class PublicBrowserChatAPIView(APIView):
     permission_classes = (permissions.AllowAny,)

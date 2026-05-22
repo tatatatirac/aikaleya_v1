@@ -201,6 +201,10 @@ KALEYA_TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
 KALEYA_TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER", "")  # +1XXXXXXXXXX
 KALEYA_PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "https://www.aikaleya.com").rstrip("/")
 
+# Comma-separated list of IPs that bypass the public browser-chat throttle.
+# Useful for developer/owner testing without hitting the per-IP rate limit.
+KALEYA_PUBLIC_CHAT_THROTTLE_WHITELIST = os.getenv("PUBLIC_CHAT_THROTTLE_WHITELIST", "")
+
 # Google OAuth — used to authorize tenants' Google Calendars for appointment sync
 KALEYA_GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID", "")
 KALEYA_GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", "")
