@@ -471,6 +471,97 @@
             border-color: rgba(244, 63, 94, .72);
             box-shadow: inset 0 0 0 1px rgba(244, 63, 94, .18);
         }
+        .conversation-row:hover { background: var(--panel-3, #2a2a38); }
+
+        /* ── Conversation detail drawer ────────────────────── */
+        #convDrawer {
+            position: fixed; top: 0; right: -480px; width: 460px; max-width: 100vw;
+            height: 100vh; background: var(--panel); border-left: 1px solid var(--border);
+            z-index: 2000; display: flex; flex-direction: column;
+            transition: right .28s cubic-bezier(.4,0,.2,1);
+            box-shadow: -8px 0 40px rgba(0,0,0,.5);
+        }
+        #convDrawer.open { right: 0; }
+        #convDrawerHeader {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 18px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+        }
+        #convDrawerHeader h3 { font-size: 15px; font-weight: 700; margin: 0; }
+        #convDrawerClose {
+            background: none; border: none; color: var(--soft); cursor: pointer;
+            font-size: 20px; padding: 4px 8px; border-radius: 8px;
+        }
+        #convDrawerClose:hover { background: var(--panel-2); color: var(--text); }
+        #convDrawerBody { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+        .msg-bubble {
+            max-width: 82%; padding: 10px 14px; border-radius: 14px; font-size: 13px; line-height: 1.5;
+        }
+        .msg-bubble.inbound { background: var(--panel-2); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .msg-bubble.outbound { background: rgba(124,77,255,.18); border: 1px solid rgba(124,77,255,.25); align-self: flex-end; border-bottom-right-radius: 4px; }
+        .msg-bubble .msg-meta { font-size: 11px; color: var(--soft); margin-top: 4px; }
+        #convDrawerOverlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 1999;
+            display: none; backdrop-filter: blur(2px);
+        }
+        #convDrawerOverlay.open { display: block; }
+
+        /* ── Toast notifications ───────────────────────────── */
+        #toastContainer {
+            position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+            display: flex; flex-direction: column; gap: 10px; align-items: flex-end;
+        }
+        .toast {
+            background: var(--panel); border: 1px solid var(--border);
+            border-radius: 14px; padding: 14px 18px; min-width: 260px; max-width: 340px;
+            box-shadow: 0 8px 32px rgba(0,0,0,.5); font-size: 13px;
+            animation: toastIn .3s cubic-bezier(.34,1.56,.64,1) forwards;
+        }
+        .toast.urgent { border-color: rgba(244,63,94,.6); }
+        .toast strong { display: block; margin-bottom: 4px; }
+        @keyframes toastIn { from { opacity:0; transform:translateX(40px); } to { opacity:1; transform:none; } }
+
+        /* ── Calendar week view ─────────────────────────────── */
+        .cal-week {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            overflow-x: auto;
+        }
+        @media (max-width: 900px) { .cal-week { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 600px) { .cal-week { grid-template-columns: repeat(2, 1fr); } }
+        .cal-day {
+            background: var(--panel-2);
+            border-radius: 14px;
+            padding: 12px 10px;
+            min-height: 120px;
+        }
+        .cal-day.today { border: 1.5px solid var(--teal); }
+        .cal-day-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--soft);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            margin-bottom: 4px;
+        }
+        .cal-day-date {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+        .cal-day.today .cal-day-date { color: var(--teal); }
+        .cal-appt {
+            font-size: 11px;
+            padding: 4px 7px;
+            border-radius: 7px;
+            background: rgba(124,77,255,.15);
+            border-left: 2px solid var(--accent);
+            margin-bottom: 4px;
+            line-height: 1.4;
+        }
+        .cal-appt strong { display: block; font-size: 11px; }
+        .cal-empty { font-size: 11px; color: var(--muted); margin-top: 6px; }
 
         .conversation-icon {
             width: 52px;
@@ -1045,6 +1136,10 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M3 21a7 7 0 0 1 14 0"/><path d="M21 21a5 5 0 0 0-4-4.9"/></svg>
                     Klijenti
                 </a>
+                <a class="nav-btn" href="#calendar" data-tab="calendar" data-title="Kalendar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                    Kalendar
+                </a>
                 <a class="nav-btn" href="#alarms" data-tab="alarms" data-title="Alarmi">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
                     Alarmi
@@ -1138,24 +1233,24 @@
                         {% endif %}
                         <div class="cards">
                             <article class="card metric">
-                                <span>Aktivni pozivi</span>
-                                <strong>3</strong>
-                                <small>+2 danas</small>
+                                <span>Pozivi danas</span>
+                                <strong>{{ stats_total_calls_today }}</strong>
+                                <small>{{ stats_active_calls }} aktivan{% if stats_active_calls != 1 %}ih{% endif %}</small>
                             </article>
                             <article class="card metric">
                                 <span>Zakazano danas</span>
                                 <strong>{{ today_summary.busy_count }}</strong>
-                                <small style="color:var(--muted)">Kaleya uradila 100%</small>
+                                <small style="color:var(--muted)">termina u kalendaru</small>
                             </article>
                             <article class="card metric">
-                                <span>Propušteni</span>
-                                <strong>0</strong>
-                                <small>-100% vs prošla ned.</small>
+                                <span>Propušteni danas</span>
+                                <strong {% if stats_missed_today > 0 %}style="color:var(--orange)"{% endif %}>{{ stats_missed_today }}</strong>
+                                <small>{{ stats_transferred_today }} prenet{% if stats_transferred_today != 1 %}ih{% endif %} na vlasnika</small>
                             </article>
                             <article class="card metric">
-                                <span>Zadovoljstvo</span>
-                                <strong>4.9</strong>
-                                <small style="color:var(--muted)">od 5.0</small>
+                                <span>Razgovori ukupno</span>
+                                <strong>{{ stats_total_conversations }}</strong>
+                                <small style="color:var(--muted)">svi kanali</small>
                             </article>
                         </div>
 
@@ -1172,7 +1267,9 @@
                                 </div>
                                 <div class="conversation-list" id="conversationFeed">
                                     {% for item in conversation_feed %}
-                                        <div class="conversation-row {% if item.urgent %}urgent{% endif %}" data-conversation-status="{{ item.filter }}">
+                                        <div class="conversation-row {% if item.urgent %}urgent{% endif %}"
+                                             data-conversation-status="{{ item.filter }}"
+                                             {% if item.conversation_id %}data-conv-id="{{ item.conversation_id }}" onclick="openConvDetail({{ item.conversation_id }})" style="cursor:pointer"{% endif %}>
                                             <div class="conversation-icon {{ item.kind }}">{% if item.kind == "support" %}!{% else %}i{% endif %}</div>
                                             <div class="conversation-main">
                                                 <strong>{{ item.title }}</strong>
@@ -1228,6 +1325,36 @@
                                 </div>
                                 <button class="outline-btn" type="button" data-jump="settings">Podesi glas</button>
                             </article>
+                        </div>
+                    </section>
+
+                    <!-- ══ CALENDAR ══════════════════════════════════════════════════════ -->
+                    <section class="panel" id="calendar">
+                        <div class="section-head">
+                            <div>
+                                <h2>Kalendar</h2>
+                                <p>Termini za tekuću sedmicu — potvrđeni i na čekanju.</p>
+                            </div>
+                        </div>
+
+                        <div class="card settings-card">
+                            <div class="cal-week">
+                                {% for day in calendar_week %}
+                                    <div class="cal-day {% if day.is_today %}today{% endif %}">
+                                        <div class="cal-day-label">{{ day.label }}</div>
+                                        <div class="cal-day-date">{{ day.date|date:"j" }}</div>
+                                        {% for appt in day.appointments %}
+                                            <div class="cal-appt">
+                                                <strong>{{ appt.start_time|time:"H:i" }} {% if appt.service %}{{ appt.service.name|truncatechars:18 }}{% endif %}</strong>
+                                                {{ appt.customer.full_name|default:"Mušterija"|truncatechars:16 }}
+                                                {% if appt.staff_member %}<br><span style="color:var(--soft)">{{ appt.staff_member.full_name|truncatechars:14 }}</span>{% endif %}
+                                            </div>
+                                        {% empty %}
+                                            <div class="cal-empty">Slobodan dan</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endfor %}
+                            </div>
                         </div>
                     </section>
 
@@ -1889,6 +2016,113 @@
                             </div>
                         </form>
 
+                        {# ── Viber card ───────────────────────────────────────────────────── #}
+                        <form method="post" class="card settings-card" style="margin-top:28px">
+                            {% csrf_token %}
+                            <input type="hidden" name="section" value="viber_integration">
+                            <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                            <h2>💜 Viber</h2>
+                            <p class="helper-text">
+                                Kaleya prima i odgovara na Viber poruke putem Viber Public Account API.
+                                Napravi Public Account na <strong>partners.viber.com</strong>, uzmi Auth Token i sačuvaj — webhook se automatski registruje.
+                            </p>
+                            <div class="form-grid">
+                                <label class="switch">Viber aktivan
+                                    <input type="checkbox" name="viber_enabled" {% if viber_integration.enabled %}checked{% endif %}>
+                                </label>
+                                <div class="field">
+                                    <label>Status</label>
+                                    <select name="viber_status">
+                                        <option value="draft"     {% if not viber_integration or viber_integration.status == "draft"     %}selected{% endif %}>Draft</option>
+                                        <option value="connected" {% if viber_integration.status == "connected" %}selected{% endif %}>Connected</option>
+                                        <option value="paused"    {% if viber_integration.status == "paused"    %}selected{% endif %}>Paused</option>
+                                        <option value="error"     {% if viber_integration.status == "error"     %}selected{% endif %}>Error</option>
+                                    </select>
+                                </div>
+                                <div class="field full">
+                                    <label>Auth Token (PA Token)</label>
+                                    <input type="password" name="viber_auth_token"
+                                           placeholder="{% if viber_integration and viber_integration.config.auth_token %}Auth token je sačuvan — unesi novi za promenu{% else %}Nalepiti token iz Viber Partners portala{% endif %}">
+                                </div>
+                                <div class="field full">
+                                    <label>Naziv pošiljaoca (Sender Name)</label>
+                                    <input name="viber_sender_name"
+                                           value="{% if viber_integration %}{{ viber_integration.config.sender_name|default:'' }}{% endif %}"
+                                           placeholder="Kaleya">
+                                </div>
+                                <div class="field full">
+                                    <label>Webhook URL (automatski se registruje na čuvanju)</label>
+                                    <input class="readonly-input" value="{{ viber_webhook_url }}" readonly onclick="this.select()">
+                                </div>
+                                {% if viber_integration.last_error %}
+                                    <div class="field full">
+                                        <label>Poslednja greška</label>
+                                        <textarea readonly>{{ viber_integration.last_error }}</textarea>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="actions">
+                                <button class="primary-btn" type="submit">Sačuvaj Viber</button>
+                            </div>
+                        </form>
+
+                        {# ── Instagram DM card ────────────────────────────────────────────── #}
+                        <form method="post" class="card settings-card" style="margin-top:28px">
+                            {% csrf_token %}
+                            <input type="hidden" name="section" value="instagram_integration">
+                            <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                            <h2>📸 Instagram DM</h2>
+                            <p class="helper-text">
+                                Kaleya odgovara na Instagram Direct poruke putem Meta Business API.
+                                Potreban je Meta Business nalog, Instagram Professional nalog i odobrena Meta App.
+                            </p>
+                            <div class="form-grid">
+                                <label class="switch">Instagram aktivan
+                                    <input type="checkbox" name="instagram_enabled" {% if instagram_integration.enabled %}checked{% endif %}>
+                                </label>
+                                <div class="field">
+                                    <label>Status</label>
+                                    <select name="instagram_status">
+                                        <option value="draft"     {% if not instagram_integration or instagram_integration.status == "draft"     %}selected{% endif %}>Draft</option>
+                                        <option value="connected" {% if instagram_integration.status == "connected" %}selected{% endif %}>Connected</option>
+                                        <option value="paused"    {% if instagram_integration.status == "paused"    %}selected{% endif %}>Paused</option>
+                                        <option value="error"     {% if instagram_integration.status == "error"     %}selected{% endif %}>Error</option>
+                                    </select>
+                                </div>
+                                <div class="field full">
+                                    <label>Page Access Token</label>
+                                    <input type="password" name="instagram_access_token"
+                                           placeholder="{% if instagram_integration and instagram_integration.config.access_token %}Token sačuvan{% else %}Iz Meta Business Suite → Settings → Advanced{% endif %}">
+                                </div>
+                                <div class="field full">
+                                    <label>Instagram Business Account ID</label>
+                                    <input name="instagram_business_account_id"
+                                           value="{% if instagram_integration %}{{ instagram_integration.config.business_account_id|default:'' }}{% endif %}"
+                                           placeholder="npr. 1234567890">
+                                </div>
+                                <div class="field">
+                                    <label>Verify Token (za Meta webhook verifikaciju)</label>
+                                    <input name="instagram_verify_token"
+                                           value="{% if instagram_integration %}{{ instagram_integration.config.verify_token|default:'' }}{% endif %}"
+                                           placeholder="slobodno izaberi string">
+                                </div>
+                                <div class="field full">
+                                    <label>Webhook URL (upisati u Meta App → Webhooks)</label>
+                                    <input class="readonly-input" value="{{ instagram_webhook_url }}" readonly onclick="this.select()">
+                                    <span class="helper-text">Callback URL → upiši; Verify Token → isto kao gore; subscribe na <strong>messages</strong>.</span>
+                                </div>
+                                {% if instagram_integration.last_error %}
+                                    <div class="field full">
+                                        <label>Poslednja greška</label>
+                                        <textarea readonly>{{ instagram_integration.last_error }}</textarea>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="actions">
+                                <button class="primary-btn" type="submit">Sačuvaj Instagram</button>
+                            </div>
+                        </form>
+
                         <form method="post" class="card settings-card" style="margin-top:28px">
                             {% csrf_token %}
                             <input type="hidden" name="section" value="telegram_integration">
@@ -2408,6 +2642,92 @@
 
         const start = window.location.hash.replace("#", "") || "overview";
         activate(start, false);
+    </script>
+
+    <!-- ── Conversation detail drawer ───────────────────────────────── -->
+    <div id="convDrawerOverlay" onclick="closeConvDetail()"></div>
+    <div id="convDrawer">
+        <div id="convDrawerHeader">
+            <h3 id="convDrawerTitle">Razgovor</h3>
+            <button id="convDrawerClose" onclick="closeConvDetail()">✕</button>
+        </div>
+        <div id="convDrawerBody">
+            <p style="color:var(--soft);text-align:center;margin-top:40px">Učitavam...</p>
+        </div>
+    </div>
+
+    <!-- ── Toast container ──────────────────────────────────────────── -->
+    <div id="toastContainer"></div>
+
+    <script>
+    // ── Conversation drawer ──────────────────────────────────────────
+    function openConvDetail(convId) {
+        const drawer = document.getElementById('convDrawer');
+        const overlay = document.getElementById('convDrawerOverlay');
+        const body = document.getElementById('convDrawerBody');
+        const title = document.getElementById('convDrawerTitle');
+        body.innerHTML = '<p style="color:var(--soft);text-align:center;margin-top:40px">Učitavam...</p>';
+        drawer.classList.add('open');
+        overlay.classList.add('open');
+        fetch(`/dashboard/conversation/${convId}/messages/`)
+            .then(r => r.json())
+            .then(data => {
+                title.textContent = `${data.customer || 'Klijent'} · ${data.channel}`;
+                if (!data.messages || data.messages.length === 0) {
+                    body.innerHTML = '<p style="color:var(--soft);text-align:center;margin-top:40px">Nema poruka u ovom razgovoru.</p>';
+                    return;
+                }
+                body.innerHTML = data.messages.map(m => `
+                    <div class="msg-bubble ${m.direction}">
+                        <div>${escHtml(m.body)}</div>
+                        <div class="msg-meta">${m.sender_label} · ${m.created_at}</div>
+                    </div>
+                `).join('');
+                body.scrollTop = body.scrollHeight;
+            })
+            .catch(() => {
+                body.innerHTML = '<p style="color:var(--red);text-align:center;margin-top:40px">Greška pri učitavanju.</p>';
+            });
+    }
+    function closeConvDetail() {
+        document.getElementById('convDrawer').classList.remove('open');
+        document.getElementById('convDrawerOverlay').classList.remove('open');
+    }
+    function escHtml(str) {
+        return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // ── Toast notifications ──────────────────────────────────────────
+    function showToast(msg, urgent) {
+        const el = document.createElement('div');
+        el.className = 'toast' + (urgent ? ' urgent' : '');
+        el.innerHTML = `<strong>${urgent ? '🚨 Hitno' : '🔔 Obaveštenje'}</strong>${escHtml(msg)}`;
+        document.getElementById('toastContainer').appendChild(el);
+        setTimeout(() => el.remove(), 7000);
+    }
+
+    // ── WebSocket for real-time events ───────────────────────────────
+    {% if selected_client %}
+    (function() {
+        const clientId = {{ selected_client.id }};
+        const wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
+        const ws = new WebSocket(`${wsProto}://${location.host}/ws/clients/${clientId}/calendar/`);
+        ws.onmessage = function(ev) {
+            try {
+                const data = JSON.parse(ev.data);
+                if (data.type === 'escalation') {
+                    showToast(data.message || 'Kaleya eskalira razgovor — mušterija želi čoveka!', true);
+                } else if (data.type === 'new_booking') {
+                    showToast(data.message || 'Nova rezervacija!', false);
+                } else if (data.type === 'missed_call') {
+                    showToast(data.message || 'Propušten poziv.', false);
+                } else if (data.message) {
+                    showToast(data.message, data.urgent || false);
+                }
+            } catch(e) {}
+        };
+    })();
+    {% endif %}
     </script>
 </body>
 </html>

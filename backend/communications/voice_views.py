@@ -52,6 +52,21 @@ def _twiml(xml: str) -> HttpResponse:
     return HttpResponse(xml, content_type="application/xml")
 
 
+def _push_ws_event(client_id: int, payload: dict):
+    """Push an event to the dashboard WebSocket group for a given client (fire-and-forget)."""
+    try:
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+        channel_layer = get_channel_layer()
+        if channel_layer:
+            async_to_sync(channel_layer.group_send)(
+                f"client_calendar_{client_id}",
+                {"type": "calendar_event", "payload": payload},
+            )
+    except Exception as exc:
+        logger.debug("WS push failed (non-critical): %s", exc)
+
+
 @csrf_exempt
 @require_POST
 def voice_incoming(request):
@@ -204,7 +219,19 @@ def voice_gather(request, session_id):
         if conversation:
             conversation.status = "closed"
             conversation.save(update_fields=["status"])
+        _push_ws_event(business_client.id, {
+            "type": "escalation",
+            "message": f"Mušterija ({session.from_number}) traži čoveka — poziv se prebacuje na {transfer_to}.",
+            "urgent": True,
+        })
         return _twiml(build_transfer_twiml(business_client, transfer_to, session.to_number or ""))
+    # ── Escalation without phone (no transfer number configured) ─────────────
+    if result and result.get("intent") == "support_handoff" and not transfer_to:
+        _push_ws_event(business_client.id, {
+            "type": "escalation",
+            "message": f"Mušterija ({session.from_number}) traži čoveka! Dodaj 'Business phone' u Podešavanjima za automatski prenos.",
+            "urgent": True,
+        })
     # ────────────────────────────────────────────────────────────────────────
 
     session.save(update_fields=["transcript"])
@@ -252,6 +279,13 @@ def voice_status(request, session_id):
     md["twilio_duration_seconds"] = call_duration
     session.metadata = md
     session.save(update_fields=["status", "ended_at", "recording_url", "metadata"])
+
+    if new_status == "missed":
+        _push_ws_event(session.business_client_id, {
+            "type": "missed_call",
+            "message": f"Propušten poziv od {session.from_number or 'nepoznat broj'}.",
+            "urgent": False,
+        })
 
     if session.conversation:
         session.conversation.status = "closed"

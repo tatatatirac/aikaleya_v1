@@ -20,7 +20,7 @@ from appointments.services import client_timezone, today_availability_summary
 from billing.models import PaymentWebhookEvent, Plan, Subscription
 from billing.services import enforce_staff_limit
 from clients.models import BusinessClient, ClientApiSettings
-from communications.models import Conversation
+from communications.models import CallSession, Conversation
 from integrations.models import IntegrationConnection
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from staff_services.models import BlockedTime, Service, StaffMember, WorkingHours
@@ -84,6 +84,8 @@ def dashboard_section_anchor(section):
         "integrations": "integrations",
         "telegram_integration": "integrations",
         "whatsapp_integration": "integrations",
+        "viber_integration": "integrations",
+        "instagram_integration": "integrations",
         "provision_phone": "integrations",
         "release_phone": "integrations",
     }.get(section or "overview", section or "overview")
@@ -155,6 +157,8 @@ def build_conversation_feed(client):
         feed.append(
             {
                 "kind": "conversation",
+                "conversation_id": conversation.id,
+                "channel": conversation.channel,
                 "filter": status_group,
                 "title": f"{customer_name} - {conversation.get_channel_display()}",
                 "subtitle": last_message.body if last_message else "Razgovor nema sacuvanih poruka.",
@@ -183,6 +187,40 @@ def build_conversation_feed(client):
         )
 
     return sorted(feed, key=lambda item: item["created_at"], reverse=True)[:18]
+
+
+def dashboard_conversation_messages(request, conv_id):
+    """Return JSON message thread for inline conversation detail in the dashboard."""
+    import json as _json
+    from django.http import JsonResponse
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "auth"}, status=401)
+    from communications.models import Message as Msg
+    # Verify ownership
+    try:
+        conv = Conversation.objects.select_related("business_client", "customer").get(pk=conv_id)
+    except Conversation.DoesNotExist:
+        return JsonResponse({"error": "not found"}, status=404)
+    # Check access
+    from clients.models import get_active_client_for_user
+    if not request.user.is_staff and not request.user.is_superuser:
+        accessible = get_active_client_for_user(request.user)
+        if not accessible or accessible.id != conv.business_client_id:
+            return JsonResponse({"error": "forbidden"}, status=403)
+    msgs = list(
+        Msg.objects.filter(conversation=conv)
+        .order_by("created_at")
+        .values("id", "direction", "body", "sender_label", "created_at", "message_type")
+    )
+    for m in msgs:
+        m["created_at"] = m["created_at"].strftime("%d.%m. %H:%M")
+    return JsonResponse({
+        "conversation_id": conv.id,
+        "channel": conv.channel,
+        "status": conv.status,
+        "customer": conv.customer.full_name if conv.customer else "",
+        "messages": msgs,
+    })
 
 
 def build_billing_client_rows(clients):
@@ -367,6 +405,12 @@ def dashboard(request):
         elif section == "whatsapp_integration":
             update_whatsapp_integration(request, selected_client)
             messages.success(request, "WhatsApp integracija je sačuvana.")
+        elif section == "viber_integration":
+            update_viber_integration(request, selected_client)
+            messages.success(request, "Viber integracija je sačuvana.")
+        elif section == "instagram_integration":
+            update_instagram_integration(request, selected_client)
+            messages.success(request, "Instagram integracija je sačuvana.")
         elif section == "provision_phone" and is_admin_user(request.user):
             try:
                 from communications.twilio_provision import provision_twilio_number, ProvisionError
@@ -427,7 +471,46 @@ def dashboard(request):
     integrations = ensure_integrations(selected_client)
     telegram_integration = next((item for item in integrations if item.provider == "telegram"), None)
     whatsapp_integration = next((item for item in integrations if item.provider == "whatsapp"), None)
+    viber_integration = next((item for item in integrations if item.provider == "viber"), None)
+    instagram_integration = next((item for item in integrations if item.provider == "instagram"), None)
     phone_integration = next((item for item in integrations if item.provider == "phone"), None)
+
+    # ── Real-time statistics ────────────────────────────────────────────────
+    _today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    _calls_today = CallSession.objects.filter(
+        business_client=selected_client, started_at__gte=_today_start
+    )
+    stats_active_calls = _calls_today.filter(status="active").count()
+    stats_missed_today = _calls_today.filter(status="missed").count()
+    stats_transferred_today = _calls_today.filter(status="transferred").count()
+    stats_total_calls_today = _calls_today.count()
+    stats_total_conversations = Conversation.objects.filter(business_client=selected_client).count()
+
+    # ── Calendar week view ──────────────────────────────────────────────────
+    _today = timezone.localdate()
+    _week_start = _today - timedelta(days=_today.weekday())  # Monday
+    _week_end = _week_start + timedelta(days=6)
+    _week_appts = (
+        Appointment.objects.select_related("customer", "service", "staff_member")
+        .filter(
+            business_client=selected_client,
+            date__range=[_week_start, _week_end],
+            status__in=[Appointment.STATUS_PENDING, Appointment.STATUS_CONFIRMED],
+        )
+        .order_by("date", "start_time")
+    )
+    _days_sr = ["Pon", "Uto", "Sri", "Čet", "Pet", "Sub", "Ned"]
+    calendar_week = []
+    for i in range(7):
+        _day = _week_start + timedelta(days=i)
+        _day_appts = [a for a in _week_appts if a.date == _day]
+        calendar_week.append({
+            "date": _day,
+            "label": _days_sr[i],
+            "is_today": _day == _today,
+            "appointments": _day_appts,
+        })
+
     upcoming_appointments = (
         Appointment.objects.select_related("customer")
         .filter(business_client=selected_client)
@@ -492,7 +575,17 @@ def dashboard(request):
         "telegram_integration": telegram_integration,
         "whatsapp_integration": whatsapp_integration,
         "whatsapp_webhook_url": request.build_absolute_uri(reverse("whatsapp-incoming")),
+        "viber_integration": viber_integration,
+        "viber_webhook_url": request.build_absolute_uri(reverse("viber-webhook", args=[viber_integration.id])) if viber_integration else "",
+        "instagram_integration": instagram_integration,
+        "instagram_webhook_url": request.build_absolute_uri(reverse("whatsapp-webhook", args=[instagram_integration.id])) if instagram_integration else "",
         "phone_integration": phone_integration,
+        "stats_active_calls": stats_active_calls,
+        "stats_missed_today": stats_missed_today,
+        "stats_transferred_today": stats_transferred_today,
+        "stats_total_calls_today": stats_total_calls_today,
+        "stats_total_conversations": stats_total_conversations,
+        "calendar_week": calendar_week,
         "phone_kaleya_number": (phone_integration.public_number if phone_integration else "") or "",
         "phone_country": ((phone_integration.config or {}).get("country", "") if phone_integration else "") or "",
         "telegram_bot_token_configured": bool((telegram_integration.config or {}).get("bot_token")) if telegram_integration else False,
@@ -818,6 +911,27 @@ def update_telegram_integration(request, client):
     integration.full_clean()
     integration.save()
 
+    # Auto-register Telegram webhook when bot_token is provided and integration is enabled
+    if config.get("bot_token") and integration.enabled:
+        from django.urls import reverse as _reverse
+        from integrations.services import configure_telegram_webhook, telegram_api_post
+        webhook_url = request.build_absolute_uri(
+            _reverse("telegram-webhook", args=[integration.id])
+        )
+        try:
+            configure_telegram_webhook(integration, webhook_url)
+            # Try to fetch bot username to display it
+            bot_info = telegram_api_post(integration, "getMe", {})
+            if bot_info.get("ok") and bot_info.get("result"):
+                username = bot_info["result"].get("username", "")
+                if username:
+                    integration.public_number = f"@{username}"
+                    integration.save(update_fields=["public_number", "updated_at"])
+        except Exception as exc:
+            integration.status = "error"
+            integration.last_error = str(exc)
+            integration.save(update_fields=["status", "last_error", "updated_at"])
+
 
 def update_whatsapp_integration(request, client):
     integration, _created = IntegrationConnection.objects.get_or_create(
@@ -832,6 +946,67 @@ def update_whatsapp_integration(request, client):
     integration.enabled = checkbox_value(request.POST, "whatsapp_enabled")
     integration.status = request.POST.get("whatsapp_status", integration.status)
     integration.public_number = public_number
+    if integration.status != "error":
+        integration.last_error = ""
+    integration.save()
+
+
+def update_viber_integration(request, client):
+    integration, _created = IntegrationConnection.objects.get_or_create(
+        business_client=client,
+        provider="viber",
+        defaults={"enabled": False, "status": "draft"},
+    )
+    config = dict(integration.config or {})
+    auth_token = request.POST.get("viber_auth_token", "").strip()
+    sender_name = request.POST.get("viber_sender_name", "").strip()
+    if auth_token:
+        config["auth_token"] = auth_token
+    if sender_name:
+        config["sender_name"] = sender_name
+
+    integration.enabled = checkbox_value(request.POST, "viber_enabled")
+    integration.status = request.POST.get("viber_status", integration.status)
+    integration.config = config
+    if integration.status != "error":
+        integration.last_error = ""
+    integration.save()
+
+    # Auto-register Viber webhook if auth_token is now set
+    if config.get("auth_token") and integration.enabled:
+        from django.urls import reverse as _reverse
+        from integrations.services import configure_viber_webhook
+        webhook_url = request.build_absolute_uri(
+            _reverse("viber-webhook", args=[integration.id])
+        )
+        try:
+            configure_viber_webhook(integration, webhook_url)
+        except Exception as exc:
+            integration.status = "error"
+            integration.last_error = str(exc)
+            integration.save(update_fields=["status", "last_error", "updated_at"])
+
+
+def update_instagram_integration(request, client):
+    integration, _created = IntegrationConnection.objects.get_or_create(
+        business_client=client,
+        provider="instagram",
+        defaults={"enabled": False, "status": "draft"},
+    )
+    config = dict(integration.config or {})
+    access_token = request.POST.get("instagram_access_token", "").strip()
+    business_account_id = request.POST.get("instagram_business_account_id", "").strip()
+    verify_token = request.POST.get("instagram_verify_token", "").strip()
+    if access_token:
+        config["access_token"] = access_token
+    if business_account_id:
+        config["business_account_id"] = business_account_id
+    if verify_token:
+        config["verify_token"] = verify_token
+
+    integration.enabled = checkbox_value(request.POST, "instagram_enabled")
+    integration.status = request.POST.get("instagram_status", integration.status)
+    integration.config = config
     if integration.status != "error":
         integration.last_error = ""
     integration.save()

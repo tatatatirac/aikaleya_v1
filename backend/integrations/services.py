@@ -475,6 +475,51 @@ def send_viber_message(connection, receiver_id, text):
         return {"status": -1, "status_message": str(exc)}
 
 
+def configure_viber_webhook(connection, webhook_url=""):
+    """Register / update the Viber Public Account webhook via Viber REST API."""
+    config = connection.config or {}
+    auth_token = config.get("auth_token", "")
+    target_url = (webhook_url or connection.webhook_url or "").strip()
+    if not auth_token:
+        raise serializers.ValidationError({"auth_token": "Viber auth_token nije podesen."})
+    if not target_url:
+        raise serializers.ValidationError({"webhook_url": "Viber webhook URL nije podesen."})
+
+    payload = json.dumps({
+        "url": target_url,
+        "event_types": ["delivered", "seen", "failed", "subscribed", "unsubscribed", "conversation_started", "message"],
+        "send_name": True,
+        "send_photo": False,
+    }).encode("utf-8")
+    req = urllib.request.Request(
+        "https://chatapi.viber.com/pa/set_webhook",
+        data=payload,
+        headers={
+            "Content-Type": "application/json",
+            "X-Viber-Auth-Token": auth_token,
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            body = resp.read().decode("utf-8")
+        result = json.loads(body)
+    except Exception as exc:
+        raise serializers.ValidationError({"viber": f"Viber API greška: {exc}"})
+
+    status_code = result.get("status", -1)
+    if status_code != 0:
+        msg = result.get("status_message") or f"Viber greška {status_code}"
+        raise serializers.ValidationError({"viber": msg})
+
+    connection.webhook_url = target_url
+    connection.enabled = True
+    connection.status = "connected"
+    connection.last_error = ""
+    connection.save(update_fields=["webhook_url", "enabled", "status", "last_error", "updated_at"])
+    return result
+
+
 def process_viber_webhook(connection, data, body_bytes=b"", signature_header=""):
     verify_viber_signature(connection, body_bytes, signature_header)
 
