@@ -1,7 +1,11 @@
+import logging
 from dataclasses import dataclass
 from datetime import timedelta
 
+from django.conf import settings
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 from django.db import transaction
 from django.utils.dateparse import parse_datetime
 from django.utils import timezone
@@ -10,6 +14,8 @@ from rest_framework import serializers
 from billing.models import Plan, Subscription
 from clients.models import BusinessClient, ClientApiSettings
 from staff_services.models import StaffMember
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -229,16 +235,28 @@ def enforce_staff_limit(business_client, adding=1):
 
 
 def activate_pending_registration_for_checkout(checkout):
+    """
+    Create the User + BusinessClient from a confirmed checkout, then email a
+    password-setup link to the owner.  Called by all payment webhooks.
+    """
     if checkout.business_client:
         return checkout.business_client
 
     pending = getattr(checkout, "pending_registration", None)
-    if not pending or not pending.email or not pending.password_hash:
+
+    # Resolve email / name from pending registration or from the checkout itself
+    email   = (pending.email   if pending else checkout.email   or "").strip().lower()
+    company = (pending.company if pending else checkout.company or "").strip()
+    full_name = (pending.full_name if pending else checkout.full_name or "").strip()
+    phone   = (pending.phone   if pending else "").strip()
+
+    if not email:
+        logger.warning("activate_pending_registration: no email on checkout %s", checkout.id)
         return None
 
     existing_user = (
-        User.objects.filter(email__iexact=pending.email).first()
-        or User.objects.filter(username__iexact=pending.email).first()
+        User.objects.filter(email__iexact=email).first()
+        or User.objects.filter(username__iexact=email).first()
     )
     if existing_user:
         existing_client = BusinessClient.objects.filter(owner=existing_user).first()
@@ -249,23 +267,23 @@ def activate_pending_registration_for_checkout(checkout):
         return None
 
     with transaction.atomic():
-        full_name = pending.full_name.strip()
         first_name, _, last_name = full_name.partition(" ")
         user = User.objects.create(
-            username=pending.email,
-            email=pending.email,
+            username=email,
+            email=email,
             first_name=first_name,
             last_name=last_name,
-            password=pending.password_hash,
+            # Unusable password — owner sets it via the /setup/ link
+            password=make_password(None),
         )
         user.profile.role = "client"
-        user.profile.phone = pending.phone
+        user.profile.phone = phone
         user.profile.save(update_fields=["role", "phone", "updated_at"])
 
         client = BusinessClient.objects.create(
             owner=user,
-            name=pending.company,
-            public_name=pending.company,
+            name=company or email,
+            public_name=company or email,
             package=checkout.plan.code,
             language="en",
             interface_language="en",
@@ -288,9 +306,53 @@ def activate_pending_registration_for_checkout(checkout):
 
         checkout.business_client = client
         checkout.save(update_fields=["business_client", "updated_at"])
-        pending.activated_at = timezone.now()
-        pending.save(update_fields=["activated_at", "updated_at"])
-        return client
+        if pending:
+            pending.activated_at = timezone.now()
+            pending.save(update_fields=["activated_at", "updated_at"])
+
+    # Generate setup token and send welcome email (outside atomic so DB is committed)
+    _send_setup_email(user, client)
+    return client
+
+
+def _send_setup_email(user, business_client):
+    """Generate an AccountSetupToken and email the owner a password-setup link."""
+    from accounts.models import AccountSetupToken
+
+    setup_token = AccountSetupToken.generate_for(user, hours=72)
+    base_url = getattr(settings, "KALEYA_PUBLIC_BASE_URL", "https://www.aikaleya.com").rstrip("/")
+    setup_url = f"{base_url}/setup/?token={setup_token.token}"
+
+    first_name = user.first_name or "there"
+    salon_name = business_client.public_name or business_client.name or "your salon"
+
+    subject = "Welcome to Kaleya — set your password to get started"
+    message = (
+        f"Hi {first_name},\n\n"
+        f"Your Kaleya AI receptionist account for {salon_name} has been activated!\n\n"
+        f"Click the link below to set your password and access your dashboard:\n\n"
+        f"    {setup_url}\n\n"
+        f"This link expires in 72 hours. If you need a new one, contact us at hello@aikaleya.com\n\n"
+        f"What to do after logging in:\n"
+        f"  1. Add your staff members\n"
+        f"  2. Add your services and prices\n"
+        f"  3. Connect your phone number (Kaleya assigns you a local number)\n"
+        f"  4. Test your AI receptionist via web chat\n\n"
+        f"Welcome aboard!\n"
+        f"— The Kaleya Team\n"
+        f"  https://www.aikaleya.com\n"
+    )
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=getattr(settings, "DEFAULT_FROM_EMAIL", "noreply@aikaleya.com"),
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+        logger.info("Setup email sent to %s (token=%s)", user.email, setup_token.token[:8])
+    except Exception as exc:
+        logger.error("Failed to send setup email to %s: %s", user.email, exc)
 
 
 def provider_datetime(value):

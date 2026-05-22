@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib import admin
 
-from accounts.models import Profile
+from accounts.models import AccountSetupToken, Profile
 
 
 class ProfileAdminForm(forms.ModelForm):
@@ -17,6 +17,22 @@ class ProfileAdminForm(forms.ModelForm):
             "role": "Admin vidi sve. Client vidi samo svoje podatke.",
             "phone": "Opcioni kontakt telefon naloga.",
         }
+
+
+@admin.register(AccountSetupToken)
+class AccountSetupTokenAdmin(admin.ModelAdmin):
+    list_display = ("user", "token_short", "expires_at", "used_at", "is_valid_display", "created_at")
+    list_filter = ("used_at",)
+    search_fields = ("user__email", "token")
+    readonly_fields = ("token", "created_at")
+
+    @admin.display(description="Token (first 12)")
+    def token_short(self, obj):
+        return obj.token[:12] + "…"
+
+    @admin.display(description="Valid?", boolean=True)
+    def is_valid_display(self, obj):
+        return obj.is_valid
 
 
 @admin.register(Profile)

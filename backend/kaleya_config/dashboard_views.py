@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, time, timedelta
 from decimal import Decimal, InvalidOperation
 import secrets
@@ -5,7 +6,7 @@ import secrets
 from django.conf import settings
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.contrib import messages
-from django.contrib.auth import logout
+from django.contrib.auth import login as auth_login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -513,6 +514,11 @@ def dashboard(request):
         "global_voice_model": global_voice_model,
         "global_voice_id": global_voice_id,
         "global_voice_key_configured": bool(getattr(settings, "KALEYA_ELEVENLABS_API_KEY", "")),
+        # Onboarding
+        "show_welcome": request.GET.get("welcome") == "1",
+        "onboarding_has_staff": selected_staff_members.exists(),
+        "onboarding_has_services": selected_services.exists(),
+        "onboarding_has_phone": bool((phone_integration.public_number if phone_integration else "")),
     }
     return render(request, "dashboard.html", context)
 
@@ -795,3 +801,68 @@ def update_telegram_integration(request, client):
         integration.last_error = ""
     integration.full_clean()
     integration.save()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Account setup (password set after payment — one-time token link)
+# ─────────────────────────────────────────────────────────────────────────────
+
+_PASSWORD_RE = re.compile(
+    r'^(?=.*[A-Z])'    # at least one uppercase
+    r'(?=.*[a-z])'    # at least one lowercase
+    r'(?=.*\d)'       # at least one digit
+    r'(?=.*[!@#$%^&*()\-_=+\[\]{};:\'",.<>/?\\|`~])'  # special char
+    r'[^\s]{8,}$'     # min 8 chars, no spaces
+)
+
+
+def setup_account(request):
+    """
+    GET  /setup/?token=<token>  — show password-setup form
+    POST /setup/?token=<token>  — validate + set password, auto-login, redirect dashboard
+    """
+    from accounts.models import AccountSetupToken
+
+    token_value = request.GET.get("token", "").strip() or request.POST.get("token", "").strip()
+    error = None
+    token_obj = None
+
+    if token_value:
+        token_obj = AccountSetupToken.objects.select_related("user").filter(token=token_value).first()
+
+    if not token_value or not token_obj:
+        return render(request, "setup.html", {"state": "invalid", "error": "Invalid or missing setup link."})
+
+    if not token_obj.is_valid:
+        return render(request, "setup.html", {"state": "expired", "error": "This setup link has expired. Please contact support."})
+
+    if request.method == "POST":
+        password  = request.POST.get("password", "")
+        password2 = request.POST.get("password2", "")
+
+        if not password:
+            error = "Please enter a password."
+        elif password != password2:
+            error = "Passwords do not match."
+        elif not _PASSWORD_RE.match(password):
+            error = (
+                "Password must be at least 8 characters and contain "
+                "an uppercase letter, a lowercase letter, a number, "
+                "and a special character (!@#$%^&* etc.). No spaces allowed."
+            )
+        else:
+            user = token_obj.user
+            user.set_password(password)
+            user.save(update_fields=["password"])
+            token_obj.mark_used()
+
+            # Auto-login and send to dashboard
+            user.backend = "django.contrib.auth.backends.ModelBackend"
+            auth_login(request, user)
+            return redirect("/dashboard/?welcome=1")
+
+    return render(request, "setup.html", {
+        "state": "form",
+        "token": token_value,
+        "error": error,
+    })

@@ -1,7 +1,11 @@
+import secrets
+from datetime import timedelta
+
 from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 
 class Profile(models.Model):
@@ -32,6 +36,43 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.user.email or self.user.username} ({self.role})"
+
+
+class AccountSetupToken(models.Model):
+    """One-time token emailed to new owners after payment — lets them set their password."""
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="setup_token",
+    )
+    token = models.CharField(max_length=128, unique=True, db_index=True)
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def is_valid(self):
+        return self.used_at is None and timezone.now() < self.expires_at
+
+    @classmethod
+    def generate_for(cls, user, hours=48):
+        token = secrets.token_urlsafe(48)
+        obj, _ = cls.objects.update_or_create(
+            user=user,
+            defaults={
+                "token": token,
+                "expires_at": timezone.now() + timedelta(hours=hours),
+                "used_at": None,
+            },
+        )
+        return obj
+
+    def mark_used(self):
+        self.used_at = timezone.now()
+        self.save(update_fields=["used_at"])
+
+    def __str__(self):
+        return f"SetupToken({self.user.email}, valid={self.is_valid})"
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)

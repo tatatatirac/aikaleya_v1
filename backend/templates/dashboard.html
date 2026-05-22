@@ -734,12 +734,12 @@
 
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 18px;
+            grid-template-columns: repeat(2, minmax(200px, 1fr));
+            gap: 20px;
         }
 
         .form-grid.three {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(3, minmax(160px, 1fr));
         }
 
         .field {
@@ -764,7 +764,8 @@
         label {
             color: var(--muted);
             font-size: 13px;
-            font-weight: 900;
+            font-weight: 700;
+            letter-spacing: 0.2px;
         }
 
         input, select, textarea {
@@ -777,15 +778,17 @@
         }
 
         input, select {
-            height: 50px;
-            padding: 0 14px;
+            height: 52px;
+            padding: 0 16px;
+            font-size: 14px;
         }
 
         textarea {
             min-height: 150px;
-            padding: 14px;
+            padding: 14px 16px;
             resize: vertical;
-            line-height: 1.45;
+            line-height: 1.5;
+            font-size: 14px;
         }
 
         input:focus, select:focus, textarea:focus {
@@ -851,6 +854,131 @@
             background: var(--panel);
             color: var(--text);
             font-weight: 800;
+        }
+
+        /* ── Settings card wider layout ─────────────────────────────── */
+        .settings-card { max-width: 100%; }
+
+        .settings-panel-wrap {
+            max-width: 960px;
+        }
+
+        /* On wide screens use 3 cols for the main client settings form */
+        @media (min-width: 1300px) {
+            .settings-card .form-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        /* ── Onboarding banner ──────────────────────────────────────── */
+        .onboarding-banner {
+            background: linear-gradient(135deg, #091f3a 0%, #0a2040 100%);
+            border: 1px solid #1d3a5f;
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            margin-bottom: 28px;
+        }
+
+        .onboarding-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .onboarding-header h3 {
+            margin: 0 0 6px;
+            font-size: 20px;
+            font-weight: 800;
+            color: #e0eeff;
+        }
+
+        .onboarding-header p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .onboarding-dismiss {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0 4px;
+            flex-shrink: 0;
+        }
+
+        .onboarding-dismiss:hover { color: var(--text); }
+
+        .onboarding-steps {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .ob-step {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid #1d3a5f;
+            border-radius: 14px;
+            padding: 16px 18px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            transition: border-color 0.2s;
+        }
+
+        .ob-step.ob-done {
+            border-color: rgba(34, 197, 94, 0.3);
+            background: rgba(34, 197, 94, 0.05);
+        }
+
+        .ob-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 900;
+            flex-shrink: 0;
+            color: var(--muted);
+        }
+
+        .ob-step.ob-done .ob-icon {
+            background: var(--green-soft);
+            color: var(--green);
+        }
+
+        .ob-step div strong {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+
+        .ob-step div span {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.4;
+        }
+
+        .ob-step div span a {
+            color: var(--teal);
+            text-decoration: underline;
+        }
+
+        @media (max-width: 900px) {
+            .onboarding-steps { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 560px) {
+            .onboarding-steps { grid-template-columns: 1fr; }
+            .onboarding-banner { padding: 20px 18px; }
         }
 
         @media (max-width: 1180px) {
@@ -967,6 +1095,47 @@
                     </section>
                 {% else %}
                     <section class="panel active" id="overview">
+                        {% if show_welcome %}
+                        <div class="onboarding-banner" id="onboardingBanner">
+                            <div class="onboarding-header">
+                                <div>
+                                    <h3>Welcome to Kaleya! 🎉 Here's how to get started</h3>
+                                    <p>Your AI receptionist is ready. Complete these steps to go live.</p>
+                                </div>
+                                <button class="onboarding-dismiss" onclick="document.getElementById('onboardingBanner').style.display='none'" aria-label="Dismiss">✕</button>
+                            </div>
+                            <div class="onboarding-steps">
+                                <div class="ob-step ob-done">
+                                    <span class="ob-icon">✓</span>
+                                    <div>
+                                        <strong>Account activated</strong>
+                                        <span>Your Kaleya account is live</span>
+                                    </div>
+                                </div>
+                                <div class="ob-step {% if onboarding_has_staff %}ob-done{% endif %}">
+                                    <span class="ob-icon">{% if onboarding_has_staff %}✓{% else %}2{% endif %}</span>
+                                    <div>
+                                        <strong>Add your staff</strong>
+                                        <span>Go to <a href="#" onclick="activate('client-detail')">Staff & Services</a> → Add staff member</span>
+                                    </div>
+                                </div>
+                                <div class="ob-step {% if onboarding_has_services %}ob-done{% endif %}">
+                                    <span class="ob-icon">{% if onboarding_has_services %}✓{% else %}3{% endif %}</span>
+                                    <div>
+                                        <strong>Add services &amp; prices</strong>
+                                        <span>Kaleya uses these to book appointments automatically</span>
+                                    </div>
+                                </div>
+                                <div class="ob-step {% if onboarding_has_phone %}ob-done{% endif %}">
+                                    <span class="ob-icon">{% if onboarding_has_phone %}✓{% else %}4{% endif %}</span>
+                                    <div>
+                                        <strong>Connect your phone</strong>
+                                        <span>Go to <a href="#" onclick="activate('integrations')">Integrations</a> → Kaleya will assign you a local number</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
                         <div class="cards">
                             <article class="card metric">
                                 <span>Aktivni pozivi</span>
