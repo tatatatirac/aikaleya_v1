@@ -1839,6 +1839,56 @@
                             {% endif %}
                         </div>
 
+                        {# ── WhatsApp / Twilio card ──────────────────────────────────────── #}
+                        <form method="post" class="card settings-card" style="margin-top:28px">
+                            {% csrf_token %}
+                            <input type="hidden" name="section" value="whatsapp_integration">
+                            <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                            <h2>💬 WhatsApp</h2>
+                            <p class="helper-text">
+                                Kaleya prima i odgovara na WhatsApp poruke putem Twilio.
+                                Upiši Twilio WhatsApp broj i nalepite webhook URL u Twilio konzolu.
+                            </p>
+                            <div class="form-grid">
+                                <label class="switch">WhatsApp aktivan
+                                    <input type="checkbox" name="whatsapp_enabled" {% if whatsapp_integration.enabled %}checked{% endif %}>
+                                </label>
+                                <div class="field">
+                                    <label>Status</label>
+                                    <select name="whatsapp_status">
+                                        <option value="draft"     {% if not whatsapp_integration or whatsapp_integration.status == "draft"     %}selected{% endif %}>Draft</option>
+                                        <option value="connected" {% if whatsapp_integration.status == "connected" %}selected{% endif %}>Connected</option>
+                                        <option value="paused"    {% if whatsapp_integration.status == "paused"    %}selected{% endif %}>Paused</option>
+                                        <option value="error"     {% if whatsapp_integration.status == "error"     %}selected{% endif %}>Error</option>
+                                    </select>
+                                </div>
+                                <div class="field full">
+                                    <label>Twilio WhatsApp broj</label>
+                                    <input name="whatsapp_public_number"
+                                           value="{{ whatsapp_integration.public_number|default:'' }}"
+                                           placeholder="+14155238886">
+                                    <span class="helper-text">Broj bez prefiksa "whatsapp:" — npr. <strong>+14155238886</strong></span>
+                                </div>
+                                <div class="field full">
+                                    <label>Webhook URL (nalepiti u Twilio konzolu)</label>
+                                    <input class="readonly-input" value="{{ whatsapp_webhook_url }}" readonly onclick="this.select()">
+                                    <span class="helper-text">
+                                        Twilio konzola → Messaging → <strong>Try it out → Send a WhatsApp message</strong> →
+                                        "When a message comes in" → nalepiti ovaj URL, metod POST.
+                                    </span>
+                                </div>
+                                {% if whatsapp_integration.last_error %}
+                                    <div class="field full">
+                                        <label>Poslednja greška</label>
+                                        <textarea readonly>{{ whatsapp_integration.last_error }}</textarea>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="actions">
+                                <button class="primary-btn" type="submit">Sačuvaj WhatsApp</button>
+                            </div>
+                        </form>
+
                         <form method="post" class="card settings-card" style="margin-top:28px">
                             {% csrf_token %}
                             <input type="hidden" name="section" value="telegram_integration">

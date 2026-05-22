@@ -83,6 +83,7 @@ def dashboard_section_anchor(section):
         "alarms": "alarms",
         "integrations": "integrations",
         "telegram_integration": "integrations",
+        "whatsapp_integration": "integrations",
         "provision_phone": "integrations",
         "release_phone": "integrations",
     }.get(section or "overview", section or "overview")
@@ -363,6 +364,9 @@ def dashboard(request):
         elif section == "telegram_integration":
             update_telegram_integration(request, selected_client)
             messages.success(request, "Telegram integracija je sacuvana.")
+        elif section == "whatsapp_integration":
+            update_whatsapp_integration(request, selected_client)
+            messages.success(request, "WhatsApp integracija je sačuvana.")
         elif section == "provision_phone" and is_admin_user(request.user):
             try:
                 from communications.twilio_provision import provision_twilio_number, ProvisionError
@@ -422,6 +426,7 @@ def dashboard(request):
 
     integrations = ensure_integrations(selected_client)
     telegram_integration = next((item for item in integrations if item.provider == "telegram"), None)
+    whatsapp_integration = next((item for item in integrations if item.provider == "whatsapp"), None)
     phone_integration = next((item for item in integrations if item.provider == "phone"), None)
     upcoming_appointments = (
         Appointment.objects.select_related("customer")
@@ -485,6 +490,8 @@ def dashboard(request):
         "voice_settings": voice_settings,
         "integrations": integrations,
         "telegram_integration": telegram_integration,
+        "whatsapp_integration": whatsapp_integration,
+        "whatsapp_webhook_url": request.build_absolute_uri(reverse("whatsapp-incoming")),
         "phone_integration": phone_integration,
         "phone_kaleya_number": (phone_integration.public_number if phone_integration else "") or "",
         "phone_country": ((phone_integration.config or {}).get("country", "") if phone_integration else "") or "",
@@ -809,6 +816,24 @@ def update_telegram_integration(request, client):
     if integration.status != "error":
         integration.last_error = ""
     integration.full_clean()
+    integration.save()
+
+
+def update_whatsapp_integration(request, client):
+    integration, _created = IntegrationConnection.objects.get_or_create(
+        business_client=client,
+        provider="whatsapp",
+        defaults={"enabled": False, "status": "draft"},
+    )
+    # Strip whatsapp: prefix if the user pasted the full Twilio format
+    public_number = request.POST.get("whatsapp_public_number", integration.public_number).strip()
+    public_number = public_number.replace("whatsapp:", "").strip()
+
+    integration.enabled = checkbox_value(request.POST, "whatsapp_enabled")
+    integration.status = request.POST.get("whatsapp_status", integration.status)
+    integration.public_number = public_number
+    if integration.status != "error":
+        integration.last_error = ""
     integration.save()
 
 
