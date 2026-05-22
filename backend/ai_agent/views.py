@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 
 from accounts.permissions import user_role
 from ai_agent.models import AIIntent, AIToolRun, CustomerMemory
-from ai_agent.providers import ProviderError, get_client_ai_config, get_client_voice_config, synthesize_elevenlabs_speech
+from ai_agent.providers import ProviderError, _post_json, get_client_ai_config, get_client_voice_config, synthesize_elevenlabs_speech
 from ai_agent.serializers import (
     AIIntentSerializer,
     AIToolRunSerializer,
@@ -258,6 +258,85 @@ class VoiceStatusAPIView(APIView):
                 "model_id": config.get("model_id", ""),
             }
         )
+
+
+class PublicBrowserChatAPIView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    _DEMO_PROMPT = (
+        "You are Kaleya, an AI receptionist for a demo hair salon called \"Mike's Barbershop\".\n"
+        "This is a LIVE DEMO showing potential salon owners what their customers would experience.\n\n"
+        "Demo salon info:\n"
+        "- Services: Fade ($30, 30min), Beard Trim ($20, 20min), Full Cut & Beard ($45, 45min), Kids Cut ($25, 20min)\n"
+        "- Hours: Mon–Sat 9AM–7PM, closed Sunday\n"
+        "- Staff: Carlos, Marcus, Jordan\n\n"
+        "Rules:\n"
+        "- Keep every reply under 2 sentences — you are on a phone call.\n"
+        "- Be warm, professional, and helpful.\n"
+        "- If the caller wants to book, enthusiastically offer a slot.\n"
+        "- Speak in the same language as the caller.\n"
+        "- Never break character or mention that this is AI."
+    )
+
+    def post(self, request):
+        text = (request.data.get("text") or "").strip()[:500]
+        lang = (request.data.get("lang") or "en").strip().lower()[:5]
+        history = request.data.get("history") or []
+
+        if not text:
+            return Response({"detail": "Text is required."}, status=400)
+
+        messages = []
+        for item in list(history)[-6:]:
+            role = (item.get("role") or "").strip()
+            content = (item.get("content") or "").strip()
+            if role in ("user", "assistant") and content:
+                messages.append({"role": role, "content": content})
+        messages.append({"role": "user", "content": text})
+
+        reply_text = ""
+        try:
+            config = get_client_ai_config(PublicVoiceClient())
+            if not config.get("api_key"):
+                raise ProviderError("AI not configured.")
+            response = _post_json(
+                "https://api.anthropic.com/v1/messages",
+                {
+                    "model": config["model"],
+                    "max_tokens": 150,
+                    "temperature": 0.7,
+                    "system": self._DEMO_PROMPT,
+                    "messages": messages,
+                },
+                {
+                    "Content-Type": "application/json",
+                    "x-api-key": config["api_key"],
+                    "anthropic-version": "2023-06-01",
+                },
+            )
+            blocks = [b.get("text", "") for b in (response.get("content") or []) if b.get("type") == "text"]
+            reply_text = "\n".join(b for b in blocks if b).strip()
+        except ProviderError:
+            fallback = {
+                "en": "Hello, this is Kaleya! How can I help you today?",
+                "sr": "Zdravo, ovde Kaleya! Kako mogu da pomognem?",
+                "es": "Hola, soy Kaleya. ¿En qué le puedo ayudar?",
+                "fr": "Bonjour, ici Kaleya. Comment puis-je vous aider?",
+                "de": "Hallo, hier ist Kaleya. Wie kann ich Ihnen helfen?",
+                "it": "Ciao, sono Kaleya. Come posso aiutarla?",
+                "pt": "Olá, aqui é Kaleya. Como posso ajudar?",
+                "ru": "Здравствуйте, это Kaleya. Чем могу помочь?",
+            }
+            reply_text = fallback.get(lang, fallback["en"])
+
+        result = {"text": reply_text, "audio_url": None}
+        try:
+            voice = synthesize_elevenlabs_speech(PublicVoiceClient(), reply_text)
+            result["audio_url"] = voice.get("audio_url")
+        except ProviderError:
+            pass
+
+        return Response(result)
 
 
 class ProviderStatusAPIView(APIView):

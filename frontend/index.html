@@ -33,6 +33,41 @@
         .glass { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
         .mic-pulse::before { content: ''; position: absolute; inset: -20px; border-radius: 50%; background: linear-gradient(135deg, #14b8a6, #3b82f6); opacity: 0.3; animation: pulse-ring 2s cubic-bezier(0.4,0,0.6,1) infinite; }
         .mic-pulse.active::before { animation: pulse-ring 1s cubic-bezier(0.4,0,0.6,1) infinite; opacity: 0.5; }
+        /* ===== Call Modal ===== */
+        #kv-call-modal { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; background: rgba(2,6,23,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); opacity: 0; pointer-events: none; transition: opacity .25s; }
+        #kv-call-modal.open { opacity: 1; pointer-events: all; }
+        #kv-call-card { background: rgba(15,23,42,0.92); border: 1px solid rgba(255,255,255,0.08); border-radius: 28px; width: min(420px, 94vw); padding: 32px 28px 24px; display: flex; flex-direction: column; align-items: center; gap: 20px; box-shadow: 0 32px 80px rgba(0,0,0,0.6); transform: translateY(24px) scale(.97); transition: transform .3s cubic-bezier(.34,1.56,.64,1); }
+        #kv-call-modal.open #kv-call-card { transform: none; }
+        #kv-call-avatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #14b8a6, #3b82f6); display: flex; align-items: center; justify-content: center; font-size: 30px; position: relative; flex-shrink: 0; }
+        #kv-call-avatar::after { content: ''; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid transparent; background: linear-gradient(135deg,#14b8a6,#3b82f6) border-box; -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); -webkit-mask-composite: destination-out; mask-composite: exclude; }
+        #kv-call-avatar.listening { animation: avatar-pulse 1.2s ease-in-out infinite; }
+        @keyframes avatar-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(20,184,166,.6); } 50% { box-shadow: 0 0 0 14px rgba(20,184,166,0); } }
+        #kv-call-status { font-size: 13px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #94a3b8; }
+        #kv-call-status.listening { color: #14b8a6; }
+        #kv-call-status.speaking { color: #3b82f6; }
+        #kv-call-status.thinking { color: #a78bfa; }
+        #kv-call-timer { font-size: 13px; color: #475569; font-variant-numeric: tabular-nums; }
+        #kv-call-timer.urgent { color: #f87171; }
+        #kv-waveform { display: flex; align-items: center; gap: 3px; height: 32px; }
+        #kv-waveform .bar { width: 3px; border-radius: 99px; background: linear-gradient(180deg,#14b8a6,#3b82f6); transform-origin: bottom; animation: none; }
+        #kv-waveform.active .bar { animation: wave-bar .8s ease-in-out infinite; }
+        #kv-waveform .bar:nth-child(1){animation-delay:0s;height:8px}
+        #kv-waveform .bar:nth-child(2){animation-delay:.1s;height:16px}
+        #kv-waveform .bar:nth-child(3){animation-delay:.2s;height:24px}
+        #kv-waveform .bar:nth-child(4){animation-delay:.05s;height:20px}
+        #kv-waveform .bar:nth-child(5){animation-delay:.15s;height:12px}
+        #kv-waveform .bar:nth-child(6){animation-delay:.25s;height:28px}
+        #kv-waveform .bar:nth-child(7){animation-delay:.08s;height:18px}
+        #kv-waveform .bar:nth-child(8){animation-delay:.18s;height:10px}
+        @keyframes wave-bar { 0%,100% { transform: scaleY(.3); opacity:.6; } 50% { transform: scaleY(1); opacity:1; } }
+        #kv-call-transcript { width: 100%; max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 0 2px; scroll-behavior: smooth; }
+        #kv-call-transcript::-webkit-scrollbar { width: 4px; } #kv-call-transcript::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 2px; }
+        .kv-tr-user { background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.25); border-radius: 12px 12px 4px 12px; padding: 8px 12px; font-size: 13px; color: #bfdbfe; align-self: flex-end; max-width: 90%; }
+        .kv-tr-ai { background: rgba(20,184,166,.12); border: 1px solid rgba(20,184,166,.22); border-radius: 12px 12px 12px 4px; padding: 8px 12px; font-size: 13px; color: #99f6e4; align-self: flex-start; max-width: 90%; }
+        .kv-tr-typing { opacity: .5; font-style: italic; }
+        #kv-call-endBtn { margin-top: 4px; padding: 12px 32px; border-radius: 99px; background: rgba(239,68,68,.15); border: 1.5px solid rgba(239,68,68,.4); color: #fca5a5; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .2s, border-color .2s; }
+        #kv-call-endBtn:hover { background: rgba(239,68,68,.28); border-color: rgba(239,68,68,.6); }
+        #kv-call-hint { font-size: 11px; color: #334155; text-align: center; line-height: 1.5; }
         @keyframes pulse-ring { 0% { transform: scale(0.8); opacity: 0.5; } 70%,100% { transform: scale(1.3); opacity: 0; } }
         .wave { animation: wave 1.5s ease-in-out infinite; }
         @keyframes wave { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(1.8); } }
@@ -959,7 +994,7 @@
                             </div>
                             <div class="kv-hero-cta">
                                 <a href="#kv-pricing" class="kv-btn kv-btn-primary kv-btn-large">Start Free 14-Day Trial</a>
-                                <button class="kv-btn kv-btn-secondary kv-btn-large" onclick="goDemo('client')">Try Live Demo</button>
+                                <button class="kv-btn kv-btn-secondary kv-btn-large" onclick="openCallModal()">📞 Call Kaleya</button>
                             </div>
                             <div class="kv-trust-bar kv-trust-bar-stack">
                                 <div>
@@ -987,7 +1022,7 @@
                                         <div class="kv-phone-kicker">Incoming call</div>
                                         <div class="kv-phone-title">Kaleya AI</div>
                                         <div class="kv-phone-subtitle">for Mike's Barbershop</div>
-                                        <button class="kv-mic-btn" onclick="event.stopPropagation();goDemo('client')">
+                                        <button class="kv-mic-btn" onclick="event.stopPropagation();openCallModal()">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z"/>
                                                 <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
@@ -1397,7 +1432,7 @@
                     <p>Set up takes 3 minutes. Cancel anytime in 1 click.</p>
                     <div class="kv-hero-cta" style="justify-content:center">
                         <a href="#kv-pricing" class="kv-btn kv-btn-primary kv-btn-large">Start Free 14-Day Trial</a>
-                        <button class="kv-btn kv-btn-secondary kv-btn-large" onclick="goDemo('client')">Try Live Demo</button>
+                        <button class="kv-btn kv-btn-secondary kv-btn-large" onclick="openCallModal()">📞 Call Kaleya</button>
                     </div>
                 </section>
             </main>
@@ -4319,6 +4354,204 @@ function goDemo(type) {
     fillLogin(type === 'admin' ? 'admin' : 'client');
     showView('login');
     showToast(type === 'admin' ? tr('demo_god_mode_ready') : tr('demo_admin_ready'));
+}
+
+// ===== BROWSER CALL MODAL =====
+const _kvcall = {
+    recognition: null,
+    audioEl: null,
+    history: [],
+    timerInterval: null,
+    secondsLeft: 120,
+    speaking: false,
+    listening: false,
+    ended: false,
+
+    get modal() { return document.getElementById('kv-call-modal'); },
+    get avatar() { return document.getElementById('kv-call-avatar'); },
+    get statusEl() { return document.getElementById('kv-call-status'); },
+    get timerEl() { return document.getElementById('kv-call-timer'); },
+    get waveform() { return document.getElementById('kv-waveform'); },
+    get transcript() { return document.getElementById('kv-call-transcript'); },
+
+    setStatus(state, text) {
+        const el = this.statusEl;
+        el.className = '';
+        el.classList.add(state);
+        el.textContent = text;
+        this.avatar.className = state === 'listening' ? 'listening' : '';
+        this.waveform.className = (state === 'listening' || state === 'speaking') ? 'active' : '';
+    },
+
+    addMessage(role, text, typing) {
+        const div = document.createElement('div');
+        div.className = role === 'user' ? 'kv-tr-user' : 'kv-tr-ai';
+        if (typing) div.classList.add('kv-tr-typing');
+        div.textContent = text;
+        div.dataset.role = role;
+        this.transcript.appendChild(div);
+        this.transcript.scrollTop = this.transcript.scrollHeight;
+        return div;
+    },
+
+    updateMessage(el, text) {
+        el.textContent = text;
+        el.classList.remove('kv-tr-typing');
+        this.transcript.scrollTop = this.transcript.scrollHeight;
+    },
+
+    formatTime(s) {
+        return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+    },
+
+    tickTimer() {
+        this.secondsLeft--;
+        this.timerEl.textContent = this.formatTime(this.secondsLeft);
+        if (this.secondsLeft <= 15) this.timerEl.classList.add('urgent');
+        if (this.secondsLeft <= 0) closeCallModal();
+    },
+
+    async sendToAI(text) {
+        this.history.push({ role: 'user', content: text });
+        const thinking = this.addMessage('ai', '…', true);
+        this.setStatus('thinking', 'Thinking…');
+        try {
+            const res = await fetch('/api/ai-agent/public-browser-chat/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+                body: JSON.stringify({ text, lang: currentLang || 'en', history: this.history.slice(-6) }),
+            });
+            if (!res.ok) throw new Error('API error');
+            const data = await res.json();
+            const replyText = data.text || '';
+            this.updateMessage(thinking, replyText);
+            this.history.push({ role: 'assistant', content: replyText });
+            if (data.audio_url) {
+                await this.playAudio(data.audio_url);
+            } else {
+                await this.browserSpeak(replyText);
+            }
+        } catch (e) {
+            this.updateMessage(thinking, 'Sorry, something went wrong.');
+        }
+        if (!this.ended) this.startListening();
+    },
+
+    playAudio(url) {
+        return new Promise(resolve => {
+            this.setStatus('speaking', 'Speaking…');
+            this.speaking = true;
+            if (this.audioEl) { this.audioEl.pause(); }
+            this.audioEl = new Audio(url);
+            this.audioEl.onended = () => { this.speaking = false; resolve(); };
+            this.audioEl.onerror = () => { this.speaking = false; resolve(); };
+            this.audioEl.play().catch(() => { this.speaking = false; resolve(); });
+        });
+    },
+
+    browserSpeak(text) {
+        return new Promise(resolve => {
+            if (!window.speechSynthesis) { resolve(); return; }
+            this.setStatus('speaking', 'Speaking…');
+            const utt = new SpeechSynthesisUtterance(text);
+            utt.lang = currentLang || 'en-US';
+            utt.onend = resolve;
+            utt.onerror = resolve;
+            speechSynthesis.speak(utt);
+        });
+    },
+
+    startListening() {
+        if (this.ended || this.speaking) return;
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) {
+            this.setStatus('', 'Speech not supported in this browser.');
+            return;
+        }
+        this.recognition = new SR();
+        this.recognition.lang = currentLang || 'en-US';
+        this.recognition.interimResults = false;
+        this.recognition.maxAlternatives = 1;
+        this.setStatus('listening', 'Listening…');
+        this.listening = true;
+
+        this.recognition.onresult = (e) => {
+            const text = e.results[0][0].transcript.trim();
+            if (text) {
+                this.addMessage('user', text);
+                this.sendToAI(text);
+            }
+        };
+        this.recognition.onerror = () => {
+            this.listening = false;
+            if (!this.ended) setTimeout(() => this.startListening(), 1200);
+        };
+        this.recognition.onend = () => { this.listening = false; };
+        try { this.recognition.start(); } catch(e) {}
+    },
+
+    stopAll() {
+        this.ended = true;
+        this.listening = false;
+        this.speaking = false;
+        clearInterval(this.timerInterval);
+        if (this.recognition) { try { this.recognition.abort(); } catch(e) {} }
+        if (this.audioEl) { this.audioEl.pause(); this.audioEl = null; }
+        if (window.speechSynthesis) speechSynthesis.cancel();
+    },
+
+    reset() {
+        this.history = [];
+        this.secondsLeft = 120;
+        this.ended = false;
+        this.speaking = false;
+        this.listening = false;
+        this.timerEl.textContent = '2:00';
+        this.timerEl.classList.remove('urgent');
+        this.transcript.innerHTML = '';
+        this.waveform.className = '';
+        this.avatar.className = '';
+    },
+};
+
+function getCsrfToken() {
+    const m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+}
+
+async function openCallModal() {
+    _kvcall.stopAll();
+    _kvcall.reset();
+    _kvcall.modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    _kvcall.setStatus('', 'Connecting…');
+
+    // Play greeting first
+    try {
+        const params = new URLSearchParams({ preset: 'client_greeting', lang: currentLang || 'en' });
+        const r = await fetch(`/api/ai-agent/public-intro-tts/?${params}`);
+        const d = await r.json();
+        if (d.audio_url) {
+            _kvcall.addMessage('ai', d.text || 'Hello, this is Kaleya. How can I help?');
+            _kvcall.history.push({ role: 'assistant', content: d.text || '' });
+            await _kvcall.playAudio(d.audio_url);
+        } else throw new Error('no audio');
+    } catch(e) {
+        const greet = 'Hello, this is Kaleya. How can I help?';
+        _kvcall.addMessage('ai', greet);
+        _kvcall.history.push({ role: 'assistant', content: greet });
+        await _kvcall.browserSpeak(greet);
+    }
+
+    if (_kvcall.ended) return;
+    _kvcall.timerInterval = setInterval(() => _kvcall.tickTimer(), 1000);
+    _kvcall.startListening();
+}
+
+function closeCallModal() {
+    _kvcall.stopAll();
+    _kvcall.modal.classList.remove('open');
+    document.body.style.overflow = '';
 }
 
 async function logoTap() {
@@ -9310,6 +9543,27 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             <button id="telegramSetupBtn" onclick="submitTelegramSetup()" class="flex-1 h-11 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[13px] font-medium disabled:opacity-50">Save &amp; Connect</button>
         </div>
     </div>
+</div>
+
+<!-- ===== CALL KALEYA MODAL ===== -->
+<div id="kv-call-modal" role="dialog" aria-modal="true" aria-label="Call Kaleya">
+  <div id="kv-call-card">
+    <div style="display:flex;align-items:center;gap:14px;width:100%;">
+      <div id="kv-call-avatar">🎙️</div>
+      <div style="flex:1;">
+        <div style="font-size:16px;font-weight:700;color:#f8fafc;">Kaleya</div>
+        <div id="kv-call-status">Connecting…</div>
+      </div>
+      <div id="kv-call-timer">2:00</div>
+    </div>
+    <div id="kv-waveform">
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    </div>
+    <div id="kv-call-transcript"></div>
+    <button id="kv-call-endBtn" onclick="closeCallModal()">End Demo Call</button>
+    <div id="kv-call-hint">Demo · Mike's Barbershop · Max 2 min · No data saved</div>
+  </div>
 </div>
 </body>
 </html>
