@@ -211,6 +211,65 @@ def build_voice_response_twiml(
     )
 
 
+def build_transfer_twiml(business_client: BusinessClient, forward_to: str, twilio_number: str = "") -> str:
+    """TwiML that bridges the caller to the owner's phone.
+
+    Flow:
+      1. <Say> "hold" message in the tenant's language
+      2. <Dial> the owner (30-second ring, record the bridged call)
+      3. If the owner doesn't answer → <Say> "no one available" + <Hangup>
+    """
+    from xml.sax.saxutils import escape
+
+    lang = business_client.interface_language or business_client.language or "en"
+    polly = POLLY_VOICE_BY_LANG.get(lang, DEFAULT_TWILIO_VOICE)
+    twilio_lang = TWILIO_SPEECH_LANG.get(lang, "en-US")
+
+    hold_msgs = {
+        "en":    "One moment, connecting you to the salon now.",
+        "en-gb": "One moment, connecting you to the salon now.",
+        "es":    "Un momento, te estoy conectando con el salón ahora.",
+        "pt":    "Um momento, estou a conectar-te com o salão agora.",
+        "ru":    "Одну минуту, соединяю вас с салоном.",
+        "fr":    "Un instant, je vous mets en relation avec le salon.",
+        "it":    "Un momento, ti sto mettendo in contatto con il salone.",
+        "de":    "Einen Moment, ich verbinde Sie jetzt mit dem Salon.",
+        "sr":    "Trenutak, prenosim vas na salon.",
+    }
+    no_answer_msgs = {
+        "en":    "I'm sorry, no one is available right now. We'll call you back shortly. Goodbye!",
+        "en-gb": "I'm sorry, no one is available right now. We'll call you back shortly. Goodbye!",
+        "es":    "Lo siento, no hay nadie disponible ahora mismo. Te llamaremos pronto. ¡Adiós!",
+        "pt":    "Desculpa, não há ninguém disponível agora. Ligamos-te em breve. Adeus!",
+        "ru":    "Извините, сейчас никого нет. Мы перезвоним вам в ближайшее время. До свидания!",
+        "fr":    "Je suis désolée, personne n'est disponible pour le moment. Nous vous rappellerons. Au revoir !",
+        "it":    "Mi dispiace, nessuno è disponibile al momento. Ti richiameremo presto. Arrivederci!",
+        "de":    "Es tut mir leid, niemand ist gerade erreichbar. Wir rufen Sie zurück. Auf Wiedersehen!",
+        "sr":    "Žao mi je, niko nije dostupan. Javićemo vam se uskoro. Doviđenja!",
+    }
+
+    hold_text = hold_msgs.get(lang, hold_msgs["en"])
+    no_answer_text = no_answer_msgs.get(lang, no_answer_msgs["en"])
+
+    hold_voice = _say_or_play(business_client, hold_text, polly, twilio_lang)
+    no_answer_voice = _say_or_play(business_client, no_answer_text, polly, twilio_lang)
+
+    # callerId must be a Twilio-verified number — use the tenant's Kaleya number
+    caller_id_attr = f' callerId="{escape(twilio_number)}"' if twilio_number else ""
+
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        "<Response>"
+        f"{hold_voice}"
+        f'<Dial{caller_id_attr} timeout="30" record="record-from-answer">'
+        f"{escape(forward_to)}"
+        f"</Dial>"
+        f"{no_answer_voice}"
+        "<Hangup/>"
+        "</Response>"
+    )
+
+
 def gather_action_url(session_id: int) -> str:
     """Absolute URL Twilio posts to after capturing speech."""
     path = reverse("voice-gather", kwargs={"session_id": session_id})

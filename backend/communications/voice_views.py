@@ -16,6 +16,7 @@ from ai_agent.services import handle_inbound_text
 from appointments.models import Customer
 from communications.models import CallSession, Message
 from communications.twilio_service import (
+    build_transfer_twiml,
     build_voice_response_twiml,
     ensure_voice_conversation,
     find_business_client_by_called_number,
@@ -159,6 +160,7 @@ def voice_gather(request, session_id):
             "customer_email": caller.email,
         })
 
+    result = None
     try:
         result = handle_inbound_text(
             business_client,
@@ -185,6 +187,26 @@ def voice_gather(request, session_id):
         body=response_text,
     )
     session.transcript = (session.transcript + f"\n[kaleya] {response_text}")[:8000]
+
+    # ── LIVE TRANSFER ───────────────────────────────────────────────────────
+    # When the AI detects the caller wants a human AND the salon has a
+    # business phone set, bridge the call directly instead of looping.
+    transfer_to = (business_client.business_phone or "").strip()
+    if result and result.get("intent") == "support_handoff" and transfer_to:
+        logger.info(
+            "Live transfer: call %s → %s (%s)",
+            session.external_call_id,
+            transfer_to,
+            business_client.name,
+        )
+        session.status = "transferred"
+        session.save(update_fields=["transcript", "status"])
+        if conversation:
+            conversation.status = "closed"
+            conversation.save(update_fields=["status"])
+        return _twiml(build_transfer_twiml(business_client, transfer_to, session.to_number or ""))
+    # ────────────────────────────────────────────────────────────────────────
+
     session.save(update_fields=["transcript"])
 
     # Naive ending heuristic — if AI's response signals goodbye, hang up.

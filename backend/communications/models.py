@@ -82,6 +82,7 @@ class CallSession(models.Model):
     STATUS_CHOICES = (
         ("ringing", "Zvoni"),
         ("active", "Aktivan"),
+        ("transferred", "Prenet na vlasnika"),
         ("completed", "Zavrsen"),
         ("missed", "Propusten"),
         ("failed", "Greska"),
