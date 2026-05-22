@@ -214,7 +214,7 @@ class PublicIntroSpeechAPIView(APIView):
         text = preset_texts[language]
 
         try:
-            voice = synthesize_elevenlabs_speech(PublicVoiceClient(), text)
+            voice = synthesize_elevenlabs_speech(PublicVoiceClient(), text, language=language)
             return Response({"preset": preset, "language": language, "text": text, **voice})
         except ProviderError as exc:
             return Response({"detail": str(exc), "preset": preset, "language": language}, status=400)
@@ -337,7 +337,7 @@ class PublicBrowserChatAPIView(APIView):
 
         result = {"text": reply_text, "audio_url": None}
         try:
-            voice = synthesize_elevenlabs_speech(PublicVoiceClient(), reply_text)
+            voice = synthesize_elevenlabs_speech(PublicVoiceClient(), reply_text, language=lang)
             result["audio_url"] = voice.get("audio_url")
         except ProviderError:
             pass

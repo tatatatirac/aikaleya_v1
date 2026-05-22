@@ -178,6 +178,23 @@ KALEYA_OPENAI_MODEL = os.getenv("OPENAI_MODEL", "")
 KALEYA_ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "")
 KALEYA_ELEVENLABS_VOICE_ID = os.getenv("ELEVENLABS_VOICE_ID", "")
 
+# Per-language voice IDs (optional overrides). If a language has no specific
+# voice configured, we fall back to KALEYA_ELEVENLABS_VOICE_ID.
+# Example .env:
+#   ELEVENLABS_VOICE_ID_EN=EXAVITQu4vr4xnSDxMaL     (Sarah)
+#   ELEVENLABS_VOICE_ID_SR=d3l4f3HgkE3P6Fo91lYA     (Ida — native Serbian)
+KALEYA_ELEVENLABS_VOICE_BY_LANG = {
+    "en":    os.getenv("ELEVENLABS_VOICE_ID_EN", ""),
+    "en-gb": os.getenv("ELEVENLABS_VOICE_ID_EN_GB", ""),
+    "es":    os.getenv("ELEVENLABS_VOICE_ID_ES", ""),
+    "pt":    os.getenv("ELEVENLABS_VOICE_ID_PT", ""),
+    "ru":    os.getenv("ELEVENLABS_VOICE_ID_RU", ""),
+    "fr":    os.getenv("ELEVENLABS_VOICE_ID_FR", ""),
+    "it":    os.getenv("ELEVENLABS_VOICE_ID_IT", ""),
+    "de":    os.getenv("ELEVENLABS_VOICE_ID_DE", ""),
+    "sr":    os.getenv("ELEVENLABS_VOICE_ID_SR", ""),
+}
+
 # Twilio (voice + SMS) — global fallback; per-tenant credentials live on IntegrationConnection
 KALEYA_TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
 KALEYA_TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")

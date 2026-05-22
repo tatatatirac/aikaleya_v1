@@ -141,13 +141,14 @@ def fallback_no_input_text(business_client: BusinessClient) -> str:
     return msgs.get(lang) or msgs["en"]
 
 
-def _try_elevenlabs_audio_url(business_client: BusinessClient, text: str) -> str | None:
+def _try_elevenlabs_audio_url(business_client: BusinessClient, text: str, language: str = "") -> str | None:
     """Generate ElevenLabs MP3 and return absolute public URL. None if ElevenLabs unavailable."""
     if not text or not text.strip():
         return None
     try:
         from ai_agent.providers import synthesize_elevenlabs_speech
-        result = synthesize_elevenlabs_speech(business_client, text)
+        lang = language or business_client.interface_language or business_client.language or "en"
+        result = synthesize_elevenlabs_speech(business_client, text, language=lang)
         rel_url = result.get("audio_url") or ""
         if not rel_url:
             return None

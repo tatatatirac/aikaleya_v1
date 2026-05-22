@@ -69,10 +69,40 @@ def get_client_ai_config(business_client):
     }
 
 
-def get_client_voice_config(business_client):
+def get_client_voice_config(business_client, language=None):
+    """Resolve the ElevenLabs voice config for this tenant.
+
+    Priority order for voice_id:
+      1. Tenant override (api_settings.voice_id)
+      2. Per-language env mapping (KALEYA_ELEVENLABS_VOICE_BY_LANG[lang])
+      3. Global default env (KALEYA_ELEVENLABS_VOICE_ID)
+      4. Tenant voice_settings.voice_id (legacy)
+    """
     api_settings = getattr(business_client, "api_settings", None)
     voice_settings = getattr(business_client, "voice_settings", None)
-    voice_id = getattr(api_settings, "voice_id", "") or settings.KALEYA_ELEVENLABS_VOICE_ID
+
+    # Determine effective language: explicit arg > business_client.interface_language > "en"
+    if not language:
+        language = (
+            getattr(business_client, "interface_language", "")
+            or getattr(business_client, "language", "")
+            or "en"
+        )
+    language = (language or "en").strip().lower()
+
+    # 1. Tenant-specific voice_id wins
+    voice_id = getattr(api_settings, "voice_id", "") or ""
+
+    # 2. Per-language env override
+    if not voice_id:
+        per_lang_map = getattr(settings, "KALEYA_ELEVENLABS_VOICE_BY_LANG", {}) or {}
+        voice_id = (per_lang_map.get(language) or "").strip()
+
+    # 3. Global default
+    if not voice_id:
+        voice_id = settings.KALEYA_ELEVENLABS_VOICE_ID
+
+    # 4. Legacy voice_settings fallback
     if not voice_id and voice_settings and getattr(voice_settings, "voice_id", "") != "demo-voice":
         voice_id = voice_settings.voice_id
 
@@ -83,6 +113,7 @@ def get_client_voice_config(business_client):
         "model_id": getattr(api_settings, "voice_model", "") or "eleven_multilingual_v2",
         "stability": float(getattr(voice_settings, "stability", 0.5) or 0.5),
         "similarity_boost": float(getattr(voice_settings, "similarity_boost", 0.75) or 0.75),
+        "language": language,
     }
 
 
@@ -166,8 +197,8 @@ def generate_anthropic_plan(business_client, user_text, context=None):
     return _extract_json_object("\n".join(text_blocks))
 
 
-def synthesize_elevenlabs_speech(business_client, text):
-    config = get_client_voice_config(business_client)
+def synthesize_elevenlabs_speech(business_client, text, language=None):
+    config = get_client_voice_config(business_client, language=language)
     if not config["api_key"]:
         raise ProviderError("ELEVENLABS_API_KEY nije podesen.")
     if not config["voice_id"]:
