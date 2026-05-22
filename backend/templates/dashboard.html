@@ -1334,7 +1334,7 @@
                         <div class="detail-grid">
                             <article class="card detail-card">
                                 <h3>Radnici</h3>
-                                {% if is_admin_user %}
+                                {% if is_admin_user or is_owner %}
                                     <form method="post" class="compact-form">
                                         {% csrf_token %}
                                         <input type="hidden" name="section" value="add_staff">
@@ -1374,14 +1374,14 @@
 
                             <article class="card detail-card">
                                 <h3>Usluge</h3>
-                                {% if is_admin_user %}
+                                {% if is_admin_user or is_owner %}
                                     <form method="post" class="compact-form three">
                                         {% csrf_token %}
                                         <input type="hidden" name="section" value="add_service">
                                         <input type="hidden" name="client_id" value="{{ selected_client.id }}">
                                         <div class="field"><label>Naziv</label><input name="name" required></div>
                                         <div class="field"><label>Kategorija</label><input name="category"></div>
-                                        <div class="field"><label>Trajanje</label><input type="number" min="5" name="duration_minutes" value="30"></div>
+                                        <div class="field"><label>Trajanje (min)</label><input type="number" min="5" name="duration_minutes" value="30"></div>
                                         <div class="field"><label>Cena</label><input type="number" min="0" step="0.01" name="price" value="0"></div>
                                         <div class="field"><label>Valuta</label><input name="currency" value="USD"></div>
                                         <label class="check-field"><input type="checkbox" name="is_active" checked> Aktivna</label>
@@ -1465,14 +1465,48 @@
                     <section class="panel" id="alarms">
                         <div class="section-head">
                             <div>
-                                <h2>Alarmi</h2>
-                                <p>Ovaj admin tab ostaje za buduću human support integraciju.</p>
+                                <h2>Eskalacija</h2>
+                                <p>Kaleya prebacuje poziv na vas kada ne može da pomogne. Podesite na koji broj.</p>
                             </div>
                         </div>
-                        <div class="card settings-card">
-                            <div class="notice">
-                                Ovde će biti support alarm kada AI ne može da završi zahtev klijenta i treba povezivanje sa čovekom.
-                            </div>
+
+                        <div class="detail-grid">
+                            <article class="card detail-card">
+                                <h3>Kako eskalacija radi</h3>
+                                <div class="status-list" style="margin-top:8px">
+                                    <div class="status-line"><span>Kad pozivalac kaže</span><strong>"Hvaću pravi čovek" / "Can I speak to someone"</strong></div>
+                                    <div class="status-line"><span>Kad AI ne može</span><strong>Booking van radnog vremena, specijalni zahtevi</strong></div>
+                                    <div class="status-line"><span>Šta Kaleya kaže</span><strong>"I'll have the owner call you right back."</strong></div>
+                                    <div class="status-line"><span>Eskalacioni broj</span>
+                                        <strong>
+                                            {% if selected_client.business_phone %}
+                                                {{ selected_client.business_phone }}
+                                            {% else %}
+                                                <span style="color:var(--orange)">Nije podešen — dodaj u Podešavanjima</span>
+                                            {% endif %}
+                                        </strong>
+                                    </div>
+                                </div>
+                                {% if not selected_client.business_phone %}
+                                    <a class="primary-btn" href="#settings" data-tab="settings" style="margin-top:18px;display:inline-flex">Podesi eskalacioni broj →</a>
+                                {% endif %}
+                            </article>
+
+                            <article class="card detail-card">
+                                <h3>Notifikacije</h3>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="section" value="alarms">
+                                    <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                                    <div class="switch-row" style="grid-template-columns:1fr 1fr;margin-bottom:18px">
+                                        <label class="switch">Notifikacije <input type="checkbox" name="notifications_enabled" {% if alarm_settings.notifications_enabled %}checked{% endif %}></label>
+                                        <label class="switch">Hitne <input type="checkbox" name="urgent_enabled" {% if alarm_settings.urgent_enabled %}checked{% endif %}></label>
+                                    </div>
+                                    <div class="actions">
+                                        <button class="primary-btn" type="submit">Sačuvaj</button>
+                                    </div>
+                                </form>
+                            </article>
                         </div>
                     </section>
 
@@ -1761,6 +1795,15 @@
                                     <input name="public_name" value="{{ selected_client.public_name }}">
                                 </div>
                                 <div class="field">
+                                    <label>Telefon firme</label>
+                                    <input name="business_phone" value="{{ selected_client.business_phone }}" placeholder="+1 415 000 0000">
+                                </div>
+                                <div class="field">
+                                    <label>Email firme</label>
+                                    <input type="email" name="business_email" value="{{ selected_client.business_email }}" placeholder="info@salon.com">
+                                </div>
+                                {% if is_admin_user %}
+                                <div class="field">
                                     <label>Paket</label>
                                     <select name="package">
                                         {% for value,label in package_choices %}
@@ -1768,6 +1811,12 @@
                                         {% endfor %}
                                     </select>
                                 </div>
+                                {% else %}
+                                <div class="field">
+                                    <label>Paket</label>
+                                    <input class="readonly-input" value="{{ selected_client.get_package_display }}" readonly>
+                                </div>
+                                {% endif %}
                                 <div class="field">
                                     <label>Vremenska zona</label>
                                     <input name="timezone" value="{{ selected_client.timezone }}">

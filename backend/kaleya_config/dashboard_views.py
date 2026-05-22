@@ -307,8 +307,9 @@ def dashboard(request):
             "delete_blocked_time",
         }
         if section in detail_sections:
-            if not is_admin_user(request.user):
-                messages.error(request, "Samo admin moze da menja radnike i usluge.")
+            is_owner = selected_client and selected_client.owner_id == request.user.id
+            if not is_admin_user(request.user) and not is_owner:
+                messages.error(request, "Samo vlasnik ili admin moze da menja radnike i usluge.")
                 return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#client-detail")
             try:
                 if section == "add_staff":
@@ -435,6 +436,7 @@ def dashboard(request):
 
     context = {
         "is_admin_user": admin_has_full_access,
+        "is_owner": selected_client and selected_client.owner_id == request.user.id,
         "clients": clients,
         "selected_client": selected_client,
         "api_settings": api_settings,
@@ -642,7 +644,11 @@ def update_client_settings(request, client):
 
     client.name = post.get("name", client.name).strip() or client.name
     client.public_name = post.get("public_name", "").strip()
-    client.package = post.get("package", client.package)
+    # Only admins can change the billing package to prevent self-upgrades
+    if is_admin_user(request.user):
+        client.package = post.get("package", client.package)
+    client.business_phone = post.get("business_phone", client.business_phone).strip()
+    client.business_email = post.get("business_email", client.business_email).strip()
     client.language = post.get("language", client.language)
     client.interface_language = post.get("interface_language", client.interface_language)
     client.voice_language = post.get("voice_language", client.voice_language)
