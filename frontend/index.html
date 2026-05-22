@@ -993,8 +993,8 @@
                                 <p id="kv-hero-subtitle">Kaleya answers at 9PM, books the fade, and texts the confirmation. You wake up to a full chair.</p>
                             </div>
                             <div class="kv-hero-cta">
-                                <a href="#kv-pricing" class="kv-btn kv-btn-primary kv-btn-large">Start Free 14-Day Trial</a>
-                                <button class="kv-btn kv-btn-secondary kv-btn-large" onclick="openCallModal()">📞 Call Kaleya</button>
+                                <a href="#kv-pricing" class="kv-btn kv-btn-primary kv-btn-large" data-i18n="trial_btn">Start Free 14-Day Trial</a>
+                                <button class="kv-btn kv-btn-secondary kv-btn-large" onclick="openCallModal()" data-i18n="hero_call_kaleya"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;display:inline-block;vertical-align:-3px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call Kaleya</button>
                             </div>
                             <div class="kv-trust-bar kv-trust-bar-stack">
                                 <div>
@@ -1431,8 +1431,8 @@
                     <h2>Stop losing <span data-lv="monthly">$1,200</span>/month to missed calls and no-shows</h2>
                     <p>Set up takes 3 minutes. Cancel anytime in 1 click.</p>
                     <div class="kv-hero-cta" style="justify-content:center">
-                        <a href="#kv-pricing" class="kv-btn kv-btn-primary kv-btn-large">Start Free 14-Day Trial</a>
-                        <button class="kv-btn kv-btn-secondary kv-btn-large" onclick="openCallModal()">📞 Call Kaleya</button>
+                        <a href="#kv-pricing" class="kv-btn kv-btn-primary kv-btn-large" data-i18n="trial_btn">Start Free 14-Day Trial</a>
+                        <button class="kv-btn kv-btn-secondary kv-btn-large" onclick="openCallModal()" data-i18n="hero_call_kaleya"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;display:inline-block;vertical-align:-3px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call Kaleya</button>
                     </div>
                 </section>
             </main>
@@ -2939,6 +2939,10 @@ const T = {
         trust_line1: 'Pravljeno za salone · Otkaži kad god želiš',
         trust_line2: 'Zakazuje preko poziva · SMS · WhatsApp · Viber · Telegram · Instagram DM',
         banner_early1: 'Rani pristup', banner_early2: 'prvih', banner_early3: 'salona dobija', banner_early4: 'DOŽIVOTNIH 50% popusta', banner_early_cta: 'Rezerviši svoje mesto',
+        hero_call_kaleya: 'Pozovi Kaleyu',
+        kv_call_connecting: 'Povezivanje…', kv_call_listening: 'Sluša…', kv_call_thinking: 'Razmišlja…', kv_call_speaking: 'Govori…',
+        kv_call_browser_unsupported: 'Koristi Chrome ili Edge za glasovni unos.', kv_call_mic_denied: 'Pristup mikrofonu odbijen.',
+        kv_call_end: 'Završi demo poziv', kv_call_hint: 'Demo · Max 2 min · Razgovor se ne čuva',
         billing_monthly: 'Mesečno', billing_yearly: 'Godišnje', billing_save: 'ušteda 2 mes.',
         per_mo: '/mes', billed_yearly: 'naplata godišnje', ea_lifetime: 'Rani pristup · doživotno',
         early_access_note: '⚡ Doživotnih 50% popusta dostupno za prvih 500 salona. Cena nikad ne raste — čak i kad nadogradiš paket.',
@@ -2999,6 +3003,10 @@ const T = {
         trust_line1: 'Built for salons · Cancel anytime',
         trust_line2: 'Books via call · SMS · WhatsApp · Viber · Telegram · Instagram DM',
         banner_early1: 'Early access', banner_early2: 'first', banner_early3: 'salons get', banner_early4: 'LIFETIME 50% off', banner_early_cta: 'Claim your spot',
+        hero_call_kaleya: 'Call Kaleya',
+        kv_call_connecting: 'Connecting…', kv_call_listening: 'Listening…', kv_call_thinking: 'Thinking…', kv_call_speaking: 'Speaking…',
+        kv_call_browser_unsupported: 'Use Chrome or Edge for voice input.', kv_call_mic_denied: 'Microphone access denied.',
+        kv_call_end: 'End Demo Call', kv_call_hint: 'Demo · Max 2 min · No data saved',
         billing_monthly: 'Monthly', billing_yearly: 'Yearly', billing_save: 'save 2 mo',
         per_mo: '/mo', billed_yearly: 'billed yearly', ea_lifetime: 'Early access · lifetime',
         early_access_note: '⚡ Lifetime 50% off available for the first 500 salons. Price never goes up — even when you upgrade plans.',
@@ -3059,6 +3067,10 @@ const T = {
         trust_line1: 'Hecho para salones · Cancela cuando quieras',
         trust_line2: 'Reserva por llamada · SMS · WhatsApp · Viber · Telegram · Instagram DM',
         banner_early1: 'Acceso anticipado', banner_early2: 'los primeros', banner_early3: 'salones obtienen', banner_early4: '50% DE POR VIDA', banner_early_cta: 'Reserva tu lugar',
+        hero_call_kaleya: 'Llama a Kaleya',
+        kv_call_connecting: 'Conectando…', kv_call_listening: 'Escuchando…', kv_call_thinking: 'Pensando…', kv_call_speaking: 'Hablando…',
+        kv_call_browser_unsupported: 'Usa Chrome o Edge para hablar.', kv_call_mic_denied: 'Acceso al micrófono denegado.',
+        kv_call_end: 'Terminar demo', kv_call_hint: 'Demo · Máx. 2 min · No se guarda nada',
         billing_monthly: 'Mensual', billing_yearly: 'Anual', billing_save: 'ahorra 2 meses',
         per_mo: '/mes', billed_yearly: 'facturado anualmente', ea_lifetime: 'Acceso anticipado · de por vida',
         early_access_note: '⚡ 50% de descuento de por vida para los primeros 500 salones. El precio nunca sube — incluso al cambiar de plan.',
@@ -3119,6 +3131,10 @@ const T = {
         trust_line1: 'Feito para salões · Cancela quando quiseres',
         trust_line2: 'Marca por chamada · SMS · WhatsApp · Viber · Telegram · Instagram DM',
         banner_early1: 'Acesso antecipado', banner_early2: 'primeiros', banner_early3: 'salões recebem', banner_early4: '50% VITALÍCIO', banner_early_cta: 'Reserva o teu lugar',
+        hero_call_kaleya: 'Liga à Kaleya',
+        kv_call_connecting: 'A ligar…', kv_call_listening: 'A ouvir…', kv_call_thinking: 'A pensar…', kv_call_speaking: 'A falar…',
+        kv_call_browser_unsupported: 'Usa Chrome ou Edge para falar.', kv_call_mic_denied: 'Acesso ao microfone negado.',
+        kv_call_end: 'Terminar demo', kv_call_hint: 'Demo · Máx. 2 min · Nada é guardado',
         billing_monthly: 'Mensal', billing_yearly: 'Anual', billing_save: 'poupa 2 meses',
         per_mo: '/mês', billed_yearly: 'cobrado anualmente', ea_lifetime: 'Acesso antecipado · vitalício',
         early_access_note: '⚡ 50% vitalício disponível para os primeiros 500 salões. O preço nunca aumenta — mesmo ao mudar de plano.',
@@ -3173,6 +3189,10 @@ const T = {
         trust_line1: 'Создано для салонов · Отмена в любой момент',
         trust_line2: 'Записывает по звонку · SMS · WhatsApp · Viber · Telegram · Instagram DM',
         banner_early1: 'Ранний доступ', banner_early2: 'первые', banner_early3: 'салонов получают', banner_early4: 'СКИДКУ 50% НАВСЕГДА', banner_early_cta: 'Забронировать место',
+        hero_call_kaleya: 'Позвонить Калее',
+        kv_call_connecting: 'Соединение…', kv_call_listening: 'Слушает…', kv_call_thinking: 'Думает…', kv_call_speaking: 'Говорит…',
+        kv_call_browser_unsupported: 'Используйте Chrome или Edge для голоса.', kv_call_mic_denied: 'Доступ к микрофону запрещён.',
+        kv_call_end: 'Завершить демо', kv_call_hint: 'Демо · Макс. 2 мин · Запись не сохраняется',
         billing_monthly: 'Помесячно', billing_yearly: 'Годовая', billing_save: 'экономия 2 мес.',
         per_mo: '/мес', billed_yearly: 'оплата за год', ea_lifetime: 'Ранний доступ · навсегда',
         early_access_note: '⚡ Скидка 50% навсегда для первых 500 салонов. Цена никогда не растёт — даже при переходе на другой тариф.',
@@ -3230,6 +3250,10 @@ T.fr = {
     trust_line1: 'Conçu pour les salons · Annulez quand vous voulez',
     trust_line2: 'Prend RDV par appel · SMS · WhatsApp · Viber · Telegram · Instagram DM',
     banner_early1: 'Accès anticipé', banner_early2: 'les premiers', banner_early3: 'salons obtiennent', banner_early4: '50% À VIE', banner_early_cta: 'Réservez votre place',
+    hero_call_kaleya: 'Appeler Kaleya',
+    kv_call_connecting: 'Connexion…', kv_call_listening: 'À l\'écoute…', kv_call_thinking: 'Réflexion…', kv_call_speaking: 'En parole…',
+    kv_call_browser_unsupported: 'Utilisez Chrome ou Edge pour parler.', kv_call_mic_denied: 'Accès au micro refusé.',
+    kv_call_end: 'Terminer la démo', kv_call_hint: 'Démo · Max 2 min · Aucune donnée conservée',
     billing_monthly: 'Mensuel', billing_yearly: 'Annuel', billing_save: 'économisez 2 mois',
     per_mo: '/mois', billed_yearly: 'facturé annuellement', ea_lifetime: 'Accès anticipé · à vie',
     early_access_note: '⚡ 50% à vie disponible pour les 500 premiers salons. Le prix n\'augmente jamais — même en changeant de forfait.',
@@ -3272,6 +3296,10 @@ T.it = {
     trust_line1: 'Pensato per i saloni · Cancella quando vuoi',
     trust_line2: 'Prenota via chiamata · SMS · WhatsApp · Viber · Telegram · Instagram DM',
     banner_early1: 'Accesso anticipato', banner_early2: 'primi', banner_early3: 'saloni ricevono', banner_early4: '50% A VITA', banner_early_cta: 'Prenota il tuo posto',
+    hero_call_kaleya: 'Chiama Kaleya',
+    kv_call_connecting: 'Connessione…', kv_call_listening: 'In ascolto…', kv_call_thinking: 'Sto pensando…', kv_call_speaking: 'Sto parlando…',
+    kv_call_browser_unsupported: 'Usa Chrome o Edge per parlare.', kv_call_mic_denied: 'Accesso al microfono negato.',
+    kv_call_end: 'Termina demo', kv_call_hint: 'Demo · Max 2 min · Nessun dato salvato',
     billing_monthly: 'Mensile', billing_yearly: 'Annuale', billing_save: 'risparmia 2 mesi',
     per_mo: '/mese', billed_yearly: 'fatturato annualmente', ea_lifetime: 'Accesso anticipato · a vita',
     early_access_note: '⚡ 50% a vita disponibile per i primi 500 saloni. Il prezzo non aumenta mai — anche cambiando piano.',
@@ -3385,6 +3413,10 @@ const EXTRA_TRANSLATIONS = {
         trust_line1: 'Gemacht für Salons · Jederzeit kündbar',
         trust_line2: 'Bucht per Anruf · SMS · WhatsApp · Viber · Telegram · Instagram DM',
         banner_early1: 'Early Access', banner_early2: 'die ersten', banner_early3: 'Salons erhalten', banner_early4: '50% AUF LEBENSZEIT', banner_early_cta: 'Platz sichern',
+        hero_call_kaleya: 'Kaleya anrufen',
+        kv_call_connecting: 'Verbinden…', kv_call_listening: 'Hört zu…', kv_call_thinking: 'Denkt nach…', kv_call_speaking: 'Spricht…',
+        kv_call_browser_unsupported: 'Chrome oder Edge für Spracheingabe.', kv_call_mic_denied: 'Mikrofonzugriff verweigert.',
+        kv_call_end: 'Demo beenden', kv_call_hint: 'Demo · Max. 2 Min. · Keine Daten gespeichert',
         billing_monthly: 'Monatlich', billing_yearly: 'Jährlich', billing_save: '2 Mo. sparen',
         per_mo: '/Monat', billed_yearly: 'jährlich abgerechnet', ea_lifetime: 'Early Access · auf Lebenszeit',
         early_access_note: '⚡ 50% lebenslang für die ersten 500 Salons. Der Preis steigt nie — auch beim Plan-Upgrade.',
@@ -4416,7 +4448,7 @@ const _kvcall = {
         this.processing = true;
         this.history.push({ role: 'user', content: text });
         const thinking = this.addMessage('ai', '…', true);
-        this.setStatus('thinking', 'Thinking…');
+        this.setStatus('thinking', tr('kv_call_thinking'));
         try {
             const res = await fetch('/api/ai-agent/public-browser-chat/', {
                 method: 'POST',
@@ -4447,7 +4479,7 @@ const _kvcall = {
 
     playAudio(url) {
         return new Promise(resolve => {
-            this.setStatus('speaking', 'Speaking…');
+            this.setStatus('speaking', tr('kv_call_speaking'));
             this.speaking = true;
             if (this.audioEl) { this.audioEl.pause(); }
             this.audioEl = new Audio(url);
@@ -4460,7 +4492,7 @@ const _kvcall = {
     browserSpeak(text) {
         return new Promise(resolve => {
             if (!window.speechSynthesis) { resolve(); return; }
-            this.setStatus('speaking', 'Speaking…');
+            this.setStatus('speaking', tr('kv_call_speaking'));
             const utt = new SpeechSynthesisUtterance(text);
             utt.lang = currentLang || 'en-US';
             utt.onend = resolve;
@@ -4478,7 +4510,7 @@ const _kvcall = {
         if (this.ended || this.speaking || this.processing) return;
         const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SR) {
-            this.setStatus('', 'Use Chrome or Edge for voice input.');
+            this.setStatus('', tr('kv_call_browser_unsupported'));
             return;
         }
         if (this.recognition) { try { this.recognition.abort(); } catch(e) {} }
@@ -4487,7 +4519,7 @@ const _kvcall = {
         this.recognition.continuous = false;
         this.recognition.interimResults = false;
         this.recognition.maxAlternatives = 1;
-        this.setStatus('listening', 'Listening…');
+        this.setStatus('listening', tr('kv_call_listening'));
         this.listening = true;
 
         this.recognition.onresult = (e) => {
@@ -4503,7 +4535,7 @@ const _kvcall = {
         this.recognition.onerror = (e) => {
             this.listening = false;
             if (e.error === 'not-allowed') {
-                this.setStatus('', 'Microphone access denied.');
+                this.setStatus('', tr('kv_call_mic_denied'));
                 return;
             }
             if (!this.ended) setTimeout(() => this.startListening(), 800);
@@ -4553,7 +4585,7 @@ async function openCallModal() {
     _kvcall.reset();
     _kvcall.modal.classList.add('open');
     document.body.style.overflow = 'hidden';
-    _kvcall.setStatus('', 'Connecting…');
+    _kvcall.setStatus('', tr('kv_call_connecting'));
 
     // Play greeting first
     try {
@@ -9590,8 +9622,8 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
       <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
     </div>
     <div id="kv-call-transcript"></div>
-    <button id="kv-call-endBtn" onclick="closeCallModal()">End Demo Call</button>
-    <div id="kv-call-hint">Demo · Mike's Barbershop · Max 2 min · No data saved</div>
+    <button id="kv-call-endBtn" onclick="closeCallModal()" data-i18n="kv_call_end">End Demo Call</button>
+    <div id="kv-call-hint" data-i18n="kv_call_hint">Demo · Max 2 min · No data saved</div>
   </div>
 </div>
 </body>
