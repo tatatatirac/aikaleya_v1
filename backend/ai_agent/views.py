@@ -286,20 +286,8 @@ class PublicBrowserChatAPIView(APIView):
     permission_classes = (permissions.AllowAny,)
     throttle_classes = (PublicChatThrottle,)
 
-    _DEMO_PROMPT = (
-        "You are Kaleya, an AI receptionist for a demo hair salon called \"Mike's Barbershop\".\n"
-        "This is a LIVE DEMO showing potential salon owners what their customers would experience.\n\n"
-        "Demo salon info:\n"
-        "- Services: Fade ($30, 30min), Beard Trim ($20, 20min), Full Cut & Beard ($45, 45min), Kids Cut ($25, 20min)\n"
-        "- Hours: Mon–Sat 9AM–7PM, closed Sunday\n"
-        "- Staff: Carlos, Marcus, Jordan\n\n"
-        "Rules:\n"
-        "- Keep every reply under 2 sentences — you are on a phone call.\n"
-        "- Be warm, professional, and helpful.\n"
-        "- If the caller wants to book, enthusiastically offer a slot.\n"
-        "- Speak in the same language as the caller.\n"
-        "- Never break character or mention that this is AI."
-    )
+    # Legacy stub — actual demo prompt is built per-request via master_prompt.py
+    _DEMO_PROMPT = ""
 
     def post(self, request):
         text = (request.data.get("text") or "").strip()[:500]
@@ -319,6 +307,7 @@ class PublicBrowserChatAPIView(APIView):
 
         reply_text = ""
         try:
+            from ai_agent.master_prompt import build_demo_master_prompt
             config = get_client_ai_config(PublicVoiceClient())
             if not config.get("api_key"):
                 raise ProviderError("AI not configured.")
@@ -326,9 +315,9 @@ class PublicBrowserChatAPIView(APIView):
                 "https://api.anthropic.com/v1/messages",
                 {
                     "model": config["model"],
-                    "max_tokens": 150,
-                    "temperature": 0.7,
-                    "system": self._DEMO_PROMPT,
+                    "max_tokens": 200,
+                    "temperature": 0.65,
+                    "system": build_demo_master_prompt(language=lang),
                     "messages": messages,
                 },
                 {

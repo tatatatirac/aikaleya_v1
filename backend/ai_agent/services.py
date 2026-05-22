@@ -2364,6 +2364,33 @@ def build_text_response(business_client, intent, tool_output):
 
 
 def build_system_prompt(business_client, channel="web", caller_phone="", caller_name=""):
+    """Master prompt for real tenants. Wraps Kaleya's persona (IP-protected)
+    around the tenant's live salon data."""
+    # Use the proprietary master prompt as the foundation.
+    try:
+        from ai_agent.master_prompt import build_real_master_prompt
+        master = build_real_master_prompt(
+            business_client,
+            channel=channel,
+            caller_phone=caller_phone,
+            caller_name=caller_name,
+        )
+    except Exception:
+        master = ""
+
+    # Tenant override (the salon's owner can append extra rules, but cannot
+    # replace Kaleya's core persona — that stays our IP).
+    try:
+        master_prompt_extra = (business_client.api_settings.master_prompt or "").strip()
+    except ClientApiSettings.DoesNotExist:
+        master_prompt_extra = ""
+    if master_prompt_extra:
+        master = f"{master}\n\n# Tenant-specific add-ons\n{master_prompt_extra}\n"
+
+    return master
+
+
+def _legacy_build_system_prompt_unused(business_client, channel="web", caller_phone="", caller_name=""):
     language = business_client.interface_language or business_client.language or "en"
     prompt = (
         "Ti si Kaleya, profesionalna AI sekretarica za zakazivanje termina. "
