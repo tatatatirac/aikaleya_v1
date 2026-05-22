@@ -1557,6 +1557,113 @@
                             </div>
                         </form>
 
+                        {# ── Phone / Twilio number card ─────────────────────────────────── #}
+                        <div class="card settings-card" style="margin-top:28px">
+                            <h2>📞 Kaleya AI broj (telefonski pozivi)</h2>
+
+                            {% if phone_kaleya_number %}
+                                {# Number already provisioned — show it + forwarding instructions #}
+                                <div class="status-list" style="margin-bottom:22px">
+                                    <div class="status-line">
+                                        <span>Kaleya AI broj</span>
+                                        <strong style="color:var(--green);font-size:22px;letter-spacing:.03em">{{ phone_kaleya_number }}</strong>
+                                    </div>
+                                    <div class="status-line"><span>Zemlja</span><strong>{{ phone_country }}</strong></div>
+                                    <div class="status-line"><span>Status</span>
+                                        <span class="badge {% if phone_integration.status == 'connected' %}ok{% else %}pause{% endif %}">
+                                            {{ phone_integration.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="card detail-card" style="background:#0c1423;border:1px solid #253248;margin-bottom:18px">
+                                    <h3 style="margin-bottom:14px">📋 Uputstvo za preusmeravanje poziva</h3>
+                                    <p style="color:var(--soft);margin:0 0 14px;font-size:15px">
+                                        Vlasnik treba da ukuca jedan od ovih kodova na svom poslovnom telefonu:
+                                    </p>
+                                    <div class="status-list">
+                                        <div class="status-line">
+                                            <span>Sve pozive preusmeri</span>
+                                            <strong style="font-family:monospace;font-size:18px;color:var(--teal)">**21*{{ phone_kaleya_number }}#</strong>
+                                        </div>
+                                        <div class="status-line">
+                                            <span>Samo kad je zauzet</span>
+                                            <strong style="font-family:monospace">**67*{{ phone_kaleya_number }}#</strong>
+                                        </div>
+                                        <div class="status-line">
+                                            <span>Samo kad ne odgovori</span>
+                                            <strong style="font-family:monospace">**61*{{ phone_kaleya_number }}#</strong>
+                                        </div>
+                                        <div class="status-line">
+                                            <span>Otkaži preusmeravanje</span>
+                                            <strong style="font-family:monospace">##002#</strong>
+                                        </div>
+                                    </div>
+                                    <p style="color:var(--muted);font-size:13px;margin:14px 0 0">
+                                        ℹ️ Koraci: Otvori aplikaciju za pozive → ukucaj kod → pritisni zelenu slušalicu → sačekaj poruku "Preusmeravanje aktivirano".
+                                        Za AT&amp;T / Verizon fiksne linije u SAD koristiti <strong style="font-family:monospace">*72{{ phone_kaleya_number }}</strong>.
+                                    </p>
+                                </div>
+
+                                {% if is_admin_user %}
+                                    <form method="post" class="inline-form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="section" value="release_phone">
+                                        <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                                        <button class="danger-btn" type="submit" onclick="return confirm('Osloboditi Twilio broj {{ phone_kaleya_number }}? Ovo će ga trajno ukloniti.')">
+                                            Oslobodi broj
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                            {% else %}
+                                {# No number yet #}
+                                <p class="helper-text">
+                                    Vlasnik unosi poslovni telefon u <strong>Podešavanja → Telefon firme</strong>.
+                                    Admin zatim klika "Kupi Kaleya broj" — sistem automatski prepoznaje zemlju i kupuje lokalni Twilio broj.
+                                    Vlasnik dobija uputstvo za preusmeravanje poziva.
+                                </p>
+
+                                <div class="status-list" style="margin:14px 0">
+                                    <div class="status-line">
+                                        <span>Poslovni telefon vlasnika</span>
+                                        <strong>
+                                            {% if selected_client.business_phone %}
+                                                {{ selected_client.business_phone }}
+                                            {% else %}
+                                                <span style="color:var(--orange)">Nije unesen — vlasnik treba da ga doda u Podešavanjima</span>
+                                            {% endif %}
+                                        </strong>
+                                    </div>
+                                </div>
+
+                                {% if is_admin_user %}
+                                    {% if selected_client.business_phone %}
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="section" value="provision_phone">
+                                            <input type="hidden" name="client_id" value="{{ selected_client.id }}">
+                                            <button class="primary-btn" type="submit">
+                                                🛒 Kupi Kaleya broj za {{ selected_client.business_phone }}
+                                            </button>
+                                        </form>
+                                        <p class="helper-text" style="margin-top:10px">
+                                            Sistem će automatski detektovati zemlju iz broja i kupiti lokalni Twilio broj.
+                                            Rusija (+7) nije podržana — kontaktiraj Kaleya podršku.
+                                        </p>
+                                    {% else %}
+                                        <div class="notice" style="min-height:auto;padding:16px">
+                                            Vlasnik prvo mora da unese poslovni telefon u Podešavanjima.
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="notice" style="min-height:auto;padding:16px">
+                                        Vaš Kaleya AI broj još nije dodeljen. Naš tim će vas kontaktirati u roku od 24h nakon aktivacije.
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+
                         <form method="post" class="card settings-card" style="margin-top:28px">
                             {% csrf_token %}
                             <input type="hidden" name="section" value="telegram_integration">

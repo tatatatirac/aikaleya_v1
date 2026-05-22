@@ -82,6 +82,8 @@ def dashboard_section_anchor(section):
         "alarms": "alarms",
         "integrations": "integrations",
         "telegram_integration": "integrations",
+        "provision_phone": "integrations",
+        "release_phone": "integrations",
     }.get(section or "overview", section or "overview")
 
 
@@ -360,6 +362,34 @@ def dashboard(request):
         elif section == "telegram_integration":
             update_telegram_integration(request, selected_client)
             messages.success(request, "Telegram integracija je sacuvana.")
+        elif section == "provision_phone" and is_admin_user(request.user):
+            try:
+                from communications.twilio_provision import provision_twilio_number, ProvisionError
+                instructions = provision_twilio_number(selected_client)
+                kaleya_num = instructions["kaleya_number"]
+                messages.success(
+                    request,
+                    f"✅ Kaleya broj kupljen: {kaleya_num} ({instructions['country_name']}). "
+                    f"Vlasnik treba da ukuca: {instructions['code_forward_all']} za preusmeravanje svih poziva.",
+                )
+            except Exception as exc:
+                err = str(exc)
+                if err.startswith("RU:"):
+                    messages.warning(request, "🇷🇺 Rusija nije podržana automatski — kontaktirajte vlasnika da se javi Kaleya podršci.")
+                else:
+                    messages.error(request, f"Greška pri kupovini broja: {err}")
+            return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#integrations")
+        elif section == "release_phone" and is_admin_user(request.user):
+            try:
+                from communications.twilio_provision import release_twilio_number
+                released = release_twilio_number(selected_client)
+                if released:
+                    messages.success(request, "Twilio broj je oslobođen.")
+                else:
+                    messages.warning(request, "Ovaj klijent nema dodeljen Twilio broj.")
+            except Exception as exc:
+                messages.error(request, f"Greška pri oslobađanju broja: {exc}")
+            return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#integrations")
         elif section == "delete_client" and is_admin_user(request.user):
             client_name = str(selected_client)
             selected_client.delete()
@@ -382,6 +412,7 @@ def dashboard(request):
 
     integrations = ensure_integrations(selected_client)
     telegram_integration = next((item for item in integrations if item.provider == "telegram"), None)
+    phone_integration = next((item for item in integrations if item.provider == "phone"), None)
     upcoming_appointments = (
         Appointment.objects.select_related("customer")
         .filter(business_client=selected_client)
@@ -444,6 +475,9 @@ def dashboard(request):
         "voice_settings": voice_settings,
         "integrations": integrations,
         "telegram_integration": telegram_integration,
+        "phone_integration": phone_integration,
+        "phone_kaleya_number": (phone_integration.public_number if phone_integration else "") or "",
+        "phone_country": ((phone_integration.config or {}).get("country", "") if phone_integration else "") or "",
         "telegram_bot_token_configured": bool((telegram_integration.config or {}).get("bot_token")) if telegram_integration else False,
         "telegram_webhook_secret_configured": bool((telegram_integration.config or {}).get("webhook_secret")) if telegram_integration else False,
         "telegram_webhook_secret": (telegram_integration.config or {}).get("webhook_secret", "") if telegram_integration else "",
