@@ -162,6 +162,7 @@ REST_FRAMEWORK = {
         "anon": os.getenv("DRF_ANON_THROTTLE_RATE", "80/hour"),
         "user": os.getenv("DRF_USER_THROTTLE_RATE", "1200/hour"),
         "auth": os.getenv("DRF_AUTH_THROTTLE_RATE", "5/min"),
+        "public_browser_chat": os.getenv("DRF_PUBLIC_CHAT_THROTTLE_RATE", "4/hour"),
     },
     "PAGE_SIZE": 50,
 }

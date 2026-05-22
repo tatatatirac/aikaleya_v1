@@ -1,6 +1,7 @@
 from rest_framework import permissions, viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 
 from accounts.permissions import user_role
@@ -260,8 +261,13 @@ class VoiceStatusAPIView(APIView):
         )
 
 
+class PublicChatThrottle(AnonRateThrottle):
+    scope = 'public_browser_chat'
+
+
 class PublicBrowserChatAPIView(APIView):
     permission_classes = (permissions.AllowAny,)
+    throttle_classes = (PublicChatThrottle,)
 
     _DEMO_PROMPT = (
         "You are Kaleya, an AI receptionist for a demo hair salon called \"Mike's Barbershop\".\n"

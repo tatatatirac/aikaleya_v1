@@ -4366,6 +4366,7 @@ const _kvcall = {
     speaking: false,
     listening: false,
     ended: false,
+    processing: false,
 
     get modal() { return document.getElementById('kv-call-modal'); },
     get avatar() { return document.getElementById('kv-call-avatar'); },
@@ -4377,7 +4378,7 @@ const _kvcall = {
     setStatus(state, text) {
         const el = this.statusEl;
         el.className = '';
-        el.classList.add(state);
+        if (state) el.classList.add(state);
         el.textContent = text;
         this.avatar.className = state === 'listening' ? 'listening' : '';
         this.waveform.className = (state === 'listening' || state === 'speaking') ? 'active' : '';
@@ -4412,6 +4413,7 @@ const _kvcall = {
     },
 
     async sendToAI(text) {
+        this.processing = true;
         this.history.push({ role: 'user', content: text });
         const thinking = this.addMessage('ai', '…', true);
         this.setStatus('thinking', 'Thinking…');
@@ -4421,6 +4423,11 @@ const _kvcall = {
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
                 body: JSON.stringify({ text, lang: currentLang || 'en', history: this.history.slice(-6) }),
             });
+            if (res.status === 429) {
+                this.updateMessage(thinking, 'Demo limit reached for today. Sign up to get your own Kaleya!');
+                this.processing = false;
+                return;
+            }
             if (!res.ok) throw new Error('API error');
             const data = await res.json();
             const replyText = data.text || '';
@@ -4432,8 +4439,9 @@ const _kvcall = {
                 await this.browserSpeak(replyText);
             }
         } catch (e) {
-            this.updateMessage(thinking, 'Sorry, something went wrong.');
+            this.updateMessage(thinking, 'Something went wrong. Try again.');
         }
+        this.processing = false;
         if (!this.ended) this.startListening();
     },
 
@@ -4461,33 +4469,52 @@ const _kvcall = {
         });
     },
 
+    getLang() {
+        const map = { sr: 'sr-RS', en: 'en-US', es: 'es-ES', fr: 'fr-FR', de: 'de-DE', it: 'it-IT', pt: 'pt-PT', ru: 'ru-RU' };
+        return map[currentLang] || 'en-US';
+    },
+
     startListening() {
-        if (this.ended || this.speaking) return;
+        if (this.ended || this.speaking || this.processing) return;
         const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SR) {
-            this.setStatus('', 'Speech not supported in this browser.');
+            this.setStatus('', 'Use Chrome or Edge for voice input.');
             return;
         }
+        if (this.recognition) { try { this.recognition.abort(); } catch(e) {} }
         this.recognition = new SR();
-        this.recognition.lang = currentLang || 'en-US';
+        this.recognition.lang = this.getLang();
+        this.recognition.continuous = false;
         this.recognition.interimResults = false;
         this.recognition.maxAlternatives = 1;
         this.setStatus('listening', 'Listening…');
         this.listening = true;
 
         this.recognition.onresult = (e) => {
-            const text = e.results[0][0].transcript.trim();
+            this.listening = false;
+            const text = (e.results[0][0].transcript || '').trim();
             if (text) {
                 this.addMessage('user', text);
                 this.sendToAI(text);
+            } else if (!this.ended) {
+                setTimeout(() => this.startListening(), 300);
             }
         };
-        this.recognition.onerror = () => {
+        this.recognition.onerror = (e) => {
             this.listening = false;
-            if (!this.ended) setTimeout(() => this.startListening(), 1200);
+            if (e.error === 'not-allowed') {
+                this.setStatus('', 'Microphone access denied.');
+                return;
+            }
+            if (!this.ended) setTimeout(() => this.startListening(), 800);
         };
-        this.recognition.onend = () => { this.listening = false; };
-        try { this.recognition.start(); } catch(e) {}
+        this.recognition.onend = () => {
+            this.listening = false;
+            if (!this.ended && !this.speaking && !this.processing) setTimeout(() => this.startListening(), 400);
+        };
+        try { this.recognition.start(); } catch(e) {
+            if (!this.ended) setTimeout(() => this.startListening(), 1000);
+        }
     },
 
     stopAll() {
@@ -4506,6 +4533,7 @@ const _kvcall = {
         this.ended = false;
         this.speaking = false;
         this.listening = false;
+        this.processing = false;
         this.timerEl.textContent = '2:00';
         this.timerEl.classList.remove('urgent');
         this.transcript.innerHTML = '';
@@ -4520,6 +4548,7 @@ function getCsrfToken() {
 }
 
 async function openCallModal() {
+    if (_kvcall.modal.classList.contains('open')) return;
     _kvcall.stopAll();
     _kvcall.reset();
     _kvcall.modal.classList.add('open');
