@@ -8,7 +8,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic import TemplateView
 from django.views.static import serve
 
-from kaleya_config.dashboard_views import dashboard, dashboard_logout, setup_account
+from kaleya_config.dashboard_views import dashboard, dashboard_logout, forgot_password, setup_account
 from kaleya_config.manifest_view import manifest_webmanifest
 
 
@@ -57,6 +57,7 @@ urlpatterns = [
     path("robots.txt", no_cache_static_serve, {"path": "robots.txt", "document_root": settings.PROJECT_ROOT / "frontend"}),
     path("sitemap.xml", no_cache_static_serve, {"path": "sitemap.xml", "document_root": settings.PROJECT_ROOT / "frontend"}),
     path("setup/", setup_account, name="account-setup"),
+    path("forgot-password/", forgot_password, name="forgot-password"),
     path("dashboard/", dashboard, name="dashboard"),
     path("admin/", dashboard, name="kaleya-admin"),
     path("admin/logout/", dashboard_logout, name="kaleya-admin-logout"),

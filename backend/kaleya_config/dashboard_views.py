@@ -875,3 +875,32 @@ def setup_account(request):
         "token": token_value,
         "error": error,
     })
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Forgot password — resend setup link by email
+# ─────────────────────────────────────────────────────────────────────────────
+
+def forgot_password(request):
+    """
+    GET  /forgot-password/  — show email form
+    POST /forgot-password/  — look up user, send setup link, always show success
+    """
+    if request.method == "POST":
+        email = (request.POST.get("email") or "").strip().lower()
+        if email:
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            try:
+                user = User.objects.get(email__iexact=email)
+                # Only send if this user owns a business client
+                bc = BusinessClient.objects.filter(owner=user).first()
+                if bc:
+                    from billing.services import _send_setup_email
+                    _send_setup_email(user, bc)
+            except User.DoesNotExist:
+                pass  # Silently ignore — don't reveal whether email exists
+        # Always show "check your inbox" — no info leakage
+        return render(request, "forgot_password.html", {"sent": True})
+
+    return render(request, "forgot_password.html", {"sent": False})
