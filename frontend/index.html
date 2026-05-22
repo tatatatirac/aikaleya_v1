@@ -4508,36 +4508,63 @@ const _kvcall = {
     },
 
     startListening() {
+        // Hard guards — prevent any concurrent recognition / restart storms
         if (this.ended || this.speaking || this.processing) return;
+        if (this.listening || this.recognition) return;   // already running
+        if (this._startingRecognition) return;            // start in flight
+        this._startingRecognition = true;
+
         const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SR) {
+            this._startingRecognition = false;
             this.setStatus('', tr('kv_call_browser_unsupported'));
             return;
         }
-        if (this.recognition) { try { this.recognition.abort(); } catch(e) {} }
-        this.recognition = new SR();
-        this.recognition.lang = this.getLang();
-        this.recognition.continuous = true;       // keep recognising until end of speech
-        this.recognition.interimResults = true;   // stream partial text so user sees feedback
-        this.recognition.maxAlternatives = 1;
-        this.setStatus('listening', tr('kv_call_listening'));
-        this.listening = true;
-        console.info('[Kaleya call] recognition started, lang =', this.recognition.lang);
+
+        const recognition = new SR();
+        recognition.lang = this.getLang();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
 
         let finalText = '';
         let silenceTimer = null;
-        const resetSilenceTimer = () => {
+        let cleaned = false;          // make sure onend/onerror only fire one cleanup
+        const interimBubble = this.addMessage('user', '', true);
+
+        const cleanup = (text) => {
+            if (cleaned) return;
+            cleaned = true;
+            clearTimeout(silenceTimer);
+            this.listening = false;
+            // Detach to allow GC; null out so startListening can run again
+            try { recognition.onresult = null; recognition.onerror = null; recognition.onend = null; } catch (e) {}
+            if (this.recognition === recognition) this.recognition = null;
+
+            if (text) {
+                this.updateMessage(interimBubble, text);
+                this.sendToAI(text);
+            } else {
+                try { interimBubble && interimBubble.remove(); } catch (e) {}
+                // Restart only if call still active. Single setTimeout — no double-queue.
+                if (!this.ended && !this.speaking && !this.processing && !this._restartScheduled) {
+                    this._restartScheduled = true;
+                    setTimeout(() => {
+                        this._restartScheduled = false;
+                        this.startListening();
+                    }, 500);
+                }
+            }
+        };
+
+        const stopWithSilence = () => {
             clearTimeout(silenceTimer);
             silenceTimer = setTimeout(() => {
-                // ~1.6s of silence after speech → consider turn finished
-                try { this.recognition && this.recognition.stop(); } catch (e) {}
+                try { recognition.stop(); } catch (e) {}
             }, 1600);
         };
 
-        // Show interim transcription right under the bubble while user speaks
-        const interimBubble = this.addMessage('user', '', true);
-
-        this.recognition.onresult = (e) => {
+        recognition.onresult = (e) => {
             let interim = '';
             for (let i = e.resultIndex; i < e.results.length; i++) {
                 const r = e.results[i];
@@ -4545,37 +4572,36 @@ const _kvcall = {
                 else interim += r[0].transcript;
             }
             this.updateMessage(interimBubble, (finalText + interim).trim() || '…');
-            resetSilenceTimer();
+            stopWithSilence();
         };
-        this.recognition.onerror = (e) => {
+        recognition.onerror = (e) => {
             console.warn('[Kaleya call] recognition error:', e.error);
-            this.listening = false;
-            clearTimeout(silenceTimer);
             if (e.error === 'not-allowed') {
                 this.setStatus('', tr('kv_call_mic_denied'));
+                cleanup('');
                 return;
             }
-            if (!this.ended) setTimeout(() => this.startListening(), 800);
+            // "aborted" / "no-speech" are recoverable — just clean up and let the cleanup
+            // logic restart listening with the 500ms backoff (single timer).
+            cleanup(finalText.trim());
         };
-        this.recognition.onend = () => {
+        recognition.onend = () => {
             console.info('[Kaleya call] recognition ended. final =', finalText.trim());
-            this.listening = false;
-            clearTimeout(silenceTimer);
-            const text = finalText.trim();
-            if (text) {
-                this.updateMessage(interimBubble, text);
-                this.sendToAI(text);
-            } else {
-                // Remove empty interim bubble and keep listening
-                try { interimBubble && interimBubble.remove(); } catch (e) {}
-                if (!this.ended && !this.speaking && !this.processing) {
-                    setTimeout(() => this.startListening(), 400);
-                }
-            }
+            cleanup(finalText.trim());
         };
-        try { this.recognition.start(); } catch(e) {
-            console.warn('[Kaleya call] recognition.start() failed:', e);
-            if (!this.ended) setTimeout(() => this.startListening(), 1000);
+
+        // Attach + start
+        this.recognition = recognition;
+        this.listening = true;
+        this.setStatus('listening', tr('kv_call_listening'));
+        try {
+            recognition.start();
+            console.info('[Kaleya call] recognition started, lang =', recognition.lang);
+        } catch (err) {
+            console.warn('[Kaleya call] recognition.start() failed:', err);
+            cleanup('');
+        } finally {
+            this._startingRecognition = false;
         }
     },
 
