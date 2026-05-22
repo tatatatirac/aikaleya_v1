@@ -4517,24 +4517,40 @@ const _kvcall = {
         if (this.recognition) { try { this.recognition.abort(); } catch(e) {} }
         this.recognition = new SR();
         this.recognition.lang = this.getLang();
-        this.recognition.continuous = false;
-        this.recognition.interimResults = false;
+        this.recognition.continuous = true;       // keep recognising until end of speech
+        this.recognition.interimResults = true;   // stream partial text so user sees feedback
         this.recognition.maxAlternatives = 1;
         this.setStatus('listening', tr('kv_call_listening'));
         this.listening = true;
+        console.info('[Kaleya call] recognition started, lang =', this.recognition.lang);
+
+        let finalText = '';
+        let silenceTimer = null;
+        const resetSilenceTimer = () => {
+            clearTimeout(silenceTimer);
+            silenceTimer = setTimeout(() => {
+                // ~1.6s of silence after speech → consider turn finished
+                try { this.recognition && this.recognition.stop(); } catch (e) {}
+            }, 1600);
+        };
+
+        // Show interim transcription right under the bubble while user speaks
+        const interimBubble = this.addMessage('user', '', true);
 
         this.recognition.onresult = (e) => {
-            this.listening = false;
-            const text = (e.results[0][0].transcript || '').trim();
-            if (text) {
-                this.addMessage('user', text);
-                this.sendToAI(text);
-            } else if (!this.ended) {
-                setTimeout(() => this.startListening(), 300);
+            let interim = '';
+            for (let i = e.resultIndex; i < e.results.length; i++) {
+                const r = e.results[i];
+                if (r.isFinal) finalText += r[0].transcript;
+                else interim += r[0].transcript;
             }
+            this.updateMessage(interimBubble, (finalText + interim).trim() || '…');
+            resetSilenceTimer();
         };
         this.recognition.onerror = (e) => {
+            console.warn('[Kaleya call] recognition error:', e.error);
             this.listening = false;
+            clearTimeout(silenceTimer);
             if (e.error === 'not-allowed') {
                 this.setStatus('', tr('kv_call_mic_denied'));
                 return;
@@ -4542,10 +4558,23 @@ const _kvcall = {
             if (!this.ended) setTimeout(() => this.startListening(), 800);
         };
         this.recognition.onend = () => {
+            console.info('[Kaleya call] recognition ended. final =', finalText.trim());
             this.listening = false;
-            if (!this.ended && !this.speaking && !this.processing) setTimeout(() => this.startListening(), 400);
+            clearTimeout(silenceTimer);
+            const text = finalText.trim();
+            if (text) {
+                this.updateMessage(interimBubble, text);
+                this.sendToAI(text);
+            } else {
+                // Remove empty interim bubble and keep listening
+                try { interimBubble && interimBubble.remove(); } catch (e) {}
+                if (!this.ended && !this.speaking && !this.processing) {
+                    setTimeout(() => this.startListening(), 400);
+                }
+            }
         };
         try { this.recognition.start(); } catch(e) {
+            console.warn('[Kaleya call] recognition.start() failed:', e);
             if (!this.ended) setTimeout(() => this.startListening(), 1000);
         }
     },
