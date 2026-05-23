@@ -40,6 +40,41 @@ def status_check(request):
     return JsonResponse(result)
 
 
+def demo_phone_number(request):
+    """Return a localized demo phone number based on visitor's country (CF-IPCountry header)."""
+    import os
+    country = (
+        request.META.get("HTTP_CF_IPCOUNTRY") or
+        request.headers.get("CF-IPCountry") or
+        ""
+    ).upper().strip()
+
+    # Group countries to regions and pick the right env var
+    # Env vars: DEMO_PHONE_US, DEMO_PHONE_GB, DEMO_PHONE_RS, DEMO_PHONE_DEFAULT
+    region_map = {
+        "US": ("DEMO_PHONE_US", "US"),
+        "CA": ("DEMO_PHONE_US", "US"),
+        "GB": ("DEMO_PHONE_GB", "GB"),
+        "IE": ("DEMO_PHONE_GB", "GB"),
+        "AU": ("DEMO_PHONE_GB", "GB"),
+        "NZ": ("DEMO_PHONE_GB", "GB"),
+        "RS": ("DEMO_PHONE_RS", "RS"),
+        "HR": ("DEMO_PHONE_RS", "RS"),
+        "BA": ("DEMO_PHONE_RS", "RS"),
+        "ME": ("DEMO_PHONE_RS", "RS"),
+        "SI": ("DEMO_PHONE_RS", "RS"),
+        "MK": ("DEMO_PHONE_RS", "RS"),
+    }
+
+    env_key, region = region_map.get(country, ("DEMO_PHONE_DEFAULT", "INT"))
+    number = os.environ.get(env_key) or os.environ.get("DEMO_PHONE_DEFAULT") or ""
+
+    response = JsonResponse({"number": number, "region": region, "country": country})
+    response["Cache-Control"] = "no-store"
+    response["Access-Control-Allow-Origin"] = "*"
+    return response
+
+
 def no_cache_response(response):
     response["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     response["Pragma"] = "no-cache"
@@ -101,6 +136,7 @@ urlpatterns = [
     path("api/billing/", include("billing.urls")),
     path("api/support/", include("support.urls")),
     path("api/audit-log/", include("audit_log.urls")),
+    path("api/demo-number/", demo_phone_number, name="demo-phone-number"),
 ]
 
 if settings.DEBUG:

@@ -996,16 +996,16 @@
                                 <span id="currentLangLabel">EN</span>
                                 <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor"><path d="M2 3.5l3 3 3-3"/></svg>
                             </button>
-                            <div id="langDropdown" class="absolute right-0 top-10 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl p-2 min-w-[170px] max-h-[60vh] overflow-auto">
-                                <button onclick="setLang('en')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">English (US)</button>
-                                <button onclick="setLang('en-gb')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">English (UK)</button>
-                                <button onclick="setLang('es')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Español</button>
-                                <button onclick="setLang('pt')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Português</button>
-                                <button onclick="setLang('fr')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Français</button>
-                                <button onclick="setLang('it')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Italiano</button>
-                                <button onclick="setLang('de')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Deutsch</button>
-                                <button onclick="setLang('ru')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">Русский</button>
-                                <button onclick="setLang('sr')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">SR / HR / BA</button>
+                            <div id="langDropdown" class="absolute right-0 top-10 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl p-2 min-w-[180px] max-h-[60vh] overflow-auto">
+                                <button onclick="setLang('en')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">🇺🇸 English (US)</button>
+                                <button onclick="setLang('en-gb')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">🇬🇧 English (UK)</button>
+                                <button onclick="setLang('es')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">🇪🇸 Español</button>
+                                <button onclick="setLang('pt')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">🇧🇷 Português</button>
+                                <button onclick="setLang('fr')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">🇫🇷 Français</button>
+                                <button onclick="setLang('it')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">🇮🇹 Italiano</button>
+                                <button onclick="setLang('de')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">🇩🇪 Deutsch</button>
+                                <button onclick="setLang('ru')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">🇷🇺 Русский</button>
+                                <button onclick="setLang('sr')" class="lang-btn w-full text-left px-3 py-2 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-800">🇷🇸🇭🇷🇧🇦 SR / HR / BA</button>
                             </div>
                         </div>
                         <button id="theme-toggle" aria-label="Toggle theme">
@@ -1045,12 +1045,18 @@
                                 <a href="#kv-pricing" class="kv-btn kv-btn-primary kv-btn-large" data-i18n="trial_btn">Start Free 14-Day Trial</a>
                                 <button class="kv-btn kv-btn-secondary kv-btn-large" onclick="openCallModal()" data-i18n="hero_call_kaleya"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;display:inline-block;vertical-align:-3px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Call Kaleya</button>
                             </div>
+                            <div id="kvDemoNumberBar" style="display:none;margin-top:8px;margin-bottom:2px;text-align:left">
+                                <a id="kvDemoNumberLink" href="tel:" class="kv-demo-call-link" style="display:inline-flex;align-items:center;gap:7px;font-size:14px;font-weight:600;color:#14b8a6;text-decoration:none;padding:7px 14px;border:1.5px solid #14b8a630;border-radius:12px;background:#14b8a608;transition:background .2s">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                                    <span id="kvDemoNumberText"></span>
+                                </a>
+                            </div>
                             <div class="kv-trust-bar kv-trust-bar-stack">
                                 <div>
                                     <span class="kv-trust-stars">★★★★★</span>
                                     <span data-i18n="trust_line1"><strong>Built for salons</strong> · Cancel anytime</span>
                                 </div>
-                                <div class="kv-trust-channels" data-i18n="trust_line2">Books via call · SMS · WhatsApp · Viber · Telegram · Instagram DM</div>
+                                <div class="kv-trust-channels" data-i18n="trust_line2">Books via call · SMS · WhatsApp · Telegram · Instagram DM</div>
                             </div>
                         </div>
 
@@ -1378,18 +1384,18 @@
                         <div class="kv-pricing-grid">
                             <div class="kv-price-card">
                                 <div class="kv-price-name">Starter</div>
-                                <p class="kv-price-tagline" data-i18n="p_basic_tagline" style="font-size:13px;font-weight:700;color:#34D399;margin:4px 0 6px;">$1 a day. Never miss an after-hours booking again.</p>
+                                <p class="kv-price-tagline" data-i18n="p_basic_tagline" style="font-size:13px;font-weight:700;color:#34D399;margin:4px 0 6px;">Under $2 a day. Never miss an after-hours booking again.</p>
                                 <p class="kv-price-desc" data-i18n="p_basic_desc">Stop losing bookings after 5PM. Kaleya handles every evening call so you wake up to a full chair.</p>
                                 <div class="kv-price-amount">
-                                    <span class="kv-price-original" data-lv="starter">$59</span><span data-lv="starter_ea">$30</span><span data-i18n="per_mo">/mo</span>
+                                    <span data-lv="starter_ea">$59</span><span data-i18n="per_mo">/mo</span>
                                 </div>
-                                <span class="kv-price-ea-tag" data-i18n="ea_lifetime">Early access · lifetime</span>
-                                <span class="kv-price-billed-note" id="kvStarterBilledNote" style="display:none"><span data-lv="starter_ea_yr">$300</span>/yr · <span data-i18n="billed_yearly">billed yearly</span></span>
+                                <span class="kv-price-billed-note" id="kvStarterBilledNote" style="display:none"><span data-lv="starter_ea_yr">$580</span>/yr · <span data-i18n="billed_yearly">billed yearly</span></span>
                                 <ul class="kv-price-feats" style="margin-top:18px">
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f1">300 talk minutes included</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f2">Evening & weekend coverage — when competitors miss calls, you don't</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f3">Google Calendar sync</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f4">SMS confirmations</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f1">500 talk minutes — covers all after-hours calls</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f2">Books by call, SMS, WhatsApp & Telegram</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f3">Google Calendar sync — every booking appears instantly</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f4">Automated SMS reminders to clients</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f5">Staff alarm — spoken next-client announcement</span></li>
                                 </ul>
                                 <a href="register-basic.html" id="kvBasicTrialBtn" class="kv-price-btn" data-i18n="trial_btn">Start Free 14-Day Trial</a>
                             </div>
@@ -1397,23 +1403,46 @@
                                 <div class="kv-pop-badge" data-i18n="popular">Most Popular</div>
                                 <div class="kv-price-name">Pro</div>
                                 <p class="kv-price-tagline" data-i18n="p_pro_tagline" style="font-size:13px;font-weight:700;color:#34D399;margin:4px 0 6px;">One prevented no-show pays for the whole month.</p>
-                                <p class="kv-price-desc" data-i18n="p_pro_desc">24/7 answering + card-on-file deposits. The math: 8 no-shows cost you $600. Kaleya costs $45.</p>
+                                <p class="kv-price-desc" data-i18n="p_pro_desc">24/7 answering on every channel. The math: 2 prevented no-shows pay for the whole month.</p>
                                 <div class="kv-price-amount">
-                                    <span class="kv-price-original" data-lv="pro">$89</span><span data-lv="pro_ea">$45</span><span data-i18n="per_mo">/mo</span>
+                                    <span data-lv="pro_ea">$119</span><span data-i18n="per_mo">/mo</span>
                                 </div>
-                                <span class="kv-price-ea-tag" data-i18n="ea_lifetime">Early access · lifetime</span>
-                                <span class="kv-price-billed-note" id="kvProBilledNote" style="display:none"><span data-lv="pro_ea_yr">$450</span>/yr · <span data-i18n="billed_yearly">billed yearly</span></span>
+                                <span class="kv-price-billed-note" id="kvProBilledNote" style="display:none"><span data-lv="pro_ea_yr">$1,160</span>/yr · <span data-i18n="billed_yearly">billed yearly</span></span>
                                 <ul class="kv-price-feats" style="margin-top:18px">
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f1">1,200 minutes included</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f2">24/7 answering</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f3">Google Calendar sync</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f4">Card-on-file deposits</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f5">Priority support</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f1">1,200 minutes — 24/7 coverage, zero missed calls</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f2">24/7 answering — even at 3 AM, someone picks up</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f3">All channels: call, SMS, WhatsApp, Telegram, Instagram DM</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f4">1 staff member — own schedule & Kaleya APP access</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f5">Priority support + time-block scheduling</span></li>
                                 </ul>
                                 <a href="register-pro.html" id="kvProTrialBtn" class="kv-price-btn kv-price-btn-blue" data-i18n="trial_btn">Start Free 14-Day Trial</a>
                             </div>
                         </div>
-                        <p style="text-align:center; color:#71717A; font-size:13px; margin-top:24px;" data-i18n="early_access_note">⚡ Lifetime 50% off available for the first 50 salons. Price never goes up — even when you upgrade plans.</p>
+                        <p style="text-align:center; color:#71717A; font-size:13px; margin-top:24px;" data-i18n="price_s">14-day free trial · cancel anytime · no long-term contracts.</p>
+                    </div>
+                </section>
+
+                <!-- Trust badges -->
+                <section class="kv-section" style="padding-top:0">
+                    <div class="kv-container">
+                        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:20px 32px;padding:32px 0 8px">
+                            <div style="display:flex;align-items:center;gap:10px;padding:14px 22px;border:1.5px solid #3b82f620;border-radius:16px;background:linear-gradient(135deg,#3b82f608,#14b8a608)">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                                <div><div style="font-size:12px;font-weight:700;letter-spacing:.04em;color:#3b82f6">AES-256</div><div style="font-size:11px;color:#64748B">Bank-level encryption</div></div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px;padding:14px 22px;border:1.5px solid #14b8a620;border-radius:16px;background:linear-gradient(135deg,#14b8a608,#3b82f608)">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+                                <div><div style="font-size:12px;font-weight:700;letter-spacing:.04em;color:#14b8a6">PCI-DSS</div><div style="font-size:11px;color:#64748B">Payment card secure</div></div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px;padding:14px 22px;border:1.5px solid #818cf820;border-radius:16px;background:linear-gradient(135deg,#818cf808,#14b8a608)">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                                <div><div style="font-size:12px;font-weight:700;letter-spacing:.04em;color:#818cf8">GDPR</div><div style="font-size:11px;color:#64748B">EU data compliant</div></div>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:10px;padding:14px 22px;border:1.5px solid #34d39920;border-radius:16px;background:linear-gradient(135deg,#34d39908,#3b82f608)">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+                                <div><div style="font-size:12px;font-weight:700;letter-spacing:.04em;color:#34d399">Zero Data Sharing</div><div style="font-size:11px;color:#64748B">Your data, never sold</div></div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -1600,8 +1629,8 @@
                     if (mode === 'yearly') {
                         if (monthlyBtn) monthlyBtn.classList.remove('kv-active');
                         if (yearlyBtn) yearlyBtn.classList.add('kv-active');
-                        if (starterAmt) starterAmt.textContent = vals.starter_ea || '$30';
-                        if (proAmt) proAmt.textContent = vals.pro_ea || '$45';
+                        if (starterAmt) starterAmt.textContent = vals.starter_ea || '$59';
+                        if (proAmt) proAmt.textContent = vals.pro_ea || '$119';
                         if (starterNote) starterNote.style.display = '';
                         if (proNote) proNote.style.display = '';
                         if (basicTrialBtn) basicTrialBtn.href = 'register-basic-yearly.html';
@@ -1609,8 +1638,8 @@
                     } else {
                         if (yearlyBtn) yearlyBtn.classList.remove('kv-active');
                         if (monthlyBtn) monthlyBtn.classList.add('kv-active');
-                        if (starterAmt) starterAmt.textContent = vals.starter_ea || '$30';
-                        if (proAmt) proAmt.textContent = vals.pro_ea || '$45';
+                        if (starterAmt) starterAmt.textContent = vals.starter_ea || '$59';
+                        if (proAmt) proAmt.textContent = vals.pro_ea || '$119';
                         if (starterNote) starterNote.style.display = 'none';
                         if (proNote) proNote.style.display = 'none';
                         if (basicTrialBtn) basicTrialBtn.href = 'register-basic.html';
@@ -1623,6 +1652,23 @@
                     try { window.kvApplyHeroSlide(0); } catch (e) {}
                 }
                 try { window.kvRefreshLocalizedStats(); } catch (e) {}
+
+                // Demo phone number — fetch from backend based on visitor IP/region
+                (function() {
+                    fetch('/api/demo-number/', { cache: 'no-store' })
+                        .then(function(r){ return r.ok ? r.json() : null; })
+                        .then(function(data) {
+                            if (!data || !data.number) return;
+                            var bar = document.getElementById('kvDemoNumberBar');
+                            var link = document.getElementById('kvDemoNumberLink');
+                            var txt = document.getElementById('kvDemoNumberText');
+                            if (!bar || !link || !txt) return;
+                            link.href = 'tel:' + data.number.replace(/\s/g, '');
+                            txt.textContent = 'Call Kaleya: ' + data.number;
+                            bar.style.display = '';
+                        })
+                        .catch(function(){});
+                })();
 
                 // FAQ accordion
                 document.querySelectorAll('#landing-view .kv-faq-q').forEach(function(btn){
@@ -2061,7 +2107,7 @@
             <!-- Client Settings Sheet -->
             <div id="client-settings" class="fixed inset-0 z-50 hidden">
                 <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeClientSettings()"></div>
-                <div class="absolute bottom-0 inset-x-0 max-w-[430px] mx-auto">
+                <div class="absolute bottom-0 inset-x-0 max-w-[430px] mx-auto sm:max-w-[680px] lg:max-w-[860px]">
                     <div class="client-settings-panel mx-3 mb-3 rounded-[28px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 max-h-[80vh] overflow-auto">
                         <div class="flex items-center justify-between">
                             <h3 class="font-display font-bold text-lg" data-i18n="cset_t">Podešavanja glasa</h3>
@@ -2106,15 +2152,15 @@
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                                 <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="cset_ui_lang">Jezik interfejsa</p>
                                 <div class="grid grid-cols-3 gap-2">
-                                    <button onclick="setLang('en')" id="clientLangEN" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">EN-US</button>
-                                    <button onclick="setLang('en-gb')" id="clientLangENGB" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">EN-UK</button>
-                                    <button onclick="setLang('es')" id="clientLangES" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">ES</button>
-                                    <button onclick="setLang('pt')" id="clientLangPT" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">PT</button>
-                                    <button onclick="setLang('fr')" id="clientLangFR" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">FR</button>
-                                    <button onclick="setLang('it')" id="clientLangIT" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">IT</button>
-                                    <button onclick="setLang('de')" id="clientLangDE" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">DE</button>
-                                    <button onclick="setLang('ru')" id="clientLangRU" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">RU</button>
-                                    <button onclick="setLang('sr')" id="clientLangSR" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">SR/HR/BA</button>
+                                    <button onclick="setLang('en')" id="clientLangEN" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold" title="English (US)">🇺🇸 EN</button>
+                                    <button onclick="setLang('en-gb')" id="clientLangENGB" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold" title="English (UK)">🇬🇧 UK</button>
+                                    <button onclick="setLang('es')" id="clientLangES" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold" title="Español">🇪🇸 ES</button>
+                                    <button onclick="setLang('pt')" id="clientLangPT" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold" title="Português">🇧🇷 PT</button>
+                                    <button onclick="setLang('fr')" id="clientLangFR" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold" title="Français">🇫🇷 FR</button>
+                                    <button onclick="setLang('it')" id="clientLangIT" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold" title="Italiano">🇮🇹 IT</button>
+                                    <button onclick="setLang('de')" id="clientLangDE" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold" title="Deutsch">🇩🇪 DE</button>
+                                    <button onclick="setLang('ru')" id="clientLangRU" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold" title="Русский">🇷🇺 RU</button>
+                                    <button onclick="setLang('sr')" id="clientLangSR" class="lang-btn h-10 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold" title="Srpski / Hrvatski / Bosanski">🇷🇸🇭🇷🇧🇦</button>
                                 </div>
                             </div>
 
@@ -2908,21 +2954,21 @@ const CLIENT_STATUS_TEXT = {
 };
 
 // ===== TRANSLATIONS =====
-const LANG_LABELS = { sr: 'SR', en: 'EN-US', 'en-gb': 'EN-UK', es: 'ES', pt: 'PT', ru: 'RU', fr: 'FR', it: 'IT', de: 'DE' };
+const LANG_LABELS = { sr: '🇷🇸 SR', en: '🇺🇸 EN', 'en-gb': '🇬🇧 UK', es: '🇪🇸 ES', pt: '🇧🇷 PT', ru: '🇷🇺 RU', fr: '🇫🇷 FR', it: '🇮🇹 IT', de: '🇩🇪 DE' };
 
 // Currency + localized amounts for landing page stats.
 // 'en' = USD (US); 'en-gb' = GBP (UK); ru = RUB; everything else = EUR.
 const LOCALIZED_VALUES = {
-    // EA = early access (50% off lifetime); _yr = yearly billed total (2 months free vs monthly EA)
-    'en':    { cur: '$',  starter: '$59',    pro: '$89',    starter_ea: '$30',    pro_ea: '$45',    starter_ea_yr: '$300',    pro_ea_yr: '$450',    no_show: '$75',   monthly: '$1,200',   bridal: '$250',   appt: '$85',   spa: '$600',   dash_rev: '$1,290',   dash_saved: '$225',   fee: '$25 / $50' },
-    'en-gb': { cur: '£',  starter: '£49',    pro: '£75',    starter_ea: '£25',    pro_ea: '£38',    starter_ea_yr: '£250',    pro_ea_yr: '£380',    no_show: '£60',   monthly: '£950',     bridal: '£200',   appt: '£68',   spa: '£480',   dash_rev: '£1,020',   dash_saved: '£180',   fee: '£20 / £40' },
-    'es':    { cur: '€',  starter: '55 €',   pro: '85 €',   starter_ea: '28 €',   pro_ea: '43 €',   starter_ea_yr: '280 €',   pro_ea_yr: '430 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
-    'pt':    { cur: '€',  starter: '55 €',   pro: '85 €',   starter_ea: '28 €',   pro_ea: '43 €',   starter_ea_yr: '280 €',   pro_ea_yr: '430 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
-    'fr':    { cur: '€',  starter: '55 €',   pro: '85 €',   starter_ea: '28 €',   pro_ea: '43 €',   starter_ea_yr: '280 €',   pro_ea_yr: '430 €',   no_show: '70 €',  monthly: '1 100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1 220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
-    'it':    { cur: '€',  starter: '55 €',   pro: '85 €',   starter_ea: '28 €',   pro_ea: '43 €',   starter_ea_yr: '280 €',   pro_ea_yr: '430 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
-    'de':    { cur: '€',  starter: '55 €',   pro: '85 €',   starter_ea: '28 €',   pro_ea: '43 €',   starter_ea_yr: '280 €',   pro_ea_yr: '430 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
-    'ru':    { cur: '₽',  starter: '5 500 ₽',pro: '8 200 ₽',starter_ea: '2 800 ₽',pro_ea: '4 100 ₽',starter_ea_yr: '28 000 ₽',pro_ea_yr: '41 000 ₽',no_show: '6 500 ₽',monthly: '100 000 ₽',bridal: '23 000 ₽',appt:'7 000 ₽', spa:'50 000 ₽',dash_rev: '115 000 ₽',dash_saved: '19 000 ₽',fee:'2 000 ₽ / 4 000 ₽' },
-    'sr':    { cur: '€',  starter: '55 €',   pro: '85 €',   starter_ea: '28 €',   pro_ea: '43 €',   starter_ea_yr: '280 €',   pro_ea_yr: '430 €',   no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    // _ea = actual monthly price; _ea_yr = yearly total (2 months free)
+    'en':    { cur: '$',  starter: '$59',    pro: '$119',   starter_ea: '$59',    pro_ea: '$119',   starter_ea_yr: '$580',    pro_ea_yr: '$1,160',  no_show: '$75',   monthly: '$1,200',   bridal: '$250',   appt: '$85',   spa: '$600',   dash_rev: '$1,290',   dash_saved: '$225',   fee: '$25 / $50' },
+    'en-gb': { cur: '£',  starter: '£49',    pro: '£95',    starter_ea: '£49',    pro_ea: '£95',    starter_ea_yr: '£480',    pro_ea_yr: '£935',    no_show: '£60',   monthly: '£950',     bridal: '£200',   appt: '£68',   spa: '£480',   dash_rev: '£1,020',   dash_saved: '£180',   fee: '£20 / £40' },
+    'es':    { cur: '€',  starter: '55 €',   pro: '110 €',  starter_ea: '55 €',   pro_ea: '110 €',  starter_ea_yr: '540 €',   pro_ea_yr: '1.080 €', no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    'pt':    { cur: '€',  starter: '55 €',   pro: '110 €',  starter_ea: '55 €',   pro_ea: '110 €',  starter_ea_yr: '540 €',   pro_ea_yr: '1.080 €', no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    'fr':    { cur: '€',  starter: '55 €',   pro: '110 €',  starter_ea: '55 €',   pro_ea: '110 €',  starter_ea_yr: '540 €',   pro_ea_yr: '1 080 €', no_show: '70 €',  monthly: '1 100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1 220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    'it':    { cur: '€',  starter: '55 €',   pro: '110 €',  starter_ea: '55 €',   pro_ea: '110 €',  starter_ea_yr: '540 €',   pro_ea_yr: '1.080 €', no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    'de':    { cur: '€',  starter: '55 €',   pro: '110 €',  starter_ea: '55 €',   pro_ea: '110 €',  starter_ea_yr: '540 €',   pro_ea_yr: '1.080 €', no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
+    'ru':    { cur: '₽',  starter: '5 500 ₽',pro: '11 000 ₽',starter_ea: '5 500 ₽',pro_ea: '11 000 ₽',starter_ea_yr: '55 000 ₽',pro_ea_yr: '110 000 ₽',no_show: '6 500 ₽',monthly: '100 000 ₽',bridal: '23 000 ₽',appt:'7 000 ₽', spa:'50 000 ₽',dash_rev: '115 000 ₽',dash_saved: '19 000 ₽',fee:'2 000 ₽ / 4 000 ₽' },
+    'sr':    { cur: '€',  starter: '55 €',   pro: '110 €',  starter_ea: '55 €',   pro_ea: '110 €',  starter_ea_yr: '540 €',   pro_ea_yr: '1.080 €', no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
 };
 function lv() { return LOCALIZED_VALUES[currentLang] || LOCALIZED_VALUES.en; }
 
@@ -2998,7 +3044,7 @@ const T = {
     sr: {
         nav_features: 'Funkcije', nav_how: 'Kako radi', nav_pricing: 'Cene', nav_login: 'Prijava',
         trust_line1: 'Pravljeno za salone · Otkaži kad god želiš',
-        trust_line2: 'Zakazuje preko poziva · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+        trust_line2: 'Zakazuje preko poziva · SMS · WhatsApp · Telegram · Instagram DM',
         banner_early1: 'Rani pristup', banner_early2: 'prvih', banner_early3: 'salona dobija', banner_early4: 'DOŽIVOTNIH 50% popusta', banner_early_cta: 'Rezerviši svoje mesto',
         hero_call_kaleya: 'Pozovi Kaleyu',
         kv_call_connecting: 'Povezivanje…', kv_call_listening: 'Sluša…', kv_call_thinking: 'Razmišlja…', kv_call_speaking: 'Govori…',
@@ -3016,7 +3062,7 @@ const T = {
         p_basic_f1: '300 minuta razgovora uključeno', p_basic_f2: 'Večernje dežurstvo — kada konkurencija propušta pozive, ti ne', p_basic_f3: 'Sinhronizacija sa Google Calendar', p_basic_f4: 'SMS potvrde',
         p_pro_f1: '1.200 minuta uključeno', p_pro_f2: '24/7 javljanje', p_pro_f3: 'Google Calendar sinhronizacija', p_pro_f4: 'Kartica za depozit', p_pro_f5: 'Prioritetna podrška',
         hero_badge: 'AI sekretarica · 24/7 aktivna', hero_title_1: 'Kaleya', hero_title_2: 'AI sekretarica 24/7',
-        hero_sub: 'Kaleya odgovara, zakazuje, otkazuje i obaveštava osoblje prirodnim glasom. Radi preko poziva, WhatsApp-a, Vibera, Telegrama i SMS-a.',
+        hero_sub: 'Kaleya odgovara, zakazuje, otkazuje i obaveštava osoblje prirodnim glasom. Radi preko poziva, WhatsApp-a, Telegrama, Instagram DM i SMS-a.',
         hero_cta_demo: 'Isprobaj besplatno', hero_cta_how: 'Pogledaj kako radi', hero_social: '500+ zadovoljnih firmi', hero_tap: 'Dodirni logo',
         hero_intro_hint: 'Kaleya se predstavlja', hero_demo_msg: '"Izvolite, kako mogu pomoći?"', integrates_with: 'Integracije:',
         feat_title: 'Sve što radi prava sekretarica, samo bolje', feat_sub: 'Kaleya razume klijente, pamti pravila i radi na jeziku koji korisnik izabere.',
@@ -3024,9 +3070,9 @@ const T = {
         f2_t: 'Pametno zakazivanje', f2_d: 'Proverava kalendar i predlaže slobodne termine.',
         f3_t: 'Prirodan glas', f3_d: 'ElevenLabs glas za prirodnije razgovore.',
         f_alarm_t: 'Alarmi za osoblje', f_alarm_d: 'Najava sledećeg klijenta i hitan poziv za razgovor.',
-        f_msg_t: 'Kanali za poruke', f_msg_d: 'WhatsApp, Viber, Telegram, SMS i telefonski poziv.',
+        f_msg_t: 'Kanali za poruke', f_msg_d: 'WhatsApp, Telegram, Instagram DM, SMS i telefonski poziv.',
         f6_t: 'Admin kontrola', f6_d: 'Globalni API i posebna podešavanja po firmi.',
-        how_t: 'Kaleya uči vaš posao za 1 dan', how1_t: 'Poveži kanal', how1_d: 'Telefon, WhatsApp, Telegram, Viber ili SMS.',
+        how_t: 'Kaleya uči vaš posao za 1 dan', how1_t: 'Poveži kanal', how1_d: 'Telefon, WhatsApp, Telegram, Instagram DM ili SMS.',
         how2_t: 'Nauči Kaleyu', how2_d: 'Upiši radno vreme, usluge i pravila zakazivanja.',
         how3_t: 'Izaberi jezik i glas', how3_d: 'Kaleya govori jezikom koji klijent izabere.',
         price_t: 'Jednostavne cene', price_s: '14 dana besplatno · otkaži kad god · bez ugovora.',
@@ -3066,7 +3112,7 @@ const T = {
     en: {
         nav_features: 'Features', nav_how: 'How it works', nav_pricing: 'Pricing', nav_login: 'Login',
         trust_line1: 'Built for salons · Cancel anytime',
-        trust_line2: 'Books via call · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+        trust_line2: 'Books via call · SMS · WhatsApp · Telegram · Instagram DM',
         banner_early1: 'Early access', banner_early2: 'first', banner_early3: 'salons get', banner_early4: 'LIFETIME 50% off', banner_early_cta: 'Claim your spot',
         hero_call_kaleya: 'Call Kaleya',
         kv_call_connecting: 'Connecting…', kv_call_listening: 'Listening…', kv_call_thinking: 'Thinking…', kv_call_speaking: 'Speaking…',
@@ -3077,14 +3123,14 @@ const T = {
         early_access_note: '⚡ Lifetime 50% off available for the first 50 salons. Price never goes up — even when you upgrade plans.',
         price_eyebrow: 'Simple pricing',
         price_separator: '"Your last receptionist called in sick. Kaleya never does."',
-        p_basic_tagline: '$1 a day. Never miss an after-hours booking again.',
+        p_basic_tagline: 'Under $2 a day. Never miss an after-hours booking again.',
         p_basic_desc: 'Stop losing bookings after 5PM. Kaleya handles every evening call so you wake up to a full chair.',
         p_pro_tagline: 'One prevented no-show pays for the whole month.',
-        p_pro_desc: '24/7 answering + card-on-file deposits. The math: 8 no-shows cost you $600. Kaleya costs $45.',
+        p_pro_desc: '24/7 answering on every channel. The math: 2 prevented no-shows pay for the whole month.',
         p_basic_f1: '300 talk minutes included', p_basic_f2: 'Evening & weekend coverage — when competitors miss calls, you don\'t', p_basic_f3: 'Google Calendar sync', p_basic_f4: 'SMS confirmations',
         p_pro_f1: '1,200 minutes included', p_pro_f2: '24/7 answering', p_pro_f3: 'Google Calendar sync', p_pro_f4: 'Card-on-file deposits', p_pro_f5: 'Priority support',
         hero_badge: 'AI receptionist · active 24/7', hero_title_1: 'Kaleya', hero_title_2: 'AI receptionist 24/7',
-        hero_sub: 'Kaleya answers, schedules, cancels and alerts staff with a natural voice. It works through calls, WhatsApp, Viber, Telegram and SMS.',
+        hero_sub: 'Kaleya answers, schedules, cancels and alerts staff with a natural voice. Works via calls, WhatsApp, Telegram, Instagram DM and SMS.',
         hero_cta_demo: 'Try for free', hero_cta_how: 'See how it works', hero_social: '500+ happy businesses', hero_tap: 'Tap the logo',
         hero_intro_hint: 'Kaleya introduces itself', hero_demo_msg: '"Hello, how can I help?"', integrates_with: 'Integrations:',
         feat_title: 'Everything a real receptionist does, only better', feat_sub: 'Kaleya understands clients, remembers rules and works in the selected language.',
@@ -3092,9 +3138,9 @@ const T = {
         f2_t: 'Smart scheduling', f2_d: 'Checks the calendar and suggests available slots.',
         f3_t: 'Natural voice', f3_d: 'ElevenLabs voice for more natural conversations.',
         f_alarm_t: 'Staff alarms', f_alarm_d: 'Next-client announcement and urgent call request.',
-        f_msg_t: 'Messaging channels', f_msg_d: 'WhatsApp, Viber, Telegram, SMS and phone calls.',
+        f_msg_t: 'Messaging channels', f_msg_d: 'WhatsApp, Telegram, Instagram DM, SMS and phone calls.',
         f6_t: 'Admin control', f6_d: 'Global API and separate settings per client.',
-        how_t: 'Kaleya learns your business in 1 day', how1_t: 'Connect a channel', how1_d: 'Phone, WhatsApp, Telegram, Viber or SMS.',
+        how_t: 'Kaleya learns your business in 1 day', how1_t: 'Connect a channel', how1_d: 'Phone, WhatsApp, Telegram, Instagram DM or SMS.',
         how2_t: 'Teach Kaleya', how2_d: 'Add working hours, services and scheduling rules.',
         how3_t: 'Choose language and voice', how3_d: 'Kaleya speaks the language the client selects.',
         price_t: 'Simple pricing', price_s: '14-day free trial · cancel anytime · no long-term contracts.',
@@ -3134,7 +3180,7 @@ const T = {
     es: {
         nav_features: 'Funciones', nav_how: 'Cómo funciona', nav_pricing: 'Precios', nav_login: 'Acceso',
         trust_line1: 'Hecho para salones · Cancela cuando quieras',
-        trust_line2: 'Reserva por llamada · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+        trust_line2: 'Reserva por llamada · SMS · WhatsApp · Telegram · Instagram DM',
         banner_early1: 'Acceso anticipado', banner_early2: 'los primeros', banner_early3: 'salones obtienen', banner_early4: '50% DE POR VIDA', banner_early_cta: 'Reserva tu lugar',
         hero_call_kaleya: 'Llama a Kaleya',
         kv_call_connecting: 'Conectando…', kv_call_listening: 'Escuchando…', kv_call_thinking: 'Pensando…', kv_call_speaking: 'Hablando…',
@@ -3145,14 +3191,14 @@ const T = {
         early_access_note: '⚡ 50% de descuento de por vida para los primeros 50 salones. El precio nunca sube — incluso al cambiar de plan.',
         price_eyebrow: 'Precios simples',
         price_separator: '"Tu última recepcionista llamó enferma. Kaleya nunca."',
-        p_basic_tagline: '$1 al día. No pierdas más reservas fuera de horario.',
+        p_basic_tagline: 'Menos de $2 al día. No pierdas más reservas fuera de horario.',
         p_basic_desc: 'Deja de perder reservas después de las 17h. Kaleya gestiona cada llamada nocturna para que despiertes con agenda llena.',
         p_pro_tagline: 'Una ausencia evitada paga todo el mes.',
-        p_pro_desc: 'Atención 24/7 + depósitos con tarjeta. Las cuentas: 8 ausencias te cuestan $600. Kaleya cuesta $45.',
+        p_pro_desc: 'Atención 24/7 en todos los canales. Las cuentas: 2 ausencias evitadas pagan todo el mes.',
         p_basic_f1: '300 minutos de llamadas incluidos', p_basic_f2: 'Cobertura nocturna — cuando la competencia falla, tú no', p_basic_f3: 'Sincronización con Google Calendar', p_basic_f4: 'Confirmaciones SMS',
         p_pro_f1: '1.200 minutos incluidos', p_pro_f2: 'Atención 24/7', p_pro_f3: 'Google Calendar sync', p_pro_f4: 'Depósitos con tarjeta', p_pro_f5: 'Soporte prioritario',
         hero_badge: 'Recepcionista IA · activa 24/7', hero_title_1: 'Kaleya', hero_title_2: 'Recepcionista IA 24/7',
-        hero_sub: 'Kaleya responde, agenda, cancela y avisa al personal con voz natural. Funciona por llamadas, WhatsApp, Viber, Telegram y SMS.',
+        hero_sub: 'Kaleya responde, agenda, cancela y avisa al personal con voz natural. Funciona por llamadas, WhatsApp, Telegram, Instagram DM y SMS.',
         hero_cta_demo: 'Probar gratis', hero_cta_how: 'Ver cómo funciona', hero_social: '500+ empresas satisfechas', hero_tap: 'Toca el logo',
         hero_intro_hint: 'Kaleya se presenta', hero_demo_msg: '"Hola, ¿cómo puedo ayudar?"', integrates_with: 'Integraciones:',
         feat_title: 'Todo lo que hace una recepcionista, pero mejor', feat_sub: 'Kaleya entiende clientes, recuerda reglas y trabaja en el idioma elegido.',
@@ -3160,9 +3206,9 @@ const T = {
         f2_t: 'Agenda inteligente', f2_d: 'Revisa el calendario y propone horarios libres.',
         f3_t: 'Voz natural', f3_d: 'Voz de ElevenLabs para conversaciones más naturales.',
         f_alarm_t: 'Alarmas para el equipo', f_alarm_d: 'Aviso del siguiente cliente y solicitud urgente de conversación.',
-        f_msg_t: 'Canales de mensajes', f_msg_d: 'WhatsApp, Viber, Telegram, SMS y llamada telefónica.',
+        f_msg_t: 'Canales de mensajes', f_msg_d: 'WhatsApp, Telegram, Instagram DM, SMS y llamada telefónica.',
         f6_t: 'Control admin', f6_d: 'API global y ajustes separados por cliente.',
-        how_t: 'Kaleya aprende tu negocio en 1 día', how1_t: 'Conecta un canal', how1_d: 'Teléfono, WhatsApp, Telegram, Viber o SMS.',
+        how_t: 'Kaleya aprende tu negocio en 1 día', how1_t: 'Conecta un canal', how1_d: 'Teléfono, WhatsApp, Telegram, Instagram DM o SMS.',
         how2_t: 'Entrena a Kaleya', how2_d: 'Añade horarios, servicios y reglas de agenda.',
         how3_t: 'Elige idioma y voz', how3_d: 'Kaleya habla el idioma que el cliente elige.',
         price_t: 'Precios simples', price_s: '14 días gratis · cancela cuando quieras · sin contratos.',
@@ -3202,7 +3248,7 @@ const T = {
     pt: {
         nav_features: 'Funcionalidades', nav_how: 'Como funciona', nav_pricing: 'Preços', nav_login: 'Entrar',
         trust_line1: 'Feito para salões · Cancela quando quiseres',
-        trust_line2: 'Marca por chamada · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+        trust_line2: 'Marca por chamada · SMS · WhatsApp · Telegram · Instagram DM',
         banner_early1: 'Acesso antecipado', banner_early2: 'primeiros', banner_early3: 'salões recebem', banner_early4: '50% VITALÍCIO', banner_early_cta: 'Reserva o teu lugar',
         hero_call_kaleya: 'Liga à Kaleya',
         kv_call_connecting: 'A ligar…', kv_call_listening: 'A ouvir…', kv_call_thinking: 'A pensar…', kv_call_speaking: 'A falar…',
@@ -3213,14 +3259,14 @@ const T = {
         early_access_note: '⚡ 50% vitalício disponível para os primeiros 50 salões. O preço nunca aumenta — mesmo ao mudar de plano.',
         price_eyebrow: 'Preços simples',
         price_separator: '"A sua última recepcionista faltou por doença. A Kaleya nunca."',
-        p_basic_tagline: '$1 por dia. Nunca mais perca uma reserva fora do horário.',
+        p_basic_tagline: 'Menos de $2 por dia. Nunca mais perca uma marcação fora de horário.',
         p_basic_desc: 'Pare de perder reservas depois das 17h. A Kaleya atende cada chamada noturna para que acorde com agenda cheia.',
         p_pro_tagline: 'Uma falta evitada paga o mês inteiro.',
-        p_pro_desc: 'Atendimento 24/7 + depósitos com cartão. A conta: 8 faltas custam $600. A Kaleya custa $45.',
+        p_pro_desc: 'Atendimento 24/7 em todos os canais. A conta: 2 faltas evitadas pagam o mês inteiro.',
         p_basic_f1: '300 minutos de chamada incluídos', p_basic_f2: 'Cobertura noturna — quando a concorrência falha, você não', p_basic_f3: 'Sincronização com Google Calendar', p_basic_f4: 'Confirmações por SMS',
         p_pro_f1: '1.200 minutos incluídos', p_pro_f2: 'Atendimento 24/7', p_pro_f3: 'Google Calendar sync', p_pro_f4: 'Depósitos com cartão', p_pro_f5: 'Suporte prioritário',
         hero_badge: 'Recepcionista IA · ativa 24/7', hero_title_1: 'Kaleya', hero_title_2: 'Recepcionista IA 24/7',
-        hero_sub: 'Kaleya atende, agenda, cancela e avisa a equipe com voz natural. Funciona por chamadas, WhatsApp, Viber, Telegram e SMS.',
+        hero_sub: 'Kaleya atende, agenda, cancela e avisa a equipe com voz natural. Funciona por chamadas, WhatsApp, Telegram, Instagram DM e SMS.',
         hero_cta_demo: 'Testar grátis', hero_cta_how: 'Ver como funciona', hero_social: '500+ empresas satisfeitas', hero_tap: 'Toque no logo',
         hero_intro_hint: 'Kaleya se apresenta', hero_demo_msg: '"Olá, como posso ajudar?"', integrates_with: 'Integrações:',
         feat_title: 'Tudo que uma recepcionista faz, só que melhor', feat_sub: 'Kaleya entende clientes, lembra regras e trabalha no idioma escolhido.',
@@ -3228,9 +3274,9 @@ const T = {
         f2_t: 'Agendamento inteligente', f2_d: 'Verifica o calendário e sugere horários livres.',
         f3_t: 'Voz natural', f3_d: 'Voz ElevenLabs para conversas mais naturais.',
         f_alarm_t: 'Alarmes para equipe', f_alarm_d: 'Aviso do próximo cliente e chamada urgente.',
-        f_msg_t: 'Canais de mensagens', f_msg_d: 'WhatsApp, Viber, Telegram, SMS e chamada telefônica.',
+        f_msg_t: 'Canais de mensagens', f_msg_d: 'WhatsApp, Telegram, Instagram DM, SMS e chamada telefônica.',
         f6_t: 'Controle admin', f6_d: 'API global e ajustes separados por cliente.',
-        how_t: 'Kaleya aprende seu negócio em 1 dia', how1_t: 'Conecte um canal', how1_d: 'Telefone, WhatsApp, Telegram, Viber ou SMS.',
+        how_t: 'Kaleya aprende seu negócio em 1 dia', how1_t: 'Conecte um canal', how1_d: 'Telefone, WhatsApp, Telegram, Instagram DM ou SMS.',
         how2_t: 'Ensine a Kaleya', how2_d: 'Adicione horários, serviços e regras de agenda.',
         how3_t: 'Escolha idioma e voz', how3_d: 'Kaleya fala o idioma escolhido pelo cliente.',
         price_t: 'Precos simples', price_s: '14 dias grátis · cancele quando quiser · sem contratos.',
@@ -3264,7 +3310,7 @@ const T = {
     ru: {
         nav_features: 'Функции', nav_how: 'Как работает', nav_pricing: 'Тарифы', nav_login: 'Вход',
         trust_line1: 'Создано для салонов · Отмена в любой момент',
-        trust_line2: 'Записывает по звонку · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+        trust_line2: 'Записывает по звонку · SMS · WhatsApp · Telegram · Instagram DM',
         banner_early1: 'Ранний доступ', banner_early2: 'первые', banner_early3: 'салонов получают', banner_early4: 'СКИДКУ 50% НАВСЕГДА', banner_early_cta: 'Забронировать место',
         hero_call_kaleya: 'Позвонить Калее',
         kv_call_connecting: 'Соединение…', kv_call_listening: 'Слушает…', kv_call_thinking: 'Думает…', kv_call_speaking: 'Говорит…',
@@ -3275,14 +3321,14 @@ const T = {
         early_access_note: '⚡ Скидка 50% навсегда для первых 50 салонов. Цена никогда не растёт — даже при переходе на другой тариф.',
         price_eyebrow: 'Простые тарифы',
         price_separator: '"Ваш последний администратор заболел. Kaleya — никогда."',
-        p_basic_tagline: '$1 в день. Больше никаких пропущенных записей после работы.',
+        p_basic_tagline: 'Менее $2 в день. Больше никаких пропущенных записей после работы.',
         p_basic_desc: 'Перестаньте терять записи после 17:00. Kaleya принимает каждый вечерний звонок, чтобы вы просыпались с полным расписанием.',
         p_pro_tagline: 'Один предотвращённый пропуск оплачивает весь месяц.',
-        p_pro_desc: 'Ответы 24/7 + депозиты по карте. Математика: 8 пропусков стоят $600. Kaleya стоит $45.',
+        p_pro_desc: 'Приём 24/7 по всем каналам. Математика: 2 предотвращённых пропуска оплачивают весь месяц.',
         p_basic_f1: '300 минут звонков включено', p_basic_f2: 'Вечернее дежурство — когда конкуренты не берут трубку, вы берёте', p_basic_f3: 'Синхронизация с Google Calendar', p_basic_f4: 'Подтверждения по SMS',
         p_pro_f1: '1 200 минут включено', p_pro_f2: 'Круглосуточный приём', p_pro_f3: 'Google Calendar sync', p_pro_f4: 'Депозиты по карте', p_pro_f5: 'Приоритетная поддержка',
         hero_badge: 'AI администратор · 24/7', hero_title_1: 'Kaleya', hero_title_2: 'AI администратор 24/7',
-        hero_sub: 'Kaleya отвечает, записывает, отменяет встречи и уведомляет персонал естественным голосом. Работает через звонки, WhatsApp, Viber, Telegram и SMS.',
+        hero_sub: 'Kaleya отвечает, записывает, отменяет встречи и уведомляет персонал естественным голосом. Работает через звонки, WhatsApp, Telegram, Instagram DM и SMS.',
         hero_cta_demo: 'Попробовать бесплатно', hero_cta_how: 'Как это работает', hero_social: '500+ довольных компаний', hero_tap: 'Нажмите логотип',
         hero_intro_hint: 'Kaleya представляется', hero_demo_msg: '"Здравствуйте, чем могу помочь?"', integrates_with: 'Интеграции:',
         feat_title: 'Все, что делает администратор, только лучше', feat_sub: 'Kaleya понимает клиентов, помнит правила и работает на выбранном языке.',
@@ -3290,9 +3336,9 @@ const T = {
         f2_t: 'Умная запись', f2_d: 'Проверяет календарь и предлагает свободное время.',
         f3_t: 'Естественный голос', f3_d: 'Голос ElevenLabs для более естественных разговоров.',
         f_alarm_t: 'Оповещения персонала', f_alarm_d: 'Следующий клиент и срочный запрос на разговор.',
-        f_msg_t: 'Каналы сообщений', f_msg_d: 'WhatsApp, Viber, Telegram, SMS и телефонный звонок.',
+        f_msg_t: 'Каналы сообщений', f_msg_d: 'WhatsApp, Telegram, Instagram DM, SMS и телефонный звонок.',
         f6_t: 'Админ контроль', f6_d: 'Глобальный API и отдельные настройки по клиенту.',
-        how_t: 'Kaleya изучает бизнес за 1 день', how1_t: 'Подключите канал', how1_d: 'Телефон, WhatsApp, Telegram, Viber или SMS.',
+        how_t: 'Kaleya изучает бизнес за 1 день', how1_t: 'Подключите канал', how1_d: 'Телефон, WhatsApp, Telegram, Instagram DM или SMS.',
         how2_t: 'Обучите Kaleya', how2_d: 'Добавьте часы работы, услуги и правила записи.',
         how3_t: 'Выберите язык и голос', how3_d: 'Kaleya говорит на языке, выбранном клиентом.',
         price_t: 'Простые тарифы', price_s: '14 дней бесплатно · отмена в любое время · без контрактов.',
@@ -3329,7 +3375,7 @@ T.fr = {
     ...T.en,
     nav_features: 'Fonctionnalites', nav_how: 'Comment ca marche', nav_pricing: 'Tarifs', nav_login: 'Connexion',
     trust_line1: 'Conçu pour les salons · Annulez quand vous voulez',
-    trust_line2: 'Prend RDV par appel · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+    trust_line2: 'Prend RDV par appel · SMS · WhatsApp · Telegram · Instagram DM',
     banner_early1: 'Accès anticipé', banner_early2: 'les premiers', banner_early3: 'salons obtiennent', banner_early4: '50% À VIE', banner_early_cta: 'Réservez votre place',
     hero_call_kaleya: 'Appeler Kaleya',
     kv_call_connecting: 'Connexion…', kv_call_listening: 'À l\'écoute…', kv_call_thinking: 'Réflexion…', kv_call_speaking: 'En parole…',
@@ -3340,13 +3386,13 @@ T.fr = {
     early_access_note: '⚡ 50% à vie disponible pour les 50 premiers salons. Le prix n\'augmente jamais — même en changeant de forfait.',
     price_eyebrow: 'Tarifs simples',
     price_separator: '"Votre dernière réceptionniste était malade. Kaleya, jamais."',
-    p_basic_tagline: '$1 par jour. Ne ratez plus jamais une réservation après les heures.',
-    p_basic_desc: 'Arrêtez de perdre des réservations après 17h. Kaleya gère chaque appel du soir pour que vous vous réveilliez avec un agenda plein.',
-    p_pro_tagline: 'Un no-show évité paie tout le mois.',
-    p_pro_desc: 'Disponible 24/7 + acomptes par carte. Le calcul : 8 no-shows vous coûtent 600$. Kaleya coûte 45$.',
+    p_basic_tagline: 'Moins de $2 par jour. Ne ratez plus jamais une reservation apres les heures.',
+    p_basic_desc: 'Arretez de perdre des reservations apres 17h. Kaleya gere chaque appel du soir pour que vous vous reveilliez avec un agenda plein.',
+    p_pro_tagline: 'Un no-show evite paie tout le mois.',
+    p_pro_desc: 'Disponible 24/7 sur tous les canaux. Le calcul : 2 no-shows evites paient tout le mois.',
     p_basic_f1: '300 minutes incluses', p_basic_f2: 'Couverture du soir — quand la concurrence rate des appels, pas vous', p_basic_f3: 'Sync Google Calendar', p_basic_f4: 'Confirmations SMS',
     p_pro_f1: '1 200 minutes incluses', p_pro_f2: 'Accueil 24/7', p_pro_f3: 'Sync Google Calendar', p_pro_f4: 'Acompte par carte', p_pro_f5: 'Support prioritaire',
-    hero_badge: 'Receptionniste IA · active 24/7', hero_sub: 'Kaleya repond, planifie, annule et alerte votre equipe avec une voix naturelle. Fonctionne avec appels, WhatsApp, Viber, Telegram et SMS.',
+    hero_badge: 'Receptionniste IA · active 24/7', hero_sub: 'Kaleya repond, planifie, annule et alerte votre equipe avec une voix naturelle. Fonctionne avec appels, WhatsApp, Telegram, Instagram DM et SMS.',
     hero_cta_demo: 'Essayer gratuitement', hero_cta_how: 'Voir le fonctionnement', hero_social: '500+ entreprises satisfaites', hero_tap: 'Touchez le logo',
     hero_intro_hint: 'Kaleya se presente', hero_demo_msg: '"Bonjour, comment puis-je aider ?"',
     feat_title: 'Tout ce qu une receptionniste fait, en mieux', feat_sub: 'Kaleya comprend les clients, retient les regles et travaille dans la langue choisie.',
@@ -3354,7 +3400,7 @@ T.fr = {
     f2_t: 'Planification intelligente', f2_d: 'Verifie le calendrier et propose les creneaux libres.',
     f3_t: 'Voix naturelle', f3_d: 'Voix ElevenLabs pour des conversations plus naturelles.',
     f_alarm_t: 'Alertes equipe', f_alarm_d: 'Annonce du prochain client et demande urgente de conversation.',
-    f_msg_t: 'Canaux de messages', f_msg_d: 'WhatsApp, Viber, Telegram, SMS et appels telephoniques.',
+    f_msg_t: 'Canaux de messages', f_msg_d: 'WhatsApp, Telegram, Instagram DM, SMS et appels telephoniques.',
     how_t: 'Kaleya apprend votre activite en 1 jour', how1_t: 'Connecter un canal', how2_t: 'Former Kaleya', how3_t: 'Choisir langue et voix',
     price_t: 'Tarifs simples', price_s: '14 jours gratuits · annulez quand vous voulez · sans engagement.',
     p1_d: 'Pour petites equipes', p2_d: 'Pour entreprises en croissance', p3_d: 'Pour centres d appels', p4_d: 'Projet complet',
@@ -3379,7 +3425,7 @@ T.it = {
     ...T.en,
     nav_features: 'Funzioni', nav_how: 'Come funziona', nav_pricing: 'Prezzi', nav_login: 'Login',
     trust_line1: 'Pensato per i saloni · Cancella quando vuoi',
-    trust_line2: 'Prenota via chiamata · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+    trust_line2: 'Prenota via chiamata · SMS · WhatsApp · Telegram · Instagram DM',
     banner_early1: 'Accesso anticipato', banner_early2: 'primi', banner_early3: 'saloni ricevono', banner_early4: '50% A VITA', banner_early_cta: 'Prenota il tuo posto',
     hero_call_kaleya: 'Chiama Kaleya',
     kv_call_connecting: 'Connessione…', kv_call_listening: 'In ascolto…', kv_call_thinking: 'Sto pensando…', kv_call_speaking: 'Sto parlando…',
@@ -3390,13 +3436,13 @@ T.it = {
     early_access_note: '⚡ 50% a vita disponibile per i primi 50 saloni. Il prezzo non aumenta mai — anche cambiando piano.',
     price_eyebrow: 'Prezzi semplici',
     price_separator: '"La tua ultima receptionist si è ammalata. Kaleya mai."',
-    p_basic_tagline: '$1 al giorno. Non perdere mai più prenotazioni fuori orario.',
+    p_basic_tagline: 'Meno di $2 al giorno. Non perdere mai piu prenotazioni fuori orario.',
     p_basic_desc: 'Smetti di perdere prenotazioni dopo le 17. Kaleya gestisce ogni chiamata serale così ti svegli con l\'agenda piena.',
     p_pro_tagline: 'Un no-show evitato paga tutto il mese.',
-    p_pro_desc: 'Risposta 24/7 + acconti con carta. I conti: 8 no-show ti costano $600. Kaleya costa $45.',
+    p_pro_desc: 'Risposta 24/7 su tutti i canali. I conti: 2 no-show evitati pagano tutto il mese.',
     p_basic_f1: '300 minuti di chiamata inclusi', p_basic_f2: 'Copertura serale — quando la concorrenza manca, tu no', p_basic_f3: 'Sync Google Calendar', p_basic_f4: 'Conferme SMS',
     p_pro_f1: '1.200 minuti inclusi', p_pro_f2: 'Risposta 24/7', p_pro_f3: 'Sync Google Calendar', p_pro_f4: 'Acconto con carta', p_pro_f5: 'Supporto prioritario',
-    hero_badge: 'Receptionist AI · attiva 24/7', hero_sub: 'Kaleya risponde, prenota, annulla e avvisa il team con voce naturale. Funziona con chiamate, WhatsApp, Viber, Telegram e SMS.',
+    hero_badge: 'Receptionist AI · attiva 24/7', hero_sub: 'Kaleya risponde, prenota, annulla e avvisa il team con voce naturale. Funziona con chiamate, WhatsApp, Telegram, Instagram DM e SMS.',
     hero_cta_demo: 'Prova gratis', hero_cta_how: 'Vedi come funziona', hero_social: '500+ aziende soddisfatte', hero_tap: 'Tocca il logo',
     hero_intro_hint: 'Kaleya si presenta', hero_demo_msg: '"Ciao, come posso aiutare?"',
     feat_title: 'Tutto cio che fa una receptionist, ma meglio', feat_sub: 'Kaleya capisce i clienti, ricorda le regole e lavora nella lingua scelta.',
@@ -3404,7 +3450,7 @@ T.it = {
     f2_t: 'Prenotazione intelligente', f2_d: 'Controlla il calendario e propone slot liberi.',
     f3_t: 'Voce naturale', f3_d: 'Voce ElevenLabs per conversazioni piu naturali.',
     f_alarm_t: 'Allarmi team', f_alarm_d: 'Annuncio del prossimo cliente e richiesta urgente di conversazione.',
-    f_msg_t: 'Canali messaggi', f_msg_d: 'WhatsApp, Viber, Telegram, SMS e chiamate.',
+    f_msg_t: 'Canali messaggi', f_msg_d: 'WhatsApp, Telegram, Instagram DM, SMS e chiamate.',
     how_t: 'Kaleya impara la tua attivita in 1 giorno', how1_t: 'Collega un canale', how2_t: 'Istruisci Kaleya', how3_t: 'Scegli lingua e voce',
     price_t: 'Prezzi semplici', price_s: '14 giorni gratis · disdici quando vuoi · senza contratti.',
     p1_d: 'Per piccoli team', p2_d: 'Per aziende in crescita', p3_d: 'Per call center', p4_d: 'Progetto completo',
@@ -3428,8 +3474,12 @@ T.it = {
 const EXTRA_TRANSLATIONS = {
     sr: {
         f_lang_t: '8 jezika', f_lang_d: 'Srpski, English, španski, portugalski, ruski, francuski, italijanski i nemački sa ručnim izborom.',
-        p_basic_d: 'Za vlasnika/firmu', p_basic_f1: 'AI Kaleya zakazivanja', p_basic_f2: 'Vlasnik/firma Kaleya APP', p_basic_f3: 'Vlasnik zakazivanja', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'AI voice', p_basic_f6: 'Alarmi i obaveštenja',
-        p_pro_d: 'Vlasnik + 1 radnik', p_pro_f1: 'Sve iz Basic', p_pro_f2: '1 radnik', p_pro_f3: 'Radnik zakazivanja', p_pro_f4: 'Radnik Kaleya APP', p_pro_f5: 'Blokiranje termina po satu/danu/višednevno', p_pro_f6: 'Instagram DM + TikTok DM',
+        p_basic_tagline: 'Manje od $2 dnevno. Nikad više propušteno zakazivanje posle radnog vremena.',
+        p_basic_desc: 'Prestani da gubiš zakazivanja posle 17h. Kaleya odgovara na svaki večernji poziv da se probudiš sa punim rasporedom.',
+        p_basic_d: 'Za vlasnika/firmu', p_basic_f1: '500 minuta razgovora — pokriva sve večernje pozive', p_basic_f2: 'Zakazuje pozivom, SMS, WhatsApp i Telegram', p_basic_f3: 'Google Calendar — svaki termin odmah vidljiv', p_basic_f4: 'Automatski SMS podsetnici klijentima', p_basic_f5: 'Glasovni alarm za osoblje — sledeći klijent',
+        p_pro_tagline: 'Jedan sprečeni no-show plaća ceo mesec.',
+        p_pro_desc: 'Dežurstvo 24/7 na svim kanalima. Računica: 2 sprečena no-showa plaćaju ceo mesec.',
+        p_pro_d: 'Vlasnik + 1 radnik', p_pro_f1: '1.200 minuta — 24/7 pokrivenost, ni jedan poziv ne propada', p_pro_f2: '24/7 dežurstvo — i u 3 ujutru neko se javlja', p_pro_f3: 'Svi kanali: poziv, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 radnik — poseban raspored i pristup Kaleya APP', p_pro_f5: 'Prioritetna podrška + blokiranje po satu i danu',
         p_business_d: 'Do 5 radnika', p_business_f1: 'Sve iz Basic + Pro', p_business_f2: 'Do 5 radnika', p_business_f3: 'Radnik Kaleya APP', p_business_f4: 'Više jezika po dogovoru', p_business_f5: 'API po firmi',
         p_business_plus_d: 'Do 15 radnika', p_business_plus_f1: 'Sve iz Basic + Pro + Business', p_business_plus_f2: 'Do 15 radnika', p_business_plus_f3: 'Telefonski pozivi i SMS', p_business_plus_f4: 'ElevenLabs AI voice',
         p_business_pro_d: '5+ radnika', p_business_pro_f1: 'Sve iz Basic + Pro + Business + Business+', p_business_pro_f2: '15+ radnika', p_business_pro_f3: 'Custom integracije', p_business_pro_f4: 'Napredna arhitektura po dogovoru', custom_price: 'Custom',
@@ -3438,8 +3488,8 @@ const EXTRA_TRANSLATIONS = {
     },
     en: {
         f_lang_t: '8 languages', f_lang_d: 'Serbian, English, Spanish, Portuguese, Russian, French, Italian and German with manual selection.',
-        p_basic_d: 'For owner/company', p_basic_f1: 'AI Kaleya scheduling', p_basic_f2: 'Owner/company Kaleya APP', p_basic_f3: 'Owner scheduling', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'AI voice', p_basic_f6: 'Alarms and notifications',
-        p_pro_d: 'Owner + 1 employee', p_pro_f1: 'Everything in Basic', p_pro_f2: '1 employee', p_pro_f3: 'Employee scheduling', p_pro_f4: 'Employee Kaleya APP', p_pro_f5: 'Blocking by hour/day/multiple days', p_pro_f6: 'Instagram DM + TikTok DM',
+        p_basic_d: 'For owner/company', p_basic_f1: '500 talk minutes — covers all after-hours calls', p_basic_f2: 'Books by call, SMS, WhatsApp & Telegram', p_basic_f3: 'Google Calendar sync — every booking appears instantly', p_basic_f4: 'Automated SMS reminders to clients', p_basic_f5: 'Staff alarm — spoken next-client announcement',
+        p_pro_d: 'Owner + 1 employee', p_pro_f1: '1,200 minutes — 24/7 coverage, zero missed calls', p_pro_f2: '24/7 answering — even at 3 AM, someone picks up', p_pro_f3: 'All channels: call, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 staff member — own schedule & Kaleya APP access', p_pro_f5: 'Priority support + time-block scheduling',
         p_business_d: 'Up to 5 employees', p_business_f1: 'Everything in Basic + Pro', p_business_f2: 'Up to 5 employees', p_business_f3: 'Employee Kaleya APP', p_business_f4: 'More languages by agreement', p_business_f5: 'Company-specific API',
         p_business_plus_d: 'Up to 15 employees', p_business_plus_f1: 'Everything in Basic + Pro + Business', p_business_plus_f2: 'Up to 15 employees', p_business_plus_f3: 'Phone calls and SMS', p_business_plus_f4: 'ElevenLabs AI voice',
         p_business_pro_d: '5+ employees', p_business_pro_f1: 'Everything in Basic + Pro + Business + Business+', p_business_pro_f2: '15+ employees', p_business_pro_f3: 'Custom integrations', p_business_pro_f4: 'Advanced architecture by agreement', custom_price: 'Custom',
@@ -3448,8 +3498,8 @@ const EXTRA_TRANSLATIONS = {
     },
     es: {
         f_lang_t: '8 idiomas', f_lang_d: 'Serbio, English, español, portugués, ruso, francés, italiano y alemán con selección manual.',
-        p_basic_d: 'Para propietario/empresa', p_basic_f1: 'Agenda AI Kaleya', p_basic_f2: 'APP Kaleya propietario/empresa', p_basic_f3: 'Agenda del propietario', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'Voz AI', p_basic_f6: 'Alarmas y notificaciones',
-        p_pro_d: 'Propietario + 1 empleado', p_pro_f1: 'Todo de Basic', p_pro_f2: '1 empleado', p_pro_f3: 'Agenda del empleado', p_pro_f4: 'APP Kaleya del empleado', p_pro_f5: 'Bloqueo por hora/día/varios días', p_pro_f6: 'Instagram DM + TikTok DM',
+        p_basic_d: 'Para propietario/empresa', p_basic_f1: '500 minutos de llamada — cubre todas las llamadas fuera de horario', p_basic_f2: 'Agenda por llamada, SMS, WhatsApp y Telegram', p_basic_f3: 'Google Calendar — cada cita aparece al instante', p_basic_f4: 'Recordatorios SMS automáticos a clientes', p_basic_f5: 'Alarma de voz — anuncio del siguiente cliente',
+        p_pro_d: 'Propietario + 1 empleado', p_pro_f1: '1.200 minutos — cobertura 24/7, cero llamadas perdidas', p_pro_f2: 'Atención 24/7 — incluso a las 3 AM', p_pro_f3: 'Todos los canales: llamada, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 empleado — agenda propia y acceso a Kaleya APP', p_pro_f5: 'Soporte prioritario + bloqueos por hora y día',
         p_business_d: 'Hasta 5 empleados', p_business_f1: 'Todo de Basic + Pro', p_business_f2: 'Hasta 5 empleados', p_business_f3: 'APP Kaleya del empleado', p_business_f4: 'Más idiomas por acuerdo', p_business_f5: 'API por empresa',
         p_business_plus_d: 'Hasta 15 empleados', p_business_plus_f1: 'Todo de Basic + Pro + Business', p_business_plus_f2: 'Hasta 15 empleados', p_business_plus_f3: 'Llamadas telefónicas y SMS', p_business_plus_f4: 'Voz AI ElevenLabs',
         p_business_pro_d: '5+ empleados', p_business_pro_f1: 'Todo de Basic + Pro + Business + Business+', p_business_pro_f2: '15+ empleados', p_business_pro_f3: 'Integraciones custom', p_business_pro_f4: 'Arquitectura avanzada por acuerdo', custom_price: 'Custom',
@@ -3458,8 +3508,8 @@ const EXTRA_TRANSLATIONS = {
     },
     pt: {
         f_lang_t: '8 idiomas', f_lang_d: 'Sérvio, English, espanhol, português, russo, francês, italiano e alemão com seleção manual.',
-        p_basic_d: 'Para dono/empresa', p_basic_f1: 'Agendamento AI Kaleya', p_basic_f2: 'APP Kaleya do dono/empresa', p_basic_f3: 'Agendamento do dono', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'Voz AI', p_basic_f6: 'Alarmes e notificações',
-        p_pro_d: 'Dono + 1 funcionário', p_pro_f1: 'Tudo do Basic', p_pro_f2: '1 funcionário', p_pro_f3: 'Agendamento do funcionário', p_pro_f4: 'APP Kaleya do funcionário', p_pro_f5: 'Bloqueio por hora/dia/vários dias', p_pro_f6: 'Instagram DM + TikTok DM',
+        p_basic_d: 'Para dono/empresa', p_basic_f1: '500 minutos de chamada — cobre todas as chamadas fora do horário', p_basic_f2: 'Marca por chamada, SMS, WhatsApp e Telegram', p_basic_f3: 'Google Calendar — cada marcação aparece instantaneamente', p_basic_f4: 'Lembretes SMS automáticos para clientes', p_basic_f5: 'Alarme de voz para equipe — próximo cliente',
+        p_pro_d: 'Dono + 1 funcionário', p_pro_f1: '1.200 minutos — cobertura 24/7, zero chamadas perdidas', p_pro_f2: 'Atendimento 24/7 — mesmo às 3 da manhã', p_pro_f3: 'Todos os canais: chamada, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 funcionário — agenda própria e acesso à Kaleya APP', p_pro_f5: 'Suporte prioritário + bloqueio por hora e dia',
         p_business_d: 'Até 5 funcionários', p_business_f1: 'Tudo do Basic + Pro', p_business_f2: 'Até 5 funcionários', p_business_f3: 'APP Kaleya do funcionário', p_business_f4: 'Mais idiomas por acordo', p_business_f5: 'API por empresa',
         p_business_plus_d: 'Até 15 funcionários', p_business_plus_f1: 'Tudo do Basic + Pro + Business', p_business_plus_f2: 'Até 15 funcionários', p_business_plus_f3: 'Chamadas telefônicas e SMS', p_business_plus_f4: 'Voz AI ElevenLabs',
         p_business_pro_d: '5+ funcionarios', p_business_pro_f1: 'Tudo do Basic + Pro + Business + Business+', p_business_pro_f2: '15+ funcionários', p_business_pro_f3: 'Integrações custom', p_business_pro_f4: 'Arquitetura avançada por acordo', custom_price: 'Custom',
@@ -3468,8 +3518,8 @@ const EXTRA_TRANSLATIONS = {
     },
     ru: {
         f_lang_t: '8 языков', f_lang_d: 'Сербский, English, испанский, португальский, русский, французский, итальянский и немецкий с ручным выбором.',
-        p_basic_d: 'Для владельца/компании', p_basic_f1: 'AI запись Kaleya', p_basic_f2: 'Kaleya APP владельца/компании', p_basic_f3: 'Запись владельца', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'AI голос', p_basic_f6: 'Оповещения и уведомления',
-        p_pro_d: 'Владелец + 1 сотрудник', p_pro_f1: 'Все из Basic', p_pro_f2: '1 сотрудник', p_pro_f3: 'Запись сотрудника', p_pro_f4: 'Kaleya APP сотрудника', p_pro_f5: 'Блокировка по часу/дню/нескольким дням', p_pro_f6: 'Instagram DM + TikTok DM',
+        p_basic_d: 'Для владельца/компании', p_basic_f1: '500 минут — покрывает все звонки после работы', p_basic_f2: 'Запись по звонку, SMS, WhatsApp и Telegram', p_basic_f3: 'Google Calendar — каждая запись появляется мгновенно', p_basic_f4: 'Автоматические SMS-напоминания клиентам', p_basic_f5: 'Голосовой сигнал персоналу — следующий клиент',
+        p_pro_d: 'Владелец + 1 сотрудник', p_pro_f1: '1 200 минут — круглосуточно, ни один звонок не пропущен', p_pro_f2: 'Приём 24/7 — даже в 3 ночи кто-то берёт трубку', p_pro_f3: 'Все каналы: звонок, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 сотрудник — свой график и доступ к Kaleya APP', p_pro_f5: 'Приоритетная поддержка + блокировка по часам и дням',
         p_business_d: 'До 5 сотрудников', p_business_f1: 'Все из Basic + Pro', p_business_f2: 'До 5 сотрудников', p_business_f3: 'Kaleya APP сотрудника', p_business_f4: 'Больше языков по договоренности', p_business_f5: 'API по компании',
         p_business_plus_d: 'До 15 сотрудников', p_business_plus_f1: 'Все из Basic + Pro + Business', p_business_plus_f2: 'До 15 сотрудников', p_business_plus_f3: 'Телефонные звонки и SMS', p_business_plus_f4: 'AI голос ElevenLabs',
         p_business_pro_d: '5+ сотрудников', p_business_pro_f1: 'Все из Basic + Pro + Business + Business+', p_business_pro_f2: '15+ сотрудников', p_business_pro_f3: 'Custom интеграции', p_business_pro_f4: 'Продвинутая архитектура по договоренности', custom_price: 'Custom',
@@ -3478,8 +3528,8 @@ const EXTRA_TRANSLATIONS = {
     },
     fr: {
         f_lang_t: '8 langues', f_lang_d: 'Serbe, English, espagnol, portugais, russe, francais, italien et allemand avec choix manuel.',
-        p_basic_d: 'Pour proprietaire/entreprise', p_basic_f1: 'Planification AI Kaleya', p_basic_f2: 'APP Kaleya proprietaire/entreprise', p_basic_f3: 'Planification proprietaire', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'Voix AI', p_basic_f6: 'Alertes et notifications',
-        p_pro_d: 'Proprietaire + 1 employe', p_pro_f1: 'Tout Basic', p_pro_f2: '1 employe', p_pro_f3: 'Planification employe', p_pro_f4: 'APP Kaleya employe', p_pro_f5: 'Blocage par heure/jour/plusieurs jours', p_pro_f6: 'Instagram DM + TikTok DM',
+        p_basic_d: 'Pour proprietaire/entreprise', p_basic_f1: '500 minutes incluses — toutes les reservations apres-heures', p_basic_f2: 'Prend RDV par appel, SMS, WhatsApp et Telegram', p_basic_f3: 'Google Calendar — chaque creneau synchro en temps reel', p_basic_f4: 'Rappels SMS automatiques aux clients', p_basic_f5: 'Alerte vocale equipe — prochain client annonce',
+        p_pro_d: 'Proprietaire + 1 employe', p_pro_f1: '1 200 minutes — couverture 24/7, zero appel manque', p_pro_f2: 'Disponible 24/7 — meme a 3h du matin', p_pro_f3: 'Tous les canaux : appel, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 employe — planning dedie et acces Kaleya APP', p_pro_f5: 'Support prioritaire + blocage par heure et jour',
         p_business_d: 'Jusqu a 5 employes', p_business_f1: 'Tout Basic + Pro', p_business_f2: 'Jusqu a 5 employes', p_business_f3: 'APP Kaleya employe', p_business_f4: 'Plus de langues sur accord', p_business_f5: 'API par entreprise',
         p_business_plus_d: 'Jusqu a 15 employes', p_business_plus_f1: 'Tout Basic + Pro + Business', p_business_plus_f2: 'Jusqu a 15 employes', p_business_plus_f3: 'Appels telephoniques et SMS', p_business_plus_f4: 'Voix AI ElevenLabs',
         p_business_pro_d: '5+ employes', p_business_pro_f1: 'Tout Basic + Pro + Business + Business+', p_business_pro_f2: '15+ employes', p_business_pro_f3: 'Integrations custom', p_business_pro_f4: 'Architecture avancee sur accord', custom_price: 'Custom',
@@ -3488,8 +3538,8 @@ const EXTRA_TRANSLATIONS = {
     },
     it: {
         f_lang_t: '8 lingue', f_lang_d: 'Serbo, English, spagnolo, portoghese, russo, francese, italiano e tedesco con scelta manuale.',
-        p_basic_d: 'Per titolare/azienda', p_basic_f1: 'Prenotazioni AI Kaleya', p_basic_f2: 'APP Kaleya titolare/azienda', p_basic_f3: 'Prenotazioni titolare', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'Voce AI', p_basic_f6: 'Allarmi e notifiche',
-        p_pro_d: 'Titolare + 1 dipendente', p_pro_f1: 'Tutto Basic', p_pro_f2: '1 dipendente', p_pro_f3: 'Prenotazioni dipendente', p_pro_f4: 'APP Kaleya dipendente', p_pro_f5: 'Blocco per ora/giorno/piu giorni', p_pro_f6: 'Instagram DM + TikTok DM',
+        p_basic_d: 'Per titolare/azienda', p_basic_f1: '500 minuti inclusi — copre tutte le chiamate fuori orario', p_basic_f2: 'Prenota via chiamata, SMS, WhatsApp e Telegram', p_basic_f3: 'Google Calendar — ogni prenotazione appare subito', p_basic_f4: 'Promemoria SMS automatici ai clienti', p_basic_f5: 'Allarme vocale team — prossimo cliente annunciato',
+        p_pro_d: 'Titolare + 1 dipendente', p_pro_f1: '1.200 minuti — copertura 24/7, nessuna chiamata persa', p_pro_f2: 'Risposta 24/7 — anche alle 3 di notte', p_pro_f3: 'Tutti i canali: chiamata, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 dipendente — orari dedicati e accesso Kaleya APP', p_pro_f5: 'Supporto prioritario + blocchi per ora e giorno',
         p_business_d: 'Fino a 5 dipendenti', p_business_f1: 'Tutto Basic + Pro', p_business_f2: 'Fino a 5 dipendenti', p_business_f3: 'APP Kaleya dipendente', p_business_f4: 'Piu lingue su accordo', p_business_f5: 'API per azienda',
         p_business_plus_d: 'Fino a 15 dipendenti', p_business_plus_f1: 'Tutto Basic + Pro + Business', p_business_plus_f2: 'Fino a 15 dipendenti', p_business_plus_f3: 'Chiamate telefoniche e SMS', p_business_plus_f4: 'Voce AI ElevenLabs',
         p_business_pro_d: '5+ dipendenti', p_business_pro_f1: 'Tutto Basic + Pro + Business + Business+', p_business_pro_f2: '15+ dipendenti', p_business_pro_f3: 'Integrazioni custom', p_business_pro_f4: 'Architettura avanzata su accordo', custom_price: 'Custom',
@@ -3500,7 +3550,7 @@ const EXTRA_TRANSLATIONS = {
         ...T.en,
         nav_features: 'Funktionen', nav_how: 'So funktioniert es', nav_pricing: 'Preise', nav_login: 'Login',
         trust_line1: 'Gemacht für Salons · Jederzeit kündbar',
-        trust_line2: 'Bucht per Anruf · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+        trust_line2: 'Bucht per Anruf · SMS · WhatsApp · Telegram · Instagram DM',
         banner_early1: 'Early Access', banner_early2: 'die ersten', banner_early3: 'Salons erhalten', banner_early4: '50% AUF LEBENSZEIT', banner_early_cta: 'Platz sichern',
         hero_call_kaleya: 'Kaleya anrufen',
         kv_call_connecting: 'Verbinden…', kv_call_listening: 'Hört zu…', kv_call_thinking: 'Denkt nach…', kv_call_speaking: 'Spricht…',
@@ -3511,20 +3561,20 @@ const EXTRA_TRANSLATIONS = {
         early_access_note: '⚡ 50% lebenslang für die ersten 50 Salons. Der Preis steigt nie — auch beim Plan-Upgrade.',
         price_eyebrow: 'Einfache Preise',
         price_separator: '"Ihre letzte Rezeptionistin hat sich krankgemeldet. Kaleya nie."',
-        p_basic_tagline: '$1 pro Tag. Nie wieder eine Buchung außerhalb der Öffnungszeiten verpassen.',
+        p_basic_tagline: 'Unter $2 pro Tag. Nie wieder eine Buchung außerhalb der Öffnungszeiten verpassen.',
         p_basic_desc: 'Hören Sie auf, Buchungen nach 17 Uhr zu verlieren. Kaleya nimmt jeden Abendanruf entgegen, damit Sie mit vollem Terminplan aufwachen.',
-        p_pro_tagline: 'Ein verhinderte No-Show bezahlt den ganzen Monat.',
-        p_pro_desc: '24/7 Erreichbarkeit + Kartenanzahlungen. Die Rechnung: 8 No-Shows kosten $600. Kaleya kostet $45.',
-        p_basic_f1: '300 Gesprächsminuten inklusive', p_basic_f2: 'Abendliche Abdeckung — wenn Mitbewerber Anrufe verpassen, Sie nicht', p_basic_f3: 'Google Calendar Sync', p_basic_f4: 'SMS-Bestätigungen',
-        p_pro_f1: '1.200 Minuten inklusive', p_pro_f2: '24/7 Annahme', p_pro_f3: 'Google Calendar Sync', p_pro_f4: 'Anzahlung per Karte', p_pro_f5: 'Vorrangiger Support',
-        hero_badge: 'AI Empfang · 24/7 aktiv', hero_title_1: 'Kaleya', hero_title_2: 'AI Empfang 24/7', hero_sub: 'Kaleya beantwortet Anrufe, bucht, storniert und benachrichtigt das Team mit natürlicher Stimme. Funktioniert mit Anrufen, WhatsApp, Viber, Telegram und SMS.',
+        p_pro_tagline: 'Ein verhinderter No-Show bezahlt den ganzen Monat.',
+        p_pro_desc: '24/7 Erreichbarkeit auf allen Kanälen. Die Rechnung: 2 verhinderte No-Shows bezahlen den ganzen Monat.',
+        p_basic_f1: '500 Gesprächsminuten — alle Abendanrufe abgedeckt', p_basic_f2: 'Buchungen per Anruf, SMS, WhatsApp und Telegram', p_basic_f3: 'Google Calendar — jeder Termin erscheint sofort', p_basic_f4: 'Automatische SMS-Erinnerungen an Kunden', p_basic_f5: 'Team-Alarm — nächster Kunde angesagt',
+        p_pro_f1: '1.200 Minuten — 24/7, kein Anruf geht verloren', p_pro_f2: '24/7 Erreichbarkeit — auch um 3 Uhr nachts', p_pro_f3: 'Alle Kanäle: Anruf, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 Mitarbeiter — eigener Kalender und Kaleya APP', p_pro_f5: 'Vorrangiger Support + Stunden-/Tagesblockierung',
+        hero_badge: 'AI Empfang · 24/7 aktiv', hero_title_1: 'Kaleya', hero_title_2: 'AI Empfang 24/7', hero_sub: 'Kaleya beantwortet Anrufe, bucht, storniert und benachrichtigt das Team mit natürlicher Stimme. Funktioniert mit Anrufen, WhatsApp, Telegram, Instagram DM und SMS.',
         hero_cta_demo: 'Kostenlos testen', hero_cta_how: 'So funktioniert es', hero_social: '500+ zufriedene Unternehmen', hero_tap: 'Logo antippen', hero_intro_hint: 'Kaleya stellt sich vor', hero_demo_msg: '"Hallo, wie kann ich helfen?"', integrates_with: 'Integrationen:',
         feat_title: 'Alles, was eine echte Rezeption macht, nur besser', feat_sub: 'Kaleya versteht Kunden, merkt sich Regeln und arbeitet in der gewählten Sprache.', f_lang_t: '8 Sprachen', f_lang_d: 'Serbisch, English, Spanisch, Portugiesisch, Russisch, Französisch, Italienisch und Deutsch mit manueller Auswahl.',
-        f2_t: 'Intelligente Terminplanung', f2_d: 'Prüft den Kalender und schlägt freie Termine vor.', f3_t: 'Natürliche Stimme', f3_d: 'ElevenLabs Stimme für natürlichere Gespräche.', f_alarm_t: 'Team-Alarme', f_alarm_d: 'Ansage des nächsten Kunden und dringende Gesprächsanfrage.', f_msg_t: 'Nachrichtenkanäle', f_msg_d: 'WhatsApp, Viber, Telegram, SMS und Telefonanruf.', f6_t: 'Admin-Kontrolle', f6_d: 'Globale API und separate Einstellungen pro Firma.',
-        how_t: 'Kaleya lernt Ihr Geschäft an 1 Tag', how1_t: 'Kanal verbinden', how1_d: 'Telefon, WhatsApp, Telegram, Viber oder SMS.', how2_t: 'Kaleya trainieren', how2_d: 'Arbeitszeiten, Services und Buchungsregeln eintragen.', how3_t: 'Sprache und Stimme wählen', how3_d: 'Kaleya spricht die Sprache, die der Kunde auswählt.',
+        f2_t: 'Intelligente Terminplanung', f2_d: 'Prüft den Kalender und schlägt freie Termine vor.', f3_t: 'Natürliche Stimme', f3_d: 'ElevenLabs Stimme für natürlichere Gespräche.', f_alarm_t: 'Team-Alarme', f_alarm_d: 'Ansage des nächsten Kunden und dringende Gesprächsanfrage.', f_msg_t: 'Nachrichtenkanäle', f_msg_d: 'WhatsApp, Telegram, Instagram DM, SMS und Telefonanruf.', f6_t: 'Admin-Kontrolle', f6_d: 'Globale API und separate Einstellungen pro Firma.',
+        how_t: 'Kaleya lernt Ihr Geschäft an 1 Tag', how1_t: 'Kanal verbinden', how1_d: 'Telefon, WhatsApp, Telegram, Instagram DM oder SMS.', how2_t: 'Kaleya trainieren', how2_d: 'Arbeitszeiten, Services und Buchungsregeln eintragen.', how3_t: 'Sprache und Stimme wählen', how3_d: 'Kaleya spricht die Sprache, die der Kunde auswählt.',
         price_t: 'Einfache Preise', price_s: '14 Tage kostenlos · jederzeit kündbar · keine Verträge.', popular: 'BELIEBT', trial_btn: '14 Tage testen', price_contact: 'Kontakt',
-        p_basic_d: 'Fuer Inhaber/Firma', p_basic_f1: 'AI Kaleya Terminplanung', p_basic_f2: 'Inhaber/Firma Kaleya APP', p_basic_f3: 'Inhaber Terminplanung', p_basic_f4: 'WA + Viber + Telegram', p_basic_f5: 'AI voice', p_basic_f6: 'Alarme und Benachrichtigungen',
-        p_pro_d: 'Inhaber + 1 Mitarbeiter', p_pro_f1: 'Alles aus Basic', p_pro_f2: '1 Mitarbeiter', p_pro_f3: 'Mitarbeiter Terminplanung', p_pro_f4: 'Mitarbeiter Kaleya APP', p_pro_f5: 'Blockierung nach Stunde/Tag/mehreren Tagen', p_pro_f6: 'Instagram DM + TikTok DM',
+        p_basic_d: 'Fuer Inhaber/Firma', p_basic_f1: '500 Gesprächsminuten — alle Abendanrufe abgedeckt', p_basic_f2: 'Buchungen per Anruf, SMS, WhatsApp und Telegram', p_basic_f3: 'Google Calendar — jeder Termin erscheint sofort', p_basic_f4: 'Automatische SMS-Erinnerungen an Kunden', p_basic_f5: 'Team-Alarm — nächster Kunde angesagt',
+        p_pro_d: 'Inhaber + 1 Mitarbeiter', p_pro_f1: '1.200 Minuten — 24/7, kein Anruf geht verloren', p_pro_f2: '24/7 Erreichbarkeit — auch um 3 Uhr nachts', p_pro_f3: 'Alle Kanäle: Anruf, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 Mitarbeiter — eigener Kalender und Kaleya APP', p_pro_f5: 'Vorrangiger Support + Stunden-/Tagesblockierung',
         p_business_d: 'Bis zu 5 Mitarbeiter', p_business_f1: 'Alles aus Basic + Pro', p_business_f2: 'Bis zu 5 Mitarbeiter', p_business_f3: 'Mitarbeiter Kaleya APP', p_business_f4: 'Mehr Sprachen nach Vereinbarung', p_business_f5: 'API pro Firma',
         p_business_plus_d: 'Bis zu 15 Mitarbeiter', p_business_plus_f1: 'Alles aus Basic + Pro + Business', p_business_plus_f2: 'Bis zu 15 Mitarbeiter', p_business_plus_f3: 'Telefonanrufe und SMS', p_business_plus_f4: 'ElevenLabs AI voice',
         p_business_pro_d: '5+ Mitarbeiter', p_business_pro_f1: 'Alles aus Basic + Pro + Business + Business+', p_business_pro_f2: '15+ Mitarbeiter', p_business_pro_f3: 'Custom Integrationen', p_business_pro_f4: 'Erweiterte Architektur nach Vereinbarung', custom_price: 'Custom',
@@ -3545,7 +3595,7 @@ Object.entries(EXTRA_TRANSLATIONS).forEach(([lang, values]) => {
 T['en-gb'] = {
     ...T.en,
     trust_line1: 'Built for salons · Cancel anytime',
-    trust_line2: 'Books via call · SMS · WhatsApp · Viber · Telegram · Instagram DM',
+    trust_line2: 'Books via call · SMS · WhatsApp · Telegram · Instagram DM',
     hero_cta_demo: 'Start free trial',
     price_s: 'Choose the plan that fits your salon.',
     trial_btn: 'Start 14-day free trial'
