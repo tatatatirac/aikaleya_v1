@@ -88,11 +88,14 @@ class CheckoutSessionSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+_CHECKOUT_YEARLY_SKIP = {"god_mode"}
+
+
 class CheckoutSessionCreateSerializer(serializers.Serializer):
-    _YEARLY_SKIP = {"god_mode"}
     plan_code = serializers.ChoiceField(choices=(
         [code for code, _label in Plan.CODE_CHOICES]
-        + [f"{code}_yearly" for code, _label in Plan.CODE_CHOICES if code not in _YEARLY_SKIP]
+        + [f"{code}_yearly" for code, _label in Plan.CODE_CHOICES
+           if code not in _CHECKOUT_YEARLY_SKIP]
     ))
     email = serializers.EmailField(required=False, allow_blank=True)
     company = serializers.CharField(required=False, allow_blank=True, max_length=160)
