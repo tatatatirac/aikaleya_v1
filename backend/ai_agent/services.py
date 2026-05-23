@@ -315,6 +315,10 @@ CLOSING_HINTS = (
     "bye",
     "goodbye",
     "see you",
+    "se you",
+    "see ya",
+    "se ya",
+    "cya",
 )
 COMPLETED_FLOW_CLOSING_HINTS = (
     "cao",
