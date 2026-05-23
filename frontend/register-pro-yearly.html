@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start Free Trial — Kaleya AI Pro (Yearly)</title>
+    <meta name="description" content="Start your 14-day free trial of Kaleya AI Pro — advanced AI receptionist for your salon. Pay yearly and save 2 months. No credit card required.">
+    <link rel="canonical" href="https://aikaleya.com/register-pro-yearly.html">
+    <meta name="robots" content="noindex, follow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/kaleya-pages.css">
+    {% if not debug %}<script src="https://js.sentry-cdn.com/aea6b61d500b0542d77599c65621f5f3.min.js" crossorigin="anonymous"></script>{% endif %}
+</head>
+<body>
+    <div class="page">
+        <header class="nav">
+            <div class="nav-inner">
+                <a class="brand" href="index.html"><img src="logo.png" alt="Kaleya"><span>Kaleya<small>aikaleya.com</small></span></a>
+                <div class="nav-actions">
+                    <select id="pageLangSelect" class="lang-select" onchange="setPageLang(this.value)"><option value="en" selected>EN</option><option value="sr">SR</option><option value="es">ES</option><option value="pt">PT</option><option value="ru">RU</option><option value="fr">FR</option><option value="it">IT</option><option value="de">DE</option></select>
+                    <button class="theme-btn" onclick="togglePageTheme()" aria-label="Dark light"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.4 6.4l-.7-.7M6.3 6.3l-.7-.7m12.8 0l-.7.7M6.3 17.7l-.7.7M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg></button>
+                    <a class="icon-link" href="index.html" aria-label="Home"><svg width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg></a>
+                </div>
+            </div>
+        </header>
+        <main class="wrap hero">
+            <span class="eyebrow" data-i18n="reg_badge">Registration and payment</span>
+            <h1><span data-i18n="reg_title">Activate package</span> Pro <small style="font-size:.55em;opacity:.6">Yearly</small></h1>
+            <p class="lead" data-i18n="reg_lead">This page is frontend preparation for client registration and payment. Real billing runs through the backend.</p>
+            <form class="form-card">
+                <input type="hidden" name="package" value="pro_yearly">
+                <div class="form-grid">
+                    <div><label data-i18n="company">Company name</label><input name="company" required></div>
+                    <div><label data-i18n="name">Full name</label><input name="name" required></div>
+                    <div><label data-i18n="email">Email</label><input name="email" type="email" required></div>
+                    <div><label data-i18n="phone">Phone</label><input name="phone" required></div>
+                    <div><label data-i18n="country">Country</label><input name="country" value="Serbia"></div>
+                    <div><label>Plan</label><input value="Pro — $450/yr (save 2 months)" readonly></div>
+                </div>
+                <div class="payment-summary" data-payment-summary="pro_yearly"></div>
+                <div style="margin-top:14px;"><label data-i18n="note">Note</label><textarea name="note"></textarea></div>
+                <button class="btn alt" type="submit" style="width:100%;margin-top:18px;" data-i18n="continue_checkout">Try 14 days - continue to checkout</button>
+                <div id="registrationStatus" class="notice" hidden></div>
+                <div class="notice" data-i18n="payment_note">In production this connects to a payment provider, backend registration, email confirmation and activation webhook.</div>
+            </form>
+        </main>
+        <footer class="footer"><div class="wrap"><span>© 2026 Kaleya AI</span><span><a href="privacy.html" data-i18n="footer_privacy">Privacy</a> · <a href="terms.html" data-i18n="footer_terms">Terms</a></span></div></footer>
+    </div>
+    <script src="assets/js/kaleya-pages.js?v=checkout-direct-20260508"></script>
+</body>
+</html>

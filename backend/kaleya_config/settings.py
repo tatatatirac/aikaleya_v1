@@ -224,9 +224,13 @@ KALEYA_LEMONSQUEEZY_WEBHOOK_SECRET = os.getenv("LEMONSQUEEZY_WEBHOOK_SECRET", ""
 KALEYA_LEMONSQUEEZY_TEST_MODE = env_bool("LEMONSQUEEZY_TEST_MODE", True)
 KALEYA_LEMONSQUEEZY_VARIANT_IDS = {
     "basic": os.getenv("LEMONSQUEEZY_VARIANT_BASIC", ""),
+    "basic_yearly": os.getenv("LEMONSQUEEZY_VARIANT_BASIC_YEARLY", ""),
     "pro": os.getenv("LEMONSQUEEZY_VARIANT_PRO", ""),
+    "pro_yearly": os.getenv("LEMONSQUEEZY_VARIANT_PRO_YEARLY", ""),
     "business": os.getenv("LEMONSQUEEZY_VARIANT_BUSINESS", ""),
+    "business_yearly": os.getenv("LEMONSQUEEZY_VARIANT_BUSINESS_YEARLY", ""),
     "business_plus": os.getenv("LEMONSQUEEZY_VARIANT_BUSINESS_PLUS", ""),
+    "business_plus_yearly": os.getenv("LEMONSQUEEZY_VARIANT_BUSINESS_PLUS_YEARLY", ""),
     "business_pro_plus": os.getenv("LEMONSQUEEZY_VARIANT_BUSINESS_PRO_PLUS", ""),
 }
 

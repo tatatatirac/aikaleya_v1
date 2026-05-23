@@ -176,7 +176,10 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
         input_serializer = CheckoutSessionCreateSerializer(data=request.data)
         input_serializer.is_valid(raise_exception=True)
         payload = input_serializer.validated_data
-        plan = Plan.objects.filter(code=payload["plan_code"], active=True).first()
+        raw_plan_code = payload["plan_code"]  # e.g. "basic" or "basic_yearly"
+        billing_period = "yearly" if raw_plan_code.endswith("_yearly") else "monthly"
+        db_plan_code = raw_plan_code[:-7] if billing_period == "yearly" else raw_plan_code
+        plan = Plan.objects.filter(code=db_plan_code, active=True).first()
         if not plan:
             return Response({"detail": "Paket nije pronadjen."}, status=status.HTTP_400_BAD_REQUEST)
         if payload.get("email") and (
@@ -186,10 +189,13 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
             return Response({"email": ["Nalog sa ovim emailom vec postoji."]}, status=status.HTTP_400_BAD_REQUEST)
 
         metadata = {
-            "plan_code": plan.code,
+            "plan_code": db_plan_code,
+            "billing_period": billing_period,
             "note": payload.get("note", ""),
             "source": "kaleya_frontend",
         }
+        yearly_amount = plan.monthly_price * 10  # 2 months free = 10× monthly
+        amount = yearly_amount if billing_period == "yearly" else plan.monthly_price
         checkout = CheckoutSession.objects.create(
             plan=plan,
             provider=CheckoutSession.PROVIDER_MANUAL,
@@ -197,7 +203,7 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
             email=payload.get("email", ""),
             company=payload.get("company", ""),
             full_name=payload.get("full_name", ""),
-            amount=plan.monthly_price,
+            amount=amount,
             currency=plan.currency,
             trial_days=plan.trial_days,
             metadata=metadata,
@@ -215,7 +221,7 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
                 },
             )
 
-        payment_provider_configured = self._payment_provider_is_configured(plan)
+        payment_provider_configured = self._payment_provider_is_configured(plan, raw_plan_code=raw_plan_code)
         message = "Payment provider jos nije povezan. Zahtev je sacuvan za rucni kontakt."
 
         if plan.is_contact_only:
@@ -280,20 +286,24 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
         data["local_checkout_url"] = f"/checkout.html?session={checkout.public_id}" if not plan.is_contact_only else ""
         return Response(data, status=status.HTTP_201_CREATED)
 
-    def _payment_provider_is_configured(self, plan):
+    def _payment_provider_is_configured(self, plan, raw_plan_code=None):
         if settings.KALEYA_PAYMENT_PROVIDER == CheckoutSession.PROVIDER_LEMONSQUEEZY:
-            return self._lemonsqueezy_is_configured(plan)
+            return self._lemonsqueezy_is_configured(plan, raw_plan_code=raw_plan_code)
         if settings.KALEYA_PAYMENT_PROVIDER == CheckoutSession.PROVIDER_PAYPAL:
             return self._paypal_is_configured(plan)
         if settings.KALEYA_PAYMENT_PROVIDER == CheckoutSession.PROVIDER_STRIPE:
             return self._stripe_is_configured(plan)
         return False
 
-    def _lemonsqueezy_is_configured(self, plan):
+    def _lemonsqueezy_is_configured(self, plan, raw_plan_code=None):
+        variant_id = (
+            settings.KALEYA_LEMONSQUEEZY_VARIANT_IDS.get(raw_plan_code or plan.code)
+            or settings.KALEYA_LEMONSQUEEZY_VARIANT_IDS.get(plan.code)
+        )
         return bool(
             settings.KALEYA_LEMONSQUEEZY_API_KEY
             and settings.KALEYA_LEMONSQUEEZY_STORE_ID
-            and settings.KALEYA_LEMONSQUEEZY_VARIANT_IDS.get(plan.code)
+            and variant_id
         )
 
     def _lemonsqueezy_json_request(self, url, payload):
@@ -320,7 +330,12 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
         return f"Lemon Squeezy greska: {exc}"
 
     def _create_lemonsqueezy_checkout(self, plan, payload, metadata, checkout):
-        variant_id = settings.KALEYA_LEMONSQUEEZY_VARIANT_IDS.get(plan.code, "")
+        billing_period = metadata.get("billing_period", "monthly")
+        raw_plan_code = f"{plan.code}_yearly" if billing_period == "yearly" else plan.code
+        variant_id = (
+            settings.KALEYA_LEMONSQUEEZY_VARIANT_IDS.get(raw_plan_code)
+            or settings.KALEYA_LEMONSQUEEZY_VARIANT_IDS.get(plan.code, "")
+        )
         success_url = append_url_query(
             settings.KALEYA_PAYMENT_SUCCESS_URL,
             payment="success",
@@ -329,6 +344,7 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
         custom_data = {
             "checkout_public_id": str(checkout.public_id),
             "plan_code": plan.code,
+            "billing_period": billing_period,
             "source": "kaleya_frontend",
         }
         note = metadata.get("note")
@@ -341,13 +357,19 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
         if payload.get("full_name"):
             checkout_data["name"] = payload["full_name"]
 
+        if billing_period == "yearly":
+            yearly_total = int(plan.monthly_price * 10)
+            billing_desc = f"{plan.trial_days} days trial, then {yearly_total} {plan.currency} per year."
+        else:
+            billing_desc = f"{plan.trial_days} days trial, then {plan.monthly_price} {plan.currency} per month."
+
         lemon_payload = {
             "data": {
                 "type": "checkouts",
                 "attributes": {
                     "product_options": {
                         "name": f"Kaleya {plan.name}",
-                        "description": f"{plan.trial_days} days trial, then {plan.monthly_price} {plan.currency} per month.",
+                        "description": billing_desc,
                         "redirect_url": success_url,
                         "receipt_button_text": "Open Kaleya",
                         "receipt_link_url": success_url,
