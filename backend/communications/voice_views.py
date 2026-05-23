@@ -221,7 +221,7 @@ def voice_gather(request, session_id):
             conversation.save(update_fields=["status"])
         _push_ws_event(business_client.id, {
             "type": "escalation",
-            "message": f"Mušterija ({session.from_number}) traži čoveka — poziv se prebacuje na {transfer_to}.",
+            "message": f"Customer ({session.from_number}) wants a human — transferring to {transfer_to}.",
             "urgent": True,
         })
         return _twiml(build_transfer_twiml(business_client, transfer_to, session.to_number or ""))
@@ -229,7 +229,7 @@ def voice_gather(request, session_id):
     if result and result.get("intent") == "support_handoff" and not transfer_to:
         _push_ws_event(business_client.id, {
             "type": "escalation",
-            "message": f"Mušterija ({session.from_number}) traži čoveka! Dodaj 'Business phone' u Podešavanjima za automatski prenos.",
+            "message": f"Customer ({session.from_number}) wants a human! Add 'Business phone' in Settings to enable auto-transfer.",
             "urgent": True,
         })
     # ────────────────────────────────────────────────────────────────────────
@@ -283,7 +283,7 @@ def voice_status(request, session_id):
     if new_status == "missed":
         _push_ws_event(session.business_client_id, {
             "type": "missed_call",
-            "message": f"Propušten poziv od {session.from_number or 'nepoznat broj'}.",
+            "message": f"Missed call from {session.from_number or 'unknown number'}.",
             "urgent": False,
         })
 

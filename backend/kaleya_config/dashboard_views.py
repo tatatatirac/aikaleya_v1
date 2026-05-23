@@ -352,66 +352,66 @@ def dashboard(request):
         if section in detail_sections:
             is_owner = selected_client and selected_client.owner_id == request.user.id
             if not is_admin_user(request.user) and not is_owner:
-                messages.error(request, "Samo vlasnik ili admin moze da menja radnike i usluge.")
+                messages.error(request, "Only the owner or an admin can edit staff and services.")
                 return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#client-detail")
             try:
                 if section == "add_staff":
                     add_staff_member(request, selected_client)
-                    messages.success(request, "Radnik je dodat.")
+                    messages.success(request, "Staff member added.")
                 elif section == "update_staff":
                     update_staff_member(request, selected_client)
-                    messages.success(request, "Radnik je sacuvan.")
+                    messages.success(request, "Staff member saved.")
                 elif section == "delete_staff":
                     delete_staff_member(request, selected_client)
-                    messages.success(request, "Radnik je obrisan.")
+                    messages.success(request, "Staff member deleted.")
                 elif section == "add_service":
                     add_service(request, selected_client)
-                    messages.success(request, "Usluga je dodata.")
+                    messages.success(request, "Service added.")
                 elif section == "update_service":
                     update_service(request, selected_client)
-                    messages.success(request, "Usluga je sacuvana.")
+                    messages.success(request, "Service saved.")
                 elif section == "delete_service":
                     delete_service(request, selected_client)
-                    messages.success(request, "Usluga je obrisana.")
+                    messages.success(request, "Service deleted.")
                 elif section == "update_working_hours":
                     update_business_working_hours(request, selected_client)
-                    messages.success(request, "Radno vreme je sacuvano.")
+                    messages.success(request, "Working hours saved.")
                 elif section == "add_blocked_time":
                     add_blocked_time(request, selected_client)
-                    messages.success(request, "Blokada termina je dodata.")
+                    messages.success(request, "Time block added.")
                 elif section == "delete_blocked_time":
                     delete_blocked_time(request, selected_client)
-                    messages.success(request, "Blokada termina je obrisana.")
+                    messages.success(request, "Time block deleted.")
             except (DjangoValidationError, DRFValidationError, ValueError) as error:
                 messages.error(request, dashboard_error_message(error))
             return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#client-detail")
         if section == "client":
             update_client_settings(request, selected_client)
-            messages.success(request, "Podešavanja klijenta su sačuvana.")
+            messages.success(request, "Client settings saved.")
         elif section == "api" and is_admin_user(request.user):
             update_api_settings(request, api_settings)
-            messages.success(request, "API podešavanja su sačuvana.")
+            messages.success(request, "API settings saved.")
         elif section == "voice":
             update_voice_settings(request, voice_settings)
-            messages.success(request, "Podešavanja glasa su sačuvana.")
+            messages.success(request, "Voice settings saved.")
         elif section == "alarms":
             update_alarm_settings(request, alarm_settings)
-            messages.success(request, "Alarm podešavanja klijenta su sačuvana.")
+            messages.success(request, "Alarm settings saved.")
         elif section == "integrations":
             update_integrations(request, selected_client)
-            messages.success(request, "Integracije su sačuvane.")
+            messages.success(request, "Integrations saved.")
         elif section == "telegram_integration":
             update_telegram_integration(request, selected_client)
-            messages.success(request, "Telegram integracija je sacuvana.")
+            messages.success(request, "Telegram integration saved.")
         elif section == "whatsapp_integration":
             update_whatsapp_integration(request, selected_client)
-            messages.success(request, "WhatsApp integracija je sačuvana.")
+            messages.success(request, "WhatsApp integration saved.")
         elif section == "viber_integration":
             update_viber_integration(request, selected_client)
-            messages.success(request, "Viber integracija je sačuvana.")
+            messages.success(request, "Viber integration saved.")
         elif section == "instagram_integration":
             update_instagram_integration(request, selected_client)
-            messages.success(request, "Instagram integracija je sačuvana.")
+            messages.success(request, "Instagram integration saved.")
         elif section == "provision_phone" and is_admin_user(request.user):
             try:
                 from communications.twilio_provision import provision_twilio_number, ProvisionError
@@ -419,53 +419,53 @@ def dashboard(request):
                 kaleya_num = instructions["kaleya_number"]
                 messages.success(
                     request,
-                    f"✅ Kaleya broj kupljen: {kaleya_num} ({instructions['country_name']}). "
-                    f"Vlasnik treba da ukuca: {instructions['code_forward_all']} za preusmeravanje svih poziva.",
+                    f"✅ Kaleya number purchased: {kaleya_num} ({instructions['country_name']}). "
+                    f"Owner should dial: {instructions['code_forward_all']} to forward all calls.",
                 )
             except Exception as exc:
                 err = str(exc)
                 if err.startswith("RU:"):
-                    messages.warning(request, "🇷🇺 Rusija nije podržana automatski — kontaktirajte vlasnika da se javi Kaleya podršci.")
+                    messages.warning(request, "🇷🇺 Russia is not supported automatically — ask the owner to contact Kaleya support.")
                 else:
-                    messages.error(request, f"Greška pri kupovini broja: {err}")
+                    messages.error(request, f"Error purchasing number: {err}")
             return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#integrations")
         elif section == "release_phone" and is_admin_user(request.user):
             try:
                 from communications.twilio_provision import release_twilio_number
                 released = release_twilio_number(selected_client)
                 if released:
-                    messages.success(request, "Twilio broj je oslobođen.")
+                    messages.success(request, "Twilio number released.")
                 else:
-                    messages.warning(request, "Ovaj klijent nema dodeljen Twilio broj.")
+                    messages.warning(request, "This client has no Twilio number assigned.")
             except Exception as exc:
-                messages.error(request, f"Greška pri oslobađanju broja: {exc}")
+                messages.error(request, f"Error releasing number: {exc}")
             return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#integrations")
         elif section == "resend_setup_link" and is_admin_user(request.user):
             owner = selected_client.owner
             if owner:
                 from billing.services import _send_setup_email
                 _send_setup_email(owner, selected_client)
-                messages.success(request, f"Setup email poslat na {owner.email}.")
+                messages.success(request, f"Setup email sent to {owner.email}.")
             else:
-                messages.error(request, "Klijent nema vlasnika — ne mogu da pošaljem email.")
+                messages.error(request, "Client has no owner — cannot send email.")
             return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#clients")
         elif section == "delete_client" and is_admin_user(request.user):
             client_name = str(selected_client)
             selected_client.delete()
-            messages.success(request, f"Klijent {client_name} je obrisan.")
+            messages.success(request, f"Client {client_name} deleted.")
             return redirect(f"{reverse('dashboard')}#clients")
         elif section == "activate_client" and is_admin_user(request.user):
             update_client_subscription_state(selected_client, Subscription.STATUS_ACTIVE)
-            messages.success(request, f"Klijent {selected_client} je aktiviran.")
+            messages.success(request, f"Client {selected_client} activated.")
             return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#clients")
         elif section == "pause_client" and is_admin_user(request.user):
             update_client_subscription_state(selected_client, Subscription.STATUS_PAST_DUE)
-            messages.success(request, f"Klijent {selected_client} je pauziran.")
+            messages.success(request, f"Client {selected_client} paused.")
             return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#clients")
         elif section == "delete_client":
-            messages.error(request, "Samo admin moze da obrise klijenta.")
+            messages.error(request, "Only admins can delete clients.")
         else:
-            messages.error(request, "Nije moguće sačuvati ovu sekciju.")
+            messages.error(request, "Cannot save this section.")
 
         return redirect(f"{reverse('dashboard')}?client_id={selected_client.id}#{dashboard_section_anchor(section)}")
 
@@ -503,14 +503,14 @@ def dashboard(request):
         )
         .order_by("date", "start_time")
     )
-    _days_sr = ["Pon", "Uto", "Sri", "Čet", "Pet", "Sub", "Ned"]
+    _days_en = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
     calendar_week = []
     for i in range(7):
         _day = _week_start + timedelta(days=i)
         _day_appts = [a for a in _week_appts if a.date == _day]
         calendar_week.append({
             "date": _day,
-            "label": _days_sr[i],
+            "label": _days_en[i],
             "is_today": _day == _today,
             "appointments": _day_appts,
         })

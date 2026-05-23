@@ -505,11 +505,11 @@ def configure_viber_webhook(connection, webhook_url=""):
             body = resp.read().decode("utf-8")
         result = json.loads(body)
     except Exception as exc:
-        raise serializers.ValidationError({"viber": f"Viber API greška: {exc}"})
+        raise serializers.ValidationError({"viber": f"Viber API error: {exc}"})
 
     status_code = result.get("status", -1)
     if status_code != 0:
-        msg = result.get("status_message") or f"Viber greška {status_code}"
+        msg = result.get("status_message") or f"Viber error {status_code}"
         raise serializers.ValidationError({"viber": msg})
 
     connection.webhook_url = target_url
