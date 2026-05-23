@@ -944,8 +944,8 @@
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 00-5-5.9V4a1 1 0 00-2 0v1.1A6 6 0 006 11v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                 </div>
                 <div class="flex-1">
-                    <p class="font-bold text-amber-900 dark:text-amber-100 text-sm" id="notifQueueTitle">Sledeći klijent na redu</p>
-                    <p class="text-xs text-amber-700 dark:text-amber-300 mt-0.5" id="notifQueueText">Test klijent je sledeći na redu</p>
+                    <p class="font-bold text-amber-900 dark:text-amber-100 text-sm" id="notifQueueTitle">Next client in line</p>
+                    <p class="text-xs text-amber-700 dark:text-amber-300 mt-0.5" id="notifQueueText">Test client is next in line</p>
                 </div>
                 <button onclick="dismissNotif('notifQueue')" class="text-amber-500 hover:text-amber-700 mt-0.5">x</button>
             </div>
@@ -957,11 +957,11 @@
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
                 </div>
                 <div class="flex-1">
-                    <p class="font-bold text-red-900 dark:text-red-100 text-sm" id="notifEmergTitle">HITNO OBAVEŠTENJE</p>
-                    <p class="text-xs text-red-700 dark:text-red-300 mt-0.5" id="notifEmergText">Klijent želi da razgovara sa vama</p>
+                    <p class="font-bold text-red-900 dark:text-red-100 text-sm" id="notifEmergTitle">URGENT NOTIFICATION</p>
+                    <p class="text-xs text-red-700 dark:text-red-300 mt-0.5" id="notifEmergText">A client wants to speak with you</p>
                     <div class="mt-2 flex gap-2">
-                        <button onclick="answerEmergency()" class="h-7 px-3 rounded-lg bg-red-600 text-white text-xs font-bold">Odgovori</button>
-                        <button onclick="dismissNotif('notifEmergency')" class="h-7 px-3 rounded-lg border border-red-300 text-red-700 text-xs">Ignoriši</button>
+                        <button onclick="answerEmergency()" class="h-7 px-3 rounded-lg bg-red-600 text-white text-xs font-bold">Answer</button>
+                        <button onclick="dismissNotif('notifEmergency')" class="h-7 px-3 rounded-lg border border-red-300 text-red-700 text-xs">Dismiss</button>
                     </div>
                 </div>
             </div>
@@ -1647,7 +1647,7 @@
                 <div class="bg-white/80 dark:bg-slate-900/80 glass border border-slate-200 dark:border-slate-800 rounded-[32px] p-8 shadow-2xl">
                     <div class="flex flex-col items-center text-center">
                         <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIbGNtcwIQAABtbnRyUkdCIFhZWiAH4gADABQACQAOAB1hY3NwTVNGVAAAAABzYXdzY3RybAAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLWhhbmSdkQA9QICwPUB0LIGepSKOAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAABxjcHJ0AAABDAAAAAx3dHB0AAABGAAAABRyWFlaAAABLAAAABRnWFlaAAABQAAAABRiWFlaAAABVAAAABRyVFJDAAABaAAAAGBnVFJDAAABaAAAAGBiVFJDAAABaAAAAGBkZXNjAAAAAAAAAAV1UkdCAAAAAAAAAAAAAAAAdGV4dAAAAABDQzAAWFlaIAAAAAAAAPNUAAEAAAABFslYWVogAAAAAAAAb6AAADjyAAADj1hZWiAAAAAAAABilgAAt4kAABjaWFlaIAAAAAAAACSgAAAPhQAAtsRjdXJ2AAAAAAAAACoAAAB8APgBnAJ1A4MEyQZOCBIKGAxiDvQRzxT2GGocLiBDJKwpai5+M+s5sz/WRldNNlR2XBdkHWyGdVZ+jYgskjacq6eMstu+mcrH12Xkd/H5////2wBDAAkGBwgHBgkICAgKCgkLDhcPDg0NDhwUFREXIh4jIyEeICAlKjUtJScyKCAgLj8vMjc5PDw8JC1CRkE6RjU7PDn/2wBDAQoKCg4MDhsPDxs5JiAmOTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OTn/wAARCAFtAZQDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3GiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKQkAZJAHvQAtFZGpeJ9D0vP23VbSEjqrSjP5da5TU/jH4SsmKx3E92R/wA8Y/8AHFAHoVFeO3fx605M/ZdHuJfTzJAn+NZU/wAfLs/6jRIk/wB+Un+goA93or55l+O/iAn93p2nqP8AaDH+tEXx318H95p2nt/uhh/WgD6GorwW3+Pd+rDz9GgdfRJCv+NbVj8edLkI+2aTdQj/AKZuH/woA9gorgtP+L3hC8wHvpLZj2miI/UZFdTpniHRtWH+gana3B/upICR+FAGpRR1ooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoornvFXjPRPC0BfUbtRKRlYE5dvwoA6Gud8R+NvD/hxSNQ1CJZR/yxQ7nP4CvDfGXxg1rWmeDTCdOszx8h/eMPdu34V5vLLJNI0krs7sclmOSaAPafEHx3lYtHommqq9BLcHJ/75H+Nec67498Ta7kXmqTeWf+WcZ2L+Qrmq2dH8Ka7rRH2HTZ5EP8ZXav5nimIx2dnOWYsfc5pK9O0v4M6vOA1/e29qp6quXYfyH611enfBvQrfBu7m6umHUZCKfwHP60AeDUAE9Aa+m7T4f+FrQDy9IgbH/PTL/zNacXhzQ4hiPSLFfpAv8AhSGfKWxv7p/KjY390/lX1mNH0wdNPtf+/S/4UHR9MIwdPtf+/S/4UAfJZBHUUV9W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NZ9MR9e2t1b3cSy28ySxsMhkbINS18naPr2q6LKJNPvpoCDnarfKfqOleh6J8Z76ALHqtilwo6yQna35HikM9uoriNJ+KfhjUMLJdNaOe067R+fSurs9V0++QPa3sEynujg0AXKKAQehBooAKKKKACiikLKoySAPegBaKz7/AFzS9OTfeX9tCvq8gFcjq3xa8N2O5bd5rxx2iTj8zgUAd9Va/wBQs9OgM15cxQRjq0jACvEdb+Mer3YaPTbaKzQ8B2+d/wDAfrXA6nq2oatN5t/eTXD9vMbIH0HQUAey+JvjBp1mHh0aE3k3TzW+WMf1NeSeIPEureIbgy6jdvIM5WMcIv0FZFa/h7wzq/iK6W30yzkmJ6tjCr7k9qYjIrsfA/w71jxbOrxxm2sQfnuJBgfh6mvVfBXwY0/TDHd65IL25HIhX/Vqff1r1WGGOCJYoY1jjQYVVGAB9KQzC8IeENK8J2It7CEGQj95Ow+dz/h7V0FFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAFTUtMsdVtzb39pDcxH+GRQfy9K8r8U/A+wu2efQro2kh58mX5k/A9RXr9FAHyV4g+HviXQCzXWmyvCv/LWIb1/MVy7KykhgQR2NfbpGRg9K5vWvAnhnWizXmkweY3/AC0jGxv0oA+RadFLJC4eKRkYd1ODXv8ArHwJ0mcs2majPbHskqhx+fFclqHwM8QwZNrdWdyOwDlT+tMRwdp4q1+0x5Or3i46Aylh+taUXxF8WRdNYkYejIh/pU178MfGFmxVtGnlx3hG8fpWXP4P8R2/+t0a9T6xGgDYX4peKwMfbYz7mIUj/FHxW4wL5F+kQrnW0DV0OG026H/bI0g0LVSf+Qdc/wDfs0AbE3xD8WTDDaxKB6Kij+lZd14k1y7z5+rXjg9R5zAfkKmg8JeIbggQ6PeuT0xEa3LL4U+MbzGNKaLP/PZgn86AOKd2dizsWY9STk0les6d8Ctcmwby+tLYdwCWP6DFdlovwP0Cz2tqFzcXrjsMIv8AWgD52jjeRtqIzH0AzXW+HPht4m18q8Fg8EDf8tp/kXH49fwr6V0fwnoGigDT9KtoSP4tm5vzOTW1SGeU+FfgnpOnlJ9ZnN/MOfLX5Yx/U/pXp1jY2mn2629nbxW8K9EjUKKsUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAH//Z" class="w-14 h-14 rounded-full ring-4 ring-teal-500/20" alt="">
-                        <h1 class="mt-4 font-display text-2xl font-bold" data-i18n="login_title">Dobrodošli nazad</h1>
+                        <h1 class="mt-4 font-display text-2xl font-bold" data-i18n="login_title">Welcome back</h1>
                         <p class="mt-1 text-sm text-slate-600 dark:text-slate-400" data-i18n="login_sub">Prijavite se na Kaleya</p>
                     </div>
                     <form id="login-form" class="mt-8 space-y-4">
@@ -1661,7 +1661,7 @@
                         </div>
                         <button type="submit" class="w-full h-12 rounded-2xl gradient-bg text-white font-semibold shadow-lg shadow-teal-500/20 hover:shadow-xl transition" data-i18n="login_btn">Prijavi se</button>
                     </form>
-                    <p id="login-error" class="mt-4 text-center text-sm text-red-500 hidden" data-i18n="login_err">Pogrešan email ili lozinka</p>
+                    <p id="login-error" class="mt-4 text-center text-sm text-red-500 hidden" data-i18n="login_err">Wrong email or password</p>
                     <p class="mt-6 text-center text-sm text-slate-500 dark:text-slate-500">
                         Forgot your password? <a href="/forgot-password/" class="text-teal-500 hover:text-teal-400 font-medium">Resend setup link →</a>
                     </p>
@@ -1700,9 +1700,9 @@
                                     <p class="text-[9px] text-teal-400 mt-1.5" data-i18n="hero_wake">hey Kaleya</p>
                                 </div>
                                 <div class="grid grid-cols-3 gap-1.5 px-3 mt-3">
-                                    <div class="bg-slate-800 rounded-xl p-1.5 text-center"><p class="text-[8px] text-slate-400">Zakaži</p><p class="text-[9px] font-bold text-white">15:00</p></div>
-                                    <div class="bg-slate-800 rounded-xl p-1.5 text-center"><p class="text-[8px] text-slate-400">Otkaži</p><p class="text-[9px] font-bold text-white">Demo</p></div>
-                                    <div class="bg-slate-800 rounded-xl p-1.5 text-center"><p class="text-[8px] text-slate-400">Proveri</p><p class="text-[9px] font-bold text-white">3</p></div>
+                                    <div class="bg-slate-800 rounded-xl p-1.5 text-center"><p class="text-[8px] text-slate-400">Schedule</p><p class="text-[9px] font-bold text-white">15:00</p></div>
+                                    <div class="bg-slate-800 rounded-xl p-1.5 text-center"><p class="text-[8px] text-slate-400">Cancel</p><p class="text-[9px] font-bold text-white">Demo</p></div>
+                                    <div class="bg-slate-800 rounded-xl p-1.5 text-center"><p class="text-[8px] text-slate-400">Check</p><p class="text-[9px] font-bold text-white">3</p></div>
                                 </div>
                                 <div class="px-3 mt-3 space-y-1.5">
                                     <div class="flex items-center gap-2 bg-slate-800/80 rounded-xl p-2"><span class="w-5 h-5 rounded-full bg-teal-500/20 text-teal-300 text-[8px] grid place-items-center shrink-0">✓</span><div><p id="how-p-name-0" class="text-[9px] font-medium text-white">Ana Jovanović</p><p class="text-[8px] text-slate-400">14:00 · <span id="how-p-status-0">Zakazano</span></p></div></div>
@@ -1710,9 +1710,9 @@
                                     <div class="flex items-center gap-2 bg-slate-800/80 rounded-xl p-2"><span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-300 text-[8px] grid place-items-center shrink-0">!</span><div><p id="how-p-name-2" class="text-[9px] font-medium text-white">Nikola Ilić</p><p class="text-[8px] text-slate-400">17:00 · <span id="how-p-status-2">Na čekanju</span></p></div></div>
                                 </div>
                                 <div class="mt-auto grid grid-cols-3 border-t border-slate-800 py-2">
-                                    <div class="flex flex-col items-center gap-0.5 text-teal-400"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg><span class="text-[7px]">Početna</span></div>
-                                    <div class="flex flex-col items-center gap-0.5 text-slate-600"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3M3 11h18M5 19h14V7H5z"/></svg><span class="text-[7px]">Kalendar</span></div>
-                                    <div class="flex flex-col items-center gap-0.5 text-slate-600"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/></svg><span class="text-[7px]">Podešavanja</span></div>
+                                    <div class="flex flex-col items-center gap-0.5 text-teal-400"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l9-9 9 9"/><path d="M5 10v10h14V10"/></svg><span class="text-[7px]">Home</span></div>
+                                    <div class="flex flex-col items-center gap-0.5 text-slate-600"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3M3 11h18M5 19h14V7H5z"/></svg><span class="text-[7px]">Calendar</span></div>
+                                    <div class="flex flex-col items-center gap-0.5 text-slate-600"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/></svg><span class="text-[7px]">Settings</span></div>
                                 </div>
                             </div>
                         </div>
@@ -1753,9 +1753,9 @@
                                         <div class="bg-slate-800 rounded-lg p-2">
                                             <p class="text-[8px] font-semibold text-white mb-1.5">Kaleya status</p>
                                             <div class="space-y-1 text-[7px]">
-                                                <div class="flex justify-between"><span class="text-slate-400">Glas</span><span class="text-white">ElevenLabs</span></div>
-                                                <div class="flex justify-between"><span class="text-slate-400">Jezik</span><span class="text-white">Srpski</span></div>
-                                                <div class="flex justify-between"><span class="text-slate-400">Status</span><span class="text-green-400">Aktivan ●</span></div>
+                                                <div class="flex justify-between"><span class="text-slate-400">Voice</span><span class="text-white">ElevenLabs</span></div>
+                                                <div class="flex justify-between"><span class="text-slate-400">Language</span><span class="text-white">English</span></div>
+                                                <div class="flex justify-between"><span class="text-slate-400">Status</span><span class="text-green-400">Active ●</span></div>
                                                 <div class="flex justify-between"><span class="text-slate-400">WhatsApp</span><span class="text-teal-400">ON</span></div>
                                             </div>
                                         </div>
@@ -1776,7 +1776,7 @@
                         <button onclick="enterDemo('admin')" class="h-11 rounded-xl gradient-bg text-white text-[13px] font-semibold hover:opacity-90 transition" data-i18n="login_demo_admin">Demo administrator: administrator@test.com / test123</button>
                         <button onclick="enterDemo('employee')" class="h-11 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-[13px] font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition" data-i18n="login_demo_employee">Demo radnik: employee / emp123</button>
                     </div>
-                    <p class="mt-4 text-[11px] text-slate-400 text-center">Svi podaci su lokalni i automatski se brišu po završetku sesije.</p>
+                    <p class="mt-4 text-[11px] text-slate-400 text-center">All data is local and automatically deleted at the end of the session.</p>
                 </div>
             </div>
         </div>
@@ -1795,7 +1795,7 @@
                     <nav class="flex-1 px-2 py-3 space-y-0.5">
                         <button data-sidebar-tab="home" onclick="switchClientTab('home')" class="client-sidebar-tab w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium transition text-left bg-slate-900 text-white dark:bg-white dark:text-slate-900">
                             <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                            <span data-i18n="nav_home">Početna</span>
+                            <span data-i18n="nav_home">Home</span>
                         </button>
                         <button data-sidebar-tab="calendar" onclick="switchClientTab('calendar')" class="client-sidebar-tab w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium transition text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900">
                             <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3M3 11h18M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -1817,7 +1817,7 @@
                     <div class="px-2 py-3 border-t border-slate-100 dark:border-slate-900 space-y-0.5">
                         <button onclick="handleClientThirdTab()" class="w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 transition text-left">
                             <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.573-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            <span data-i18n="nav_set">Podeš.</span>
+                            <span data-i18n="nav_set">Settings</span>
                         </button>
                         <button onclick="logout()" class="w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 transition text-left">
                             <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
@@ -1856,7 +1856,7 @@
                 <div data-client-screen="home" class="flex-1 px-5 pt-8 pb-24">
                     <div class="text-center">
                         <p id="clientGreeting" class="text-xs uppercase tracking-widest text-slate-500 font-semibold" data-i18n="client_greet">Dobro jutro</p>
-                        <h2 class="mt-2 font-display text-[28px] font-bold leading-tight" data-i18n="client_how">Kako mogu pomoći danas?</h2>
+                        <h2 class="mt-2 font-display text-[28px] font-bold leading-tight" data-i18n="client_how">How can I help today?</h2>
                     </div>
                     <div id="clientSubscriptionCard" class="mt-4 rounded-2xl border border-teal-100 dark:border-teal-900/60 bg-teal-50/70 dark:bg-teal-950/20 p-3 text-left">
                         <div class="flex items-center justify-between gap-3">
@@ -1900,12 +1900,12 @@
                         <div class="grid grid-cols-3 gap-3">
                             <button data-action="zakazi" class="group p-4 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/70 hover:bg-white dark:hover:bg-slate-900 transition text-left">
                                 <div class="w-8 h-8 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 grid place-items-center group-active:scale-95 transition"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
-                                <p class="mt-3 text-[13px] font-semibold" data-i18n="qa1">Zakaži</p>
+                                <p class="mt-3 text-[13px] font-semibold" data-i18n="qa1">Schedule</p>
                                 <p class="text-[11px] text-slate-500" data-i18n="qa1_s">Novi termin</p>
                             </button>
                             <button data-action="otkazi" class="group p-4 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/70 hover:bg-white dark:hover:bg-slate-900 transition text-left">
                                 <div class="w-8 h-8 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 grid place-items-center"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg></div>
-                                <p class="mt-3 text-[13px] font-semibold" data-i18n="qa2">Otkaži</p>
+                                <p class="mt-3 text-[13px] font-semibold" data-i18n="qa2">Cancel</p>
                                 <p class="text-[11px] text-slate-500" data-i18n="qa2_s">Sastanak</p>
                             </button>
                             <button data-action="proveri" class="group p-4 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/70 hover:bg-white dark:hover:bg-slate-900 transition text-left">
@@ -1992,7 +1992,7 @@
                             <option value="normal" data-i18n="support_priority_normal_select">Normalno</option>
                             <option value="urgent" data-i18n="support_priority_urgent_select">Hitno</option>
                         </select>
-                        <textarea id="clientSupportMessageInput" rows="4" data-i18n-placeholder="support_message_placeholder" placeholder="Opisite sta ne radi ili sta treba da proverimo." class="mt-3 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] outline-none resize-none"></textarea>
+                        <textarea id="clientSupportMessageInput" rows="4" data-i18n-placeholder="support_message_placeholder" placeholder="Describe what's not working or what needs to be checked." class="mt-3 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px] outline-none resize-none"></textarea>
                         <button onclick="createClientSupportTicket()" class="mt-3 w-full h-11 rounded-2xl gradient-bg text-white text-sm font-semibold" data-i18n="support_send">Posalji support zahtev</button>
                     </div>
                     <div id="clientSupportTicketList" class="mt-5 space-y-3"></div>
@@ -2018,7 +2018,7 @@
                     <div class="mb-6">
                         <p class="text-[12px] font-semibold uppercase tracking-wide text-slate-500 mb-1" data-i18n="nav_channels">Kanali</p>
                         <h2 class="font-display text-[24px] font-bold leading-tight" data-i18n="cset_integrations">Zakazivanje putem kanala</h2>
-                        <p class="mt-1 text-sm text-slate-500">Poveži kanale na kojima Kaleya prima poruke i zakazuje termine.</p>
+                        <p class="mt-1 text-sm text-slate-500">Connect channels through which Kaleya receives messages and books appointments.</p>
                     </div>
                     <div id="channelsPanelGrid" class="grid gap-4 sm:grid-cols-2">
                         <div class="h-28 rounded-[20px] bg-slate-100 dark:bg-slate-800 animate-pulse"></div>
@@ -2032,7 +2032,7 @@
                     <div class="mx-3 mb-3 h-[64px] rounded-[24px] bg-white/90 dark:bg-slate-900/90 glass border border-slate-200 dark:border-slate-800 shadow-xl flex items-center justify-around px-1.5">
                         <button data-client-tab="home" onclick="switchClientTab('home')" class="client-tab flex flex-col items-center gap-1 px-2 py-2 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900">
                             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                            <span class="text-[10px] font-medium" data-i18n="nav_home">Početna</span>
+                            <span class="text-[10px] font-medium" data-i18n="nav_home">Home</span>
                         </button>
                         <button data-client-tab="calendar" onclick="switchClientTab('calendar')" class="client-tab flex flex-col items-center gap-1 px-2 py-2 rounded-xl text-slate-500">
                             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3M3 11h18M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -2048,7 +2048,7 @@
                         </button>
                         <button id="clientSettingsNavBtn" data-client-tab="settings" onclick="handleClientThirdTab()" class="client-tab flex flex-col items-center gap-1 px-2 py-2 rounded-xl text-slate-500">
                             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.065-2.572c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            <span id="clientSettingsNavLabel" class="text-[10px] font-medium" data-i18n="nav_set">Podeš.</span>
+                            <span id="clientSettingsNavLabel" class="text-[10px] font-medium" data-i18n="nav_set">Settings</span>
                         </button>
                     </div>
                 </div>
@@ -2252,13 +2252,13 @@
                                 <div id="clientStaffList" class="space-y-2"></div>
                                 <div id="clientServiceList" class="mt-3 space-y-2"></div>
                                 <div class="mt-4 client-settings-grid">
-                                    <input id="newStaffName" type="text" placeholder="Ime zaposlenog" data-i18n-placeholder="staff_name_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
-                                    <input id="newStaffRole" type="text" placeholder="Zanimanje" data-i18n-placeholder="staff_role_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                    <input id="newStaffName" type="text" placeholder="Employee name" data-i18n-placeholder="staff_name_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                    <input id="newStaffRole" type="text" placeholder="Occupation / role" data-i18n-placeholder="staff_role_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                 </div>
-                                <input id="newStaffPhone" type="tel" placeholder="Telefon zaposlenog" data-i18n-placeholder="staff_phone_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                <input id="newStaffPhone" type="tel" placeholder="Employee phone" data-i18n-placeholder="staff_phone_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                 <div class="mt-2 client-settings-grid">
-                                    <input id="newStaffUsername" type="text" placeholder="Korisnicko ime" data-i18n-placeholder="staff_username_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
-                                    <input id="newStaffPassword" type="password" placeholder="Lozinka" data-i18n-placeholder="staff_password_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                    <input id="newStaffUsername" type="text" placeholder="Username" data-i18n-placeholder="staff_username_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                    <input id="newStaffPassword" type="password" placeholder="Password" data-i18n-placeholder="staff_password_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                 </div>
                                 <p class="mt-1 text-[10px] text-slate-500" data-i18n="staff_login_note">Vlasnik unosi login za zaposlenog. Ako menjate osobu, lozinku unesite samo kada zelite novu.</p>
                                 <input id="editingStaffId" type="hidden">
@@ -2267,7 +2267,7 @@
                                     <button id="clientStaffCancelBtn" onclick="resetClientStaffForm()" class="hidden h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="cancel_btn">Odustani</button>
                                 </div>
                                 <div class="mt-2 client-settings-grid">
-                                    <input id="newServiceName" type="text" placeholder="Naziv usluge" data-i18n-placeholder="service_name_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                    <input id="newServiceName" type="text" placeholder="Service name" data-i18n-placeholder="service_name_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                     <select id="newServiceDuration" class="h-10 px-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px]">
                                         <option value="30">30m</option>
                                         <option value="45">45m</option>
@@ -2276,7 +2276,7 @@
                                         <option value="120">120m</option>
                                     </select>
                                 </div>
-                                <input id="newServicePrice" type="number" min="0" step="0.01" placeholder="Cena" data-i18n-placeholder="price_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                <input id="newServicePrice" type="number" min="0" step="0.01" placeholder="Price" data-i18n-placeholder="price_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                 <input id="editingServiceId" type="hidden">
                                 <div class="mt-2 client-settings-actions">
                                     <button id="clientServiceSaveBtn" onclick="saveClientServiceForm()" class="h-10 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="add_service">Dodaj uslugu</button>
@@ -2299,7 +2299,7 @@
                                         <input id="blockedStart" type="text" inputmode="numeric" value="09:00" placeholder="09:00" onchange="handleBlockedTimeChange('start')" title="Blokada od" class="blocked-time-field h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                         <input id="blockedEnd" type="text" inputmode="numeric" value="09:30" placeholder="09:30" onchange="handleBlockedTimeChange('end')" title="Blokada do" class="blocked-time-field h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                     </div>
-                                    <input id="blockedReason" type="text" placeholder="Razlog, npr. pauza ili odmor" data-i18n-placeholder="blocked_reason_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                    <input id="blockedReason" type="text" placeholder="Reason, e.g. break or vacation" data-i18n-placeholder="blocked_reason_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
                                     <button onclick="createClientBlockedTime()" class="mt-2 w-full h-10 rounded-xl bg-amber-500 text-white text-[12px] font-semibold" data-i18n="add_block">Dodaj blokadu</button>
                                 </div>
 
@@ -2315,7 +2315,7 @@
                                     <input id="editingCustomerMemoryId" type="hidden">
                                     <div id="clientCustomerMemoryEditor" class="hidden mt-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700">
                                         <p id="customerMemoryEditorName" class="text-[12px] font-semibold">-</p>
-                                        <textarea id="customerMemoryNotesInput" rows="3" data-i18n-placeholder="memory_notes_placeholder" placeholder="Napomena ili rutina musterije" class="mt-2 w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[12px] outline-none resize-none"></textarea>
+                                        <textarea id="customerMemoryNotesInput" rows="3" data-i18n-placeholder="memory_notes_placeholder" placeholder="Note or customer routine" class="mt-2 w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[12px] outline-none resize-none"></textarea>
                                         <select id="customerMemoryRiskInput" class="mt-2 w-full h-10 px-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[12px]">
                                             <option value="low" data-i18n="memory_risk_low">Nizak no-show rizik</option>
                                             <option value="medium" data-i18n="memory_risk_medium">Srednji no-show rizik</option>
@@ -2387,7 +2387,7 @@
                                     </select>
                                     <button id="clientAiTestRunBtn" onclick="runPrivateAiTest()" class="h-10 px-4 rounded-xl gradient-bg text-white text-[12px] font-semibold" data-i18n="ai_test_run">Testiraj</button>
                                 </div>
-                                <textarea id="clientAiTestInput" rows="4" data-i18n-placeholder="ai_test_input_placeholder" placeholder="Npr. Klijent želi šišanje sutra u 15:00, telefon +381..." class="mt-2 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none resize-none"></textarea>
+                                <textarea id="clientAiTestInput" rows="4" data-i18n-placeholder="ai_test_input_placeholder" placeholder="E.g. Client wants a haircut tomorrow at 3 PM, phone +381..." class="mt-2 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none resize-none"></textarea>
                                 <p id="clientAiTestNote" class="mt-2 text-[10px] text-slate-500" data-i18n="ai_test_real_note">Pravi nalozi koriste AI model iz backenda. Demo nalog koristi sigurni fallback bez trosenja API kredita.</p>
                                 <div id="clientAiTestResult" class="hidden mt-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 p-3 text-[12px]">
                                     <div class="grid grid-cols-3 gap-2">
@@ -2594,7 +2594,7 @@
                                 <div class="p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                                     <p class="text-[12px] text-slate-500" data-i18n="ad_s3">Propušteni</p>
                                     <p class="mt-2 text-[28px] font-bold">0</p>
-                                    <p class="text-[12px] text-green-600">-100% vs prošla ned.</p>
+                                    <p class="text-[12px] text-green-600">-100% vs last week</p>
                                 </div>
                                 <div class="p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                                     <p class="text-[12px] text-slate-500" data-i18n="ad_s4">Zadovoljstvo</p>
@@ -2611,12 +2611,12 @@
                                 <div class="p-5 rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                                     <h3 class="font-semibold">Kaleya status</h3>
                                     <div class="mt-4 space-y-3 text-[13px]">
-                                        <div class="flex justify-between"><span class="text-slate-500">Glas</span><span class="font-medium" id="adminVoiceStatus">Browser TTS</span></div>
-                                        <div class="flex justify-between"><span class="text-slate-500">Jezik</span><span class="font-medium">Srpski</span></div>
-                                        <div class="flex justify-between"><span class="text-slate-500">Wake word</span><span class="font-medium">"hej Kaleya"</span></div>
-                                        <div class="flex justify-between"><span class="text-slate-500">Radno vreme</span><span class="font-medium">00-24</span></div>
+                                        <div class="flex justify-between"><span class="text-slate-500">Voice</span><span class="font-medium" id="adminVoiceStatus">Browser TTS</span></div>
+                                        <div class="flex justify-between"><span class="text-slate-500">Language</span><span class="font-medium">English</span></div>
+                                        <div class="flex justify-between"><span class="text-slate-500">Wake word</span><span class="font-medium">"hey Kaleya"</span></div>
+                                        <div class="flex justify-between"><span class="text-slate-500">Working hours</span><span class="font-medium">00-24</span></div>
                                     </div>
-                                    <button onclick="switchAdminTab('settings')" class="mt-4 w-full h-9 rounded-xl border border-slate-300 dark:border-slate-700 text-[13px] font-medium hover:bg-slate-50 dark:hover:bg-slate-800">Podesi glas</button>
+                                    <button onclick="switchAdminTab('settings')" class="mt-4 w-full h-9 rounded-xl border border-slate-300 dark:border-slate-700 text-[13px] font-medium hover:bg-slate-50 dark:hover:bg-slate-800">Configure voice</button>
                                 </div>
                             </div>
                         </div>
@@ -2628,17 +2628,17 @@
                                     <h2 class="font-display text-xl font-bold" data-i18n="ad_clients">Administratori / firme</h2>
                                     <p class="text-sm text-slate-600 dark:text-slate-400" data-i18n="ad_clients_sub">API i model mogu biti globalni ili posebni po firmi.</p>
                                 </div>
-                                <button class="h-9 px-3 rounded-xl gradient-bg text-white text-[13px] font-medium">+ Nova firma</button>
+                                <button class="h-9 px-3 rounded-xl gradient-bg text-white text-[13px] font-medium">+ New company</button>
                             </div>
                             <div class="overflow-x-auto rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                                 <table class="w-full min-w-[760px] text-[13px]">
                                     <thead class="bg-slate-50 dark:bg-slate-800/50 text-[11px] uppercase tracking-wide text-slate-500">
-                                        <tr><th class="text-left px-4 py-3">Ime</th><th class="text-left px-4 py-3">Kontakt</th><th class="text-left px-4 py-3">Paket</th><th class="text-left px-4 py-3">AI model</th><th class="text-left px-4 py-3">Status</th><th class="text-left px-4 py-3">Akcije</th></tr>
+                                        <tr><th class="text-left px-4 py-3">Name</th><th class="text-left px-4 py-3">Contact</th><th class="text-left px-4 py-3">Plan</th><th class="text-left px-4 py-3">AI model</th><th class="text-left px-4 py-3">Status</th><th class="text-left px-4 py-3">Actions</th></tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                                        <tr><td class="px-4 py-3 font-medium">Demo Administrator</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">administrator@test.com</td><td class="px-4 py-3">Pro</td><td class="px-4 py-3 text-slate-500">Globalni</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[11px]">Aktivan</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Demo Administrator')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po firmi</button></td></tr>
-                                        <tr><td class="px-4 py-3 font-medium">Salon Lepote Bella</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">+381 11 123456</td><td class="px-4 py-3">Business</td><td class="px-4 py-3 text-slate-500">Jači model</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[11px]">Aktivan</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Salon Lepote Bella')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po firmi</button></td></tr>
-                                        <tr><td class="px-4 py-3 font-medium">Ordinacija Dr. Milić</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">+381 21 555888</td><td class="px-4 py-3">Starter</td><td class="px-4 py-3 text-slate-500">Globalni</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[11px]">Pauza</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Ordinacija Dr. Milić')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">API po firmi</button></td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">Demo Administrator</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">administrator@test.com</td><td class="px-4 py-3">Pro</td><td class="px-4 py-3 text-slate-500">Global</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[11px]">Active</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Demo Administrator')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">Company API</button></td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">Salon Lepote Bella</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">+381 11 123456</td><td class="px-4 py-3">Business</td><td class="px-4 py-3 text-slate-500">Advanced model</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-[11px]">Active</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Salon Lepote Bella')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">Company API</button></td></tr>
+                                        <tr><td class="px-4 py-3 font-medium">Ordinacija Dr. Milic</td><td class="px-4 py-3 text-slate-600 dark:text-slate-400">+381 21 555888</td><td class="px-4 py-3">Starter</td><td class="px-4 py-3 text-slate-500">Global</td><td class="px-4 py-3"><span class="px-2 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[11px]">Paused</span></td><td class="px-4 py-3"><button onclick="openClientApiModal('Ordinacija Dr. Milic')" class="h-8 px-3 rounded-lg border border-slate-300 dark:border-slate-700 text-[12px]">Company API</button></td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -2649,16 +2649,16 @@
                                     <div class="flex items-start justify-between gap-4">
                                         <div>
                                             <h3 class="font-display text-lg font-bold" data-i18n="client_api_title">API po firmi</h3>
-                                            <p id="clientApiModalName" class="text-sm text-slate-500 mt-1">Firma</p>
+                                            <p id="clientApiModalName" class="text-sm text-slate-500 mt-1">Company</p>
                                         </div>
                                         <button onclick="closeClientApiModal()" class="w-8 h-8 grid place-items-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">✕</button>
                                     </div>
                                     <div class="mt-5 grid gap-3 text-[13px]">
                                         <div class="rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3">
-                                            <p class="font-semibold">Poseban API po firmi</p>
-                                            <p class="mt-1 text-[12px] text-slate-500">Ova podesavanja se cuvaju u backend bazi i nikada u browseru.</p>
+                                            <p class="font-semibold">Company-specific API</p>
+                                            <p class="mt-1 text-[12px] text-slate-500">These settings are saved in the backend database and never in the browser.</p>
                                         </div>
-                                        <div class="rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 px-4 py-3 text-[12px] text-amber-800 dark:text-amber-200">Sledeci korak je lep backend ekran za izmenu AI modela i glasa po firmi.</div>
+                                        <div class="rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 px-4 py-3 text-[12px] text-amber-800 dark:text-amber-200">The next step is a backend screen for editing AI model and voice per company.</div>
                                     </div>
                                     <div class="mt-5 space-y-4 hidden">
                                         <div>
@@ -2667,14 +2667,14 @@
                                         </div>
                                         <div>
                                             <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">ElevenLabs API Key</label>
-                                            <input id="clientElKeyInput" type="password" placeholder="Poseban ElevenLabs ključ za ovu firmu" class="mt-1.5 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px] font-mono">
+                                            <input id="clientElKeyInput" type="password" placeholder="Custom ElevenLabs key for this company" class="mt-1.5 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px] font-mono">
                                         </div>
                                         <div>
-                                            <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">Nivo AI modela</label>
+                                            <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">AI model level</label>
                                             <select id="clientModelSelect" class="mt-1.5 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px]">
-                                                <option value="global">Koristi globalni model</option>
-                                                <option value="standard">Standardni model</option>
-                                                <option value="advanced">Jači model</option>
+                                                <option value="global">Use global model</option>
+                                                <option value="standard">Standard model</option>
+                                                <option value="advanced">Advanced model</option>
                                                 <option value="premium">Premium model</option>
                                             </select>
                                         </div>
@@ -2695,7 +2695,7 @@
                             </div>
                             <div class="rounded-[20px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5">
                                 <div id="alarm-conv-list" class="space-y-2 text-[13px]">
-                                    <p class="text-[12px] text-slate-400 py-4 text-center">Učitavam...</p>
+                                    <p class="text-[12px] text-slate-400 py-4 text-center">Loading...</p>
                                 </div>
                             </div>
                         </div>
@@ -2726,65 +2726,65 @@
                                     <div class="mt-5 grid gap-3 text-[13px]">
                                         <div class="flex justify-between gap-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3"><span class="text-slate-500">Provider</span><span id="adminAiProvider" class="font-semibold">Anthropic</span></div>
                                         <div class="flex justify-between gap-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3"><span class="text-slate-500">Model</span><span id="adminAiModel" class="font-semibold">claude-haiku-4-5</span></div>
-                                        <div class="flex justify-between gap-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3"><span class="text-slate-500">Status</span><span id="adminAiStatus" class="font-semibold text-green-600 dark:text-green-400">Server povezan</span></div>
-                                        <p class="text-[12px] text-slate-500">API kljuc se cuva na backendu. Frontend ga ne prikazuje i ne cuva.</p>
+                                        <div class="flex justify-between gap-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3"><span class="text-slate-500">Status</span><span id="adminAiStatus" class="font-semibold text-green-600 dark:text-green-400">Server connected</span></div>
+                                        <p class="text-[12px] text-slate-500">API key is stored on the backend. Frontend does not display or store it.</p>
                                     </div>
                                     <div class="mt-5 space-y-4 hidden">
                                         <div>
                                             <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">AI API Key</label>
                                             <div class="mt-1.5 flex gap-2">
-                                                <input id="globalAiKey" type="password" placeholder="Unesi globalni API ključ" class="flex-1 h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px] font-mono">
-                                                <button onclick="toggleKeyVis('globalAiKey')" class="h-11 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-[12px]">Prikaži</button>
+                                                <input id="globalAiKey" type="password" placeholder="Enter global API key" class="flex-1 h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px] font-mono">
+                                                <button onclick="toggleKeyVis('globalAiKey')" class="h-11 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-[12px]">Show</button>
                                             </div>
                                         </div>
                                         <div>
-                                            <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">Nivo modela</label>
+                                            <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">Model level</label>
                                             <select id="globalAiModel" class="mt-1.5 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px]">
-                                                <option value="standard">Standardni model</option>
-                                                <option value="advanced">Jači model</option>
+                                                <option value="standard">Standard model</option>
+                                                <option value="advanced">Advanced model</option>
                                                 <option value="premium">Premium model</option>
                                             </select>
                                         </div>
                                         <div>
-                                            <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">Globalna sistemska instrukcija</label>
-                                            <textarea id="globalSystemNote" rows="3" class="mt-1.5 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px]">Kaleya je profesionalna AI sekretarica za zakazivanje.</textarea>
+                                            <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">Global system instruction</label>
+                                            <textarea id="globalSystemNote" rows="3" class="mt-1.5 w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px]">Kaleya is a professional AI receptionist for scheduling.</textarea>
                                         </div>
                                         <button onclick="saveGlobalAiSettings()" class="w-full h-11 rounded-xl gradient-bg text-white font-medium" data-i18n="save_global_api">Sačuvaj globalni API</button>
                                     </div>
                                 </div>
 
                                 <div class="p-6 rounded-[24px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-                                    <h3 class="font-semibold">API Podešavanja - ElevenLabs</h3>
-                                    <p class="text-[13px] text-slate-600 dark:text-slate-400 mt-1">Kaleya koristi ovaj glas za pozive, demo i obaveštenja.</p>
+                                    <h3 class="font-semibold">API Settings - ElevenLabs</h3>
+                                    <p class="text-[13px] text-slate-600 dark:text-slate-400 mt-1">Kaleya uses this voice for calls, demos and notifications.</p>
                                     <div class="mt-5 grid gap-3 text-[13px]">
                                         <div class="flex justify-between gap-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3"><span class="text-slate-500">Provider</span><span id="adminVoiceProvider" class="font-semibold">ElevenLabs</span></div>
                                         <div class="flex justify-between gap-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3"><span class="text-slate-500">Model</span><span id="adminVoiceModel" class="font-semibold">eleven_multilingual_v2</span></div>
-                                        <div class="flex justify-between gap-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3"><span class="text-slate-500">Status</span><span id="adminVoiceConnectedStatus" class="font-semibold text-green-600 dark:text-green-400">Server povezan</span></div>
-                                        <button onclick="testElevenVoice()" class="h-11 px-5 rounded-xl border border-slate-300 dark:border-slate-700 font-medium text-[14px] hover:bg-slate-50 dark:hover:bg-slate-800">Testiraj glas</button>
+                                        <div class="flex justify-between gap-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 px-4 py-3"><span class="text-slate-500">Status</span><span id="adminVoiceConnectedStatus" class="font-semibold text-green-600 dark:text-green-400">Server connected</span></div>
+                                        <button onclick="testElevenVoice()" class="h-11 px-5 rounded-xl border border-slate-300 dark:border-slate-700 font-medium text-[14px] hover:bg-slate-50 dark:hover:bg-slate-800">Test voice</button>
                                     </div>
                                     <div class="mt-5 space-y-4 hidden">
                                         <div>
                                             <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">ElevenLabs API Key</label>
                                             <div class="mt-1.5 flex gap-2">
-                                                <input id="elevenKey" type="password" placeholder="Unesi ElevenLabs API ključ" class="flex-1 h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-teal-500/50 text-[13px] font-mono">
-                                                <button onclick="toggleKeyVis('elevenKey')" class="h-11 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-[12px]">Prikaži</button>
+                                                <input id="elevenKey" type="password" placeholder="Enter ElevenLabs API key" class="flex-1 h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-teal-500/50 text-[13px] font-mono">
+                                                <button onclick="toggleKeyVis('elevenKey')" class="h-11 px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-[12px]">Show</button>
                                             </div>
-                                            <p class="mt-1.5 text-[11px] text-slate-500">Trenutno: <span id="maskedKey" class="font-mono">Nije podešeno</span></p>
+                                            <p class="mt-1.5 text-[11px] text-slate-500">Currently: <span id="maskedKey" class="font-mono">Not configured</span></p>
                                         </div>
                                         <div>
-                                            <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">Glas Kaleye</label>
+                                            <label class="text-[12px] font-medium text-slate-600 dark:text-slate-400">Kaleya voice</label>
                                             <select id="voiceSelect" class="mt-1.5 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-teal-500/50 text-[13px]">
-                                                <option value="EXAVITQu4vr4xnSDxMaL">Bella - ženski glas</option>
-                                                <option value="ErXwobaYiN019PkySvjV">Antoni - muški glas</option>
-                                                <option value="21m00Tcm4TlvDq8ikWAM">Rachel - ženski EN</option>
+                                                <option value="EXAVITQu4vr4xnSDxMaL">Bella - female voice</option>
+                                                <option value="ErXwobaYiN019PkySvjV">Antoni - male voice</option>
+                                                <option value="21m00Tcm4TlvDq8ikWAM">Rachel - female EN</option>
                                                 <option value="custom">Custom Voice ID</option>
                                             </select>
-                                            <input id="customVoice" type="text" placeholder="Unesi custom Voice ID" class="hidden mt-2 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px] font-mono">
+                                            <input id="customVoice" type="text" placeholder="Enter custom Voice ID" class="hidden mt-2 w-full h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px] font-mono">
                                         </div>
                                         <div class="flex flex-wrap items-center gap-3 pt-2">
-                                            <button onclick="saveElevenLabs()" class="h-11 px-5 rounded-xl gradient-bg text-white font-medium text-[14px] shadow-lg shadow-teal-500/20">Sačuvaj</button>
-                                            <button onclick="testElevenVoice()" class="h-11 px-5 rounded-xl border border-slate-300 dark:border-slate-700 font-medium text-[14px] hover:bg-slate-50 dark:hover:bg-slate-800">Testiraj "Izvolite"</button>
-                                            <span id="saveStatus" class="text-[12px] text-green-600 hidden">Sačuvano</span>
+                                            <button onclick="saveElevenLabs()" class="h-11 px-5 rounded-xl gradient-bg text-white font-medium text-[14px] shadow-lg shadow-teal-500/20">Save</button>
+                                            <button onclick="testElevenVoice()" class="h-11 px-5 rounded-xl border border-slate-300 dark:border-slate-700 font-medium text-[14px] hover:bg-slate-50 dark:hover:bg-slate-800">Test "Hello"</button>
+                                            <span id="saveStatus" class="text-[12px] text-green-600 hidden">Saved</span>
                                         </div>
                                     </div>
                                 </div>
@@ -2793,10 +2793,10 @@
                             <div class="mt-6 p-5 rounded-[20px] border border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/30 text-[13px] text-amber-900 dark:text-amber-200" data-i18n="api_security_note">Produkcijski API ključevi se čuvaju u backendu i .env fajlu. Ovaj ekran je UI model za admin kontrolu.</div>
 
                             <div class="mt-6 p-6 rounded-[24px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-                                <h3 class="font-semibold mb-3">Brzi test</h3>
+                                <h3 class="font-semibold mb-3">Quick test</h3>
                                 <div class="flex flex-col sm:flex-row gap-2">
-                                    <input id="testText" type="text" value="Izvolite, kako mogu pomoći?" class="flex-1 h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px]">
-                                    <button onclick="speak(document.getElementById('testText').value)" class="h-11 px-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium text-[13px]">Pusti</button>
+                                    <input id="testText" type="text" value="Hello, how can I help?" class="flex-1 h-11 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-[13px]">
+                                    <button onclick="speak(document.getElementById('testText').value)" class="h-11 px-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium text-[13px]">Play</button>
                                 </div>
                             </div>
                         </div>
@@ -2809,7 +2809,7 @@
     <!-- Toast -->
     <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] hidden">
         <div class="px-4 h-11 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xl flex items-center gap-2 text-[13px] font-medium">
-            <span id="toastText">Sačuvano</span>
+            <span id="toastText">Saved</span>
         </div>
     </div>
 
@@ -8635,7 +8635,7 @@ function loadAdminSettings() {
     const elevenKey = document.getElementById('elevenKey');
     if (elevenKey) elevenKey.value = key;
     const maskedKey = document.getElementById('maskedKey');
-    if (maskedKey) maskedKey.textContent = key ? '•'.repeat(24) + key.slice(-4) : 'Nije podešeno';
+    if (maskedKey) maskedKey.textContent = key ? '•'.repeat(24) + key.slice(-4) : 'Not configured';
     const voice = localStorage.getItem('elevenlabs_voice') || 'EXAVITQu4vr4xnSDxMaL';
     const select = document.getElementById('voiceSelect');
     if (!select) return;
@@ -8694,7 +8694,7 @@ const _DEMO_CONVS = [
 async function loadAdminConversations() {
     const listDash  = document.getElementById('admin-conv-list');
     const listAlarm = document.getElementById('alarm-conv-list');
-    const loading = '<p class="text-[12px] text-slate-400 py-4 text-center">Učitavam...</p>';
+    const loading = '<p class="text-[12px] text-slate-400 py-4 text-center">Loading...</p>';
     if (listDash)  listDash.innerHTML  = loading;
     if (listAlarm) listAlarm.innerHTML = loading;
 
@@ -9670,12 +9670,12 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
 <div id="cookieBanner" class="fixed bottom-0 left-0 right-0 z-50 p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 shadow-lg" style="display:none">
     <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <p class="flex-1 text-[13px] text-slate-600 dark:text-slate-300">
-            Koristimo kolačiće za prijavu i osnovne funkcije platforme. Možete prihvatiti sve kolačiće ili samo nužne.
-            <a href="/frontend/privacy.html" class="underline ml-1">Politika privatnosti</a>
+            We use cookies for login and basic platform features. You can accept all cookies or only essential ones.
+            <a href="/frontend/privacy.html" class="underline ml-1">Privacy Policy</a>
         </p>
         <div class="flex gap-2 shrink-0">
-            <button onclick="cookieConsent('essential')" class="h-9 px-4 rounded-xl border border-slate-300 dark:border-slate-600 text-[12px] font-semibold text-slate-700 dark:text-slate-200">Samo nužni</button>
-            <button onclick="cookieConsent('all')" class="h-9 px-5 rounded-xl gradient-bg text-white text-[12px] font-semibold">Prihvati sve</button>
+            <button onclick="cookieConsent('essential')" class="h-9 px-4 rounded-xl border border-slate-300 dark:border-slate-600 text-[12px] font-semibold text-slate-700 dark:text-slate-200">Essential only</button>
+            <button onclick="cookieConsent('all')" class="h-9 px-5 rounded-xl gradient-bg text-white text-[12px] font-semibold">Accept all</button>
         </div>
     </div>
 </div>
