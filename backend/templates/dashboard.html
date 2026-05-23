@@ -1127,40 +1127,40 @@
                 </span>
             </a>
 
-            <nav class="nav" aria-label="Admin navigacija">
-                <a class="nav-btn active" href="#overview" data-tab="overview" data-title="Kontrolna tabla">
+            <nav class="nav" aria-label="Main navigation">
+                <a class="nav-btn active" href="#overview" data-tab="overview" data-title="Dashboard">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>
-                    Kontrolna tabla
+                    Dashboard
                 </a>
-                <a class="nav-btn" href="#clients" data-tab="clients" data-title="Klijenti">
+                <a class="nav-btn" href="#clients" data-tab="clients" data-title="Clients">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 11a4 4 0 1 0-8 0"/><path d="M3 21a7 7 0 0 1 14 0"/><path d="M21 21a5 5 0 0 0-4-4.9"/></svg>
-                    Klijenti
+                    Clients
                 </a>
-                <a class="nav-btn" href="#calendar" data-tab="calendar" data-title="Kalendar">
+                <a class="nav-btn" href="#calendar" data-tab="calendar" data-title="Calendar">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                    Kalendar
+                    Calendar
                 </a>
-                <a class="nav-btn" href="#alarms" data-tab="alarms" data-title="Alarmi">
+                <a class="nav-btn" href="#alarms" data-tab="alarms" data-title="Alarms">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
-                    Alarmi
+                    Alarms
                 </a>
-                <a class="nav-btn" href="#integrations" data-tab="integrations" data-title="Integracije">
+                <a class="nav-btn" href="#integrations" data-tab="integrations" data-title="Integrations">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7.5-.5l-2 2a5 5 0 0 0 7 7l1-1"/></svg>
-                    Integracije
+                    Integrations
                 </a>
                 {% if is_admin_user %}
-                    <a class="nav-btn" href="#payments" data-tab="payments" data-title="Plaćanja">
+                    <a class="nav-btn" href="#payments" data-tab="payments" data-title="Payments">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>
-                        Plaćanja
+                        Payments
                     </a>
                 {% endif %}
                 <a class="nav-btn" href="#billing" data-tab="billing" data-title="Billing">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>
                     Billing
                 </a>
-                <a class="nav-btn" href="#settings" data-tab="settings" data-title="Podešavanja">
+                <a class="nav-btn" href="#settings" data-tab="settings" data-title="Settings">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V22h-4v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 0 1 4.2 18l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3v-4h.1a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.3 8A2 2 0 0 1 7.1 5.2l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V4h4v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 0 1 19.8 8l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1H21v4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>
-                    Podešavanja
+                    Settings
                 </a>
             </nav>
 
@@ -1168,14 +1168,14 @@
                 {% csrf_token %}
                 <button type="submit">
                     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M21 3v18"/></svg>
-                    Odjava
+                    Sign out
                 </button>
             </form>
         </aside>
 
         <main class="main">
             <header class="topbar">
-                <h1 id="page-title">Kontrolna tabla</h1>
+                <h1 id="page-title">Dashboard</h1>
                 <span class="online-pill">{% if selected_client and selected_client.kaleya_enabled %}Kaleya online{% else %}Kaleya offline{% endif %}</span>
             </header>
 
@@ -1190,7 +1190,7 @@
 
                 {% if not selected_client %}
                     <section class="panel active" id="overview">
-                        <div class="notice">Nema klijenta za ovaj nalog. Pokreni `python backend\manage.py seed_demo` ili dodaj klijenta u Django adminu.</div>
+                        <div class="notice">No client found for this account. Run <code>python backend\manage.py seed_demo</code> or add a client in Django admin.</div>
                     </section>
                 {% else %}
                     <section class="panel active" id="overview">
@@ -1237,36 +1237,36 @@
                         {% endif %}
                         <div class="cards">
                             <article class="card metric">
-                                <span>Pozivi danas</span>
+                                <span>Calls today</span>
                                 <strong>{{ stats_total_calls_today }}</strong>
-                                <small>{{ stats_active_calls }} aktivan{% if stats_active_calls != 1 %}ih{% endif %}</small>
+                                <small>{{ stats_active_calls }} active</small>
                             </article>
                             <article class="card metric">
-                                <span>Zakazano danas</span>
+                                <span>Booked today</span>
                                 <strong>{{ today_summary.busy_count }}</strong>
-                                <small style="color:var(--muted)">termina u kalendaru</small>
+                                <small style="color:var(--muted)">appointments in calendar</small>
                             </article>
                             <article class="card metric">
-                                <span>Propušteni danas</span>
+                                <span>Missed today</span>
                                 <strong {% if stats_missed_today > 0 %}style="color:var(--orange)"{% endif %}>{{ stats_missed_today }}</strong>
-                                <small>{{ stats_transferred_today }} prenet{% if stats_transferred_today != 1 %}ih{% endif %} na vlasnika</small>
+                                <small>{{ stats_transferred_today }} transferred to owner</small>
                             </article>
                             <article class="card metric">
-                                <span>Razgovori ukupno</span>
+                                <span>Total conversations</span>
                                 <strong>{{ stats_total_conversations }}</strong>
-                                <small style="color:var(--muted)">svi kanali</small>
+                                <small style="color:var(--muted)">all channels</small>
                             </article>
                         </div>
 
                         <div class="dashboard-grid">
                             <article class="card calls-card">
                                 <div class="conversation-head">
-                                    <h2>Razgovori Kaleye</h2>
-                                    <select id="conversationFilter" class="conversation-filter" aria-label="Filter razgovora">
-                                        <option value="all">Sve</option>
-                                        <option value="unresolved">Nije reseno</option>
-                                        <option value="urgent">Hitno</option>
-                                        <option value="resolved">Reseno</option>
+                                    <h2>Kaleya conversations</h2>
+                                    <select id="conversationFilter" class="conversation-filter" aria-label="Filter conversations">
+                                        <option value="all">All</option>
+                                        <option value="unresolved">Unresolved</option>
+                                        <option value="urgent">Urgent</option>
+                                        <option value="resolved">Resolved</option>
                                     </select>
                                 </div>
                                 <div class="conversation-list" id="conversationFeed">
@@ -1286,11 +1286,11 @@
                                         <div class="conversation-row" data-conversation-status="resolved">
                                             <div class="conversation-icon conversation">i</div>
                                             <div class="conversation-main">
-                                                <strong>Jos nema razgovora</strong>
-                                                <span>Kaleya ceka prvi zahtev klijenta.</span>
-                                                <small>Bez eskalacije</small>
+                                                <strong>No conversations yet</strong>
+                                                <span>Kaleya is waiting for the first client request.</span>
+                                                <small>No escalations</small>
                                             </div>
-                                            <span class="conversation-time">sada</span>
+                                            <span class="conversation-time">now</span>
                                         </div>
                                     {% endfor %}
                                 </div>
@@ -1310,10 +1310,10 @@
                                         <div class="call-row">
                                             <div class="call-icon info">i</div>
                                             <div class="call-main">
-                                                <strong>Još nema poziva</strong>
-                                                <span>Kaleya čeka prvi zahtev</span>
+                                                <strong>No appointments yet</strong>
+                                                <span>Kaleya is ready for the first booking.</span>
                                             </div>
-                                            <span class="call-time">sada</span>
+                                            <span class="call-time">now</span>
                                         </div>
                                     {% endfor %}
                                 </div>
@@ -1322,12 +1322,12 @@
                             <article class="card status-card">
                                 <h2>Kaleya status</h2>
                                 <div class="status-list">
-                                    <div class="status-line"><span>Glas</span><strong>{% firstof api_settings.voice_provider global_voice_provider "ElevenLabs" %}</strong></div>
-                                    <div class="status-line"><span>Jezik</span><strong>{{ selected_client.get_interface_language_display }}</strong></div>
-                                    <div class="status-line"><span>Wake word</span><strong>"hej Kaleya"</strong></div>
-                                    <div class="status-line"><span>Radno vreme</span><strong>{{ selected_client.work_start|time:"H:i" }}-{{ selected_client.work_end|time:"H:i" }}</strong></div>
+                                    <div class="status-line"><span>Voice</span><strong>{% firstof api_settings.voice_provider global_voice_provider "ElevenLabs" %}</strong></div>
+                                    <div class="status-line"><span>Language</span><strong>{{ selected_client.get_interface_language_display }}</strong></div>
+                                    <div class="status-line"><span>Wake word</span><strong>"hey Kaleya"</strong></div>
+                                    <div class="status-line"><span>Working hours</span><strong>{{ selected_client.work_start|time:"H:i" }}-{{ selected_client.work_end|time:"H:i" }}</strong></div>
                                 </div>
-                                <button class="outline-btn" type="button" data-jump="settings">Podesi glas</button>
+                                <button class="outline-btn" type="button" data-jump="settings">Configure voice</button>
                             </article>
                         </div>
                     </section>
@@ -1336,8 +1336,8 @@
                     <section class="panel" id="calendar">
                         <div class="section-head">
                             <div>
-                                <h2>Kalendar</h2>
-                                <p>Termini za tekuću sedmicu — potvrđeni i na čekanju.</p>
+                                <h2>Calendar</h2>
+                                <p>Appointments for the current week — confirmed and pending.</p>
                             </div>
                         </div>
 
@@ -1350,11 +1350,11 @@
                                         {% for appt in day.appointments %}
                                             <div class="cal-appt">
                                                 <strong>{{ appt.start_time|time:"H:i" }} {% if appt.service %}{{ appt.service.name|truncatechars:18 }}{% endif %}</strong>
-                                                {{ appt.customer.full_name|default:"Mušterija"|truncatechars:16 }}
+                                                {{ appt.customer.full_name|default:"Client"|truncatechars:16 }}
                                                 {% if appt.staff_member %}<br><span style="color:var(--soft)">{{ appt.staff_member.full_name|truncatechars:14 }}</span>{% endif %}
                                             </div>
                                         {% empty %}
-                                            <div class="cal-empty">Slobodan dan</div>
+                                            <div class="cal-empty">Free day</div>
                                         {% endfor %}
                                     </div>
                                 {% endfor %}
@@ -1365,25 +1365,25 @@
                     <section class="panel" id="clients">
                         <div class="section-head">
                             <div>
-                                <h2>Klijenti</h2>
-                                <p>API i model mogu biti globalni ili posebni po klijentu.</p>
+                                <h2>Clients</h2>
+                                <p>API and model can be global or per-client overrides.</p>
                             </div>
-                <a class="primary-btn" href="/django-admin/clients/businessclient/add/">+ Novi klijent</a>
+                <a class="primary-btn" href="/django-admin/clients/businessclient/add/">+ New client</a>
                         </div>
 
                         <div class="card table-card table-scroll">
                             <table class="client-table">
                                 <thead>
                                     <tr>
-                                        <th>Ime</th>
-                                        <th>Kontakt</th>
-                                        <th>Paket</th>
-                                        <th>Pretplata</th>
-                                        <th>Obnova</th>
-                                        <th>Cena</th>
+                                        <th>Name</th>
+                                        <th>Contact</th>
+                                        <th>Plan</th>
+                                        <th>Subscription</th>
+                                        <th>Renewal</th>
+                                        <th>Price</th>
                                         <th>AI model</th>
                                         <th>Status</th>
-                                        <th class="actions-col">Akcije</th>
+                                        <th class="actions-col">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1398,67 +1398,67 @@
                                                         {{ client.subscription.get_status_display }}
                                                     </span>
                                                 {% else %}
-                                                    <span class="badge off">Nema pretplate</span>
+                                                    <span class="badge off">No subscription</span>
                                                 {% endif %}
                                             </td>
                                             <td class="renew-cell">
                                                 {% if client.subscription.current_period_end %}
                                                     <strong>{{ client.subscription.current_period_end|date:"d.m.Y" }}</strong>
-                                                    <span>sledeca naplata</span>
+                                                    <span>next billing</span>
                                                 {% elif client.subscription.trial_ends_at %}
                                                     <strong>{{ client.subscription.trial_ends_at|date:"d.m.Y" }}</strong>
-                                                    <span>kraj trial-a</span>
+                                                    <span>trial end</span>
                                                 {% else %}
                                                     <strong>-</strong>
-                                                    <span>nije zakazano</span>
+                                                    <span>not scheduled</span>
                                                 {% endif %}
                                             </td>
                                             <td class="price-cell">
                                                 {% if client.subscription.plan %}
                                                     <strong>{{ client.subscription.plan.monthly_price }} {{ client.subscription.plan.currency }}</strong>
-                                                    <span>mesecno</span>
+                                                    <span>monthly</span>
                                                 {% else %}
                                                     <strong>-</strong>
-                                                    <span>nema plana</span>
+                                                    <span>no plan</span>
                                                 {% endif %}
                                             </td>
-                                            <td class="muted">{{ client.api_settings.ai_model|default:global_ai_model|default:"Globalni" }}</td>
+                                            <td class="muted">{{ client.api_settings.ai_model|default:global_ai_model|default:"Global" }}</td>
                                             <td>
                                                 <span class="badge {% if client.kaleya_enabled %}ok{% else %}pause{% endif %}">
-                                                    {% if client.kaleya_enabled %}Aktivan{% else %}Pauza{% endif %}
+                                                    {% if client.kaleya_enabled %}Active{% else %}Paused{% endif %}
                                                 </span>
                                             </td>
                                             <td class="actions-cell">
                                                 <div class="row-actions">
-                                                    <a class="mini-btn" href="?client_id={{ client.id }}#client-detail">Detalji</a>
-                                                    <a class="mini-btn" href="?client_id={{ client.id }}#settings">API po klijentu</a>
+                                                    <a class="mini-btn" href="?client_id={{ client.id }}#client-detail">Details</a>
+                                                    <a class="mini-btn" href="?client_id={{ client.id }}#settings">Client API</a>
                                                     {% if is_admin_user %}
                                                         {% if client.kaleya_enabled %}
                                                             <form class="inline-form" method="post">
                                                                 {% csrf_token %}
                                                                 <input type="hidden" name="section" value="pause_client">
                                                                 <input type="hidden" name="client_id" value="{{ client.id }}">
-                                                                <button class="mini-btn warning" type="submit">Pauziraj</button>
+                                                                <button class="mini-btn warning" type="submit">Pause</button>
                                                             </form>
                                                         {% else %}
                                                             <form class="inline-form" method="post">
                                                                 {% csrf_token %}
                                                                 <input type="hidden" name="section" value="activate_client">
                                                                 <input type="hidden" name="client_id" value="{{ client.id }}">
-                                                                <button class="mini-btn success" type="submit">Aktiviraj</button>
+                                                                <button class="mini-btn success" type="submit">Activate</button>
                                                             </form>
                                                         {% endif %}
-                                                        <form class="inline-form" method="post" title="Pošalji novi setup email vlasniku">
+                                                        <form class="inline-form" method="post" title="Send new setup email to owner">
                                                             {% csrf_token %}
                                                             <input type="hidden" name="section" value="resend_setup_link">
                                                             <input type="hidden" name="client_id" value="{{ client.id }}">
                                                             <button class="mini-btn" type="submit">📧 Setup link</button>
                                                         </form>
-                                                        <form class="inline-form" method="post" onsubmit="return confirm('Obrisati klijenta {{ client.public_name|default:client.name }}?');">
+                                                        <form class="inline-form" method="post" onsubmit="return confirm('Delete client {{ client.public_name|default:client.name }}?');">
                                                             {% csrf_token %}
                                                             <input type="hidden" name="section" value="delete_client">
                                                             <input type="hidden" name="client_id" value="{{ client.id }}">
-                                                            <button class="danger-btn" type="submit">Obriši</button>
+                                                            <button class="danger-btn" type="submit">Delete</button>
                                                         </form>
                                                     {% endif %}
                                                 </div>
@@ -1474,33 +1474,33 @@
                         <div class="section-head">
                             <div>
                                 <div class="client-title">
-                                    <h2>Detalji klijenta</h2>
+                                    <h2>Client details</h2>
                                     <span class="badge {% if selected_client.kaleya_enabled %}ok{% else %}pause{% endif %}">
                                         {% if selected_client.kaleya_enabled %}Kaleya online{% else %}Kaleya offline{% endif %}
                                     </span>
                                 </div>
                                 <p>{{ selected_client.public_name|default:selected_client.name }} - {{ selected_client.owner.email|default:selected_client.owner.username }}</p>
                             </div>
-                            <a class="mini-btn" href="?client_id={{ selected_client.id }}#clients">Nazad na klijente</a>
+                            <a class="mini-btn" href="?client_id={{ selected_client.id }}#clients">Back to clients</a>
                         </div>
 
                         <div class="detail-grid three">
                             <article class="card detail-card">
-                                <h3>Pretplata</h3>
+                                <h3>Subscription</h3>
                                 <div class="status-list">
-                                    <div class="status-line"><span>Paket</span><strong>{{ selected_client.get_package_display }}</strong></div>
+                                    <div class="status-line"><span>Plan</span><strong>{{ selected_client.get_package_display }}</strong></div>
                                     <div class="status-line">
                                         <span>Status</span>
                                         <strong>
                                             {% if selected_subscription %}
                                                 {{ selected_subscription.get_status_display }}
                                             {% else %}
-                                                Nema pretplate
+                                                No subscription
                                             {% endif %}
                                         </strong>
                                     </div>
                                     <div class="status-line">
-                                        <span>Cena</span>
+                                        <span>Price</span>
                                         <strong>
                                             {% if selected_subscription and selected_subscription.plan %}
                                                 {{ selected_subscription.plan.monthly_price }} {{ selected_subscription.plan.currency }}
@@ -1510,7 +1510,7 @@
                                         </strong>
                                     </div>
                                     <div class="status-line">
-                                        <span>Obnova</span>
+                                        <span>Renewal</span>
                                         <strong>
                                             {% if selected_subscription.current_period_end %}
                                                 {{ selected_subscription.current_period_end|date:"d.m.Y" }}
@@ -1530,24 +1530,24 @@
                                     <div class="status-line"><span>AI provider</span><strong>{% firstof api_settings.ai_provider global_ai_provider "global" %}</strong></div>
                                     <div class="status-line"><span>AI model</span><strong>{% firstof api_settings.ai_model global_ai_model "global" %}</strong></div>
                                     <div class="status-line"><span>Voice provider</span><strong>{% firstof api_settings.voice_provider global_voice_provider "ElevenLabs" %}</strong></div>
-                                    <div class="status-line"><span>Voice ID</span><strong>{% if api_settings.voice_id or voice_settings.voice_id or global_voice_id %}Podesen{% else %}Nije podesen{% endif %}</strong></div>
+                                    <div class="status-line"><span>Voice ID</span><strong>{% if api_settings.voice_id or voice_settings.voice_id or global_voice_id %}Set{% else %}Not set{% endif %}</strong></div>
                                 </div>
                             </article>
 
                             <article class="card detail-card">
-                                <h3>Operativa</h3>
+                                <h3>Operations</h3>
                                 <div class="status-list">
-                                    <div class="status-line"><span>Radnici</span><strong>{{ selected_staff_members|length }}</strong></div>
-                                    <div class="status-line"><span>Usluge</span><strong>{{ selected_services|length }}</strong></div>
-                                    <div class="status-line"><span>Termini</span><strong>{{ selected_appointment_total }}</strong></div>
-                                    <div class="status-line"><span>Radno vreme</span><strong>{{ selected_client.work_start|time:"H:i" }}-{{ selected_client.work_end|time:"H:i" }}</strong></div>
+                                    <div class="status-line"><span>Staff</span><strong>{{ selected_staff_members|length }}</strong></div>
+                                    <div class="status-line"><span>Services</span><strong>{{ selected_services|length }}</strong></div>
+                                    <div class="status-line"><span>Appointments</span><strong>{{ selected_appointment_total }}</strong></div>
+                                    <div class="status-line"><span>Working hours</span><strong>{{ selected_client.work_start|time:"H:i" }}-{{ selected_client.work_end|time:"H:i" }}</strong></div>
                                 </div>
                             </article>
                         </div>
 
                         <div class="detail-grid">
                             <article class="card detail-card">
-                                <h3>Radno vreme</h3>
+                                <h3>Working hours</h3>
                                 <form method="post" class="edit-list">
                                     {% csrf_token %}
                                     <input type="hidden" name="section" value="update_working_hours">
@@ -1555,56 +1555,56 @@
                                     {% for row in selected_working_hours %}
                                         <div class="edit-row work-row">
                                             <div class="field">
-                                                <label>Dan</label>
+                                                <label>Day</label>
                                                 <input value="{{ row.get_weekday_display }}" readonly>
                                             </div>
                                             <div class="field">
-                                                <label>Od</label>
+                                                <label>From</label>
                                                 <input type="time" name="weekday_{{ row.weekday }}_start" value="{{ row.start_time|time:'H:i' }}">
                                             </div>
                                             <div class="field">
-                                                <label>Do</label>
+                                                <label>To</label>
                                                 <input type="time" name="weekday_{{ row.weekday }}_end" value="{{ row.end_time|time:'H:i' }}">
                                             </div>
                                             <label class="check-field">
                                                 <input type="checkbox" name="weekday_{{ row.weekday }}_closed" {% if row.is_closed %}checked{% endif %}>
-                                                Zatvoreno
+                                                Closed
                                             </label>
                                         </div>
                                     {% endfor %}
-                                    <button class="primary-btn" type="submit">Sacuvaj radno vreme</button>
+                                    <button class="primary-btn" type="submit">Save working hours</button>
                                 </form>
                             </article>
 
                             <article class="card detail-card">
-                                <h3>Blokade i pauze</h3>
+                                <h3>Blocks &amp; Breaks</h3>
                                 <form method="post" class="compact-form three">
                                     {% csrf_token %}
                                     <input type="hidden" name="section" value="add_blocked_time">
                                     <input type="hidden" name="client_id" value="{{ selected_client.id }}">
                                     <div class="field">
-                                        <label>Tip</label>
+                                        <label>Type</label>
                                         <select name="block_type">
-                                            <option value="one_day">Jednodnevno</option>
-                                            <option value="multi_day">Vise dana</option>
+                                            <option value="one_day">Single day</option>
+                                            <option value="multi_day">Multi-day</option>
                                         </select>
                                     </div>
                                     <div class="field">
-                                        <label>Radnik</label>
+                                        <label>Staff member</label>
                                         <select name="staff_id">
-                                            <option value="">Svi radnici</option>
+                                            <option value="">All staff</option>
                                             {% for staff in selected_staff_members %}
                                                 <option value="{{ staff.id }}">{{ staff.full_name }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
-                                    <div class="field"><label>Razlog</label><input name="reason" placeholder="odmor, pauza, bolovanje"></div>
-                                    <div class="field"><label>Datum</label><input type="date" name="block_date"></div>
-                                    <div class="field"><label>Od</label><input type="time" name="start_time" value="{{ selected_client.work_start|time:'H:i' }}"></div>
-                                    <div class="field"><label>Do</label><input type="time" name="end_time" value="{{ selected_client.work_end|time:'H:i' }}"></div>
-                                    <div class="field"><label>Datum od</label><input type="date" name="start_date"></div>
-                                    <div class="field"><label>Datum do</label><input type="date" name="end_date"></div>
-                                    <button class="primary-btn" type="submit">Dodaj blokadu</button>
+                                    <div class="field"><label>Reason</label><input name="reason" placeholder="vacation, break, sick leave"></div>
+                                    <div class="field"><label>Date</label><input type="date" name="block_date"></div>
+                                    <div class="field"><label>From</label><input type="time" name="start_time" value="{{ selected_client.work_start|time:'H:i' }}"></div>
+                                    <div class="field"><label>To</label><input type="time" name="end_time" value="{{ selected_client.work_end|time:'H:i' }}"></div>
+                                    <div class="field"><label>Date from</label><input type="date" name="start_date"></div>
+                                    <div class="field"><label>Date to</label><input type="date" name="end_date"></div>
+                                    <button class="primary-btn" type="submit">Add block</button>
                                 </form>
 
                                 <div class="edit-list">
@@ -1615,11 +1615,11 @@
                                                 <input value="{{ block.start_at|date:'d.m.Y H:i' }} - {{ block.end_at|date:'d.m.Y H:i' }}" readonly>
                                             </div>
                                             <div class="field">
-                                                <label>Radnik</label>
-                                                <input value="{% if block.staff_member %}{{ block.staff_member.full_name }}{% else %}Svi radnici{% endif %}" readonly>
+                                                <label>Staff</label>
+                                                <input value="{% if block.staff_member %}{{ block.staff_member.full_name }}{% else %}All staff{% endif %}" readonly>
                                             </div>
                                             <div class="field">
-                                                <label>Razlog</label>
+                                                <label>Reason</label>
                                                 <input value="{{ block.reason|default:'-' }}" readonly>
                                             </div>
                                             <form method="post" class="inline-form">
@@ -1627,11 +1627,11 @@
                                                 <input type="hidden" name="section" value="delete_blocked_time">
                                                 <input type="hidden" name="client_id" value="{{ selected_client.id }}">
                                                 <input type="hidden" name="blocked_time_id" value="{{ block.id }}">
-                                                <button class="danger-btn" type="submit" onclick="return confirm('Obrisati ovu blokadu?');">Obrisi</button>
+                                                <button class="danger-btn" type="submit" onclick="return confirm('Delete this block?');">Delete</button>
                                             </form>
                                         </div>
                                     {% empty %}
-                                        <div class="notice">Nema blokada termina.</div>
+                                        <div class="notice">No time blocks.</div>
                                     {% endfor %}
                                 </div>
                             </article>
@@ -1639,19 +1639,19 @@
 
                         <div class="detail-grid">
                             <article class="card detail-card">
-                                <h3>Radnici</h3>
+                                <h3>Staff</h3>
                                 {% if is_admin_user or is_owner %}
                                     <form method="post" class="compact-form">
                                         {% csrf_token %}
                                         <input type="hidden" name="section" value="add_staff">
                                         <input type="hidden" name="client_id" value="{{ selected_client.id }}">
-                                        <div class="field"><label>Ime</label><input name="full_name" required></div>
-                                        <div class="field"><label>Zanimanje</label><input name="role_title"></div>
-                                        <div class="field"><label>Telefon</label><input name="phone"></div>
+                                        <div class="field"><label>Name</label><input name="full_name" required></div>
+                                        <div class="field"><label>Role</label><input name="role_title"></div>
+                                        <div class="field"><label>Phone</label><input name="phone"></div>
                                         <div class="field"><label>Email</label><input type="email" name="email"></div>
-                                        <div class="field"><label>Boja</label><input type="color" name="color" value="#3b82f6"></div>
-                                        <label class="check-field"><input type="checkbox" name="is_active" checked> Aktivan</label>
-                                        <button class="primary-btn" type="submit">Dodaj radnika</button>
+                                        <div class="field"><label>Color</label><input type="color" name="color" value="#3b82f6"></div>
+                                        <label class="check-field"><input type="checkbox" name="is_active" checked> Active</label>
+                                        <button class="primary-btn" type="submit">Add staff member</button>
                                     </form>
                                 {% endif %}
 
@@ -1662,36 +1662,36 @@
                                             <input type="hidden" name="section" value="update_staff">
                                             <input type="hidden" name="client_id" value="{{ selected_client.id }}">
                                             <input type="hidden" name="staff_id" value="{{ staff.id }}">
-                                            <div class="field"><label>Ime</label><input name="full_name" value="{{ staff.full_name }}" required></div>
-                                            <div class="field"><label>Zanimanje</label><input name="role_title" value="{{ staff.role_title }}"></div>
-                                            <div class="field"><label>Telefon</label><input name="phone" value="{{ staff.phone }}"></div>
+                                            <div class="field"><label>Name</label><input name="full_name" value="{{ staff.full_name }}" required></div>
+                                            <div class="field"><label>Role</label><input name="role_title" value="{{ staff.role_title }}"></div>
+                                            <div class="field"><label>Phone</label><input name="phone" value="{{ staff.phone }}"></div>
                                             <div class="field"><label>Email</label><input type="email" name="email" value="{{ staff.email }}"></div>
-                                            <label class="check-field"><input type="checkbox" name="is_active" {% if staff.is_active %}checked{% endif %}> Aktivan</label>
+                                            <label class="check-field"><input type="checkbox" name="is_active" {% if staff.is_active %}checked{% endif %}> Active</label>
                                             <div class="edit-actions">
-                                                <button class="mini-btn success" type="submit">Sacuvaj</button>
-                                                <button class="danger-btn" type="submit" name="section" value="delete_staff" onclick="return confirm('Obrisati radnika {{ staff.full_name }}?');">Obrisi</button>
+                                                <button class="mini-btn success" type="submit">Save</button>
+                                                <button class="danger-btn" type="submit" name="section" value="delete_staff" onclick="return confirm('Delete staff member {{ staff.full_name }}?');">Delete</button>
                                             </div>
                                         </form>
                                     {% empty %}
-                                        <div class="notice">Nema dodatih radnika.</div>
+                                        <div class="notice">No staff members added.</div>
                                     {% endfor %}
                                 </div>
                             </article>
 
                             <article class="card detail-card">
-                                <h3>Usluge</h3>
+                                <h3>Services</h3>
                                 {% if is_admin_user or is_owner %}
                                     <form method="post" class="compact-form three">
                                         {% csrf_token %}
                                         <input type="hidden" name="section" value="add_service">
                                         <input type="hidden" name="client_id" value="{{ selected_client.id }}">
-                                        <div class="field"><label>Naziv</label><input name="name" required></div>
-                                        <div class="field"><label>Kategorija</label><input name="category"></div>
-                                        <div class="field"><label>Trajanje (min)</label><input type="number" min="5" name="duration_minutes" value="30"></div>
-                                        <div class="field"><label>Cena</label><input type="number" min="0" step="0.01" name="price" value="0"></div>
-                                        <div class="field"><label>Valuta</label><input name="currency" value="USD"></div>
-                                        <label class="check-field"><input type="checkbox" name="is_active" checked> Aktivna</label>
-                                        <button class="primary-btn" type="submit">Dodaj uslugu</button>
+                                        <div class="field"><label>Name</label><input name="name" required></div>
+                                        <div class="field"><label>Category</label><input name="category"></div>
+                                        <div class="field"><label>Duration (min)</label><input type="number" min="5" name="duration_minutes" value="30"></div>
+                                        <div class="field"><label>Price</label><input type="number" min="0" step="0.01" name="price" value="0"></div>
+                                        <div class="field"><label>Currency</label><input name="currency" value="USD"></div>
+                                        <label class="check-field"><input type="checkbox" name="is_active" checked> Active</label>
+                                        <button class="primary-btn" type="submit">Add service</button>
                                     </form>
                                 {% endif %}
 
@@ -1702,19 +1702,19 @@
                                             <input type="hidden" name="section" value="update_service">
                                             <input type="hidden" name="client_id" value="{{ selected_client.id }}">
                                             <input type="hidden" name="service_id" value="{{ service.id }}">
-                                            <div class="field"><label>Naziv</label><input name="name" value="{{ service.name }}" required></div>
-                                            <div class="field"><label>Kategorija</label><input name="category" value="{{ service.category }}"></div>
+                                            <div class="field"><label>Name</label><input name="name" value="{{ service.name }}" required></div>
+                                            <div class="field"><label>Category</label><input name="category" value="{{ service.category }}"></div>
                                             <div class="field"><label>Min</label><input type="number" min="5" name="duration_minutes" value="{{ service.duration_minutes }}"></div>
-                                            <div class="field"><label>Cena</label><input type="number" min="0" step="0.01" name="price" value="{{ service.price }}"></div>
-                                            <div class="field"><label>Valuta</label><input name="currency" value="{{ service.currency }}"></div>
-                                            <label class="check-field"><input type="checkbox" name="is_active" {% if service.is_active %}checked{% endif %}> Aktivna</label>
+                                            <div class="field"><label>Price</label><input type="number" min="0" step="0.01" name="price" value="{{ service.price }}"></div>
+                                            <div class="field"><label>Currency</label><input name="currency" value="{{ service.currency }}"></div>
+                                            <label class="check-field"><input type="checkbox" name="is_active" {% if service.is_active %}checked{% endif %}> Active</label>
                                             <div class="edit-actions">
-                                                <button class="mini-btn success" type="submit">Sacuvaj</button>
-                                                <button class="danger-btn" type="submit" name="section" value="delete_service" onclick="return confirm('Obrisati uslugu {{ service.name }}?');">Obrisi</button>
+                                                <button class="mini-btn success" type="submit">Save</button>
+                                                <button class="danger-btn" type="submit" name="section" value="delete_service" onclick="return confirm('Delete service {{ service.name }}?');">Delete</button>
                                             </div>
                                         </form>
                                     {% empty %}
-                                        <div class="notice">Nema dodatih usluga.</div>
+                                        <div class="notice">No services added.</div>
                                     {% endfor %}
                                 </div>
                             </article>
@@ -1722,13 +1722,13 @@
 
                         <div class="detail-grid">
                             <article class="card detail-card">
-                                <h3>Integracije</h3>
+                                <h3>Integrations</h3>
                                 <table class="detail-table">
                                     <thead>
                                         <tr>
-                                            <th>Kanal</th>
+                                            <th>Channel</th>
                                             <th>Status</th>
-                                            <th>Broj / nalog</th>
+                                            <th>Number / account</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -1748,7 +1748,7 @@
                             </article>
 
                             <article class="card detail-card">
-                                <h3>Poslednje AI aktivnosti</h3>
+                                <h3>Recent AI activity</h3>
                                 <div class="call-list">
                                     {% for log in selected_ai_logs %}
                                         <div class="call-row">
@@ -1761,7 +1761,7 @@
                                             <span class="call-time">{{ log.created_at|date:"d.m H:i" }}</span>
                                         </div>
                                     {% empty %}
-                                        <div class="notice">Jos nema AI aktivnosti za ovog klijenta.</div>
+                                        <div class="notice">No AI activity yet for this client.</div>
                                     {% endfor %}
                                 </div>
                             </article>
@@ -1771,45 +1771,45 @@
                     <section class="panel" id="alarms">
                         <div class="section-head">
                             <div>
-                                <h2>Eskalacija</h2>
-                                <p>Kaleya prebacuje poziv na vas kada ne može da pomogne. Podesite na koji broj.</p>
+                                <h2>Alarms &amp; Escalation</h2>
+                                <p>Kaleya transfers the call to you when it can't help. Set the number below.</p>
                             </div>
                         </div>
 
                         <div class="detail-grid">
                             <article class="card detail-card">
-                                <h3>Kako eskalacija radi</h3>
+                                <h3>How escalation works</h3>
                                 <div class="status-list" style="margin-top:8px">
-                                    <div class="status-line"><span>Kad pozivalac kaže</span><strong>"Hvaću pravi čovek" / "Can I speak to someone"</strong></div>
-                                    <div class="status-line"><span>Kad AI ne može</span><strong>Booking van radnog vremena, specijalni zahtevi</strong></div>
-                                    <div class="status-line"><span>Šta Kaleya kaže</span><strong>"I'll have the owner call you right back."</strong></div>
-                                    <div class="status-line"><span>Eskalacioni broj</span>
+                                    <div class="status-line"><span>When caller says</span><strong>"I want a real person" / "Can I speak to someone"</strong></div>
+                                    <div class="status-line"><span>When AI can't help</span><strong>Booking outside hours, special requests</strong></div>
+                                    <div class="status-line"><span>What Kaleya says</span><strong>"I'll have the owner call you right back."</strong></div>
+                                    <div class="status-line"><span>Escalation number</span>
                                         <strong>
                                             {% if selected_client.business_phone %}
                                                 {{ selected_client.business_phone }}
                                             {% else %}
-                                                <span style="color:var(--orange)">Nije podešen — dodaj u Podešavanjima</span>
+                                                <span style="color:var(--orange)">Not set — add it in Settings</span>
                                             {% endif %}
                                         </strong>
                                     </div>
                                 </div>
                                 {% if not selected_client.business_phone %}
-                                    <a class="primary-btn" href="#settings" data-tab="settings" style="margin-top:18px;display:inline-flex">Podesi eskalacioni broj →</a>
+                                    <a class="primary-btn" href="#settings" data-tab="settings" style="margin-top:18px;display:inline-flex">Set escalation number →</a>
                                 {% endif %}
                             </article>
 
                             <article class="card detail-card">
-                                <h3>Notifikacije</h3>
+                                <h3>Notifications</h3>
                                 <form method="post">
                                     {% csrf_token %}
                                     <input type="hidden" name="section" value="alarms">
                                     <input type="hidden" name="client_id" value="{{ selected_client.id }}">
                                     <div class="switch-row" style="grid-template-columns:1fr 1fr;margin-bottom:18px">
-                                        <label class="switch">Notifikacije <input type="checkbox" name="notifications_enabled" {% if alarm_settings.notifications_enabled %}checked{% endif %}></label>
-                                        <label class="switch">Hitne <input type="checkbox" name="urgent_enabled" {% if alarm_settings.urgent_enabled %}checked{% endif %}></label>
+                                        <label class="switch">Notifications <input type="checkbox" name="notifications_enabled" {% if alarm_settings.notifications_enabled %}checked{% endif %}></label>
+                                        <label class="switch">Urgent only <input type="checkbox" name="urgent_enabled" {% if alarm_settings.urgent_enabled %}checked{% endif %}></label>
                                     </div>
                                     <div class="actions">
-                                        <button class="primary-btn" type="submit">Sačuvaj</button>
+                                        <button class="primary-btn" type="submit">Save alarms</button>
                                     </div>
                                 </form>
                             </article>
@@ -1819,8 +1819,8 @@
                     <section class="panel" id="integrations">
                         <div class="section-head">
                             <div>
-                                <h2>Integracije</h2>
-                                <p>Kanali za WhatsApp, Viber, Telegram, SMS i telefonske pozive.</p>
+                                <h2>Integrations</h2>
+                                <p>Channels: WhatsApp, Viber, Telegram, phone calls, Google Calendar.</p>
                             </div>
                         </div>
                         <form method="post" class="card settings-card">
@@ -1831,10 +1831,10 @@
                                 <table class="client-table">
                                     <thead>
                                         <tr>
-                                            <th>Kanal</th>
-                                            <th>Aktivno</th>
+                                            <th>Channel</th>
+                                            <th>Active</th>
                                             <th>Status</th>
-                                            <th>Broj / nalog</th>
+                                            <th>Number / account</th>
                                             <th>Webhook</th>
                                         </tr>
                                     </thead>
@@ -1859,22 +1859,22 @@
                                 </table>
                             </div>
                             <div class="actions">
-                                <button class="primary-btn" type="submit">Sačuvaj integracije</button>
+                                <button class="primary-btn" type="submit">Save integrations</button>
                             </div>
                         </form>
 
                         {# ── Phone / Twilio number card ─────────────────────────────────── #}
                         <div class="card settings-card" style="margin-top:28px">
-                            <h2>📞 Kaleya AI broj (telefonski pozivi)</h2>
+                            <h2>📞 Kaleya AI number (phone calls)</h2>
 
                             {% if phone_kaleya_number %}
                                 {# Number already provisioned — show it + forwarding instructions #}
                                 <div class="status-list" style="margin-bottom:22px">
                                     <div class="status-line">
-                                        <span>Kaleya AI broj</span>
+                                        <span>Kaleya AI number</span>
                                         <strong style="color:var(--green);font-size:22px;letter-spacing:.03em">{{ phone_kaleya_number }}</strong>
                                     </div>
-                                    <div class="status-line"><span>Zemlja</span><strong>{{ phone_country }}</strong></div>
+                                    <div class="status-line"><span>Country</span><strong>{{ phone_country }}</strong></div>
                                     <div class="status-line"><span>Status</span>
                                         <span class="badge {% if phone_integration.status == 'connected' %}ok{% else %}pause{% endif %}">
                                             {{ phone_integration.get_status_display }}
@@ -1883,31 +1883,31 @@
                                 </div>
 
                                 <div class="card detail-card" style="background:#0c1423;border:1px solid #253248;margin-bottom:18px">
-                                    <h3 style="margin-bottom:14px">📋 Uputstvo za preusmeravanje poziva</h3>
+                                    <h3 style="margin-bottom:14px">📋 Call forwarding instructions</h3>
                                     <p style="color:var(--soft);margin:0 0 14px;font-size:15px">
-                                        Vlasnik treba da ukuca jedan od ovih kodova na svom poslovnom telefonu:
+                                        The owner needs to dial one of these codes on their business phone:
                                     </p>
                                     <div class="status-list">
                                         <div class="status-line">
-                                            <span>Sve pozive preusmeri</span>
+                                            <span>Forward all calls</span>
                                             <strong style="font-family:monospace;font-size:18px;color:var(--teal)">**21*{{ phone_kaleya_number }}#</strong>
                                         </div>
                                         <div class="status-line">
-                                            <span>Samo kad je zauzet</span>
+                                            <span>Only when busy</span>
                                             <strong style="font-family:monospace">**67*{{ phone_kaleya_number }}#</strong>
                                         </div>
                                         <div class="status-line">
-                                            <span>Samo kad ne odgovori</span>
+                                            <span>Only when no answer</span>
                                             <strong style="font-family:monospace">**61*{{ phone_kaleya_number }}#</strong>
                                         </div>
                                         <div class="status-line">
-                                            <span>Otkaži preusmeravanje</span>
+                                            <span>Cancel forwarding</span>
                                             <strong style="font-family:monospace">##002#</strong>
                                         </div>
                                     </div>
                                     <p style="color:var(--muted);font-size:13px;margin:14px 0 0">
-                                        ℹ️ Koraci: Otvori aplikaciju za pozive → ukucaj kod → pritisni zelenu slušalicu → sačekaj poruku "Preusmeravanje aktivirano".
-                                        Za AT&amp;T / Verizon fiksne linije u SAD koristiti <strong style="font-family:monospace">*72{{ phone_kaleya_number }}</strong>.
+                                        ℹ️ Steps: Open the phone dialer → enter the code → press the green call button → wait for "Forwarding activated".
+                                        For AT&amp;T / Verizon landlines in the US use <strong style="font-family:monospace">*72{{ phone_kaleya_number }}</strong>.
                                     </p>
                                 </div>
 
@@ -1916,8 +1916,8 @@
                                         {% csrf_token %}
                                         <input type="hidden" name="section" value="release_phone">
                                         <input type="hidden" name="client_id" value="{{ selected_client.id }}">
-                                        <button class="danger-btn" type="submit" onclick="return confirm('Osloboditi Twilio broj {{ phone_kaleya_number }}? Ovo će ga trajno ukloniti.')">
-                                            Oslobodi broj
+                                        <button class="danger-btn" type="submit" onclick="return confirm('Release Twilio number {{ phone_kaleya_number }}? This will permanently remove it.')">
+                                            Release number
                                         </button>
                                     </form>
                                 {% endif %}
@@ -1925,19 +1925,19 @@
                             {% else %}
                                 {# No number yet #}
                                 <p class="helper-text">
-                                    Vlasnik unosi poslovni telefon u <strong>Podešavanja → Telefon firme</strong>.
-                                    Admin zatim klika "Kupi Kaleya broj" — sistem automatski prepoznaje zemlju i kupuje lokalni Twilio broj.
-                                    Vlasnik dobija uputstvo za preusmeravanje poziva.
+                                    The owner enters their business phone in <strong>Settings → Business phone</strong>.
+                                    The admin then clicks "Buy Kaleya number" — the system detects the country automatically and purchases a local Twilio number.
+                                    The owner receives call forwarding instructions.
                                 </p>
 
                                 <div class="status-list" style="margin:14px 0">
                                     <div class="status-line">
-                                        <span>Poslovni telefon vlasnika</span>
+                                        <span>Owner's business phone</span>
                                         <strong>
                                             {% if selected_client.business_phone %}
                                                 {{ selected_client.business_phone }}
                                             {% else %}
-                                                <span style="color:var(--orange)">Nije unesen — vlasnik treba da ga doda u Podešavanjima</span>
+                                                <span style="color:var(--orange)">Not entered — owner needs to add it in Settings</span>
                                             {% endif %}
                                         </strong>
                                     </div>
@@ -1950,21 +1950,21 @@
                                             <input type="hidden" name="section" value="provision_phone">
                                             <input type="hidden" name="client_id" value="{{ selected_client.id }}">
                                             <button class="primary-btn" type="submit">
-                                                🛒 Kupi Kaleya broj za {{ selected_client.business_phone }}
+                                                🛒 Buy Kaleya number for {{ selected_client.business_phone }}
                                             </button>
                                         </form>
                                         <p class="helper-text" style="margin-top:10px">
-                                            Sistem će automatski detektovati zemlju iz broja i kupiti lokalni Twilio broj.
-                                            Rusija (+7) nije podržana — kontaktiraj Kaleya podršku.
+                                            The system will auto-detect the country from the number and purchase a local Twilio number.
+                                            Russia (+7) is not supported — contact Kaleya support.
                                         </p>
                                     {% else %}
                                         <div class="notice" style="min-height:auto;padding:16px">
-                                            Vlasnik prvo mora da unese poslovni telefon u Podešavanjima.
+                                            The owner must first enter a business phone number in Settings.
                                         </div>
                                     {% endif %}
                                 {% else %}
                                     <div class="notice" style="min-height:auto;padding:16px">
-                                        Vaš Kaleya AI broj još nije dodeljen. Naš tim će vas kontaktirati u roku od 24h nakon aktivacije.
+                                        Your Kaleya AI number has not been assigned yet. Our team will contact you within 24 hours of activation.
                                     </div>
                                 {% endif %}
                             {% endif %}
@@ -1977,11 +1977,11 @@
                             <input type="hidden" name="client_id" value="{{ selected_client.id }}">
                             <h2>💬 WhatsApp</h2>
                             <p class="helper-text">
-                                Kaleya prima i odgovara na WhatsApp poruke putem Twilio.
-                                Upiši Twilio WhatsApp broj i nalepite webhook URL u Twilio konzolu.
+                                Kaleya receives and replies to WhatsApp messages via Twilio.
+                                Enter the Twilio WhatsApp number and paste the webhook URL into the Twilio console.
                             </p>
                             <div class="form-grid">
-                                <label class="switch">WhatsApp aktivan
+                                <label class="switch">WhatsApp active
                                     <input type="checkbox" name="whatsapp_enabled" {% if whatsapp_integration.enabled %}checked{% endif %}>
                                 </label>
                                 <div class="field">
@@ -1994,29 +1994,29 @@
                                     </select>
                                 </div>
                                 <div class="field full">
-                                    <label>Twilio WhatsApp broj</label>
+                                    <label>Twilio WhatsApp number</label>
                                     <input name="whatsapp_public_number"
                                            value="{{ whatsapp_integration.public_number|default:'' }}"
                                            placeholder="+14155238886">
-                                    <span class="helper-text">Broj bez prefiksa "whatsapp:" — npr. <strong>+14155238886</strong></span>
+                                    <span class="helper-text">Number without "whatsapp:" prefix — e.g. <strong>+14155238886</strong></span>
                                 </div>
                                 <div class="field full">
-                                    <label>Webhook URL (nalepiti u Twilio konzolu)</label>
+                                    <label>Webhook URL (paste into Twilio console)</label>
                                     <input class="readonly-input" value="{{ whatsapp_webhook_url }}" readonly onclick="this.select()">
                                     <span class="helper-text">
-                                        Twilio konzola → Messaging → <strong>Try it out → Send a WhatsApp message</strong> →
-                                        "When a message comes in" → nalepiti ovaj URL, metod POST.
+                                        Twilio console → Messaging → <strong>Try it out → Send a WhatsApp message</strong> →
+                                        "When a message comes in" → paste this URL, method POST.
                                     </span>
                                 </div>
                                 {% if whatsapp_integration.last_error %}
                                     <div class="field full">
-                                        <label>Poslednja greška</label>
+                                        <label>Last error</label>
                                         <textarea readonly>{{ whatsapp_integration.last_error }}</textarea>
                                     </div>
                                 {% endif %}
                             </div>
                             <div class="actions">
-                                <button class="primary-btn" type="submit">Sačuvaj WhatsApp</button>
+                                <button class="primary-btn" type="submit">Save WhatsApp</button>
                             </div>
                         </form>
 
@@ -2027,11 +2027,11 @@
                             <input type="hidden" name="client_id" value="{{ selected_client.id }}">
                             <h2>💜 Viber</h2>
                             <p class="helper-text">
-                                Kaleya prima i odgovara na Viber poruke putem Viber Public Account API.
-                                Napravi Public Account na <strong>partners.viber.com</strong>, uzmi Auth Token i sačuvaj — webhook se automatski registruje.
+                                Kaleya receives and replies to Viber messages via the Viber Public Account API.
+                                Create a Public Account at <strong>partners.viber.com</strong>, get the Auth Token and save — the webhook is registered automatically.
                             </p>
                             <div class="form-grid">
-                                <label class="switch">Viber aktivan
+                                <label class="switch">Viber active
                                     <input type="checkbox" name="viber_enabled" {% if viber_integration.enabled %}checked{% endif %}>
                                 </label>
                                 <div class="field">
@@ -2046,27 +2046,27 @@
                                 <div class="field full">
                                     <label>Auth Token (PA Token)</label>
                                     <input type="password" name="viber_auth_token"
-                                           placeholder="{% if viber_integration and viber_integration.config.auth_token %}Auth token je sačuvan — unesi novi za promenu{% else %}Nalepiti token iz Viber Partners portala{% endif %}">
+                                           placeholder="{% if viber_integration and viber_integration.config.auth_token %}Auth token saved — enter a new one to change{% else %}Paste token from Viber Partners portal{% endif %}">
                                 </div>
                                 <div class="field full">
-                                    <label>Naziv pošiljaoca (Sender Name)</label>
+                                    <label>Sender Name</label>
                                     <input name="viber_sender_name"
                                            value="{% if viber_integration %}{{ viber_integration.config.sender_name|default:'' }}{% endif %}"
                                            placeholder="Kaleya">
                                 </div>
                                 <div class="field full">
-                                    <label>Webhook URL (automatski se registruje na čuvanju)</label>
+                                    <label>Webhook URL (auto-registered on save)</label>
                                     <input class="readonly-input" value="{{ viber_webhook_url }}" readonly onclick="this.select()">
                                 </div>
                                 {% if viber_integration.last_error %}
                                     <div class="field full">
-                                        <label>Poslednja greška</label>
+                                        <label>Last error</label>
                                         <textarea readonly>{{ viber_integration.last_error }}</textarea>
                                     </div>
                                 {% endif %}
                             </div>
                             <div class="actions">
-                                <button class="primary-btn" type="submit">Sačuvaj Viber</button>
+                                <button class="primary-btn" type="submit">Save Viber</button>
                             </div>
                         </form>
 
@@ -2077,11 +2077,11 @@
                             <input type="hidden" name="client_id" value="{{ selected_client.id }}">
                             <h2>📸 Instagram DM</h2>
                             <p class="helper-text">
-                                Kaleya odgovara na Instagram Direct poruke putem Meta Business API.
-                                Potreban je Meta Business nalog, Instagram Professional nalog i odobrena Meta App.
+                                Kaleya replies to Instagram Direct messages via the Meta Business API.
+                                You need a Meta Business account, an Instagram Professional account, and an approved Meta App.
                             </p>
                             <div class="form-grid">
-                                <label class="switch">Instagram aktivan
+                                <label class="switch">Instagram active
                                     <input type="checkbox" name="instagram_enabled" {% if instagram_integration.enabled %}checked{% endif %}>
                                 </label>
                                 <div class="field">
@@ -2096,7 +2096,7 @@
                                 <div class="field full">
                                     <label>Page Access Token</label>
                                     <input type="password" name="instagram_access_token"
-                                           placeholder="{% if instagram_integration and instagram_integration.config.access_token %}Token sačuvan{% else %}Iz Meta Business Suite → Settings → Advanced{% endif %}">
+                                           placeholder="{% if instagram_integration and instagram_integration.config.access_token %}Token saved{% else %}From Meta Business Suite → Settings → Advanced{% endif %}">
                                 </div>
                                 <div class="field full">
                                     <label>Instagram Business Account ID</label>
@@ -2105,25 +2105,25 @@
                                            placeholder="npr. 1234567890">
                                 </div>
                                 <div class="field">
-                                    <label>Verify Token (za Meta webhook verifikaciju)</label>
+                                    <label>Verify Token (for Meta webhook verification)</label>
                                     <input name="instagram_verify_token"
                                            value="{% if instagram_integration %}{{ instagram_integration.config.verify_token|default:'' }}{% endif %}"
-                                           placeholder="slobodno izaberi string">
+                                           placeholder="choose any string">
                                 </div>
                                 <div class="field full">
-                                    <label>Webhook URL (upisati u Meta App → Webhooks)</label>
+                                    <label>Webhook URL (enter in Meta App → Webhooks)</label>
                                     <input class="readonly-input" value="{{ instagram_webhook_url }}" readonly onclick="this.select()">
-                                    <span class="helper-text">Callback URL → upiši; Verify Token → isto kao gore; subscribe na <strong>messages</strong>.</span>
+                                    <span class="helper-text">Callback URL → enter this; Verify Token → same as above; subscribe to <strong>messages</strong>.</span>
                                 </div>
                                 {% if instagram_integration.last_error %}
                                     <div class="field full">
-                                        <label>Poslednja greška</label>
+                                        <label>Last error</label>
                                         <textarea readonly>{{ instagram_integration.last_error }}</textarea>
                                     </div>
                                 {% endif %}
                             </div>
                             <div class="actions">
-                                <button class="primary-btn" type="submit">Sačuvaj Instagram</button>
+                                <button class="primary-btn" type="submit">Save Instagram</button>
                             </div>
                         </form>
 
@@ -2133,11 +2133,11 @@
                             <input type="hidden" name="client_id" value="{{ selected_client.id }}">
                             <h2>Telegram bot</h2>
                             <p class="helper-text">
-                                Ovde se povezuje Telegram bot za izabranu firmu. Bot token se ne prikazuje posle cuvanja;
-                                ako zelis promenu, unesi novi token i sacuvaj ponovo.
+                                Connect the Telegram bot for the selected business. The bot token is not shown after saving;
+                                to change it, enter a new token and save again.
                             </p>
                             <div class="form-grid">
-                                <label class="switch">Telegram aktivan <input type="checkbox" name="telegram_enabled" {% if telegram_integration.enabled %}checked{% endif %}></label>
+                                <label class="switch">Telegram active <input type="checkbox" name="telegram_enabled" {% if telegram_integration.enabled %}checked{% endif %}></label>
                                 <div class="field">
                                     <label>Status</label>
                                     <select name="telegram_status">
@@ -2153,27 +2153,27 @@
                                 </div>
                                 <div class="field full">
                                     <label>Bot token</label>
-                                    <input type="password" name="telegram_bot_token" placeholder="{% if telegram_bot_token_configured %}Bot token je sacuvan{% else %}Unesi token iz BotFather-a{% endif %}">
+                                    <input type="password" name="telegram_bot_token" placeholder="{% if telegram_bot_token_configured %}Bot token saved{% else %}Enter token from BotFather{% endif %}">
                                 </div>
                                 <div class="field full">
                                     <label>Webhook URL</label>
                                     <input class="readonly-input" name="telegram_webhook_url" value="{% firstof telegram_integration.webhook_url telegram_webhook_url %}" readonly>
-                                    <span class="helper-text">Ovaj URL se upisuje u Telegram setWebhook za ovog klijenta.</span>
+                                    <span class="helper-text">This URL is registered via Telegram setWebhook for this client.</span>
                                 </div>
                                 <div class="field full">
                                     <label>Webhook secret</label>
-                                    <input name="telegram_webhook_secret" value="{{ telegram_webhook_secret }}" placeholder="Automatski se generise ako ostane prazno">
-                                    <span class="helper-text">Telegram salje ovaj secret u header-u i backend odbija sve sto ga nema.</span>
+                                    <input name="telegram_webhook_secret" value="{{ telegram_webhook_secret }}" placeholder="Auto-generated if left empty">
+                                    <span class="helper-text">Telegram sends this secret in the header; the backend rejects requests without it.</span>
                                 </div>
                                 {% if telegram_integration.last_error %}
                                     <div class="field full">
-                                        <label>Poslednja greska</label>
+                                        <label>Last error</label>
                                         <textarea readonly>{{ telegram_integration.last_error }}</textarea>
                                     </div>
                                 {% endif %}
                             </div>
                             <div class="actions">
-                                <button class="primary-btn" type="submit">Sacuvaj Telegram</button>
+                                <button class="primary-btn" type="submit">Save Telegram</button>
                             </div>
                         </form>
 
@@ -2181,27 +2181,27 @@
                         <div class="card settings-card" style="margin-top:28px" id="gcalCard">
                             <h2>📅 Google Calendar</h2>
                             <p style="color:var(--muted);font-size:14px;margin:0 0 16px">
-                                Sinhronizuj zakazivanja sa Google kalendarom vlasnika salona.
-                                Kada Kaleya zakaže termin, automatski se kreira Google Calendar event.
+                                Sync appointments with the salon owner's Google Calendar.
+                                When Kaleya books an appointment, a Google Calendar event is created automatically.
                             </p>
                             {% if gcal_success_msg %}
                                 <div style="background:var(--green-soft);border:1px solid var(--green);border-radius:12px;padding:12px 16px;margin-bottom:16px;color:var(--green);font-size:14px;font-weight:600;">
-                                    ✅ Google Calendar je uspešno povezan!
+                                    ✅ Google Calendar connected successfully!
                                 </div>
                             {% endif %}
                             {% if gcal_error_msg %}
                                 <div style="background:rgba(240,95,114,.13);border:1px solid var(--red);border-radius:12px;padding:12px 16px;margin-bottom:16px;color:var(--red);font-size:14px;font-weight:600;">
-                                    ❌ Greška pri povezivanju: {{ gcal_error_msg }}
+                                    ❌ Error connecting: {{ gcal_error_msg }}
                                 </div>
                             {% endif %}
                             <div class="form-grid">
                                 <div class="field">
                                     <label>Status</label>
-                                    <input class="readonly-input" value="{% if gcal_is_connected %}🟢 Povezan{% else %}⚪ Nije povezan{% endif %}" readonly>
+                                    <input class="readonly-input" value="{% if gcal_is_connected %}🟢 Connected{% else %}⚪ Not connected{% endif %}" readonly>
                                 </div>
                                 {% if gcal_connected_email %}
                                 <div class="field">
-                                    <label>Google nalog</label>
+                                    <label>Google account</label>
                                     <input class="readonly-input" value="{{ gcal_connected_email }}" readonly>
                                 </div>
                                 {% endif %}
@@ -2209,11 +2209,11 @@
                             <div class="actions" style="gap:12px">
                                 {% if gcal_is_connected %}
                                     <button class="primary-btn" onclick="gcalDisconnect(event)" style="background:rgba(240,95,114,.15);color:var(--red);border:1px solid rgba(240,95,114,.3)">
-                                        Prekini vezu
+                                        Disconnect
                                     </button>
                                 {% else %}
                                     <button class="primary-btn" onclick="gcalConnect(event)">
-                                        Poveži Google Calendar
+                                        Connect Google Calendar
                                     </button>
                                 {% endif %}
                             </div>
@@ -2224,62 +2224,62 @@
                         <section class="panel" id="payments">
                             <div class="section-head">
                                 <div>
-                                    <h2>Plaćanja</h2>
-                                    <p>Lemon Squeezy webhook događaji, aktivacije naloga i greške obrade.</p>
+                                    <h2>Payments (Admin)</h2>
+                                    <p>Lemon Squeezy webhook events, account activations and processing errors.</p>
                                 </div>
                                 <a class="primary-btn" href="/django-admin/billing/paymentwebhookevent/">Django log</a>
                             </div>
 
                             <div class="cards">
                                 <article class="card metric">
-                                    <span>Klijenti za proveru</span>
+                                    <span>Clients to review</span>
                                     <strong>{{ billing_client_stats.needs_attention|default:0 }}</strong>
-                                    <small style="color:var(--orange)">naplata ili pristup</small>
+                                    <small style="color:var(--orange)">billing or access issue</small>
                                 </article>
                                 <article class="card metric">
-                                    <span>Aktivne pretplate</span>
+                                    <span>Active subscriptions</span>
                                     <strong>{{ billing_client_stats.active|default:0 }}</strong>
-                                    <small>placaju i rade</small>
+                                    <small>paying and running</small>
                                 </article>
                                 <article class="card metric">
                                     <span>Trial</span>
                                     <strong>{{ billing_client_stats.trial|default:0 }}</strong>
-                                    <small style="color:var(--orange)">14 dana proba</small>
+                                    <small style="color:var(--orange)">14-day trial</small>
                                 </article>
                                 <article class="card metric">
-                                    <span>Ukupno webhook-a</span>
+                                    <span>Total webhooks</span>
                                     <strong>{{ payment_webhook_total }}</strong>
-                                    <small style="color:var(--muted)">svi događaji</small>
+                                    <small style="color:var(--muted)">all events</small>
                                 </article>
                                 <article class="card metric">
-                                    <span>Obrađeno</span>
+                                    <span>Processed</span>
                                     <strong>{{ payment_webhook_processed }}</strong>
-                                    <small>nalozi aktivirani</small>
+                                    <small>accounts activated</small>
                                 </article>
                                 <article class="card metric">
-                                    <span>Na čekanju</span>
+                                    <span>Pending</span>
                                     <strong>{{ payment_webhook_pending }}</strong>
                                     <small style="color:var(--orange)">received / verified</small>
                                 </article>
                                 <article class="card metric">
-                                    <span>Greške</span>
+                                    <span>Errors</span>
                                     <strong>{{ payment_webhook_failed }}</strong>
-                                    <small style="color:var(--red)">treba provera</small>
+                                    <small style="color:var(--red)">needs review</small>
                                 </article>
                             </div>
 
                             <div class="card table-card table-scroll" style="margin-top:28px">
-                                <h3>Billing status klijenata</h3>
+                                <h3>Client billing status</h3>
                                 <table class="client-table">
                                     <thead>
                                         <tr>
-                                            <th>Klijent</th>
-                                            <th>Paket</th>
-                                            <th>Pretplata</th>
-                                            <th>Pristup</th>
-                                            <th>Obnova / trial</th>
-                                            <th>Cena</th>
-                                            <th>Problem / sledeca akcija</th>
+                                            <th>Client</th>
+                                            <th>Plan</th>
+                                            <th>Subscription</th>
+                                            <th>Access</th>
+                                            <th>Renewal / trial</th>
+                                            <th>Price</th>
+                                            <th>Issue / next action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -2299,19 +2299,19 @@
                                                 <td class="renew-cell">
                                                     {% if row.due_at %}
                                                         <strong>{{ row.due_at|date:"d.m.Y" }}</strong>
-                                                        <span>{% if row.status_code == "trial" %}kraj trial-a{% else %}sledeca naplata{% endif %}</span>
+                                                        <span>{% if row.status_code == "trial" %}trial end{% else %}next billing{% endif %}</span>
                                                     {% else %}
                                                         <strong>-</strong>
-                                                        <span>nema datuma</span>
+                                                        <span>no date</span>
                                                     {% endif %}
                                                 </td>
                                                 <td class="price-cell">
                                                     {% if row.price %}
                                                         <strong>{{ row.price }} {{ row.currency }}</strong>
-                                                        <span>mesecno</span>
+                                                        <span>monthly</span>
                                                     {% else %}
                                                         <strong>-</strong>
-                                                        <span>nema plana</span>
+                                                        <span>no plan</span>
                                                     {% endif %}
                                                 </td>
                                                 <td>
@@ -2321,7 +2321,7 @@
                                             </tr>
                                         {% empty %}
                                             <tr>
-                                                <td colspan="7" class="muted">Nema klijenata za billing pregled.</td>
+                                                <td colspan="7" class="muted">No clients for billing review.</td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>
@@ -2333,12 +2333,12 @@
                                 <table class="client-table">
                                     <thead>
                                         <tr>
-                                            <th>Vreme</th>
+                                            <th>Time</th>
                                             <th>Provider</th>
-                                            <th>Događaj</th>
+                                            <th>Event</th>
                                             <th>Status</th>
                                             <th>Checkout</th>
-                                            <th>Poruka</th>
+                                            <th>Message</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -2366,7 +2366,7 @@
                                             </tr>
                                         {% empty %}
                                             <tr>
-                                                <td colspan="6" class="muted">Još nema payment webhook događaja.</td>
+                                                <td colspan="6" class="muted">No payment webhook events yet.</td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>
@@ -2475,8 +2475,8 @@
                     <section class="panel" id="settings">
                         <div class="section-head">
                             <div>
-                                <h2>Podešavanja</h2>
-                                <p>Radno vreme, jezik, glas, alarmi klijenta i API po klijentu.</p>
+                                <h2>Settings</h2>
+                                <p>Working hours, language, voice, alarms and per-client API overrides.</p>
                             </div>
                             {% if clients %}
                                 <form method="get">
@@ -2493,27 +2493,27 @@
                             {% csrf_token %}
                             <input type="hidden" name="section" value="client">
                             <input type="hidden" name="client_id" value="{{ selected_client.id }}">
-                            <h2>Klijent</h2>
+                            <h2>Client</h2>
                             <div class="form-grid">
                                 <div class="field">
-                                    <label>Naziv</label>
+                                    <label>Name</label>
                                     <input name="name" value="{{ selected_client.name }}">
                                 </div>
                                 <div class="field">
-                                    <label>Javni naziv</label>
+                                    <label>Public name</label>
                                     <input name="public_name" value="{{ selected_client.public_name }}">
                                 </div>
                                 <div class="field">
-                                    <label>Telefon firme</label>
+                                    <label>Business phone</label>
                                     <input name="business_phone" value="{{ selected_client.business_phone }}" placeholder="+1 415 000 0000">
                                 </div>
                                 <div class="field">
-                                    <label>Email firme</label>
+                                    <label>Business email</label>
                                     <input type="email" name="business_email" value="{{ selected_client.business_email }}" placeholder="info@salon.com">
                                 </div>
                                 {% if is_admin_user %}
                                 <div class="field">
-                                    <label>Paket</label>
+                                    <label>Plan</label>
                                     <select name="package">
                                         {% for value,label in package_choices %}
                                             <option value="{{ value }}" {% if selected_client.package == value %}selected{% endif %}>{{ label }}</option>
@@ -2522,16 +2522,16 @@
                                 </div>
                                 {% else %}
                                 <div class="field">
-                                    <label>Paket</label>
+                                    <label>Plan</label>
                                     <input class="readonly-input" value="{{ selected_client.get_package_display }}" readonly>
                                 </div>
                                 {% endif %}
                                 <div class="field">
-                                    <label>Vremenska zona</label>
+                                    <label>Timezone</label>
                                     <input name="timezone" value="{{ selected_client.timezone }}">
                                 </div>
                                 <div class="field">
-                                    <label>Jezik aplikacije</label>
+                                    <label>App language</label>
                                     <select name="interface_language">
                                         {% for value,label in language_choices %}
                                             <option value="{{ value }}" {% if selected_client.interface_language == value %}selected{% endif %}>{{ label }}</option>
@@ -2539,7 +2539,7 @@
                                     </select>
                                 </div>
                                 <div class="field">
-                                    <label>Jezik glasa</label>
+                                    <label>Voice language</label>
                                     <select name="voice_language">
                                         {% for value,label in language_choices %}
                                             <option value="{{ value }}" {% if selected_client.voice_language == value %}selected{% endif %}>{{ label }}</option>
@@ -2547,15 +2547,15 @@
                                     </select>
                                 </div>
                                 <div class="field">
-                                    <label>Rad od</label>
+                                    <label>Open from</label>
                                     <input type="time" name="work_start" value="{{ selected_client.work_start|time:'H:i' }}">
                                 </div>
                                 <div class="field">
-                                    <label>Rad do</label>
+                                    <label>Close at</label>
                                     <input type="time" name="work_end" value="{{ selected_client.work_end|time:'H:i' }}">
                                 </div>
                                 <div class="field">
-                                    <label>Interval termina</label>
+                                    <label>Slot interval</label>
                                     <select name="slot_interval_minutes">
                                         {% for value in slot_choices %}
                                             <option value="{{ value }}" {% if selected_client.slot_interval_minutes == value %}selected{% endif %}>{{ value }} min</option>
@@ -2563,7 +2563,7 @@
                                     </select>
                                 </div>
                                 <div class="field">
-                                    <label>Format vremena</label>
+                                    <label>Time format</label>
                                     <select name="time_format">
                                         {% for value,label in time_format_choices %}
                                             <option value="{{ value }}" {% if selected_client.time_format == value %}selected{% endif %}>{{ label }}</option>
@@ -2571,7 +2571,7 @@
                                     </select>
                                 </div>
                                 <div class="field">
-                                    <label>Format datuma</label>
+                                    <label>Date format</label>
                                     <select name="date_format">
                                         {% for value,label in date_format_choices %}
                                             <option value="{{ value }}" {% if selected_client.date_format == value %}selected{% endif %}>{{ label }}</option>
@@ -2579,7 +2579,7 @@
                                     </select>
                                 </div>
                                 <div class="field">
-                                    <label>Prvi dan u nedelji</label>
+                                    <label>Week start</label>
                                     <select name="week_start">
                                         {% for value,label in week_start_choices %}
                                             <option value="{{ value }}" {% if selected_client.week_start == value %}selected{% endif %}>{{ label }}</option>
@@ -2589,14 +2589,14 @@
                             </div>
                             <div class="switch-row">
                                 <label class="switch">Kaleya online <input type="checkbox" name="kaleya_enabled" {% if selected_client.kaleya_enabled %}checked{% endif %}></label>
-                                <label class="switch">Telefon <input type="checkbox" name="allow_phone_calls" {% if selected_client.allow_phone_calls %}checked{% endif %}></label>
+                                <label class="switch">Phone <input type="checkbox" name="allow_phone_calls" {% if selected_client.allow_phone_calls %}checked{% endif %}></label>
                                 <label class="switch">SMS <input type="checkbox" name="allow_sms" {% if selected_client.allow_sms %}checked{% endif %}></label>
                                 <label class="switch">WhatsApp <input type="checkbox" name="allow_whatsapp" {% if selected_client.allow_whatsapp %}checked{% endif %}></label>
                                 <label class="switch">Viber <input type="checkbox" name="allow_viber" {% if selected_client.allow_viber %}checked{% endif %}></label>
                                 <label class="switch">Telegram <input type="checkbox" name="allow_telegram" {% if selected_client.allow_telegram %}checked{% endif %}></label>
                             </div>
                             <div class="actions">
-                                <button class="primary-btn" type="submit">Sačuvaj klijenta</button>
+                                <button class="primary-btn" type="submit">Save client</button>
                             </div>
                         </form>
 
@@ -2604,10 +2604,10 @@
                             {% csrf_token %}
                             <input type="hidden" name="section" value="voice">
                             <input type="hidden" name="client_id" value="{{ selected_client.id }}">
-                            <h2>Glas</h2>
+                            <h2>Voice</h2>
                             <div class="form-grid">
                                 <div class="field">
-                                    <label>Jezik glasa</label>
+                                    <label>Voice language</label>
                                     <select name="voice_language">
                                         {% for value,label in language_choices %}
                                             <option value="{{ value }}" {% if voice_settings.language == value %}selected{% endif %}>{{ label }}</option>
@@ -2632,7 +2632,7 @@
                                 </div>
                             </div>
                             <div class="actions">
-                                <button class="primary-btn" type="submit">Sačuvaj glas</button>
+                                <button class="primary-btn" type="submit">Save voice settings</button>
                             </div>
                         </form>
 
@@ -2641,7 +2641,7 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="section" value="api">
                                 <input type="hidden" name="client_id" value="{{ selected_client.id }}">
-                                <h2>API po klijentu</h2>
+                                <h2>Per-client API</h2>
                                 <div class="form-grid">
                                     <div class="field">
                                         <label>AI provider</label>
@@ -2653,11 +2653,11 @@
                                     </div>
                                     <div class="field full">
                                         <label>AI API key</label>
-                                        <input type="password" name="ai_api_key" placeholder="{% if api_settings.ai_api_key %}Ključ po klijentu je sačuvan{% elif global_ai_key_configured %}Koristi globalni Claude API iz .env{% else %}Unesi Claude API ključ{% endif %}">
+                                        <input type="password" name="ai_api_key" placeholder="{% if api_settings.ai_api_key %}Per-client key saved{% elif global_ai_key_configured %}Using global Claude API from .env{% else %}Enter Claude API key{% endif %}">
                                     </div>
                                     <div class="field full">
-                                        <label>Master prompt za Kaleya voice</label>
-                                        <textarea name="master_prompt" placeholder="Ton razgovora, pravila predstavljanja, granice odgovora i stil koji Kaleya koristi za ovog klijenta.">{{ api_settings.master_prompt }}</textarea>
+                                        <label>Master prompt for Kaleya voice</label>
+                                        <textarea name="master_prompt" placeholder="Conversation tone, introduction rules, response boundaries and style Kaleya uses for this client.">{{ api_settings.master_prompt }}</textarea>
                                     </div>
                                     <div class="field">
                                         <label>Voice provider</label>
@@ -2673,11 +2673,11 @@
                                     </div>
                                     <div class="field">
                                         <label>Voice API key</label>
-                                        <input type="password" name="voice_api_key" placeholder="{% if api_settings.voice_api_key %}Ključ po klijentu je sačuvan{% elif global_voice_key_configured %}Koristi globalni ElevenLabs API iz .env{% else %}Unesi ElevenLabs ključ{% endif %}">
+                                        <input type="password" name="voice_api_key" placeholder="{% if api_settings.voice_api_key %}Per-client key saved{% elif global_voice_key_configured %}Using global ElevenLabs API from .env{% else %}Enter ElevenLabs key{% endif %}">
                                     </div>
                                 </div>
                                 <div class="actions">
-                                    <button class="primary-btn" type="submit">Sačuvaj API</button>
+                                    <button class="primary-btn" type="submit">Save API settings</button>
                                 </div>
                             </form>
                         {% endif %}
@@ -2686,40 +2686,40 @@
                             {% csrf_token %}
                             <input type="hidden" name="section" value="alarms">
                             <input type="hidden" name="client_id" value="{{ selected_client.id }}">
-                            <h2>Alarmi klijenta</h2>
+                            <h2>Client alarms</h2>
                             <div class="switch-row">
-                                <label class="switch">Obaveštenja <input type="checkbox" name="notifications_enabled" {% if alarm_settings.notifications_enabled %}checked{% endif %}></label>
-                                <label class="switch">Hitno <input type="checkbox" name="urgent_enabled" {% if alarm_settings.urgent_enabled %}checked{% endif %}></label>
-                                <label class="switch">Najava reda <input type="checkbox" name="announcement_enabled" {% if alarm_settings.announcement_enabled %}checked{% endif %}></label>
+                                <label class="switch">Notifications <input type="checkbox" name="notifications_enabled" {% if alarm_settings.notifications_enabled %}checked{% endif %}></label>
+                                <label class="switch">Urgent only <input type="checkbox" name="urgent_enabled" {% if alarm_settings.urgent_enabled %}checked{% endif %}></label>
+                                <label class="switch">Queue announcement <input type="checkbox" name="announcement_enabled" {% if alarm_settings.announcement_enabled %}checked{% endif %}></label>
                             </div>
                             <div class="form-grid three">
                                 <div class="field">
-                                    <label>Zvuk obaveštenja</label>
+                                    <label>Notification sound</label>
                                     <input name="notification_sound" value="{{ alarm_settings.notification_sound }}">
                                 </div>
                                 <div class="field">
-                                    <label>Hitni zvuk</label>
+                                    <label>Urgent sound</label>
                                     <input name="urgent_sound" value="{{ alarm_settings.urgent_sound }}">
                                 </div>
                                 <div class="field">
-                                    <label>Zvuk najave</label>
+                                    <label>Announcement sound</label>
                                     <input name="announcement_sound" value="{{ alarm_settings.announcement_sound }}">
                                 </div>
                                 <div class="field">
-                                    <label>Jačina obaveštenja</label>
+                                    <label>Notification volume</label>
                                     <input type="number" min="0" max="100" name="notification_volume" value="{{ alarm_settings.notification_volume }}">
                                 </div>
                                 <div class="field">
-                                    <label>Jačina hitnog alarma</label>
+                                    <label>Urgent volume</label>
                                     <input type="number" min="0" max="100" name="urgent_volume" value="{{ alarm_settings.urgent_volume }}">
                                 </div>
                                 <div class="field">
-                                    <label>Jačina najave</label>
+                                    <label>Announcement volume</label>
                                     <input type="number" min="0" max="100" name="announcement_volume" value="{{ alarm_settings.announcement_volume }}">
                                 </div>
                             </div>
                             <div class="actions">
-                                <button class="primary-btn" type="submit">Sačuvaj alarme</button>
+                                <button class="primary-btn" type="submit">Save alarms</button>
                             </div>
                         </form>
                     </section>
@@ -2749,7 +2749,7 @@
             tabs.forEach((item) => item.classList.toggle("active", item.dataset.tab === parentTab));
             panels.forEach((panel) => panel.classList.toggle("active", panel.id === requestedTab));
             if (title) {
-                title.textContent = requestedTab === "client-detail" ? "Detalji klijenta" : button.dataset.title || "Kontrolna tabla";
+                title.textContent = requestedTab === "client-detail" ? "Client details" : button.dataset.title || "Kontrolna tabla";
             }
 
             if (updateUrl) {
@@ -2791,11 +2791,11 @@
     <div id="convDrawerOverlay" onclick="closeConvDetail()"></div>
     <div id="convDrawer">
         <div id="convDrawerHeader">
-            <h3 id="convDrawerTitle">Razgovor</h3>
+            <h3 id="convDrawerTitle">Conversation</h3>
             <button id="convDrawerClose" onclick="closeConvDetail()">✕</button>
         </div>
         <div id="convDrawerBody">
-            <p style="color:var(--soft);text-align:center;margin-top:40px">Učitavam...</p>
+            <p style="color:var(--soft);text-align:center;margin-top:40px">Loading...</p>
         </div>
     </div>
 
@@ -2809,15 +2809,15 @@
         const overlay = document.getElementById('convDrawerOverlay');
         const body = document.getElementById('convDrawerBody');
         const title = document.getElementById('convDrawerTitle');
-        body.innerHTML = '<p style="color:var(--soft);text-align:center;margin-top:40px">Učitavam...</p>';
+        body.innerHTML = '<p style="color:var(--soft);text-align:center;margin-top:40px">Loading...</p>';
         drawer.classList.add('open');
         overlay.classList.add('open');
         fetch(`/dashboard/conversation/${convId}/messages/`)
             .then(r => r.json())
             .then(data => {
-                title.textContent = `${data.customer || 'Klijent'} · ${data.channel}`;
+                title.textContent = `${data.customer || 'Client'} · ${data.channel}`;
                 if (!data.messages || data.messages.length === 0) {
-                    body.innerHTML = '<p style="color:var(--soft);text-align:center;margin-top:40px">Nema poruka u ovom razgovoru.</p>';
+                    body.innerHTML = '<p style="color:var(--soft);text-align:center;margin-top:40px">No messages in this conversation.</p>';
                     return;
                 }
                 body.innerHTML = data.messages.map(m => `
@@ -2829,7 +2829,7 @@
                 body.scrollTop = body.scrollHeight;
             })
             .catch(() => {
-                body.innerHTML = '<p style="color:var(--red);text-align:center;margin-top:40px">Greška pri učitavanju.</p>';
+                body.innerHTML = '<p style="color:var(--red);text-align:center;margin-top:40px">Error loading conversation.</p>';
             });
     }
     function closeConvDetail() {
@@ -2844,7 +2844,7 @@
     function showToast(msg, urgent) {
         const el = document.createElement('div');
         el.className = 'toast' + (urgent ? ' urgent' : '');
-        el.innerHTML = `<strong>${urgent ? '🚨 Hitno' : '🔔 Obaveštenje'}</strong>${escHtml(msg)}`;
+        el.innerHTML = `<strong>${urgent ? '🚨 Urgent' : '🔔 Notification'}</strong>${escHtml(msg)}`;
         document.getElementById('toastContainer').appendChild(el);
         setTimeout(() => el.remove(), 7000);
     }
@@ -2858,7 +2858,7 @@
         e.preventDefault();
         const btn = e.currentTarget;
         btn.disabled = true;
-        btn.textContent = 'Čekaj...';
+        btn.textContent = 'Please wait...';
         fetch(`/api/integrations/google-calendar/start/?client_id={{ selected_client.id|default:'' }}`, {
             method: 'POST',
             credentials: 'include',
@@ -2870,23 +2870,23 @@
             if (data.authorize_url) {
                 window.location.href = data.authorize_url;
             } else {
-                showToast(data.detail || 'Greška pri pokretanju Google OAuth.', true);
+                showToast(data.detail || 'Error starting Google OAuth.', true);
                 btn.disabled = false;
-                btn.textContent = 'Poveži Google Calendar';
+                btn.textContent = 'Connect Google Calendar';
             }
         })
         .catch(() => {
-            showToast('Mrežna greška pri pokušaju veze.', true);
+            showToast('Network error connecting to Google.', true);
             btn.disabled = false;
-            btn.textContent = 'Poveži Google Calendar';
+            btn.textContent = 'Connect Google Calendar';
         });
     }
     function gcalDisconnect(e) {
         e.preventDefault();
-        if (!confirm('Da li sigurno želiš da isključiš Google Calendar?')) return;
+        if (!confirm('Are you sure you want to disconnect Google Calendar?')) return;
         const btn = e.currentTarget;
         btn.disabled = true;
-        btn.textContent = 'Prekidam...';
+        btn.textContent = 'Disconnecting...';
         fetch(`/api/integrations/google-calendar/disconnect/?client_id={{ selected_client.id|default:'' }}`, {
             method: 'POST',
             credentials: 'include',
@@ -2896,9 +2896,9 @@
         .then(r => r.json())
         .then(() => { location.reload(); })
         .catch(() => {
-            showToast('Greška pri prekidu veze.', true);
+            showToast('Error disconnecting Google Calendar.', true);
             btn.disabled = false;
-            btn.textContent = 'Prekini vezu';
+            btn.textContent = 'Disconnect';
         });
     }
 
@@ -2912,11 +2912,11 @@
             try {
                 const data = JSON.parse(ev.data);
                 if (data.type === 'escalation') {
-                    showToast(data.message || 'Kaleya eskalira razgovor — mušterija želi čoveka!', true);
+                    showToast(data.message || 'Kaleya is escalating — customer wants a human!', true);
                 } else if (data.type === 'new_booking') {
-                    showToast(data.message || 'Nova rezervacija!', false);
+                    showToast(data.message || 'New booking!', false);
                 } else if (data.type === 'missed_call') {
-                    showToast(data.message || 'Propušten poziv.', false);
+                    showToast(data.message || 'Missed call.', false);
                 } else if (data.message) {
                     showToast(data.message, data.urgent || false);
                 }
