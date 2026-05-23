@@ -108,10 +108,9 @@ def google_calendar_disconnect(request):
 
 
 def _redirect_to_dashboard(error: str | None = None, success: str | None = None) -> HttpResponse:
-    """Send the browser back to the SPA with a hash flag so we can show feedback."""
-    base = settings.KALEYA_PUBLIC_BASE_URL or "https://www.aikaleya.com"
+    """Send the browser back to the admin dashboard with a query-param flag."""
     if success:
-        return HttpResponseRedirect(f"{base}/#gcal={quote(success)}")
+        return HttpResponseRedirect(f"/dashboard/?gcal={quote(success)}")
     if error:
-        return HttpResponseRedirect(f"{base}/#gcal-error={quote(error)}")
-    return HttpResponseRedirect(base)
+        return HttpResponseRedirect(f"/dashboard/?gcal-error={quote(error)}")
+    return HttpResponseRedirect("/dashboard/")

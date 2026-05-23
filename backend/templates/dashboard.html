@@ -2172,6 +2172,48 @@
                                 <button class="primary-btn" type="submit">Sacuvaj Telegram</button>
                             </div>
                         </form>
+
+                        <!-- ── Google Calendar ─────────────────────────────────── -->
+                        <div class="card settings-card" style="margin-top:28px" id="gcalCard">
+                            <h2>📅 Google Calendar</h2>
+                            <p style="color:var(--muted);font-size:14px;margin:0 0 16px">
+                                Sinhronizuj zakazivanja sa Google kalendarom vlasnika salona.
+                                Kada Kaleya zakaže termin, automatski se kreira Google Calendar event.
+                            </p>
+                            {% if gcal_success_msg %}
+                                <div style="background:var(--green-soft);border:1px solid var(--green);border-radius:12px;padding:12px 16px;margin-bottom:16px;color:var(--green);font-size:14px;font-weight:600;">
+                                    ✅ Google Calendar je uspešno povezan!
+                                </div>
+                            {% endif %}
+                            {% if gcal_error_msg %}
+                                <div style="background:rgba(240,95,114,.13);border:1px solid var(--red);border-radius:12px;padding:12px 16px;margin-bottom:16px;color:var(--red);font-size:14px;font-weight:600;">
+                                    ❌ Greška pri povezivanju: {{ gcal_error_msg }}
+                                </div>
+                            {% endif %}
+                            <div class="form-grid">
+                                <div class="field">
+                                    <label>Status</label>
+                                    <input class="readonly-input" value="{% if gcal_is_connected %}🟢 Povezan{% else %}⚪ Nije povezan{% endif %}" readonly>
+                                </div>
+                                {% if gcal_connected_email %}
+                                <div class="field">
+                                    <label>Google nalog</label>
+                                    <input class="readonly-input" value="{{ gcal_connected_email }}" readonly>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="actions" style="gap:12px">
+                                {% if gcal_is_connected %}
+                                    <button class="primary-btn" onclick="gcalDisconnect(event)" style="background:rgba(240,95,114,.15);color:var(--red);border:1px solid rgba(240,95,114,.3)">
+                                        Prekini vezu
+                                    </button>
+                                {% else %}
+                                    <button class="primary-btn" onclick="gcalConnect(event)">
+                                        Poveži Google Calendar
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
                     </section>
 
                     {% if is_admin_user %}
@@ -2704,6 +2746,59 @@
         el.innerHTML = `<strong>${urgent ? '🚨 Hitno' : '🔔 Obaveštenje'}</strong>${escHtml(msg)}`;
         document.getElementById('toastContainer').appendChild(el);
         setTimeout(() => el.remove(), 7000);
+    }
+
+    // ── Google Calendar OAuth ─────────────────────────────────────────
+    function getCsrfToken() {
+        const m = document.cookie.match(/csrftoken=([^;]+)/);
+        return m ? m[1] : '';
+    }
+    function gcalConnect(e) {
+        e.preventDefault();
+        const btn = e.currentTarget;
+        btn.disabled = true;
+        btn.textContent = 'Čekaj...';
+        fetch(`/api/integrations/google-calendar/start/?client_id={{ selected_client.id|default:'' }}`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/json'},
+            body: JSON.stringify({business_client: {{ selected_client.id|default:'null' }}})
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.authorize_url) {
+                window.location.href = data.authorize_url;
+            } else {
+                showToast(data.detail || 'Greška pri pokretanju Google OAuth.', true);
+                btn.disabled = false;
+                btn.textContent = 'Poveži Google Calendar';
+            }
+        })
+        .catch(() => {
+            showToast('Mrežna greška pri pokušaju veze.', true);
+            btn.disabled = false;
+            btn.textContent = 'Poveži Google Calendar';
+        });
+    }
+    function gcalDisconnect(e) {
+        e.preventDefault();
+        if (!confirm('Da li sigurno želiš da isključiš Google Calendar?')) return;
+        const btn = e.currentTarget;
+        btn.disabled = true;
+        btn.textContent = 'Prekidam...';
+        fetch(`/api/integrations/google-calendar/disconnect/?client_id={{ selected_client.id|default:'' }}`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/json'},
+            body: JSON.stringify({business_client: {{ selected_client.id|default:'null' }}})
+        })
+        .then(r => r.json())
+        .then(() => { location.reload(); })
+        .catch(() => {
+            showToast('Greška pri prekidu veze.', true);
+            btn.disabled = false;
+            btn.textContent = 'Prekini vezu';
+        });
     }
 
     // ── WebSocket for real-time events ───────────────────────────────

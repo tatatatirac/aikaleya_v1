@@ -474,6 +474,9 @@ def dashboard(request):
     viber_integration = next((item for item in integrations if item.provider == "viber"), None)
     instagram_integration = next((item for item in integrations if item.provider == "instagram"), None)
     phone_integration = next((item for item in integrations if item.provider == "phone"), None)
+    google_calendar_integration = IntegrationConnection.objects.filter(
+        business_client=selected_client, provider="google_calendar"
+    ).first()
 
     # ── Real-time statistics ────────────────────────────────────────────────
     _today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -580,6 +583,11 @@ def dashboard(request):
         "instagram_integration": instagram_integration,
         "instagram_webhook_url": request.build_absolute_uri(reverse("whatsapp-webhook", args=[instagram_integration.id])) if instagram_integration else "",
         "phone_integration": phone_integration,
+        "google_calendar_integration": google_calendar_integration,
+        "gcal_is_connected": bool(google_calendar_integration and google_calendar_integration.status == "connected" and google_calendar_integration.enabled),
+        "gcal_connected_email": (google_calendar_integration.public_number or "") if google_calendar_integration else "",
+        "gcal_success_msg": request.GET.get("gcal", ""),
+        "gcal_error_msg": request.GET.get("gcal-error", ""),
         "stats_active_calls": stats_active_calls,
         "stats_missed_today": stats_missed_today,
         "stats_transferred_today": stats_transferred_today,
