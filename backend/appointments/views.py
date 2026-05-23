@@ -80,6 +80,10 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         if status_filter:
             queryset = queryset.filter(status=status_filter)
 
+        # Hide soft-deleted appointments from calendar view by default
+        # (dossier endpoint queries directly without this filter)
+        queryset = queryset.filter(hidden_in_calendar=False)
+
         return queryset
 
     def get_serializer_context(self):
@@ -146,3 +150,66 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         appointment.cancelled_reason = request.data.get("reason", "")
         appointment.save(update_fields=["status", "cancelled_reason", "updated_at"])
         return Response(self.get_serializer(appointment).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"], url_path="hide")
+    def hide(self, request, pk=None):
+        """Soft-delete: hide appointment from calendar view without erasing history."""
+        appointment = Appointment.objects.get(
+            pk=pk, business_client=client_for_request(request)
+        )
+        appointment.hidden_in_calendar = True
+        appointment.save(update_fields=["hidden_in_calendar", "updated_at"])
+        return Response({"status": "hidden", "id": appointment.id}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["get"], url_path="dossier")
+    def dossier(self, request):
+        """Return client history statistics by phone number or name for the dossier panel."""
+        client = client_for_request(request)
+        if not client:
+            return Response({"detail": "Client not found."}, status=404)
+
+        phone = request.query_params.get("phone", "").strip()
+        name = request.query_params.get("name", "").strip()
+
+        if not phone and not name:
+            return Response({"detail": "Provide phone or name."}, status=400)
+
+        # Query ALL appointments for this business client — including hidden ones
+        qs = Appointment.objects.select_related("customer", "service").filter(
+            business_client=client
+        ).exclude(status=Appointment.STATUS_BLOCKED)
+
+        if phone:
+            qs = qs.filter(customer__phone__icontains=phone)
+        elif name:
+            qs = qs.filter(
+                Q(customer__first_name__icontains=name)
+                | Q(customer__last_name__icontains=name)
+                | Q(title__icontains=name)
+            )
+
+        total = qs.count()
+        cancelled = qs.filter(status=Appointment.STATUS_CANCELLED).count()
+        services_used = list(
+            qs.filter(service__isnull=False)
+            .values_list("service__name", flat=True)
+            .distinct()[:15]
+        )
+        hidden_count = qs.filter(hidden_in_calendar=True).count()
+
+        # Customer info
+        first_appt = qs.order_by("date", "start_time").first()
+        customer_name = ""
+        customer_phone = ""
+        if first_appt and first_appt.customer:
+            customer_name = first_appt.customer.full_name
+            customer_phone = first_appt.customer.phone
+
+        return Response({
+            "customer_name": customer_name,
+            "customer_phone": customer_phone,
+            "total": total,
+            "cancelled": cancelled,
+            "hidden_in_calendar": hidden_count,
+            "services": services_used,
+        })

@@ -6172,6 +6172,79 @@ async function deleteAppointmentBackend(item) {
     if (!res.ok && res.status !== 204) throw new Error(await res.text());
 }
 
+async function hideAppointmentFromCalendar(itemId) {
+    const item = schedule.find(s => s.id === itemId);
+    if (!item) return;
+    try {
+        if (item.backendId && getAuthToken() && location.protocol !== 'file:') {
+            const res = await kaleyaApi(`/api/appointments/appointments/${item.backendId}/hide/`, { method: 'POST' });
+            if (!res.ok) throw new Error(await res.text());
+        }
+        // Remove from local schedule array
+        schedule = schedule.filter(s => s.id !== itemId);
+        renderSchedule();
+        renderClientCalendar();
+    } catch (e) {
+        console.warn('Kaleya hide appointment failed', e);
+        showToast(tr('appointment_not_deleted'));
+    }
+}
+
+async function openClientDossier(phone, name) {
+    const modal = document.getElementById('clientDossierModal');
+    const body = document.getElementById('clientDossierBody');
+    if (!modal || !body) return;
+    body.innerHTML = '<p class="text-slate-400 text-sm text-center py-6">Loading...</p>';
+    modal.classList.remove('hidden');
+    try {
+        const params = phone ? `phone=${encodeURIComponent(phone)}` : `name=${encodeURIComponent(name)}`;
+        const res = await kaleyaApi(`/api/appointments/appointments/dossier/?${params}`, { method: 'GET' });
+        if (!res.ok) throw new Error(await res.text());
+        const d = await res.json();
+        const displayName = d.customer_name || name || phone || 'Client';
+        const displayPhone = d.customer_phone || phone || '';
+        const noShowPct = d.total > 0 ? Math.round((d.no_show / d.total) * 100) : 0;
+        const cancelPct = d.total > 0 ? Math.round((d.cancelled / d.total) * 100) : 0;
+        body.innerHTML = `
+            <div class="space-y-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-teal-100 dark:bg-teal-900 grid place-items-center text-teal-600 dark:text-teal-400 font-bold text-lg">${escapeHtml(displayName.charAt(0).toUpperCase())}</div>
+                    <div>
+                        <p class="font-semibold text-[14px]">${escapeHtml(displayName)}</p>
+                        ${displayPhone ? `<a href="tel:${escapeHtml(displayPhone.replace(/\s/g,''))}" class="text-teal-600 dark:text-teal-400 text-[12px] font-mono hover:underline">${escapeHtml(displayPhone)}</a>` : ''}
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2 pt-1">
+                    <div class="rounded-xl border border-slate-200 dark:border-slate-700 p-3 text-center">
+                        <p class="text-[22px] font-black text-slate-800 dark:text-slate-100">${d.total}</p>
+                        <p class="text-[10px] text-slate-500 mt-0.5">${tr('memory_bookings')}</p>
+                    </div>
+                    <div class="rounded-xl border border-red-200 dark:border-red-900 p-3 text-center">
+                        <p class="text-[22px] font-black text-red-600 dark:text-red-400">${d.cancelled}</p>
+                        <p class="text-[10px] text-slate-500 mt-0.5">${tr('memory_cancellations')} ${cancelPct > 0 ? `(${cancelPct}%)` : ''}</p>
+                    </div>
+                    <div class="rounded-xl border border-amber-200 dark:border-amber-900 p-3 text-center">
+                        <p class="text-[22px] font-black text-amber-600 dark:text-amber-400">${d.no_show || 0}</p>
+                        <p class="text-[10px] text-slate-500 mt-0.5">No-show ${noShowPct > 0 ? `(${noShowPct}%)` : ''}</p>
+                    </div>
+                </div>
+                ${d.services && d.services.length ? `
+                <div class="pt-1">
+                    <p class="text-[11px] font-semibold text-slate-500 mb-2">${tr('staff_services_title')}</p>
+                    <div class="flex flex-wrap gap-1.5">${d.services.map(s => `<span class="text-[11px] px-2 py-1 rounded-full bg-teal-50 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800">${escapeHtml(s)}</span>`).join('')}</div>
+                </div>` : ''}
+                ${d.hidden_in_calendar > 0 ? `<p class="text-[10px] text-slate-400 text-right">${d.hidden_in_calendar} ${tr('delete_btn').toLowerCase()} / hidden</p>` : ''}
+            </div>
+        `;
+    } catch (e) {
+        body.innerHTML = '<p class="text-red-500 text-sm text-center py-6">Error loading dossier.</p>';
+    }
+}
+
+function closeClientDossier() {
+    document.getElementById('clientDossierModal')?.classList.add('hidden');
+}
+
 function unpackApiRows(data) {
     return Array.isArray(data) ? data : (data.results || []);
 }
@@ -8461,17 +8534,25 @@ function renderClientDaySlots() {
             `;
         }
         const endTime = addMinutesToTime(item.time, Number(item.duration || getClientCalendarSettings().interval));
+        const phoneLink = item.phone ? `<a href="tel:${escapeHtml(item.phone.replace(/\s/g,''))}" class="font-mono font-normal text-teal-600 dark:text-teal-400 text-[11px] hover:underline ml-1">${escapeHtml(item.phone)}</a>` : '';
+        const dossierBtn = item.phone || localizedAppointmentName(item) !== 'Client'
+            ? `<button onclick="openClientDossier('${escapeHtml(item.phone || '')}','${escapeHtml(localizedAppointmentName(item))}')" class="w-6 h-6 rounded-full border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 grid place-items-center text-[11px] font-bold" title="Client dossier">ℹ</button>` : '';
+        const hideBtn = !isEmployeeUser() && item.backendId
+            ? `<button onclick="hideAppointmentFromCalendar('${item.id}')" class="w-6 h-6 rounded-full border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-red-500 grid place-items-center" title="${tr('delete_btn')}" style="font-size:14px;line-height:1">×</button>` : '';
         return `
             <div class="p-3 rounded-[16px] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
                 <div class="flex items-start justify-between gap-3">
-                    <div>
+                    <div class="min-w-0 flex-1">
                         <p class="font-mono text-sm font-semibold">${formatClientTime(item.time)} - ${formatClientTime(endTime)}</p>
-                        <p class="text-[13px] font-semibold">${escapeHtml(localizedAppointmentName(item))}</p>
+                        <p class="text-[13px] font-semibold">${escapeHtml(localizedAppointmentName(item))}${phoneLink}</p>
                         <div class="mt-1">${renderStaffMiniBadge(item)}</div>
                         ${appointmentDetailText(item) ? `<p class="text-[11px] text-slate-500">${escapeHtml(appointmentDetailText(item))}</p>` : ''}
-                        <p class="text-[11px] text-slate-500">${escapeHtml(localizedStatus(item.status))} - ${escapeHtml(item.phone || '')}</p>
+                        <p class="text-[11px] text-slate-500">${escapeHtml(localizedStatus(item.status))}</p>
                     </div>
-                    ${renderStatusControl(item)}
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        ${dossierBtn}${hideBtn}
+                        ${renderStatusControl(item)}
+                    </div>
                 </div>
                 <div class="mt-3 flex items-center justify-between gap-2">
                     <span class="text-[10px] px-2 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">${escapeHtml(item.channel || 'Phone')}</span>
@@ -9865,6 +9946,17 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             <button id="telegramSetupCancelBtn" onclick="closeTelegramSetup()" class="flex-1 h-11 rounded-xl border border-slate-200 dark:border-slate-700 text-[13px]">Cancel</button>
             <button id="telegramSetupBtn" onclick="submitTelegramSetup()" class="flex-1 h-11 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[13px] font-medium disabled:opacity-50">Save &amp; Connect</button>
         </div>
+    </div>
+</div>
+
+<!-- ===== CLIENT DOSSIER MODAL ===== -->
+<div id="clientDossierModal" class="hidden fixed inset-0 z-[9990] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm" onclick="if(event.target===this)closeClientDossier()">
+    <div class="w-full max-w-sm mx-auto bg-white dark:bg-slate-900 rounded-t-[28px] sm:rounded-[28px] border border-slate-200 dark:border-slate-700 shadow-2xl p-5">
+        <div class="flex items-center justify-between mb-4">
+            <p class="font-bold text-[15px]">Client Dossier</p>
+            <button onclick="closeClientDossier()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 grid place-items-center text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 text-lg font-bold">×</button>
+        </div>
+        <div id="clientDossierBody"></div>
     </div>
 </div>
 

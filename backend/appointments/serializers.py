@@ -55,6 +55,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
             "source",
             "notes",
             "cancelled_reason",
+            "hidden_in_calendar",
             "metadata",
             "created_at",
             "updated_at",

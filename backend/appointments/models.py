@@ -81,6 +81,7 @@ class Appointment(models.Model):
     source = models.CharField(max_length=80, default="manual")
     notes = models.TextField(blank=True)
     cancelled_reason = models.CharField(max_length=240, blank=True)
+    hidden_in_calendar = models.BooleanField(default=False)
     metadata = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
