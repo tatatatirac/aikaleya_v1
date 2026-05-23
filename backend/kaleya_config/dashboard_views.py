@@ -17,7 +17,7 @@ from django.views.decorators.http import require_POST
 from ai_core.models import AlarmSettings, KaleyaCommandLog, VoiceSettings
 from appointments.models import Appointment
 from appointments.services import client_timezone, today_availability_summary
-from billing.models import PaymentWebhookEvent, Plan, Subscription
+from billing.models import CheckoutSession, PaymentWebhookEvent, Plan, Subscription
 from billing.services import enforce_staff_limit
 from clients.models import BusinessClient, ClientApiSettings
 from communications.models import CallSession, Conversation
@@ -88,6 +88,7 @@ def dashboard_section_anchor(section):
         "instagram_integration": "integrations",
         "provision_phone": "integrations",
         "release_phone": "integrations",
+        "billing": "billing",
     }.get(section or "overview", section or "overview")
 
 
@@ -526,6 +527,18 @@ def dashboard(request):
     ).count()
     today_summary = today_availability_summary(selected_client)
     selected_subscription = get_client_subscription(selected_client)
+
+    # Billing portal URL — saved by webhook when LS subscription activates
+    _paid_checkout = (
+        CheckoutSession.objects.filter(
+            business_client=selected_client,
+            status=CheckoutSession.STATUS_PAID,
+        )
+        .order_by("-updated_at")
+        .first()
+    )
+    billing_portal_url = ((_paid_checkout.metadata or {}).get("customer_portal_url", "") if _paid_checkout else "") or ""
+
     selected_staff_members = selected_client.staff_members.all().order_by("full_name")
     selected_services = selected_client.services.all().order_by("category", "name")
     selected_working_hours = ensure_business_working_hours(selected_client)
@@ -601,6 +614,7 @@ def dashboard(request):
         "telegram_webhook_secret": (telegram_integration.config or {}).get("webhook_secret", "") if telegram_integration else "",
         "telegram_webhook_url": request.build_absolute_uri(reverse("telegram-webhook", args=[telegram_integration.id])) if telegram_integration else "",
         "selected_subscription": selected_subscription,
+        "billing_portal_url": billing_portal_url,
         "selected_staff_members": selected_staff_members,
         "selected_services": selected_services,
         "selected_working_hours": selected_working_hours,

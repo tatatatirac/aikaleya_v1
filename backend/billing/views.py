@@ -793,6 +793,16 @@ class LemonSqueezyWebhookView(APIView):
         return None
 
     def _activate_subscription(self, checkout, attributes):
+        # Save the Lemon Squeezy customer portal URL in checkout metadata so the
+        # owner can self-serve (cancel, update payment) without contacting support.
+        urls = attributes.get("urls") or {}
+        portal_url = urls.get("customer_portal", "")
+        if portal_url:
+            md = dict(checkout.metadata or {})
+            md["customer_portal_url"] = portal_url
+            checkout.metadata = md
+            checkout.save(update_fields=["metadata", "updated_at"])
+
         return activate_checkout_subscription(
             checkout,
             external_customer_id=str(attributes.get("customer_id") or ""),
