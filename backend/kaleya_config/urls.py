@@ -14,11 +14,30 @@ from kaleya_config.manifest_view import manifest_webmanifest
 
 admin.site.site_header = "Kaleya"
 admin.site.site_title = "Kaleya Admin"
-admin.site.index_title = "Kaleya administracija"
+admin.site.index_title = "Kaleya Admin"
 
 
 def health_check(request):
     return JsonResponse({"status": "ok", "service": "kaleya-backend"})
+
+
+def status_check(request):
+    import time
+    from django.db import DatabaseError, connection
+
+    result = {"status": "green", "components": {}}
+
+    try:
+        t0 = time.monotonic()
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+        db_ms = round((time.monotonic() - t0) * 1000)
+        result["components"]["database"] = {"status": "green", "latency_ms": db_ms}
+    except DatabaseError as exc:
+        result["components"]["database"] = {"status": "red", "error": str(exc)}
+        result["status"] = "red"
+
+    return JsonResponse(result)
 
 
 def no_cache_response(response):
@@ -65,7 +84,9 @@ urlpatterns = [
     path("admin/login/", lambda request: redirect("/?login=admin")),
     re_path(r"^admin/.+$", lambda request: redirect("/admin/")),
     path("django-admin/", admin.site.urls),
+    path("healthz", health_check, name="healthz"),
     path("api/health/", health_check, name="health-check"),
+    path("api/status/", status_check, name="status-check"),
     path("api/auth/", include("accounts.urls")),
     path("api/clients/", include("clients.urls")),
     path("api/staff-services/", include("staff_services.urls")),

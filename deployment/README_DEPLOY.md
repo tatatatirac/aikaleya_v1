@@ -118,15 +118,36 @@ https://aikaleya.com/api/health/
 
 ## 11. Backup baze
 
-Ručni JSON backup:
+### pg_dump (preporučeno za produkciju)
+
+Zahteva `postgresql-client` na serveru:
 
 ```bash
-source /var/www/aikaleya/.venv/bin/activate
-python /var/www/aikaleya/backend/manage.py backup_data
+apt-get install -y postgresql-client
 ```
 
-Preporučeni cron primer za svaku noć u 03:15:
+Ručni pg_dump:
 
 ```bash
-15 3 * * * cd /var/www/aikaleya && .venv/bin/python backend/manage.py backup_data >> /var/log/kaleya-backup.log 2>&1
+cd /var/www/aikaleya && .venv/bin/python backend/manage.py pg_dump_backup
 ```
+
+Restore iz dump fajla:
+
+```bash
+pg_restore --clean --if-exists -h localhost -U <db_user> -d <db_name> /var/www/aikaleya/backups/kaleya-pgdump-YYYYMMDD-HHMMSS.dump
+```
+
+Cron za svaku noć u 03:15 (`crontab -e`):
+
+```bash
+15 3 * * * cd /var/www/aikaleya && .venv/bin/python backend/manage.py pg_dump_backup >> /var/log/kaleya-backup.log 2>&1
+```
+
+### JSON backup (fallback)
+
+```bash
+cd /var/www/aikaleya && .venv/bin/python backend/manage.py backup_data
+```
+
+**Restore test obavezan pre launch-a** — verifikuj da pg_restore vraća bazu u ispravno stanje na staging-u.
