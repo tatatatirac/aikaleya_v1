@@ -151,7 +151,7 @@ def build_conversation_feed(client):
             getattr(customer, "full_name", "")
             or metadata.get("customer_name")
             or metadata.get("name")
-            or "Nepoznat klijent"
+            or "Unknown client"
         )
         customer_phone = getattr(customer, "phone", "") or metadata.get("phone") or metadata.get("customer_phone") or ""
         status_group = "urgent" if conversation.status == "handoff" else "resolved" if conversation.status == "closed" else "unresolved"
@@ -162,7 +162,7 @@ def build_conversation_feed(client):
                 "channel": conversation.channel,
                 "filter": status_group,
                 "title": f"{customer_name} - {conversation.get_channel_display()}",
-                "subtitle": last_message.body if last_message else "Razgovor nema sacuvanih poruka.",
+                "subtitle": last_message.body if last_message else "No messages saved in this conversation.",
                 "contact": customer_phone or conversation.get_status_display(),
                 "status": conversation.get_status_display(),
                 "created_at": conversation.last_message_at or conversation.created_at,
@@ -180,7 +180,7 @@ def build_conversation_feed(client):
                 "filter": "urgent" if urgent else "resolved",
                 "title": ticket.subject,
                 "subtitle": ticket.message,
-                "contact": support_requester_label(ticket) or "Kontakt nije upisan",
+                "contact": support_requester_label(ticket) or "No contact info",
                 "status": ticket.get_status_display(),
                 "created_at": ticket.created_at,
                 "urgent": urgent,
@@ -242,41 +242,41 @@ def build_billing_client_rows(clients):
         stats[status_code if status_code in stats else "none"] += 1
         badge_class = "ok"
         issue = "OK"
-        action = "Nema akcije"
+        action = "No action needed"
         needs_attention = False
 
         if not subscription:
             badge_class = "off"
-            issue = "Nema pretplate"
-            action = "Proveri da li je nalog rucno kreiran ili checkout nije zavrsen."
+            issue = "No subscription"
+            action = "Check if account was created manually or checkout did not complete."
             needs_attention = True
         elif subscription.status == Subscription.STATUS_PAST_DUE:
             badge_class = "off"
-            issue = "Naplata nije prosla"
-            action = "Kontaktirati klijenta ili proveriti Lemon Squeezy event."
+            issue = "Payment failed"
+            action = "Contact client or check Lemon Squeezy event log."
             needs_attention = True
         elif subscription.status == Subscription.STATUS_CANCELLED:
             badge_class = "off"
-            issue = "Pretplata je otkazana"
-            action = "Proveriti da li pristup treba da ostane ugasen."
+            issue = "Subscription cancelled"
+            action = "Verify whether access should remain disabled."
             needs_attention = True
         elif subscription.status == Subscription.STATUS_TRIAL:
             badge_class = "pause"
             if subscription.trial_ends_at and subscription.trial_ends_at < now:
-                issue = "Trial je istekao"
-                action = "Proveriti da li je placanje aktiviralo pretplatu."
+                issue = "Trial expired"
+                action = "Check if payment activated the subscription."
                 needs_attention = True
             else:
-                issue = "Trial aktivan"
-                action = "Pratiti kraj trial perioda."
+                issue = "Trial active"
+                action = "Monitor trial end date."
 
         if subscription and not client.kaleya_enabled and subscription.status in {
             Subscription.STATUS_ACTIVE,
             Subscription.STATUS_TRIAL,
         }:
             badge_class = "pause"
-            issue = "Pristup je pauziran"
-            action = "Aktiviraj klijenta ako je naplata uredna."
+            issue = "Access paused"
+            action = "Activate client if billing is in order."
             needs_attention = True
 
         if needs_attention:
@@ -291,9 +291,9 @@ def build_billing_client_rows(clients):
                 "client": client,
                 "subscription": subscription,
                 "status_code": status_code,
-                "status_label": subscription.get_status_display() if subscription else "Nema pretplate",
+                "status_label": subscription.get_status_display() if subscription else "No subscription",
                 "badge_class": badge_class,
-                "access_label": "Aktivan" if client.kaleya_enabled else "Pauza",
+                "access_label": "Active" if client.kaleya_enabled else "Paused",
                 "access_badge_class": "ok" if client.kaleya_enabled else "pause",
                 "due_at": due_at,
                 "price": subscription.plan.monthly_price if subscription and subscription.plan else None,
