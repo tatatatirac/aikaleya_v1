@@ -175,6 +175,22 @@
             letter-spacing: 0;
         }
 
+        .client-switcher {
+            height: 38px;
+            padding: 0 10px 0 12px;
+            background: var(--panel);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none;
+            flex-shrink: 0;
+            max-width: 240px;
+        }
+        .client-switcher:hover, .client-switcher:focus { border-color: var(--teal); }
+
         .online-pill {
             height: 48px;
             display: inline-flex;
@@ -1176,6 +1192,13 @@
         <main class="main">
             <header class="topbar">
                 <h1 id="page-title">Dashboard</h1>
+                {% if is_admin_user %}
+                <select class="client-switcher" onchange="switchClient(this.value)" title="Switch client">
+                    {% for c in clients %}
+                    <option value="{{ c.id }}"{% if selected_client and c.id == selected_client.id %} selected{% endif %}>{{ c.public_name|default:c.name }}</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
                 <span class="online-pill">{% if selected_client and selected_client.kaleya_enabled %}Kaleya online{% else %}Kaleya offline{% endif %}</span>
             </header>
 
@@ -2738,6 +2761,11 @@
             if (window.location.hash !== nextHash) {
                 window.location.hash = nextHash;
             }
+        }
+
+        function switchClient(clientId) {
+            const hash = window.location.hash || '#overview';
+            window.location.href = '/dashboard/?client_id=' + clientId + hash;
         }
 
         function activate(tab, updateUrl = true) {
