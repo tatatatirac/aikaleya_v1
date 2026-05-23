@@ -1387,7 +1387,7 @@
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f3">Google Calendar sync</span></li>
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f4">SMS confirmations</span></li>
                                 </ul>
-                                <a href="register-basic.html" class="kv-price-btn" data-i18n="trial_btn">Start Free 14-Day Trial</a>
+                                <a href="register-basic.html" id="kvBasicTrialBtn" class="kv-price-btn" data-i18n="trial_btn">Start Free 14-Day Trial</a>
                             </div>
                             <div class="kv-price-card kv-pc-popular">
                                 <div class="kv-pop-badge" data-i18n="popular">Most Popular</div>
@@ -1405,7 +1405,7 @@
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f4">Card-on-file deposits</span></li>
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f5">Priority support</span></li>
                                 </ul>
-                                <a href="register-pro.html" class="kv-price-btn kv-price-btn-blue" data-i18n="trial_btn">Start Free 14-Day Trial</a>
+                                <a href="register-pro.html" id="kvProTrialBtn" class="kv-price-btn kv-price-btn-blue" data-i18n="trial_btn">Start Free 14-Day Trial</a>
                             </div>
                         </div>
                         <p style="text-align:center; color:#71717A; font-size:13px; margin-top:24px;" data-i18n="early_access_note">⚡ Lifetime 50% off available for the first 50 salons. Price never goes up — even when you upgrade plans.</p>
@@ -1589,15 +1589,18 @@
                     var proAmt = document.querySelector('[data-lv="pro_ea"]');
                     var starterNote = document.getElementById('kvStarterBilledNote');
                     var proNote = document.getElementById('kvProBilledNote');
+                    var basicTrialBtn = document.getElementById('kvBasicTrialBtn');
+                    var proTrialBtn = document.getElementById('kvProTrialBtn');
                     var vals = (typeof LOCALIZED_VALUES !== 'undefined' && LOCALIZED_VALUES[currentLang]) || (typeof LOCALIZED_VALUES !== 'undefined' && LOCALIZED_VALUES.en) || {};
                     if (mode === 'yearly') {
                         if (monthlyBtn) monthlyBtn.classList.remove('kv-active');
                         if (yearlyBtn) yearlyBtn.classList.add('kv-active');
-                        // When yearly: divide yearly total by 12 visually, but cleaner to just show /yr below
                         if (starterAmt) starterAmt.textContent = vals.starter_ea || '$30';
                         if (proAmt) proAmt.textContent = vals.pro_ea || '$45';
                         if (starterNote) starterNote.style.display = '';
                         if (proNote) proNote.style.display = '';
+                        if (basicTrialBtn) basicTrialBtn.href = 'register-basic-yearly.html';
+                        if (proTrialBtn) proTrialBtn.href = 'register-pro-yearly.html';
                     } else {
                         if (yearlyBtn) yearlyBtn.classList.remove('kv-active');
                         if (monthlyBtn) monthlyBtn.classList.add('kv-active');
@@ -1605,6 +1608,8 @@
                         if (proAmt) proAmt.textContent = vals.pro_ea || '$45';
                         if (starterNote) starterNote.style.display = 'none';
                         if (proNote) proNote.style.display = 'none';
+                        if (basicTrialBtn) basicTrialBtn.href = 'register-basic.html';
+                        if (proTrialBtn) proTrialBtn.href = 'register-pro.html';
                     }
                 };
 
