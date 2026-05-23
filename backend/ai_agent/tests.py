@@ -2124,6 +2124,7 @@ class AIAppointmentToolTests(TestCase):
         return_value={"intent": "check_availability", "confidence": 0.92, "payload": {"date": "2026-05-21"}},
     )
     def test_telegram_uses_ai_planner_but_backend_response_text(self, planner_mock, reply_mock):
+        reply_mock.return_value = "Ima slobodnih termina u cetvrtak."
         self.client.interface_language = "sr"
         self.client.language = "sr"
         self.client.save(update_fields=["interface_language", "language", "updated_at"])
@@ -2138,7 +2139,7 @@ class AIAppointmentToolTests(TestCase):
         self.assertEqual(result["intent"], "check_availability")
         self.assertIn("Ima", result["response_text"])
         planner_mock.assert_called_once()
-        reply_mock.assert_not_called()
+        reply_mock.assert_called_once()
 
     def test_gratitude_closes_conversation_without_unknown_prompt(self):
         self.client.interface_language = "sr"

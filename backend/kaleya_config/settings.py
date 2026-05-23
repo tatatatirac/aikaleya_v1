@@ -199,6 +199,7 @@ KALEYA_ELEVENLABS_VOICE_BY_LANG = {
 KALEYA_TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID", "")
 KALEYA_TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN", "")
 KALEYA_TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER", "")  # +1XXXXXXXXXX
+KALEYA_TWILIO_DRY_RUN = env_bool("TWILIO_DRY_RUN", DEBUG)
 KALEYA_PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "https://www.aikaleya.com").rstrip("/")
 
 # Comma-separated list of IPs that bypass the public browser-chat throttle.

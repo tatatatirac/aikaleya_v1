@@ -1,7 +1,7 @@
 from datetime import time, timedelta
 from unittest import mock
 
-from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User
 from django.test import Client, TestCase, override_settings
 from django.utils import timezone
@@ -63,7 +63,11 @@ class PackageLimitTests(TestCase):
 
     def test_basic_package_blocks_employee_creation(self):
         plan = self.make_plan(Plan.CODE_BASIC, 0)
-        Subscription.objects.create(business_client=self.client_profile, plan=plan)
+        Subscription.objects.create(
+            business_client=self.client_profile,
+            plan=plan,
+            status=Subscription.STATUS_ACTIVE,
+        )
 
         response = self.api.post(
             "/api/staff-services/staff/",
@@ -78,7 +82,11 @@ class PackageLimitTests(TestCase):
         plan = self.make_plan(Plan.CODE_PRO, 1)
         self.client_profile.package = Plan.CODE_PRO
         self.client_profile.save(update_fields=["package", "updated_at"])
-        Subscription.objects.create(business_client=self.client_profile, plan=plan)
+        Subscription.objects.create(
+            business_client=self.client_profile,
+            plan=plan,
+            status=Subscription.STATUS_ACTIVE,
+        )
 
         first = self.api.post(
             "/api/staff-services/staff/",
@@ -277,7 +285,7 @@ class PackageLimitTests(TestCase):
         self.assertEqual(CheckoutSession.objects.count(), 1)
 
     @override_settings(KALEYA_PAYMENT_PROVIDER=CheckoutSession.PROVIDER_MANUAL)
-    def test_checkout_session_stores_pending_registration_with_hashed_password(self):
+    def test_checkout_session_stores_pending_registration_without_checkout_password(self):
         self.make_plan(Plan.CODE_BASIC, 0)
         api = APIClient()
 
@@ -297,11 +305,9 @@ class PackageLimitTests(TestCase):
 
         self.assertEqual(response.status_code, 201)
         pending = PendingCheckoutRegistration.objects.get(email="pending-client@example.com")
-        self.assertTrue(check_password("strongpass123", pending.password_hash))
-        self.assertNotEqual(pending.password_hash, "strongpass123")
+        self.assertEqual(pending.password_hash, "")
         self.assertEqual(pending.phone, "+381600001")
         self.assertNotIn("strongpass123", str(response.data))
-        self.assertNotIn(pending.password_hash, str(response.data))
 
     @override_settings(KALEYA_PAYMENT_PROVIDER=CheckoutSession.PROVIDER_MANUAL)
     def test_checkout_session_rejects_existing_email_when_password_is_requested(self):
@@ -377,7 +383,7 @@ class PackageLimitTests(TestCase):
         self.assertEqual(checkout.external_checkout_id, "checkout_ls_123")
         self.assertEqual(checkout.checkout_url, "https://aikaleya.lemonsqueezy.com/checkout/buy/checkout_ls_123")
         pending = PendingCheckoutRegistration.objects.get(checkout=checkout)
-        self.assertTrue(check_password("strongpass123", pending.password_hash))
+        self.assertEqual(pending.password_hash, "")
         lemon_request.assert_called_once()
         request_url, request_payload = lemon_request.call_args.args
         self.assertEqual(request_url, "https://api.lemonsqueezy.com/v1/checkouts")
@@ -785,9 +791,9 @@ class PackageLimitTests(TestCase):
         response = django_client.get("/admin/")
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Plaćanja")
-        self.assertContains(response, "Billing status klijenata")
-        self.assertContains(response, "Klijenti za proveru")
+        self.assertContains(response, "Payments")
+        self.assertContains(response, "Payments (Admin)")
+        self.assertContains(response, "Clients to review")
         self.assertContains(response, "subscription_created")
         self.assertContains(response, "subscription_dashboard")
 
@@ -889,7 +895,7 @@ class PackageLimitTests(TestCase):
         response = django_client.get(f"/admin/?client_id={self.client_profile.id}")
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Detalji klijenta")
+        self.assertContains(response, "Client details")
         self.assertContains(response, "Ana Specialist")
         self.assertContains(response, "Premium service")
         self.assertContains(response, "WhatsApp")

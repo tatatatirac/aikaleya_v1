@@ -294,7 +294,9 @@ class IntegrationStatusTests(TestCase):
         self.assertEqual(Message.objects.count(), 0)
         send_mock.assert_not_called()
 
-    def test_dashboard_can_save_telegram_configuration_without_exposing_token(self):
+    @mock.patch("integrations.services.telegram_api_post", return_value={"ok": False})
+    @mock.patch("integrations.services.configure_telegram_webhook")
+    def test_dashboard_can_save_telegram_configuration_without_exposing_token(self, configure_mock, telegram_api_mock):
         django_client = Client()
         django_client.force_login(self.user)
 
@@ -320,6 +322,8 @@ class IntegrationStatusTests(TestCase):
         self.assertEqual(connection.public_number, "@kaleya_test_bot")
         self.assertEqual(connection.config["bot_token"], "123456:telegram-secret-token")
         self.assertEqual(connection.config["webhook_secret"], "webhook-secret")
+        configure_mock.assert_called()
+        telegram_api_mock.assert_called()
 
         second_response = django_client.post(
             "/admin/",
@@ -344,7 +348,7 @@ class IntegrationStatusTests(TestCase):
         page = django_client.get(f"/admin/?client_id={self.business_client.id}#integrations")
         self.assertEqual(page.status_code, status.HTTP_200_OK)
         self.assertContains(page, "Telegram bot")
-        self.assertContains(page, "Bot token je sacuvan")
+        self.assertContains(page, "Bot token saved")
         self.assertNotContains(page, "123456:telegram-secret-token")
 
     @mock.patch("integrations.services.telegram_api_post", return_value={"ok": True, "description": "Webhook was set"})

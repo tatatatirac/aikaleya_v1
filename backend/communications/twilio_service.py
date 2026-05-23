@@ -306,6 +306,21 @@ def send_sms(business_client: BusinessClient, to_number: str, body: str) -> dict
     if not (sid and token and from_number and to_number and body):
         return {"error": "Twilio credentials, from-number, or message missing."}
 
+    if getattr(settings, "KALEYA_TWILIO_DRY_RUN", False):
+        logger.info(
+            "Twilio SMS dry run: from=%s to=%s body_len=%s",
+            from_number,
+            to_number,
+            len(body or ""),
+        )
+        return {
+            "sid": "dry-run",
+            "status": "dry_run",
+            "from": from_number,
+            "to": to_number,
+            "dry_run": True,
+        }
+
     try:
         from twilio.rest import Client
     except ImportError:

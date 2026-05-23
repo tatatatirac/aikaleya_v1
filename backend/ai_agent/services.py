@@ -2772,7 +2772,7 @@ def handle_inbound_text(
                 _caller_phone_for_prompt = customer.phone
             if not _caller_name_for_prompt and customer:
                 _caller_name_for_prompt = customer.full_name or customer.first_name or ""
-            response_text = generate_anthropic_reply(
+            ai_response_text = generate_anthropic_reply(
                 business_client,
                 text,
                 build_system_prompt(business_client, channel=channel, caller_phone=_caller_phone_for_prompt, caller_name=_caller_name_for_prompt),
@@ -2796,7 +2796,9 @@ def handle_inbound_text(
                     "tool_output": tool_output,
                     "safe_deterministic_response": response_text,
                 },
-            ) or response_text
+            )
+            if isinstance(ai_response_text, str) and ai_response_text.strip():
+                response_text = ai_response_text
             ai_provider_used = "anthropic"
         except ProviderError as exc:
             tool_run.status = "failed"
