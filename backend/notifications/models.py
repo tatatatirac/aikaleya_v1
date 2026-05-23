@@ -42,11 +42,11 @@ class NotificationRule(models.Model):
 
 class NotificationJob(models.Model):
     STATUS_CHOICES = (
-        ("pending", "Ceka"),
-        ("processing", "Obradjuje se"),
-        ("sent", "Poslato"),
-        ("failed", "Greska"),
-        ("cancelled", "Otkazano"),
+        ("pending", "Pending"),
+        ("processing", "Processing"),
+        ("sent", "Sent"),
+        ("failed", "Failed"),
+        ("cancelled", "Cancelled"),
     )
 
     business_client = models.ForeignKey(BusinessClient, on_delete=models.CASCADE, related_name="notification_jobs")

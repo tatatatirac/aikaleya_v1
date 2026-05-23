@@ -9,19 +9,19 @@ class PlanAdminForm(forms.ModelForm):
         model = Plan
         fields = ("code", "name", "monthly_price", "currency", "trial_days", "is_contact_only", "description", "features", "active")
         labels = {
-            "code": "Kod paketa",
-            "name": "Naziv paketa",
-            "monthly_price": "Mesečna cena",
-            "currency": "Valuta",
-            "trial_days": "Probni period",
-            "is_contact_only": "Samo kontakt",
-            "description": "Opis",
-            "features": "Lista mogućnosti",
-            "active": "Aktivan",
+            "code": "Plan code",
+            "name": "Plan name",
+            "monthly_price": "Monthly price",
+            "currency": "Currency",
+            "trial_days": "Trial period",
+            "is_contact_only": "Contact only",
+            "description": "Description",
+            "features": "Features list",
+            "active": "Active",
         }
         help_texts = {
-            "features": "JSON lista mogućnosti. Primer: [\"AI zakazivanje\", \"Kalendar\"].",
-            "is_contact_only": "Uključi za GOD MODE ako ne ide direktno plaćanje nego kontakt.",
+            "features": 'JSON list of features. Example: ["AI booking", "Calendar"].',
+            "is_contact_only": "Enable for GOD MODE if direct payment is not available and contact is needed instead.",
         }
 
 
@@ -30,12 +30,12 @@ class SubscriptionAdminForm(forms.ModelForm):
         model = Subscription
         fields = ("business_client", "plan", "status", "trial_ends_at", "current_period_start", "current_period_end")
         labels = {
-            "business_client": "Klijent",
-            "plan": "Paket",
+            "business_client": "Client",
+            "plan": "Plan",
             "status": "Status",
-            "trial_ends_at": "Probni period do",
-            "current_period_start": "Period od",
-            "current_period_end": "Period do",
+            "trial_ends_at": "Trial ends at",
+            "current_period_start": "Period from",
+            "current_period_end": "Period to",
         }
 
 
@@ -46,8 +46,8 @@ class PlanAdmin(admin.ModelAdmin):
     list_filter = ("active", "is_contact_only", "currency")
     search_fields = ("name", "code")
     fieldsets = (
-        ("Paket", {"fields": ("code", "name", "monthly_price", "currency", "trial_days", "is_contact_only", "active")}),
-        ("Opis", {"fields": ("description", "features")}),
+        ("Plan", {"fields": ("code", "name", "monthly_price", "currency", "trial_days", "is_contact_only", "active")}),
+        ("Description", {"fields": ("description", "features")}),
     )
 
 
@@ -58,7 +58,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
     list_filter = ("status", "plan")
     search_fields = ("business_client__name", "external_customer_id", "external_subscription_id")
     fieldsets = (
-        ("Pretplata", {"fields": ("business_client", "plan", "status")}),
+        ("Subscription", {"fields": ("business_client", "plan", "status")}),
         ("Period", {"fields": ("trial_ends_at", "current_period_start", "current_period_end")}),
     )
 
@@ -86,10 +86,10 @@ class CheckoutSessionAdmin(admin.ModelAdmin):
         "updated_at",
     )
     fieldsets = (
-        ("Zahtev", {"fields": ("plan", "provider", "status", "business_client")}),
-        ("Kontakt", {"fields": ("email", "company", "full_name")}),
-        ("Placanje", {"fields": ("amount", "currency", "trial_days", "checkout_url", "external_checkout_id")}),
-        ("Sistem", {"fields": ("metadata", "created_at", "updated_at")}),
+        ("Request", {"fields": ("plan", "provider", "status", "business_client")}),
+        ("Contact", {"fields": ("email", "company", "full_name")}),
+        ("Payment", {"fields": ("amount", "currency", "trial_days", "checkout_url", "external_checkout_id")}),
+        ("System", {"fields": ("metadata", "created_at", "updated_at")}),
     )
 
 
@@ -111,8 +111,8 @@ class PendingCheckoutRegistrationAdmin(admin.ModelAdmin):
         "updated_at",
     )
     fieldsets = (
-        ("Registracija", {"fields": ("checkout", "email", "company", "full_name", "phone", "country")}),
-        ("Sistem", {"fields": ("password_hash", "activated_at", "created_at", "updated_at")}),
+        ("Registration", {"fields": ("checkout", "email", "company", "full_name", "phone", "country")}),
+        ("System", {"fields": ("password_hash", "activated_at", "created_at", "updated_at")}),
     )
 
 
@@ -147,8 +147,8 @@ class PaymentWebhookEventAdmin(admin.ModelAdmin):
     )
     fieldsets = (
         ("Webhook", {"fields": ("provider", "event_name", "status", "signature_valid")}),
-        ("Veze", {"fields": ("checkout", "external_event_id", "external_object_id")}),
-        ("Obrada", {"fields": ("processed_at", "error")}),
-        ("Podaci", {"fields": ("payload", "raw_body")}),
-        ("Sistem", {"fields": ("created_at", "updated_at")}),
+        ("Links", {"fields": ("checkout", "external_event_id", "external_object_id")}),
+        ("Processing", {"fields": ("processed_at", "error")}),
+        ("Data", {"fields": ("payload", "raw_body")}),
+        ("System", {"fields": ("created_at", "updated_at")}),
     )

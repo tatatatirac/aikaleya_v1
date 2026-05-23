@@ -9,18 +9,18 @@ class CustomerAdminForm(forms.ModelForm):
         model = Customer
         fields = ("business_client", "first_name", "last_name", "phone", "email", "preferred_channel", "notes")
         labels = {
-            "business_client": "Klijent",
-            "first_name": "Ime",
-            "last_name": "Prezime",
-            "phone": "Telefon",
+            "business_client": "Client",
+            "first_name": "First name",
+            "last_name": "Last name",
+            "phone": "Phone",
             "email": "Email",
-            "preferred_channel": "Omiljeni kanal",
-            "notes": "Beleške",
+            "preferred_channel": "Preferred channel",
+            "notes": "Notes",
         }
         help_texts = {
-            "business_client": "Firma kod koje krajnji korisnik zakazuje termin.",
-            "preferred_channel": "Primer: phone, sms, whatsapp, viber, telegram.",
-            "notes": "Interna beleška, nije obavezna.",
+            "business_client": "The business where this customer books appointments.",
+            "preferred_channel": "Example: phone, sms, whatsapp, viber, telegram.",
+            "notes": "Internal note, optional.",
         }
 
 
@@ -40,21 +40,21 @@ class AppointmentAdminForm(forms.ModelForm):
             "cancelled_reason",
         )
         labels = {
-            "business_client": "Klijent",
-            "customer": "Krajnji korisnik",
-            "title": "Naslov ako nema korisnika",
-            "status": "Status termina",
-            "date": "Datum",
-            "start_time": "Vreme početka",
-            "duration_minutes": "Trajanje",
-            "channel": "Kanal",
-            "notes": "Beleške",
-            "cancelled_reason": "Razlog otkazivanja",
+            "business_client": "Client",
+            "customer": "Customer",
+            "title": "Title if no customer",
+            "status": "Appointment status",
+            "date": "Date",
+            "start_time": "Start time",
+            "duration_minutes": "Duration",
+            "channel": "Channel",
+            "notes": "Notes",
+            "cancelled_reason": "Cancellation reason",
         }
         help_texts = {
-            "title": "Koristi se za blokiranje termina ili ručni unos bez osobe.",
-            "duration_minutes": "Na primer 30, 60, 120 minuta.",
-            "channel": "Preko čega je termin došao: phone, sms, whatsapp, viber, telegram ili web.",
+            "title": "Used to block a slot or add an appointment manually without a customer.",
+            "duration_minutes": "For example 30, 60, 120 minutes.",
+            "channel": "Channel through which the appointment came: phone, sms, whatsapp, viber, telegram or web.",
         }
 
 
@@ -65,8 +65,8 @@ class CustomerAdmin(admin.ModelAdmin):
     list_filter = ("business_client", "preferred_channel")
     search_fields = ("first_name", "last_name", "phone", "email")
     fieldsets = (
-        ("Krajnji korisnik", {"fields": ("business_client", "first_name", "last_name", "phone", "email", "preferred_channel")}),
-        ("Beleške", {"fields": ("notes",)}),
+        ("Customer", {"fields": ("business_client", "first_name", "last_name", "phone", "email", "preferred_channel")}),
+        ("Notes", {"fields": ("notes",)}),
     )
 
 
@@ -77,7 +77,7 @@ class AppointmentAdmin(admin.ModelAdmin):
     list_filter = ("business_client", "status", "date", "channel")
     search_fields = ("customer__first_name", "customer__last_name", "customer__phone", "title")
     fieldsets = (
-        ("Termin", {"fields": ("business_client", "customer", "title", "status")}),
-        ("Vreme", {"fields": ("date", "start_time", "duration_minutes")}),
-        ("Komunikacija", {"fields": ("channel", "notes", "cancelled_reason")}),
+        ("Appointment", {"fields": ("business_client", "customer", "title", "status")}),
+        ("Time", {"fields": ("date", "start_time", "duration_minutes")}),
+        ("Communication", {"fields": ("channel", "notes", "cancelled_reason")}),
     )

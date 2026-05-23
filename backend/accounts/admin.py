@@ -9,13 +9,13 @@ class ProfileAdminForm(forms.ModelForm):
         model = Profile
         fields = ("user", "role", "phone")
         labels = {
-            "user": "Korisnik",
-            "role": "Uloga",
-            "phone": "Telefon",
+            "user": "User",
+            "role": "Role",
+            "phone": "Phone",
         }
         help_texts = {
-            "role": "Admin vidi sve. Client vidi samo svoje podatke.",
-            "phone": "Opcioni kontakt telefon naloga.",
+            "role": "Admin sees everything. Client sees only their own data.",
+            "phone": "Optional contact phone number for the account.",
         }
 
 
@@ -42,5 +42,5 @@ class ProfileAdmin(admin.ModelAdmin):
     list_filter = ("role",)
     search_fields = ("user__email", "user__username", "phone")
     fieldsets = (
-        ("Nalog", {"fields": ("user", "role", "phone")}),
+        ("Account", {"fields": ("user", "role", "phone")}),
     )

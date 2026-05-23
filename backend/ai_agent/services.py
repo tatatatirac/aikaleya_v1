@@ -1847,13 +1847,13 @@ def create_support_ticket_for_handoff(
 
     subject = f"Kaleya support handoff - {channel or 'web'}"
     message = (
-        "Kaleya nije mogla samostalno da zavrsi zahtev.\n\n"
-        f"Kanal: {channel or 'web'}\n"
-        f"Jezik: {language or 'en'}\n"
-        f"Klijent: {requester_name or 'Nepoznato'}\n"
-        f"Telefon: {requester_phone or 'Nepoznato'}\n"
-        f"Email: {requester_email or 'Nepoznato'}\n"
-        f"Poruka korisnika: {text or ''}"
+        "Kaleya could not complete the request on its own.\n\n"
+        f"Channel: {channel or 'web'}\n"
+        f"Language: {language or 'en'}\n"
+        f"Client: {requester_name or 'Unknown'}\n"
+        f"Phone: {requester_phone or 'Unknown'}\n"
+        f"Email: {requester_email or 'Unknown'}\n"
+        f"Customer message: {text or ''}"
     )
     return SupportTicket.objects.create(
         business_client=business_client,

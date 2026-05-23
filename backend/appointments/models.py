@@ -37,11 +37,11 @@ class Appointment(models.Model):
     STATUS_BLOCKED = "blocked"
 
     STATUS_CHOICES = (
-        (STATUS_CONFIRMED, "Zakazano"),
-        (STATUS_MOVED, "Pomereno"),
-        (STATUS_CANCELLED, "Otkazano"),
-        (STATUS_PENDING, "Za proveru"),
-        (STATUS_BLOCKED, "Blokirano"),
+        (STATUS_CONFIRMED, "Confirmed"),
+        (STATUS_MOVED, "Rescheduled"),
+        (STATUS_CANCELLED, "Cancelled"),
+        (STATUS_PENDING, "Pending"),
+        (STATUS_BLOCKED, "Blocked"),
     )
 
     CHANNEL_CHOICES = (
@@ -145,8 +145,8 @@ class Appointment(models.Model):
             other_start = datetime.combine(appointment.date, appointment.start_time)
             other_end = other_start + timedelta(minutes=appointment.duration_minutes)
             if current_start < other_end and current_end > other_start:
-                raise ValidationError("Termin se preklapa sa postojecim zauzetim slotom.")
+                raise ValidationError("This appointment overlaps with an existing booked slot.")
 
     def __str__(self):
-        label = self.customer.full_name if self.customer else self.title or "Blokirano"
+        label = self.customer.full_name if self.customer else self.title or "Blocked"
         return f"{label} - {self.date} {self.start_time}"
