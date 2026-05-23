@@ -2757,7 +2757,7 @@ def handle_inbound_text(
     response_text = build_text_response(business_client, intent.intent, tool_output)
     ai_provider_used = "fallback"
 
-    if use_ai and not skip_ai_for_simple_text and channel not in {"telegram", "whatsapp", "viber", "sms"}:
+    if use_ai and not skip_ai_for_simple_text and channel not in {"whatsapp", "viber", "sms"}:
         try:
             _caller_phone_for_prompt = ""
             _caller_name_for_prompt = ""
