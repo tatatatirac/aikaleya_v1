@@ -588,39 +588,33 @@
         .kv-phone-status { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -.02em; }
         .kv-phone-online { width: 14px; height: 14px; border-radius: 50%; background: #34D399; box-shadow: 0 0 0 7px rgba(52,211,153,.10); }
         .kv-phone-body {
-            min-height: calc(100% - 122px); padding: 34px 26px 26px;
-            display: flex; flex-direction: column; align-items: center;
+            min-height: calc(100% - 122px); padding: 22px 20px 20px;
+            display: flex; flex-direction: column; align-items: stretch;
         }
-        .kv-logo-orbit {
-            width: 210px; height: 210px; border-radius: 999px; display: grid; place-items: center;
-            border: 4px solid transparent; margin-bottom: 22px;
-            background: linear-gradient(#030715,#030715) padding-box, linear-gradient(135deg,#C4B5FD,#60A5FA) border-box;
-            box-shadow: 0 0 44px rgba(59,130,246,.18);
-        }
-        .kv-phone-logo { width: 138px; height: 138px; border-radius: 999px; object-fit: cover; background: #fff; }
-        .kv-phone-kicker { text-transform: uppercase; letter-spacing: .16em; font-size: 13px; font-weight: 700; color: #8B94A7; margin-bottom: 6px; }
-        .kv-phone-title { font-size: 44px; font-weight: 800; letter-spacing: -.045em; line-height: 1; color: #fff; }
-        .kv-phone-subtitle { font-size: 20px; color: #8B94A7; margin-top: 8px; }
-        .kv-mic-btn {
-            width: 108px; height: 108px; border-radius: 999px; border: none; color: white;
-            background: linear-gradient(135deg,#8B5CF6,#2563EB); display: grid; place-items: center;
-            margin-top: 26px; cursor: pointer;
-            box-shadow: 0 16px 42px rgba(37,99,235,.32), 0 0 0 20px rgba(59,130,246,.10);
-        }
-        .kv-mic-btn svg { width: 46px; height: 46px; }
-        .kv-voice-bars { height: 40px; display: flex; align-items: flex-end; gap: 8px; margin: 22px 0 8px; }
-        .kv-voice-bars span { width: 9px; border-radius: 999px; background: #C4B5FD; }
-        .kv-voice-bars span:nth-child(1) { height: 14px; }
-        .kv-voice-bars span:nth-child(2) { height: 28px; }
-        .kv-voice-bars span:nth-child(3) { height: 40px; background: #8B5CF6; }
-        .kv-voice-bars span:nth-child(4) { height: 28px; background: #60A5FA; }
-        .kv-voice-bars span:nth-child(5) { height: 14px; }
-        .kv-call-bubble {
-            width: 100%; border-radius: 28px; background: #121827; border: 1px solid #283246;
-            padding: 24px; box-shadow: 0 18px 40px rgba(0,0,0,.25);
-        }
-        .kv-bubble-label { color: #B8C0D3; text-transform: uppercase; letter-spacing: .08em; font-size: 12px; font-weight: 700; margin-bottom: 10px; }
-        .kv-call-bubble p { margin: 0; color: #F8FAFC; font-size: 16px; line-height: 1.55; }
+        .kv-voice-bars { height: 36px; display: flex; align-items: flex-end; gap: 6px; margin-top: auto; padding-top: 12px; }
+        .kv-voice-bars span { width: 8px; border-radius: 999px; background: #C4B5FD; }
+        .kv-voice-bars span:nth-child(1) { height: 12px; }
+        .kv-voice-bars span:nth-child(2) { height: 24px; }
+        .kv-voice-bars span:nth-child(3) { height: 36px; background: #8B5CF6; }
+        .kv-voice-bars span:nth-child(4) { height: 24px; background: #60A5FA; }
+        .kv-voice-bars span:nth-child(5) { height: 12px; }
+
+        /* Chat interface inside phone */
+        .kv-chat-header { display: flex; align-items: center; gap: 11px; padding-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,.07); margin-bottom: 16px; }
+        .kv-chat-avatar { width: 38px; height: 38px; border-radius: 999px; flex: 0 0 auto; background: linear-gradient(135deg,#16B6A2,#3B82F6); display: grid; place-items: center; font-weight: 800; color: #fff; font-size: 16px; }
+        .kv-chat-hname { font-size: 13px; font-weight: 700; color: #fff; line-height: 1.2; }
+        .kv-chat-hsub { font-size: 11px; color: #34D399; margin-top: 2px; display: flex; align-items: center; gap: 5px; }
+        .kv-chat-hsub::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #34D399; display: inline-block; }
+        .kv-chat-htimer { margin-left: auto; font-size: 12px; color: #8B94A7; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .kv-chat { display: flex; flex-direction: column; gap: 10px; }
+        .kv-chat-msg { max-width: 90%; padding: 11px 15px; border-radius: 18px; }
+        .kv-chat-msg p { margin: 0; font-size: 14px; line-height: 1.5; color: #fff; }
+        .kv-chat-customer { align-self: flex-end; background: #1E293B; border-bottom-right-radius: 4px; }
+        .kv-chat-kaleya { align-self: flex-start; background: linear-gradient(135deg,#0D9488,#2563EB); border-bottom-left-radius: 4px; }
+        .kv-chat-confirm { margin-top: 2px; font-size: 12px !important; opacity: .8; }
+
+        /* Floating card step tags */
+        .kv-fc-tag-green { background: #DCFCE7 !important; color: #16A34A !important; }
 
         /* Floating cards */
         .kv-floating-card {
@@ -1071,25 +1065,23 @@
                                         <span style="font-size:13px;opacity:.75">24/7</span>
                                     </div>
                                     <div class="kv-phone-body">
-                                        <div class="kv-logo-orbit" onclick="logoTap()">
-                                            <img class="kv-phone-logo" src="" alt="Kaleya">
+                                        <div class="kv-chat-header">
+                                            <div class="kv-chat-avatar">K</div>
+                                            <div>
+                                                <div class="kv-chat-hname">Kaleya AI</div>
+                                                <div class="kv-chat-hsub">Active · Mike's Barbershop</div>
+                                            </div>
+                                            <div class="kv-chat-htimer">2:14</div>
                                         </div>
-                                        <div class="kv-phone-kicker">Incoming call</div>
-                                        <div class="kv-phone-title">Kaleya AI</div>
-                                        <div class="kv-phone-subtitle">for Mike's Barbershop</div>
-                                        <button class="kv-mic-btn" onclick="event.stopPropagation();openCallModal()">
-                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z"/>
-                                                <path d="M19 10v1a7 7 0 0 1-14 0v-1"/>
-                                                <path d="M12 18v3"/>
-                                                <path d="M8 21h8"/>
-                                            </svg>
-                                        </button>
+                                        <div class="kv-chat">
+                                            <div class="kv-chat-msg kv-chat-customer">
+                                                <p>Need a fade tomorrow,<br>around 3 PM?</p>
+                                            </div>
+                                            <div class="kv-chat-msg kv-chat-kaleya">
+                                                <p>Done! Fade with Carlos,<br>tomorrow 3:00 PM ✓</p>
+                                            </div>
+                                        </div>
                                         <div class="kv-voice-bars"><span></span><span></span><span></span><span></span><span></span></div>
-                                        <div class="kv-call-bubble">
-                                            <div class="kv-bubble-label">Kaleya introduces itself</div>
-                                            <p>"Thanks for calling Mike's! I can book you for a fade tomorrow at 3pm with Carlos. Does that work?"</p>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1101,7 +1093,7 @@
                                 <div>
                                     <strong>Google Calendar</strong>
                                     <p>Fade · Tomorrow 3:00 PM · Carlos</p>
-                                    <span class="kv-fc-tag">Booked by Kaleya</span>
+                                    <span class="kv-fc-tag">① Calendar updated</span>
                                 </div>
                             </div>
 
@@ -1112,6 +1104,7 @@
                                 <div>
                                     <strong>SMS Sent</strong>
                                     <p>"Your cut is confirmed for tomorrow at 3pm. Reply YES to confirm."</p>
+                                    <span class="kv-fc-tag kv-fc-tag-green">② Sent instantly</span>
                                 </div>
                             </div>
                         </div>
