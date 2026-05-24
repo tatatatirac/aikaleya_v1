@@ -2875,11 +2875,14 @@ if (savedAppVersion && savedAppVersion !== KALEYA_APP_VERSION) {
 }
 localStorage.setItem('kaleya_app_version', KALEYA_APP_VERSION);
 
-if (!localStorage.getItem('kaleya_lang_user_set') && localStorage.getItem('kaleya_lang') === 'sr') {
-    localStorage.setItem('kaleya_lang', 'en');
+// Geo-based language: Cloudflare CF-IPCountry → mapped to Kaleya lang in Django context
+// Only applies if user has NOT manually chosen a language
+if (!localStorage.getItem('kaleya_lang_user_set')) {
+    const geoLang = '{{ geo_lang }}';
+    localStorage.setItem('kaleya_lang', geoLang || 'en');
 }
-if (!localStorage.getItem('kaleya_voice_lang_user_set') && localStorage.getItem('kaleya_voice_lang') === 'sr') {
-    localStorage.setItem('kaleya_voice_lang', 'en');
+if (!localStorage.getItem('kaleya_voice_lang_user_set')) {
+    localStorage.setItem('kaleya_voice_lang', localStorage.getItem('kaleya_lang') || 'en');
 }
 let currentLang = localStorage.getItem('kaleya_lang') || 'en';
 let currentVoiceLang = localStorage.getItem('kaleya_voice_lang') || currentLang;
