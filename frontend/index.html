@@ -134,10 +134,10 @@
         #langDropdown.open { display: block; }
         .device-preview { cursor: pointer; }
         * { -webkit-tap-highlight-color: transparent; }
-        .client-settings-panel input,
-        .client-settings-panel select,
-        .client-settings-panel button,
-        .client-settings-panel textarea {
+        #client-settings input,
+        #client-settings select,
+        #client-settings button,
+        #client-settings textarea {
             min-width: 0;
         }
         .client-settings-grid {
@@ -167,9 +167,6 @@
             white-space: nowrap;
         }
         @media (max-width: 430px) {
-            .client-settings-panel {
-                padding: 1rem;
-            }
             .client-settings-grid,
             .client-settings-actions,
             .client-settings-list-row {
@@ -1862,12 +1859,12 @@
                             <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                             <span data-i18n="nav_channels">Kanali</span>
                         </button>
+                        <button data-sidebar-tab="settings" onclick="switchClientTab('settings')" class="client-sidebar-tab w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium transition text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900">
+                            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.573-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span data-i18n="nav_set">Podešavanja</span>
+                        </button>
                     </nav>
                     <div class="px-2 py-3 border-t border-slate-100 dark:border-slate-900 space-y-0.5">
-                        <button onclick="handleClientThirdTab()" class="w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 transition text-left">
-                            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.573-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            <span data-i18n="nav_set">Settings</span>
-                        </button>
                         <button onclick="logout()" class="w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 transition text-left">
                             <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
                             <span data-i18n="logout">Odjava</span>
@@ -2104,17 +2101,12 @@
                 </div><!-- /main-content -->
             </div><!-- /client-inner -->
 
-            <!-- Client Settings Sheet -->
-            <div id="client-settings" class="fixed inset-0 z-50 hidden">
-                <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeClientSettings()"></div>
-                <div class="absolute bottom-0 inset-x-0 max-w-[430px] mx-auto sm:max-w-[680px] lg:max-w-[860px]">
-                    <div class="client-settings-panel mx-3 mb-3 rounded-[28px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl p-6 max-h-[80vh] overflow-auto">
-                        <div class="flex items-center justify-between">
-                            <h3 class="font-display font-bold text-lg" data-i18n="cset_t">Podešavanja glasa</h3>
-                            <button onclick="closeClientSettings()" class="w-8 h-8 grid place-items-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">✕</button>
-                        </div>
-                        <button data-pwa-install onclick="installKaleyaApp()" class="hidden mt-4 w-full h-11 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold">Install Kaleya as app</button>
-                        <div class="mt-6 space-y-5">
+            <!-- Client Settings Tab -->
+            <div id="client-settings" data-client-screen="settings" class="hidden flex-1 px-5 pt-6 pb-24 overflow-y-auto">
+                <div class="max-w-[860px] mx-auto">
+                    <h3 class="font-display font-bold text-lg mb-2" data-i18n="cset_t">Podešavanja</h3>
+                    <button data-pwa-install onclick="installKaleyaApp()" class="hidden mb-5 w-full h-11 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold">Install Kaleya as app</button>
+                    <div class="space-y-5">
 
                             <!-- LOGO UPLOAD -->
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
@@ -2298,39 +2290,49 @@
 
                             <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                                 <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="staff_services_title">Osoblje i usluge</p>
-                                <div id="clientStaffList" class="space-y-2"></div>
-                                <div id="clientServiceList" class="mt-3 space-y-2"></div>
-                                <div class="mt-4 client-settings-grid">
-                                    <input id="newStaffName" type="text" placeholder="Employee name" data-i18n-placeholder="staff_name_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
-                                    <input id="newStaffRole" type="text" placeholder="Occupation / role" data-i18n-placeholder="staff_role_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
-                                </div>
-                                <input id="newStaffPhone" type="tel" placeholder="Employee phone" data-i18n-placeholder="staff_phone_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
-                                <div class="mt-2 client-settings-grid">
-                                    <input id="newStaffUsername" type="text" placeholder="Username" data-i18n-placeholder="staff_username_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
-                                    <input id="newStaffPassword" type="password" placeholder="Password" data-i18n-placeholder="staff_password_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
-                                </div>
-                                <p class="mt-1 text-[10px] text-slate-500" data-i18n="staff_login_note">Vlasnik unosi login za zaposlenog. Ako menjate osobu, lozinku unesite samo kada zelite novu.</p>
-                                <input id="editingStaffId" type="hidden">
-                                <div class="mt-2 client-settings-actions">
-                                    <button id="clientStaffSaveBtn" onclick="saveClientStaffForm()" class="h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12px] font-semibold" data-i18n="add_person">Dodaj osobu</button>
-                                    <button id="clientStaffCancelBtn" onclick="resetClientStaffForm()" class="hidden h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="cancel_btn">Odustani</button>
-                                </div>
-                                <div class="mt-2 client-settings-grid">
-                                    <input id="newServiceName" type="text" placeholder="Service name" data-i18n-placeholder="service_name_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
-                                    <select id="newServiceDuration" class="h-10 px-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px]">
-                                        <option value="30">30m</option>
-                                        <option value="45">45m</option>
-                                        <option value="60">60m</option>
-                                        <option value="90">90m</option>
-                                        <option value="120">120m</option>
-                                    </select>
-                                </div>
-                                <input id="newServicePrice" type="number" min="0" step="0.01" placeholder="Price" data-i18n-placeholder="price_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
-                                <input id="editingServiceId" type="hidden">
-                                <div class="mt-2 client-settings-actions">
-                                    <button id="clientServiceSaveBtn" onclick="saveClientServiceForm()" class="h-10 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="add_service">Dodaj uslugu</button>
-                                    <button id="clientServiceCancelBtn" onclick="resetClientServiceForm()" class="hidden h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="cancel_btn">Odustani</button>
-                                </div>
+                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <!-- STAFF COLUMN -->
+                                    <div>
+                                        <p class="text-[11px] font-semibold text-slate-500 mb-2" data-i18n="nav_staff">Osoblje</p>
+                                        <div id="clientStaffList" class="space-y-2"></div>
+                                        <div class="mt-3 client-settings-grid">
+                                            <input id="newStaffName" type="text" placeholder="Employee name" data-i18n-placeholder="staff_name_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                            <input id="newStaffRole" type="text" placeholder="Occupation / role" data-i18n-placeholder="staff_role_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                        </div>
+                                        <input id="newStaffPhone" type="tel" placeholder="Employee phone" data-i18n-placeholder="staff_phone_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                        <div class="mt-2 client-settings-grid">
+                                            <input id="newStaffUsername" type="text" placeholder="Username" data-i18n-placeholder="staff_username_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                            <input id="newStaffPassword" type="password" placeholder="Password" data-i18n-placeholder="staff_password_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                        </div>
+                                        <p class="mt-1 text-[10px] text-slate-500" data-i18n="staff_login_note">Vlasnik unosi login za zaposlenog. Ako menjate osobu, lozinku unesite samo kada zelite novu.</p>
+                                        <input id="editingStaffId" type="hidden">
+                                        <div class="mt-2 client-settings-actions">
+                                            <button id="clientStaffSaveBtn" onclick="saveClientStaffForm()" class="h-10 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[12px] font-semibold" data-i18n="add_person">Dodaj osobu</button>
+                                            <button id="clientStaffCancelBtn" onclick="resetClientStaffForm()" class="hidden h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="cancel_btn">Odustani</button>
+                                        </div>
+                                    </div>
+                                    <!-- SERVICES COLUMN -->
+                                    <div>
+                                        <p class="text-[11px] font-semibold text-slate-500 mb-2" data-i18n="nav_services">Usluge</p>
+                                        <div id="clientServiceList" class="space-y-2"></div>
+                                        <div class="mt-3 client-settings-grid">
+                                            <input id="newServiceName" type="text" placeholder="Service name" data-i18n-placeholder="service_name_placeholder" class="h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                            <select id="newServiceDuration" class="h-10 px-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px]">
+                                                <option value="30">30m</option>
+                                                <option value="45">45m</option>
+                                                <option value="60">60m</option>
+                                                <option value="90">90m</option>
+                                                <option value="120">120m</option>
+                                            </select>
+                                        </div>
+                                        <input id="newServicePrice" type="number" min="0" step="0.01" placeholder="Price" data-i18n-placeholder="price_placeholder" class="mt-2 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px] outline-none">
+                                        <input id="editingServiceId" type="hidden">
+                                        <div class="mt-2 client-settings-actions">
+                                            <button id="clientServiceSaveBtn" onclick="saveClientServiceForm()" class="h-10 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="add_service">Dodaj uslugu</button>
+                                            <button id="clientServiceCancelBtn" onclick="resetClientServiceForm()" class="hidden h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 text-[12px] font-semibold" data-i18n="cancel_btn">Odustani</button>
+                                        </div>
+                                    </div>
+                                </div><!-- /grid staff+services -->
 
                                 <div class="mt-5 pt-4 border-t border-slate-200 dark:border-slate-800">
                                     <p class="text-xs font-semibold text-slate-600 dark:text-slate-300 mb-3" data-i18n="blocked_time_title">Blokirano vreme / pauze</p>
@@ -2471,10 +2473,9 @@
                                     <button onclick="gdprDeleteAccount()" class="h-10 rounded-xl border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 text-[12px] font-semibold">Delete account</button>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                    </div><!-- /space-y-5 -->
+                </div><!-- /max-w-[860px] -->
+            </div><!-- /client-settings tab -->
 
             <div id="appointmentModal" class="fixed inset-0 z-50 hidden">
                 <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeAppointmentEditor()"></div>
@@ -8657,7 +8658,7 @@ function handleClientThirdTab() {
         openEmployeeDirectory();
         return;
     }
-    openClientSettings();
+    switchClientTab('settings');
 }
 
 function staffColorSeed(name = '') {
@@ -8783,11 +8784,9 @@ function addAppointment() {
 
 function switchClientTab(tab) {
     if (tab === 'settings' && isEmployeeUser()) tab = 'team';
-    if (tab !== 'settings') {
-        document.querySelectorAll('[data-client-screen]').forEach(screen => {
-            screen.classList.toggle('hidden', screen.dataset.clientScreen !== tab);
-        });
-    }
+    document.querySelectorAll('[data-client-screen]').forEach(screen => {
+        screen.classList.toggle('hidden', screen.dataset.clientScreen !== tab);
+    });
     document.querySelectorAll('.client-tab').forEach(btn => {
         const active = btn.dataset.clientTab === tab;
         btn.className = `client-tab flex flex-col items-center gap-1 px-2 py-2 rounded-xl ${active ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'text-slate-500'}`;
@@ -8803,6 +8802,14 @@ function switchClientTab(tab) {
         loadClientSupportTicketsFromBackend();
     }
     if (tab === 'channels') loadClientIntegrationsStatus();
+    if (tab === 'settings') {
+        updateElStatus();
+        updateClientLangButtons();
+        syncClientCalendarSettingsUI();
+        updatePwaInstallButtons();
+        Promise.all([loadClientEntitlementsFromBackend(), loadClientSettingsFromBackend(), loadClientOperationalDataFromBackend(), loadClientCustomerMemoriesFromBackend(), loadClientSupportTicketsFromBackend(), loadClientIntegrationsStatus()]).catch(() => {});
+        try { refreshGcalStatus(); } catch (e) {}
+    }
 }
 
 function moveClientCalendar(delta) {
@@ -9103,21 +9110,14 @@ function openChannelDemo(channel, phone) {
 }
 
 // Client settings
-async function openClientSettings() {
+function openClientSettings() {
     if (isEmployeeUser()) {
         openEmployeeDirectory();
         return;
     }
     switchClientTab('settings');
-    document.getElementById('client-settings').classList.remove('hidden');
-    updateElStatus();
-    updateClientLangButtons();
-    syncClientCalendarSettingsUI();
-    updatePwaInstallButtons();
-    await Promise.all([loadClientEntitlementsFromBackend(), loadClientSettingsFromBackend(), loadClientOperationalDataFromBackend(), loadClientCustomerMemoriesFromBackend(), loadClientSupportTicketsFromBackend(), loadClientIntegrationsStatus()]);
-    try { refreshGcalStatus(); } catch (e) {}
 }
-function closeClientSettings() { document.getElementById('client-settings').classList.add('hidden'); }
+function closeClientSettings() { switchClientTab('home'); }
 function updateElStatus() {
     const hasKey = false;
     const el = document.getElementById('elStatus');

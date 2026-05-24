@@ -412,6 +412,18 @@ AVAILABILITY_RESPONSE_TEMPLATES = {
     ),
 }
 
+WEEKDAY_NAMES = {
+    "sr": ["ponedeljak", "utorak", "sreda", "cetvrtak", "petak", "subota", "nedjelja"],
+    "en": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    "de": ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"],
+    "es": ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"],
+    "pt": ["segunda", "terca", "quarta", "quinta", "sexta", "sabado", "domingo"],
+    "fr": ["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"],
+    "it": ["lunedi", "martedi", "mercoledi", "giovedi", "venerdi", "sabato", "domenica"],
+    "ru": ["Ponedelnik", "Vtornik", "Sreda", "Chetverg", "Pyatnica", "Subbota", "Voskresenye"],
+}
+
+
 BOOKING_RESPONSE_TEMPLATES = {
     "booked": {
         "en": "The appointment is booked for {date} at {time}.",
@@ -1272,6 +1284,119 @@ def localized_time_preference_question(language):
     if language == "ru":
         return "Утром или после обеда?"
     return "Morning or afternoon?"
+
+
+def natural_time_display(time_str, language="en"):
+    """
+    Converts 24-h 'HH:MM' to a natural spoken form.
+    '16:00' → '4'    '16:30' → '4:30' (en) / '4 i po' (sr)
+    '09:00' → '9'    '13:15' → '1:15'
+    """
+    if not time_str:
+        return str(time_str or "")
+    try:
+        parts = str(time_str)[:5].split(":")
+        hour = int(parts[0])
+        minute = int(parts[1]) if len(parts) > 1 else 0
+        display_hour = hour % 12 or 12  # 0→12, 13→1, 16→4
+        if minute == 0:
+            return str(display_hour)
+        if minute == 30 and language == "sr":
+            return f"{display_hour} i po"
+        return f"{display_hour}:{minute:02d}"
+    except (ValueError, IndexError):
+        return str(time_str)
+
+
+def localized_weekday_date(date_str, language="en"):
+    """
+    Converts ISO date '2026-05-25' to a spoken weekday+date string per language.
+    sr: 'ponedeljak (25.05.2026)'
+    en: 'Monday (05/25/2026)'
+    de/fr/it/pt/es: 'Montag (25.05.2026)'
+    """
+    from datetime import date as _date
+    if not date_str:
+        return str(date_str or "")
+    try:
+        d = _date.fromisoformat(str(date_str)[:10])
+        idx = d.weekday()  # 0=Monday … 6=Sunday
+        names = WEEKDAY_NAMES.get(language) or WEEKDAY_NAMES["en"]
+        weekday = names[idx]
+        if language == "en":
+            return f"{weekday} ({d.month}/{d.day}/{d.year})"
+        return f"{weekday} ({d.day}.{d.month:02d}.{d.year})"
+    except (ValueError, TypeError):
+        return str(date_str)
+
+
+def localized_booked_confirmation(tool_output, language):
+    """
+    Builds the booking confirmation message in the format the user requested:
+    'Ok, zakazala sam vam za ponedeljak (25.05.2026) u 4 kod Milana. Vase ime za potvrdu?'
+    If the customer is already identified (customer_identified=True), omits the name request.
+    """
+    date_display = localized_weekday_date(tool_output.get("date") or "", language)
+    time_display = natural_time_display(tool_output.get("time") or "", language)
+    staff_name = tool_output.get("staff_member") or ""
+    has_name = bool(tool_output.get("customer_identified"))
+
+    if language == "sr":
+        msg = f"Ok, zakazala sam vam za {date_display} u {time_display}"
+        if staff_name:
+            msg += f" kod {staff_name}"
+        msg += "."
+        if not has_name:
+            msg += " Vase ime za potvrdu?"
+        return msg
+    if language == "de":
+        msg = f"Ok, Ihr Termin ist gebucht fuer {date_display} um {time_display} Uhr"
+        if staff_name:
+            msg += f" bei {staff_name}"
+        msg += "."
+        if not has_name:
+            msg += " Ihr Name zur Bestaetigung?"
+        return msg
+    if language == "es":
+        msg = f"Ok, su cita esta reservada para el {date_display} a las {time_display}"
+        if staff_name:
+            msg += f" con {staff_name}"
+        msg += "."
+        if not has_name:
+            msg += " Su nombre para confirmar?"
+        return msg
+    if language == "pt":
+        msg = f"Ok, seu agendamento esta confirmado para {date_display} as {time_display}"
+        if staff_name:
+            msg += f" com {staff_name}"
+        msg += "."
+        if not has_name:
+            msg += " Seu nome para confirmar?"
+        return msg
+    if language == "fr":
+        msg = f"Ok, votre rendez-vous est confirme pour le {date_display} a {time_display}"
+        if staff_name:
+            msg += f" avec {staff_name}"
+        msg += "."
+        if not has_name:
+            msg += " Votre nom pour confirmer?"
+        return msg
+    if language == "it":
+        msg = f"Ok, il suo appuntamento e confermato per {date_display} alle {time_display}"
+        if staff_name:
+            msg += f" con {staff_name}"
+        msg += "."
+        if not has_name:
+            msg += " Il suo nome per confermare?"
+        return msg
+    # English default
+    msg = f"Ok, you're booked for {date_display} at {time_display}"
+    if staff_name:
+        msg += f" with {staff_name}"
+    msg += "."
+    if not has_name:
+        msg += " Your name for confirmation?"
+    return msg
 
 
 def localized_outside_work_hours_response(language, tool_output, business_client):
@@ -2193,6 +2318,27 @@ def apply_confirmed_memory_service(payload, previous_state, text, customer_memor
     return payload, True
 
 
+def apply_preferred_staff_to_payload(payload, customer_memory, text):
+    """
+    If no staff specified in payload and customer has a preferred_staff_member in memory,
+    auto-fill staff_hint from memory — unless the text signals they want anyone / a change.
+    """
+    payload = {**(payload or {})}
+    if payload.get("staff_hint") or payload.get("staff_member_id"):
+        return payload
+    preferred_staff = (customer_memory or {}).get("preferred_staff_member") or ""
+    if not preferred_staff:
+        return payload
+    normalized = normalize_intent_text(text or "")
+    # Customer explicitly wants someone else or doesn't care
+    any_staff_hints = ("neko drugi", "anyone", "bilo ko", "ko god", "any staff", "koji god",
+                       "svejedno", "doesn't matter", "ne znam", "anyone available")
+    if any(h in normalized for h in any_staff_hints):
+        return payload
+    payload["staff_hint"] = preferred_staff
+    return payload
+
+
 def attach_last_appointment_to_payload(payload, previous_state):
     if not previous_state or not previous_state.get("last_appointment_id"):
         return payload
@@ -2255,14 +2401,7 @@ def build_text_response(business_client, intent, tool_output):
             base = f"{hint} doesn't work here." if hint else "That person doesn't work here."
             return f"{base} Available staff: {staff_list}. Who would you like to book with?" if staff_list else f"{base} Please specify which staff member you want."
         if status == "booked":
-            return localized_status_response(
-                BOOKING_RESPONSE_TEMPLATES,
-                "booked",
-                language,
-                date=tool_output.get("date"),
-                time=tool_output.get("time"),
-                suggestions=suggestions,
-            )
+            return localized_booked_confirmation(tool_output, language)
         if status == "needs_time":
             favorite_time = (tool_output.get("customer_memory") or {}).get("favorite_time") or ""
             if not tool_output.get("suggestion_time") and not favorite_time and tool_output.get("suggested_slots"):
@@ -2306,13 +2445,7 @@ def build_text_response(business_client, intent, tool_output):
     if intent == "reschedule_appointment":
         suggestions = memory_prioritized_suggestions(tool_output)
         if tool_output.get("status") == "rescheduled":
-            return localized_status_response(
-                RESCHEDULE_RESPONSE_TEMPLATES,
-                "rescheduled",
-                language,
-                date=tool_output.get("date"),
-                time=tool_output.get("time"),
-            )
+            return localized_booked_confirmation(tool_output, language)
         if tool_output.get("status") == "needs_time":
             if not suggestions:
                 return localized_no_available_booking_response(language, tool_output, business_client=business_client)
@@ -2622,6 +2755,8 @@ def handle_inbound_text(
     )
     if confirmed_memory_service:
         planner_raw_response["confirmed_memory_service"] = payload.get("service_hint", "")
+    if intent_name == "book_appointment":
+        payload = apply_preferred_staff_to_payload(payload, current_customer_memory, text)
     if should_use_last_appointment_date(intent_name, previous_state, text, payload):
         payload = attach_last_appointment_date_to_payload(payload, previous_state)
         planner_raw_response["used_last_appointment_date"] = True

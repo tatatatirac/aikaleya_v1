@@ -561,6 +561,27 @@ def adjust_past_weekday_request(business_client, text, target_date, requested_ti
     return target_date
 
 
+def parse_after_hour_time(text):
+    """
+    Detects 'posle 3', 'after 3', 'apres 15h', etc.
+    Returns a suggestion_time 30 min past that hour so the slot search starts *after* it.
+    E.g. 'posle 3' → '15:30', 'after 16' → '16:30'.
+    Returns "" if no after-hour pattern is found.
+    """
+    normalized = normalize_lookup(text or "")
+    after_match = re.search(
+        r"\b(?:posle|poslije|after|apres|despues\s*de|dopo\s*le|nach)\s*([1-9]|1[0-9]|2[0-3])\b",
+        normalized,
+    )
+    if not after_match:
+        return ""
+    hour = int(after_match.group(1))
+    # Ambiguous small hours (1–8) in an "after" context are almost always PM
+    if 1 <= hour <= 8:
+        hour += 12
+    return f"{hour:02d}:30"
+
+
 def parse_time_period_preference(text, payload=None):
     payload = payload or {}
     if payload.get("time_preference"):
@@ -571,7 +592,11 @@ def parse_time_period_preference(text, payload=None):
     if any(phrase in normalized for phrase in ("prepodne", "pre podne", "ujutru", "morning")):
         return "10:00"
     if any(phrase in normalized for phrase in ("uvece", "vece", "evening")):
-        return "15:00"
+        return "18:00"
+    # "posle 3" / "after 4" etc. — find first slot AFTER that hour
+    after_time = parse_after_hour_time(text)
+    if after_time:
+        return after_time
     return ""
 
 
@@ -582,6 +607,10 @@ def parse_requested_time_from_payload(text, payload=None):
     parsed_from_text = parse_requested_time(text)
     if parsed_from_text:
         return parsed_from_text
+    # If text says "posle/after [hour]", the planner's exact time is wrong — suppress it
+    # so the slot search starts just AFTER that hour instead of booking AT it.
+    if parse_after_hour_time(text):
+        return ""
     return parse_requested_time("", payload.get("time"))
 
 
@@ -1207,7 +1236,8 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
         "date": appointment.date.isoformat(),
         "time": appointment.start_time.strftime("%H:%M"),
         "duration_minutes": appointment.duration_minutes,
-        "customer": appointment.customer.full_name if appointment.customer else appointment.title,
+        "customer": appointment.customer.full_name if appointment.customer else "",
+        "customer_identified": bool(appointment.customer and appointment.customer.full_name),
         "staff_member": appointment.staff_member.full_name if appointment.staff_member else "",
         "service": appointment.service.name if appointment.service else "",
     }
