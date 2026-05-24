@@ -35,7 +35,7 @@ PLAN_CATALOG = [
     {
         "code": Plan.CODE_PRO,
         "name": "Pro",
-        "monthly_price": 89,
+        "monthly_price": 119,
         "currency": "USD",
         "trial_days": 14,
         "sort_order": 2,
