@@ -34,8 +34,8 @@ class PlanLimits:
 
 
 FALLBACK_LIMITS = {
-    Plan.CODE_BASIC: PlanLimits(0, True, True, True, False, False, False, False, False, False, False),
-    Plan.CODE_PRO: PlanLimits(1, True, True, True, False, False, True, True, False, False, False),
+    Plan.CODE_BASIC: PlanLimits(3, True, True, True, False, False, False, False, False, False, False),
+    Plan.CODE_PRO: PlanLimits(5, True, True, True, False, False, True, True, False, False, False),
     Plan.CODE_BUSINESS: PlanLimits(5, True, True, True, False, False, True, True, True, True, False),
     Plan.CODE_BUSINESS_PLUS: PlanLimits(15, True, True, True, True, True, True, True, True, True, True),
     Plan.CODE_BUSINESS_PRO_PLUS: PlanLimits(None, True, True, True, True, True, True, True, True, True, True),

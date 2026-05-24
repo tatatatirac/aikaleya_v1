@@ -7421,7 +7421,7 @@ async function createClientStaffMember() {
             let msg = tr('staff_not_saved');
             try {
                 const d = JSON.parse(raw);
-                msg = d.package?.[0] || d.login_username?.[0] || d.detail || d.non_field_errors?.[0] || msg;
+                msg = (Array.isArray(d.package) ? d.package[0] : d.package) || d.login_username?.[0] || d.detail || d.non_field_errors?.[0] || msg;
             } catch (_) { if (raw && !raw.startsWith('{')) msg = raw; }
             throw new Error(msg);
         }
@@ -7507,7 +7507,7 @@ async function updateClientStaffMember(staffId) {
             let msg = tr('staff_not_updated');
             try {
                 const d = JSON.parse(raw);
-                msg = d.package?.[0] || d.login_username?.[0] || d.detail || d.non_field_errors?.[0] || msg;
+                msg = (Array.isArray(d.package) ? d.package[0] : d.package) || d.login_username?.[0] || d.detail || d.non_field_errors?.[0] || msg;
             } catch (_) { if (raw && !raw.startsWith('{')) msg = raw; }
             throw new Error(msg);
         }
