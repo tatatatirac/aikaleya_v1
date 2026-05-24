@@ -1388,11 +1388,11 @@
                                 </div>
                                 <span class="kv-price-billed-note" id="kvStarterBilledNote" style="display:none"><span data-lv="starter_ea_yr">$580</span>/yr · <span data-i18n="billed_yearly">billed yearly</span></span>
                                 <ul class="kv-price-feats" style="margin-top:18px">
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f1">500 talk minutes — covers all after-hours calls</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f2">Books by call, SMS, WhatsApp & Telegram</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f1">500 voice min/mo included · $0.15/min overage</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f2">Telegram booking — free channel, no per-message fees</span></li>
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f3">Kaleya calendar — all bookings in one place</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f4">Automated SMS reminders to clients</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f5">Staff alarm — spoken next-client announcement</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f4">Automated reminders + spoken staff alarm</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f5">Up to 3 staff members</span></li>
                                 </ul>
                                 <a href="register-basic.html" id="kvBasicTrialBtn" class="kv-price-btn" data-i18n="trial_btn">Start Free 14-Day Trial</a>
                             </div>
@@ -1406,9 +1406,9 @@
                                 </div>
                                 <span class="kv-price-billed-note" id="kvProBilledNote" style="display:none"><span data-lv="pro_ea_yr">$1,160</span>/yr · <span data-i18n="billed_yearly">billed yearly</span></span>
                                 <ul class="kv-price-feats" style="margin-top:18px">
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f1">1,200 minutes — 24/7 coverage, zero missed calls</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f2">Up to 5 staff — own schedule &amp; Kaleya APP per member</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f3">All channels: call, SMS, WhatsApp, Telegram, Instagram DM</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f1">1,200 voice min/mo included · $0.15/min overage</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f2">WhatsApp, SMS &amp; Instagram DM unlocked</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f3">Up to 5 staff — own schedule &amp; Kaleya app per member</span></li>
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f4">Time-block scheduling per staff member</span></li>
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f5">Priority support</span></li>
                                 </ul>
@@ -2973,6 +2973,12 @@ const LOCALIZED_VALUES = {
     'sr':    { cur: '€',  starter: '55 €',   pro: '110 €',  starter_ea: '55 €',   pro_ea: '110 €',  starter_ea_yr: '540 €',   pro_ea_yr: '1.080 €', no_show: '70 €',  monthly: '1.100 €',  bridal: '230 €',  appt: '80 €',  spa: '560 €',  dash_rev: '1.220 €',  dash_saved: '210 €',  fee: '20 € / 40 €' },
 };
 function lv() { return LOCALIZED_VALUES[currentLang] || LOCALIZED_VALUES.en; }
+function currencySymbol(code) {
+    return {'USD':'$','GBP':'£','EUR':'€','RUB':'₽','CAD':'CA$','AUD':'A$'}[(code||'').toUpperCase()] || code || '$';
+}
+function clientCurrencyCode() {
+    return {'$':'USD','£':'GBP','€':'EUR','₽':'RUB'}[lv().cur] || 'USD';
+}
 
 // Rotating hero titles per language (currency comes from LOCALIZED_VALUES).
 window.HERO_SLIDES_BY_LANG = {
@@ -3478,10 +3484,10 @@ const EXTRA_TRANSLATIONS = {
         f_lang_t: '8 jezika', f_lang_d: 'Srpski, English, španski, portugalski, ruski, francuski, italijanski i nemački sa ručnim izborom.',
         p_basic_tagline: 'Manje od $2 dnevno. Nikad više propušteno zakazivanje posle radnog vremena.',
         p_basic_desc: 'Prestani da gubiš zakazivanja posle 17h. Kaleya odgovara na svaki večernji poziv da se probudiš sa punim rasporedom.',
-        p_basic_d: 'Za vlasnika/firmu', p_basic_f1: '500 minuta razgovora — pokriva sve večernje pozive', p_basic_f2: 'Zakazuje pozivom, SMS, WhatsApp i Telegram', p_basic_f3: 'Kaleya kalendar — svi termini na jednom mestu', p_basic_f4: 'Automatski SMS podsetnici klijentima', p_basic_f5: 'Glasovni alarm za osoblje — sledeći klijent',
+        p_basic_d: 'Za salone do 3 radnika', p_basic_f1: '500 min glasa/mes. · $0.15/min za prekoračenje', p_basic_f2: 'Telegram zakazivanje — besplatan kanal, bez naplate po poruci', p_basic_f3: 'Kaleya kalendar — svi termini na jednom mestu', p_basic_f4: 'Automatski podsetnici + glasovni alarm za osoblje', p_basic_f5: 'Do 3 radnika',
         p_pro_tagline: 'Jedan sprečeni no-show plaća ceo mesec.',
-        p_pro_desc: 'Dežurstvo 24/7 na svim kanalima. Računica: 2 sprečena no-showa plaćaju ceo mesec.',
-        p_pro_d: 'Tim — do 5 radnika', p_pro_f1: '1.200 minuta — 24/7 pokrivenost, ni jedan poziv ne propada', p_pro_f2: 'Do 5 radnika — vlastiti raspored i Kaleya APP za svakog', p_pro_f3: 'Svi kanali: poziv, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: 'Blokiranje termina po satu, danu i radniku', p_pro_f5: 'Prioritetna podrška',
+        p_pro_desc: '2,4× više minuta + WhatsApp, SMS i Instagram DM — kanali gde su tvoji klijenti. 2 sprečena no-showa plaćaju ceo mesec.',
+        p_pro_d: 'Za rastuće timove — do 5 radnika', p_pro_f1: '1.200 min/mes. · $0.15/min za prekoračenje', p_pro_f2: 'WhatsApp, SMS i Instagram DM otključani', p_pro_f3: 'Do 5 radnika — vlastiti raspored i Kaleya APP za svakog', p_pro_f4: 'Blokiranje termina po radniku i danu', p_pro_f5: 'Prioritetna podrška',
         p_business_d: 'Do 5 radnika', p_business_f1: 'Sve iz Basic + Pro', p_business_f2: 'Do 5 radnika', p_business_f3: 'Radnik Kaleya APP', p_business_f4: 'Više jezika po dogovoru', p_business_f5: 'API po firmi',
         p_business_plus_d: 'Do 15 radnika', p_business_plus_f1: 'Sve iz Basic + Pro + Business', p_business_plus_f2: 'Do 15 radnika', p_business_plus_f3: 'Telefonski pozivi i SMS', p_business_plus_f4: 'ElevenLabs AI voice',
         p_business_pro_d: '5+ radnika', p_business_pro_f1: 'Sve iz Basic + Pro + Business + Business+', p_business_pro_f2: '15+ radnika', p_business_pro_f3: 'Custom integracije', p_business_pro_f4: 'Napredna arhitektura po dogovoru', custom_price: 'Custom',
@@ -3490,8 +3496,8 @@ const EXTRA_TRANSLATIONS = {
     },
     en: {
         f_lang_t: '8 languages', f_lang_d: 'Serbian, English, Spanish, Portuguese, Russian, French, Italian and German with manual selection.',
-        p_basic_d: 'For owner/company', p_basic_f1: '500 talk minutes — covers all after-hours calls', p_basic_f2: 'Books by call, SMS, WhatsApp & Telegram', p_basic_f3: 'Kaleya calendar — all bookings in one place', p_basic_f4: 'Automated SMS reminders to clients', p_basic_f5: 'Staff alarm — spoken next-client announcement',
-        p_pro_d: 'Team — up to 5 staff', p_pro_f1: '1,200 minutes — 24/7 coverage, zero missed calls', p_pro_f2: 'Up to 5 staff — own schedule & Kaleya APP per member', p_pro_f3: 'All channels: call, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: 'Time-block scheduling per staff member', p_pro_f5: 'Priority support',
+        p_basic_d: 'For salons up to 3 staff', p_basic_f1: '500 voice min/mo · $0.15/min overage after limit', p_basic_f2: 'Telegram booking — free channel, no per-message fees', p_basic_f3: 'Kaleya calendar — all bookings in one place', p_basic_f4: 'Automated reminders + spoken staff alarm', p_basic_f5: 'Up to 3 staff members',
+        p_pro_d: 'For growing teams — up to 5 staff', p_pro_f1: '1,200 voice min/mo · $0.15/min overage after limit', p_pro_f2: 'WhatsApp, SMS & Instagram DM unlocked', p_pro_f3: 'Up to 5 staff — own schedule & Kaleya app per member', p_pro_f4: 'Time-block scheduling per staff member', p_pro_f5: 'Priority support',
         p_business_d: 'Up to 5 employees', p_business_f1: 'Everything in Basic + Pro', p_business_f2: 'Up to 5 employees', p_business_f3: 'Employee Kaleya APP', p_business_f4: 'More languages by agreement', p_business_f5: 'Company-specific API',
         p_business_plus_d: 'Up to 15 employees', p_business_plus_f1: 'Everything in Basic + Pro + Business', p_business_plus_f2: 'Up to 15 employees', p_business_plus_f3: 'Phone calls and SMS', p_business_plus_f4: 'ElevenLabs AI voice',
         p_business_pro_d: '5+ employees', p_business_pro_f1: 'Everything in Basic + Pro + Business + Business+', p_business_pro_f2: '15+ employees', p_business_pro_f3: 'Custom integrations', p_business_pro_f4: 'Advanced architecture by agreement', custom_price: 'Custom',
@@ -3500,8 +3506,8 @@ const EXTRA_TRANSLATIONS = {
     },
     es: {
         f_lang_t: '8 idiomas', f_lang_d: 'Serbio, English, español, portugués, ruso, francés, italiano y alemán con selección manual.',
-        p_basic_d: 'Para propietario/empresa', p_basic_f1: '500 minutos de llamada — cubre todas las llamadas fuera de horario', p_basic_f2: 'Agenda por llamada, SMS, WhatsApp y Telegram', p_basic_f3: 'Kaleya calendar — todas las citas en un lugar', p_basic_f4: 'Recordatorios SMS automáticos a clientes', p_basic_f5: 'Alarma de voz — anuncio del siguiente cliente',
-        p_pro_d: 'Equipo — hasta 5 empleados', p_pro_f1: '1.200 minutos — cobertura 24/7, cero llamadas perdidas', p_pro_f2: 'Hasta 5 empleados — agenda propia y Kaleya APP', p_pro_f3: 'Todos los canales: llamada, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: 'Bloqueo de horarios por empleado y día', p_pro_f5: 'Soporte prioritario',
+        p_basic_d: 'Para salones hasta 3 empleados', p_basic_f1: '500 min de voz/mes · $0.15/min tras el límite', p_basic_f2: 'Telegram — canal gratuito, sin cargo por mensaje', p_basic_f3: 'Kaleya calendar — todas las citas en un lugar', p_basic_f4: 'Recordatorios automáticos + alarma de voz para equipo', p_basic_f5: 'Hasta 3 empleados',
+        p_pro_d: 'Para equipos en crecimiento — hasta 5 empleados', p_pro_f1: '1.200 min/mes · $0.15/min tras el límite', p_pro_f2: 'WhatsApp, SMS e Instagram DM desbloqueados', p_pro_f3: 'Hasta 5 empleados — agenda propia y Kaleya APP', p_pro_f4: 'Bloqueo de horarios por empleado y día', p_pro_f5: 'Soporte prioritario',
         p_business_d: 'Hasta 5 empleados', p_business_f1: 'Todo de Basic + Pro', p_business_f2: 'Hasta 5 empleados', p_business_f3: 'APP Kaleya del empleado', p_business_f4: 'Más idiomas por acuerdo', p_business_f5: 'API por empresa',
         p_business_plus_d: 'Hasta 15 empleados', p_business_plus_f1: 'Todo de Basic + Pro + Business', p_business_plus_f2: 'Hasta 15 empleados', p_business_plus_f3: 'Llamadas telefónicas y SMS', p_business_plus_f4: 'Voz AI ElevenLabs',
         p_business_pro_d: '5+ empleados', p_business_pro_f1: 'Todo de Basic + Pro + Business + Business+', p_business_pro_f2: '15+ empleados', p_business_pro_f3: 'Integraciones custom', p_business_pro_f4: 'Arquitectura avanzada por acuerdo', custom_price: 'Custom',
@@ -3510,8 +3516,8 @@ const EXTRA_TRANSLATIONS = {
     },
     pt: {
         f_lang_t: '8 idiomas', f_lang_d: 'Sérvio, English, espanhol, português, russo, francês, italiano e alemão com seleção manual.',
-        p_basic_d: 'Para dono/empresa', p_basic_f1: '500 minutos de chamada — cobre todas as chamadas fora do horário', p_basic_f2: 'Marca por chamada, SMS, WhatsApp e Telegram', p_basic_f3: 'Kaleya calendar — todas as marcações num só lugar', p_basic_f4: 'Lembretes SMS automáticos para clientes', p_basic_f5: 'Alarme de voz para equipe — próximo cliente',
-        p_pro_d: 'Equipe — até 5 membros', p_pro_f1: '1.200 minutos — cobertura 24/7, zero chamadas perdidas', p_pro_f2: 'Até 5 funcionários — agenda própria e Kaleya APP', p_pro_f3: 'Todos os canais: chamada, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: 'Bloqueio de horários por funcionário e dia', p_pro_f5: 'Suporte prioritário',
+        p_basic_d: 'Para salões até 3 funcionários', p_basic_f1: '500 min de voz/mês · $0.15/min após o limite', p_basic_f2: 'Telegram — canal gratuito, sem custo por mensagem', p_basic_f3: 'Kaleya calendar — todas as marcações num só lugar', p_basic_f4: 'Lembretes automáticos + alarme de voz para equipe', p_basic_f5: 'Até 3 funcionários',
+        p_pro_d: 'Para equipas em crescimento — até 5 membros', p_pro_f1: '1.200 min/mês · $0.15/min após o limite', p_pro_f2: 'WhatsApp, SMS e Instagram DM desbloqueados', p_pro_f3: 'Até 5 funcionários — agenda própria e Kaleya APP', p_pro_f4: 'Bloqueio de horários por funcionário e dia', p_pro_f5: 'Suporte prioritário',
         p_business_d: 'Até 5 funcionários', p_business_f1: 'Tudo do Basic + Pro', p_business_f2: 'Até 5 funcionários', p_business_f3: 'APP Kaleya do funcionário', p_business_f4: 'Mais idiomas por acordo', p_business_f5: 'API por empresa',
         p_business_plus_d: 'Até 15 funcionários', p_business_plus_f1: 'Tudo do Basic + Pro + Business', p_business_plus_f2: 'Até 15 funcionários', p_business_plus_f3: 'Chamadas telefônicas e SMS', p_business_plus_f4: 'Voz AI ElevenLabs',
         p_business_pro_d: '5+ funcionarios', p_business_pro_f1: 'Tudo do Basic + Pro + Business + Business+', p_business_pro_f2: '15+ funcionários', p_business_pro_f3: 'Integrações custom', p_business_pro_f4: 'Arquitetura avançada por acordo', custom_price: 'Custom',
@@ -3520,8 +3526,8 @@ const EXTRA_TRANSLATIONS = {
     },
     ru: {
         f_lang_t: '8 языков', f_lang_d: 'Сербский, English, испанский, португальский, русский, французский, итальянский и немецкий с ручным выбором.',
-        p_basic_d: 'Для владельца/компании', p_basic_f1: '500 минут — покрывает все звонки после работы', p_basic_f2: 'Запись по звонку, SMS, WhatsApp и Telegram', p_basic_f3: 'Kaleya calendar — все записи в одном месте', p_basic_f4: 'Автоматические SMS-напоминания клиентам', p_basic_f5: 'Голосовой сигнал персоналу — следующий клиент',
-        p_pro_d: 'Команда — до 5 сотрудников', p_pro_f1: '1 200 минут — круглосуточно, ни один звонок не пропущен', p_pro_f2: 'До 5 сотрудников — свой график и Kaleya APP каждому', p_pro_f3: 'Все каналы: звонок, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: 'Блокировка времени по сотруднику и дню', p_pro_f5: 'Приоритетная поддержка',
+        p_basic_d: 'Для салонов до 3 сотрудников', p_basic_f1: '500 мин голоса/мес. · $0.15/мин после лимита', p_basic_f2: 'Telegram — бесплатный канал, без оплаты за сообщение', p_basic_f3: 'Kaleya calendar — все записи в одном месте', p_basic_f4: 'Автоматические напоминания + голосовой сигнал персоналу', p_basic_f5: 'До 3 сотрудников',
+        p_pro_d: 'Для растущих команд — до 5 сотрудников', p_pro_f1: '1 200 мин/мес. · $0.15/мин после лимита', p_pro_f2: 'WhatsApp, SMS и Instagram DM разблокированы', p_pro_f3: 'До 5 сотрудников — своё расписание и Kaleya APP', p_pro_f4: 'Блокировка времени по сотруднику и дню', p_pro_f5: 'Приоритетная поддержка',
         p_business_d: 'До 5 сотрудников', p_business_f1: 'Все из Basic + Pro', p_business_f2: 'До 5 сотрудников', p_business_f3: 'Kaleya APP сотрудника', p_business_f4: 'Больше языков по договоренности', p_business_f5: 'API по компании',
         p_business_plus_d: 'До 15 сотрудников', p_business_plus_f1: 'Все из Basic + Pro + Business', p_business_plus_f2: 'До 15 сотрудников', p_business_plus_f3: 'Телефонные звонки и SMS', p_business_plus_f4: 'AI голос ElevenLabs',
         p_business_pro_d: '5+ сотрудников', p_business_pro_f1: 'Все из Basic + Pro + Business + Business+', p_business_pro_f2: '15+ сотрудников', p_business_pro_f3: 'Custom интеграции', p_business_pro_f4: 'Продвинутая архитектура по договоренности', custom_price: 'Custom',
@@ -3530,8 +3536,8 @@ const EXTRA_TRANSLATIONS = {
     },
     fr: {
         f_lang_t: '8 langues', f_lang_d: 'Serbe, English, espagnol, portugais, russe, francais, italien et allemand avec choix manuel.',
-        p_basic_d: 'Pour proprietaire/entreprise', p_basic_f1: '500 minutes incluses — toutes les reservations apres-heures', p_basic_f2: 'Prend RDV par appel, SMS, WhatsApp et Telegram', p_basic_f3: 'Kaleya calendar — tous les rendez-vous au même endroit', p_basic_f4: 'Rappels SMS automatiques aux clients', p_basic_f5: 'Alerte vocale equipe — prochain client annonce',
-        p_pro_d: 'Equipe — jusqu\'a 5 employes', p_pro_f1: '1 200 minutes — couverture 24/7, zero appel manque', p_pro_f2: 'Jusqu\'a 5 employes — planning dedie et Kaleya APP', p_pro_f3: 'Tous les canaux : appel, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: 'Blocage d\'horaires par employe et par jour', p_pro_f5: 'Support prioritaire',
+        p_basic_d: 'Pour salons jusqu\'a 3 employes', p_basic_f1: '500 min voix/mois · $0.15/min après le quota', p_basic_f2: 'Telegram — canal gratuit, sans frais par message', p_basic_f3: 'Kaleya calendar — tous les rendez-vous au même endroit', p_basic_f4: 'Rappels automatiques + alerte vocale equipe', p_basic_f5: 'Jusqu\'a 3 employes',
+        p_pro_d: 'Pour equipes en croissance — jusqu\'a 5 employes', p_pro_f1: '1 200 min/mois · $0.15/min après le quota', p_pro_f2: 'WhatsApp, SMS et Instagram DM debloqués', p_pro_f3: 'Jusqu\'a 5 employes — planning dedie et Kaleya APP', p_pro_f4: 'Blocage d\'horaires par employe et par jour', p_pro_f5: 'Support prioritaire',
         p_business_d: 'Jusqu a 5 employes', p_business_f1: 'Tout Basic + Pro', p_business_f2: 'Jusqu a 5 employes', p_business_f3: 'APP Kaleya employe', p_business_f4: 'Plus de langues sur accord', p_business_f5: 'API par entreprise',
         p_business_plus_d: 'Jusqu a 15 employes', p_business_plus_f1: 'Tout Basic + Pro + Business', p_business_plus_f2: 'Jusqu a 15 employes', p_business_plus_f3: 'Appels telephoniques et SMS', p_business_plus_f4: 'Voix AI ElevenLabs',
         p_business_pro_d: '5+ employes', p_business_pro_f1: 'Tout Basic + Pro + Business + Business+', p_business_pro_f2: '15+ employes', p_business_pro_f3: 'Integrations custom', p_business_pro_f4: 'Architecture avancee sur accord', custom_price: 'Custom',
@@ -3540,8 +3546,8 @@ const EXTRA_TRANSLATIONS = {
     },
     it: {
         f_lang_t: '8 lingue', f_lang_d: 'Serbo, English, spagnolo, portoghese, russo, francese, italiano e tedesco con scelta manuale.',
-        p_basic_d: 'Per titolare/azienda', p_basic_f1: '500 minuti inclusi — copre tutte le chiamate fuori orario', p_basic_f2: 'Prenota via chiamata, SMS, WhatsApp e Telegram', p_basic_f3: 'Kaleya calendar — tutte le prenotazioni in un posto', p_basic_f4: 'Promemoria SMS automatici ai clienti', p_basic_f5: 'Allarme vocale team — prossimo cliente annunciato',
-        p_pro_d: 'Team — fino a 5 membri', p_pro_f1: '1.200 minuti — copertura 24/7, nessuna chiamata persa', p_pro_f2: 'Fino a 5 dipendenti — orari dedicati e Kaleya APP', p_pro_f3: 'Tutti i canali: chiamata, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: 'Blocco orari per dipendente e giorno', p_pro_f5: 'Supporto prioritario',
+        p_basic_d: 'Per saloni fino a 3 dipendenti', p_basic_f1: '500 min voce/mese · $0.15/min dopo il limite', p_basic_f2: 'Telegram — canale gratuito, senza costi per messaggio', p_basic_f3: 'Kaleya calendar — tutte le prenotazioni in un posto', p_basic_f4: 'Promemoria automatici + allarme vocale team', p_basic_f5: 'Fino a 3 dipendenti',
+        p_pro_d: 'Per team in crescita — fino a 5 dipendenti', p_pro_f1: '1.200 min/mese · $0.15/min dopo il limite', p_pro_f2: 'WhatsApp, SMS e Instagram DM sbloccati', p_pro_f3: 'Fino a 5 dipendenti — orari dedicati e Kaleya APP', p_pro_f4: 'Blocco orari per dipendente e giorno', p_pro_f5: 'Supporto prioritario',
         p_business_d: 'Fino a 5 dipendenti', p_business_f1: 'Tutto Basic + Pro', p_business_f2: 'Fino a 5 dipendenti', p_business_f3: 'APP Kaleya dipendente', p_business_f4: 'Piu lingue su accordo', p_business_f5: 'API per azienda',
         p_business_plus_d: 'Fino a 15 dipendenti', p_business_plus_f1: 'Tutto Basic + Pro + Business', p_business_plus_f2: 'Fino a 15 dipendenti', p_business_plus_f3: 'Chiamate telefoniche e SMS', p_business_plus_f4: 'Voce AI ElevenLabs',
         p_business_pro_d: '5+ dipendenti', p_business_pro_f1: 'Tutto Basic + Pro + Business + Business+', p_business_pro_f2: '15+ dipendenti', p_business_pro_f3: 'Integrazioni custom', p_business_pro_f4: 'Architettura avanzata su accordo', custom_price: 'Custom',
@@ -3567,16 +3573,16 @@ const EXTRA_TRANSLATIONS = {
         p_basic_desc: 'Hören Sie auf, Buchungen nach 17 Uhr zu verlieren. Kaleya nimmt jeden Abendanruf entgegen, damit Sie mit vollem Terminplan aufwachen.',
         p_pro_tagline: 'Ein verhinderter No-Show bezahlt den ganzen Monat.',
         p_pro_desc: '24/7 Erreichbarkeit auf allen Kanälen. Die Rechnung: 2 verhinderte No-Shows bezahlen den ganzen Monat.',
-        p_basic_f1: '500 Gesprächsminuten — alle Abendanrufe abgedeckt', p_basic_f2: 'Buchungen per Anruf, SMS, WhatsApp und Telegram', p_basic_f3: 'Kaleya calendar — alle Termine auf einen Blick', p_basic_f4: 'Automatische SMS-Erinnerungen an Kunden', p_basic_f5: 'Team-Alarm — nächster Kunde angesagt',
-        p_pro_f1: '1.200 Minuten — 24/7, kein Anruf geht verloren', p_pro_f2: 'Bis zu 5 Mitarbeiter — eigener Kalender und Kaleya APP', p_pro_f3: 'Alle Kanäle: Anruf, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: 'Zeitblockierung pro Mitarbeiter und Tag', p_pro_f5: 'Vorrangiger Support',
+        p_basic_f1: '500 Gesprächsmin./Monat · $0.15/Min. nach Limit', p_basic_f2: 'Telegram — kostenloser Kanal, keine Nachrichtengebühren', p_basic_f3: 'Kaleya calendar — alle Termine auf einen Blick', p_basic_f4: 'Automatische Erinnerungen + Sprach-Alarm für Team', p_basic_f5: 'Bis zu 3 Mitarbeiter',
+        p_pro_f1: '1.200 Min./Monat · $0.15/Min. nach Limit', p_pro_f2: 'WhatsApp, SMS & Instagram DM freigeschaltet', p_pro_f3: 'Bis zu 5 Mitarbeiter — eigener Kalender und Kaleya APP', p_pro_f4: 'Zeitblockierung pro Mitarbeiter und Tag', p_pro_f5: 'Vorrangiger Support',
         hero_badge: 'AI Empfang · 24/7 aktiv', hero_title_1: 'Kaleya', hero_title_2: 'AI Empfang 24/7', hero_sub: 'Kaleya beantwortet Anrufe, bucht, storniert und benachrichtigt das Team mit natürlicher Stimme. Funktioniert mit Anrufen, WhatsApp, Telegram, Instagram DM und SMS.',
         hero_cta_demo: 'Kostenlos testen', hero_cta_how: 'So funktioniert es', hero_social: '500+ zufriedene Unternehmen', hero_tap: 'Logo antippen', hero_intro_hint: 'Kaleya stellt sich vor', hero_demo_msg: '"Hallo, wie kann ich helfen?"', integrates_with: 'Integrationen:',
         feat_title: 'Alles, was eine echte Rezeption macht, nur besser', feat_sub: 'Kaleya versteht Kunden, merkt sich Regeln und arbeitet in der gewählten Sprache.', f_lang_t: '8 Sprachen', f_lang_d: 'Serbisch, English, Spanisch, Portugiesisch, Russisch, Französisch, Italienisch und Deutsch mit manueller Auswahl.',
         f2_t: 'Intelligente Terminplanung', f2_d: 'Prüft den Kalender und schlägt freie Termine vor.', f3_t: 'Natürliche Stimme', f3_d: 'ElevenLabs Stimme für natürlichere Gespräche.', f_alarm_t: 'Team-Alarme', f_alarm_d: 'Ansage des nächsten Kunden und dringende Gesprächsanfrage.', f_msg_t: 'Nachrichtenkanäle', f_msg_d: 'WhatsApp, Telegram, Instagram DM, SMS und Telefonanruf.', f6_t: 'Admin-Kontrolle', f6_d: 'Globale API und separate Einstellungen pro Firma.',
         how_t: 'Kaleya lernt Ihr Geschäft an 1 Tag', how1_t: 'Kanal verbinden', how1_d: 'Telefon, WhatsApp, Telegram, Instagram DM oder SMS.', how2_t: 'Kaleya trainieren', how2_d: 'Arbeitszeiten, Services und Buchungsregeln eintragen.', how3_t: 'Sprache und Stimme wählen', how3_d: 'Kaleya spricht die Sprache, die der Kunde auswählt.',
         price_t: 'Einfache Preise', price_s: '14 Tage kostenlos · jederzeit kündbar · keine Verträge.', popular: 'BELIEBT', trial_btn: 'Kostenlos starten — 14 Tage', price_contact: 'Kontakt',
-        p_basic_d: 'Fuer Inhaber/Firma', p_basic_f1: '500 Gesprächsminuten — alle Abendanrufe abgedeckt', p_basic_f2: 'Buchungen per Anruf, SMS, WhatsApp und Telegram', p_basic_f3: 'Kaleya calendar — alle Termine auf einen Blick', p_basic_f4: 'Automatische SMS-Erinnerungen an Kunden', p_basic_f5: 'Team-Alarm — nächster Kunde angesagt',
-        p_pro_d: 'Team — bis zu 5 Mitarbeiter', p_pro_f1: '1.200 Minuten — 24/7, kein Anruf geht verloren', p_pro_f2: 'Bis zu 5 Mitarbeiter — eigener Kalender und Kaleya APP', p_pro_f3: 'Alle Kanäle: Anruf, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: 'Zeitblockierung pro Mitarbeiter und Tag', p_pro_f5: 'Vorrangiger Support',
+        p_basic_d: 'Fuer Salons bis 3 Mitarbeiter', p_basic_f1: '500 Gesprächsmin./Monat · $0.15/Min. nach Limit', p_basic_f2: 'Telegram — kostenloser Kanal, keine Nachrichtengebühren', p_basic_f3: 'Kaleya calendar — alle Termine auf einen Blick', p_basic_f4: 'Automatische Erinnerungen + Sprach-Alarm für Team', p_basic_f5: 'Bis zu 3 Mitarbeiter',
+        p_pro_d: 'Fuer wachsende Teams — bis zu 5 Mitarbeiter', p_pro_f1: '1.200 Min./Monat · $0.15/Min. nach Limit', p_pro_f2: 'WhatsApp, SMS & Instagram DM freigeschaltet', p_pro_f3: 'Bis zu 5 Mitarbeiter — eigener Kalender und Kaleya APP', p_pro_f4: 'Zeitblockierung pro Mitarbeiter und Tag', p_pro_f5: 'Vorrangiger Support',
         p_business_d: 'Bis zu 5 Mitarbeiter', p_business_f1: 'Alles aus Basic + Pro', p_business_f2: 'Bis zu 5 Mitarbeiter', p_business_f3: 'Mitarbeiter Kaleya APP', p_business_f4: 'Mehr Sprachen nach Vereinbarung', p_business_f5: 'API pro Firma',
         p_business_plus_d: 'Bis zu 15 Mitarbeiter', p_business_plus_f1: 'Alles aus Basic + Pro + Business', p_business_plus_f2: 'Bis zu 15 Mitarbeiter', p_business_plus_f3: 'Telefonanrufe und SMS', p_business_plus_f4: 'ElevenLabs AI voice',
         p_business_pro_d: '5+ Mitarbeiter', p_business_pro_f1: 'Alles aus Basic + Pro + Business + Business+', p_business_pro_f2: '15+ Mitarbeiter', p_business_pro_f3: 'Custom Integrationen', p_business_pro_f4: 'Erweiterte Architektur nach Vereinbarung', custom_price: 'Custom',
@@ -6758,7 +6764,7 @@ function renderClientOperationalSettings() {
                         <p class="text-[10px] text-slate-500">${Number(service.duration_minutes || 30)} min</p>
                     </div>
                     <div class="client-settings-list-actions">
-                        <span class="text-[10px] text-slate-500">${escapeHtml(service.currency || 'EUR')} ${escapeHtml(service.price || '0.00')}</span>
+                        <span class="text-[10px] text-slate-500">${currencySymbol(service.currency || 'EUR')}${escapeHtml(service.price || '0.00')}</span>
                         <button onclick="startEditClientService('${service.id}')" class="h-7 px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-semibold">${escapeHtml(tr('edit_btn'))}</button>
                         <button onclick="deleteClientService('${service.id}')" class="h-7 px-2.5 rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-300 text-[10px] font-semibold">${escapeHtml(tr('delete_btn'))}</button>
                     </div>
@@ -7445,7 +7451,7 @@ async function createClientService() {
     const price = Math.max(0, Number(String(priceInput?.value || '0').replace(',', '.')) || 0).toFixed(2);
     if (!name) return showToast(tr('service_name_required'));
     if (!getAuthToken() || location.protocol === 'file:') {
-        clientServices.push({ id: `local-service-${Date.now()}`, name, duration_minutes: duration, currency: 'EUR', price, is_active: true });
+        clientServices.push({ id: `local-service-${Date.now()}`, name, duration_minutes: duration, currency: clientCurrencyCode(), price, is_active: true });
         resetClientServiceForm();
         renderClientOperationalSettings();
         populateAppointmentStaffServiceFields();
@@ -7455,7 +7461,7 @@ async function createClientService() {
     try {
         const res = await kaleyaApi('/api/staff-services/services/', {
             method: 'POST',
-            body: JSON.stringify({ name, category: '', description: '', duration_minutes: duration, price, currency: 'EUR', is_active: true })
+            body: JSON.stringify({ name, category: '', description: '', duration_minutes: duration, price, currency: clientCurrencyCode(), is_active: true })
         });
         if (!res.ok) throw new Error(await res.text());
         const service = await res.json();
@@ -7534,7 +7540,7 @@ async function updateClientService(serviceId) {
 
     if (!getAuthToken() || location.protocol === 'file:') {
         clientServices = clientServices.map(service => String(service.id) === String(serviceId)
-            ? { ...service, name, duration_minutes: duration, price, currency: service.currency || 'EUR' }
+            ? { ...service, name, duration_minutes: duration, price, currency: service.currency || clientCurrencyCode() }
             : service);
         resetClientServiceForm();
         renderClientOperationalSettings();
@@ -7546,7 +7552,7 @@ async function updateClientService(serviceId) {
     try {
         const res = await kaleyaApi(`/api/staff-services/services/${serviceId}/`, {
             method: 'PATCH',
-            body: JSON.stringify({ name, duration_minutes: duration, price, currency: 'EUR', is_active: true })
+            body: JSON.stringify({ name, duration_minutes: duration, price, currency: clientCurrencyCode(), is_active: true })
         });
         if (!res.ok) throw new Error(await res.text());
         const saved = await res.json();

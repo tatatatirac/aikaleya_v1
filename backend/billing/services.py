@@ -34,8 +34,9 @@ class PlanLimits:
 
 
 FALLBACK_LIMITS = {
-    Plan.CODE_BASIC: PlanLimits(3, True, True, True, False, False, False, False, False, False, False),
-    Plan.CODE_PRO: PlanLimits(5, True, True, True, False, False, True, True, False, False, False),
+    # max_staff, whatsapp, viber, telegram, sms, phone_calls, instagram, tiktok, api_override, more_langs, elevenlabs
+    Plan.CODE_BASIC: PlanLimits(3, False, True, True, False, True, False, False, False, False, False),
+    Plan.CODE_PRO: PlanLimits(5, True, True, True, True, True, True, True, False, False, False),
     Plan.CODE_BUSINESS: PlanLimits(5, True, True, True, False, False, True, True, True, True, False),
     Plan.CODE_BUSINESS_PLUS: PlanLimits(15, True, True, True, True, True, True, True, True, True, True),
     Plan.CODE_BUSINESS_PRO_PLUS: PlanLimits(None, True, True, True, True, True, True, True, True, True, True),
