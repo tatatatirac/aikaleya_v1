@@ -6039,7 +6039,8 @@ async function runPrivateAiTest() {
             false,
             {
                 channel,
-                external_thread_id: kaleyaWorkflowThreadId(`private-ai-${channel}`)
+                external_thread_id: kaleyaWorkflowThreadId(`private-ai-${channel}`),
+                is_private_test: true
             },
             true
         );

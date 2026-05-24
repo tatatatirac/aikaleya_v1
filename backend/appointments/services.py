@@ -119,7 +119,7 @@ def availability_for_date(
     if staff_member_id:
         appointments_query = appointments_query.filter(Q(staff_member_id=staff_member_id) | Q(staff_member__isnull=True))
     appointments = list(appointments_query.order_by("start_time"))
-    active = [appointment for appointment in appointments if appointment.status in ACTIVE_STATUSES]
+    active = [appointment for appointment in appointments if appointment.status in ACTIVE_STATUSES and not appointment.is_test]
 
     slots = []
     if work_window["is_closed"]:

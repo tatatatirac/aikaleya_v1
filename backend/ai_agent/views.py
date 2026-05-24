@@ -169,6 +169,7 @@ class InboundTextAPIView(APIView):
             include_voice=False if is_demo else serializer.validated_data.get("include_voice", False),
             external_thread_id=serializer.validated_data.get("external_thread_id", ""),
             actor=request.user,
+            is_test=bool(serializer.validated_data.get("is_private_test", False)),
         )
         if is_demo:
             result["demo_mode"] = True

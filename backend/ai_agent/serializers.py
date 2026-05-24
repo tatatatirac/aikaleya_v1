@@ -132,6 +132,7 @@ class InboundTextSerializer(serializers.Serializer):
     cancelled_reason = serializers.CharField(required=False, allow_blank=True)
     use_ai = serializers.BooleanField(required=False, default=True)
     include_voice = serializers.BooleanField(required=False, default=False)
+    is_private_test = serializers.BooleanField(required=False, default=False)
 
 
 class TextToSpeechSerializer(serializers.Serializer):

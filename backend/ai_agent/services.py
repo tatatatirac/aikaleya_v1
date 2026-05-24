@@ -424,24 +424,24 @@ BOOKING_RESPONSE_TEMPLATES = {
         "de": "Der Termin ist fuer {date} um {time} gebucht.",
     },
     "needs_time": {
-        "en": "I can offer these available slots: {suggestions}. Which one works for you?",
-        "sr": "Mogu da ponudim ove slobodne termine: {suggestions}. Koji zelite?",
-        "es": "Puedo ofrecer estos horarios disponibles: {suggestions}. Cual le viene bien?",
-        "pt": "Posso oferecer estes horarios disponiveis: {suggestions}. Qual prefere?",
-        "ru": "Могу предложить эти свободные слоты: {suggestions}. Какой вам подходит?",
-        "fr": "Je peux proposer ces creneaux disponibles: {suggestions}. Lequel vous convient?",
-        "it": "Posso proporre questi slot disponibili: {suggestions}. Quale preferisce?",
-        "de": "Ich kann diese freien Termine anbieten: {suggestions}. Welchen moechten Sie?",
+        "en": "I have a slot at {suggestions}. Does that work for you?",
+        "sr": "Imam slobodan termin u {suggestions}. Da li vam odgovara?",
+        "es": "Tengo disponible el horario de las {suggestions}. Le viene bien?",
+        "pt": "Tenho um horario disponivel as {suggestions}. Funciona para voce?",
+        "ru": "Есть свободное время в {suggestions}. Вам подходит?",
+        "fr": "J'ai un creneau a {suggestions}. Cela vous convient?",
+        "it": "Ho uno slot disponibile alle {suggestions}. Le va bene?",
+        "de": "Ich habe einen freien Termin um {suggestions}. Passt Ihnen das?",
     },
     "time_unavailable": {
-        "en": "That slot is not available. Available suggestions: {suggestions}.",
-        "sr": "Taj termin nije slobodan. Slobodni predlozi su: {suggestions}.",
-        "es": "Ese horario no esta disponible. Opciones disponibles: {suggestions}.",
-        "pt": "Esse horario nao esta disponivel. Sugestoes disponiveis: {suggestions}.",
-        "ru": "Этот слот недоступен. Доступные варианты: {suggestions}.",
-        "fr": "Ce creneau n'est pas disponible. Propositions disponibles: {suggestions}.",
-        "it": "Quello slot non e disponibile. Proposte disponibili: {suggestions}.",
-        "de": "Dieser Termin ist nicht frei. Verfuegbare Vorschlaege: {suggestions}.",
+        "en": "That slot is taken. I have {suggestions} free. Does that work?",
+        "sr": "Taj termin nije slobodan. Imam slobodan u {suggestions}. Da li odgovara?",
+        "es": "Ese horario no esta disponible. Tengo libre las {suggestions}. Le viene bien?",
+        "pt": "Esse horario nao esta disponivel. Tenho disponivel as {suggestions}. Funciona?",
+        "ru": "Этот слот недоступен. Свободно в {suggestions}. Вам подходит?",
+        "fr": "Ce creneau n'est pas disponible. J'ai {suggestions} de libre. Cela vous convient?",
+        "it": "Quello slot non e disponibile. Ho libero alle {suggestions}. Le va bene?",
+        "de": "Dieser Termin ist nicht frei. Ich habe {suggestions} frei. Passt das?",
     },
 }
 
@@ -490,14 +490,14 @@ RESCHEDULE_RESPONSE_TEMPLATES = {
         "de": "Ich kann den Termin verschieben, brauche aber neues Datum und Uhrzeit.",
     },
     "needs_time": {
-        "en": "I can move it to {date}. Available slots: {suggestions}. Which one works for you?",
-        "sr": "Mogu da pomerim termin na {date}. Slobodni termini: {suggestions}. Koji zelite?",
-        "es": "Puedo mover la cita a {date}. Horarios disponibles: {suggestions}. Cual le viene bien?",
-        "pt": "Posso remarcar para {date}. Horarios disponiveis: {suggestions}. Qual prefere?",
-        "ru": "Могу перенести запись на {date}. Доступные слоты: {suggestions}. Какой вам подходит?",
-        "fr": "Je peux deplacer le rendez-vous au {date}. Creneaux disponibles: {suggestions}. Lequel vous convient?",
-        "it": "Posso spostare l'appuntamento al {date}. Slot disponibili: {suggestions}. Quale preferisce?",
-        "de": "Ich kann den Termin auf {date} verschieben. Freie Termine: {suggestions}. Welcher passt?",
+        "en": "I can move it to {date}. I have {suggestions} free. Does that work?",
+        "sr": "Mogu da pomerim termin na {date}. Slobodan termin je u {suggestions}. Da li odgovara?",
+        "es": "Puedo mover la cita a {date}. Tengo libre las {suggestions}. Le viene bien?",
+        "pt": "Posso remarcar para {date}. Tenho disponivel as {suggestions}. Funciona?",
+        "ru": "Могу перенести запись на {date}. Свободно в {suggestions}. Вам подходит?",
+        "fr": "Je peux deplacer le rendez-vous au {date}. J'ai {suggestions} de libre. Cela vous convient?",
+        "it": "Posso spostare l'appuntamento al {date}. Ho libero alle {suggestions}. Le va bene?",
+        "de": "Ich kann den Termin auf {date} verschieben. Frei um {suggestions}. Passt das?",
     },
 }
 
@@ -1091,7 +1091,7 @@ def memory_prioritized_suggestions(tool_output):
         preferred = [slot for slot in suggestions if str(slot).startswith(favorite_time)]
         remaining = [slot for slot in suggestions if slot not in preferred]
         suggestions = preferred + remaining
-    return ", ".join(suggestions[:3])
+    return suggestions[0] if suggestions else ""
 
 
 def local_greeting_part(language, business_client):
@@ -1258,18 +1258,20 @@ def localized_no_available_booking_response(language, tool_output, business_clie
 
 def localized_time_preference_question(language):
     if language == "sr":
-        return "Kada vam odgovara da proverim koji su slobodni termini?"
+        return "Prepodne ili popodne?"
     if language == "de":
-        return "Welche Uhrzeit wuerde Ihnen passen, damit ich freie Termine pruefen kann?"
+        return "Vormittags oder nachmittags?"
     if language == "es":
-        return "Que hora le viene bien para que revise los horarios libres?"
+        return "Por la manana o por la tarde?"
     if language == "pt":
-        return "Que horario prefere para eu verificar os horarios livres?"
+        return "De manha ou de tarde?"
     if language == "fr":
-        return "Quel horaire vous conviendrait pour que je verifie les creneaux disponibles?"
+        return "Le matin ou l'apres-midi?"
     if language == "it":
-        return "Che orario preferisce, cosi controllo gli slot disponibili?"
-    return "What time works for you so I can check the available slots?"
+        return "Mattina o pomeriggio?"
+    if language == "ru":
+        return "Утром или после обеда?"
+    return "Morning or afternoon?"
 
 
 def localized_outside_work_hours_response(language, tool_output, business_client):
@@ -2235,6 +2237,23 @@ def build_text_response(business_client, intent, tool_output):
     if intent == "book_appointment":
         status = tool_output.get("status")
         suggestions = memory_prioritized_suggestions(tool_output)
+        if status == "staff_not_found":
+            hint = tool_output.get("staff_hint", "")
+            staff_list = ", ".join(tool_output.get("available_staff") or [])
+            if language == "sr":
+                base = f"{hint} ne radi kod nas." if hint else "Taj zaposleni ne radi kod nas."
+                return f"{base} Imamo: {staff_list}. Za koga zelite termin?" if staff_list else f"{base} Napisite koje osoblje zelite."
+            if language == "de":
+                base = f"{hint} arbeitet nicht bei uns." if hint else "Diese Person arbeitet nicht bei uns."
+                return f"{base} Verfuegbar: {staff_list}. Fuer wen moechten Sie buchen?" if staff_list else f"{base} Bitte nennen Sie das gewuenschte Personal."
+            if language == "es":
+                base = f"{hint} no trabaja con nosotros." if hint else "Esa persona no trabaja con nosotros."
+                return f"{base} Tenemos: {staff_list}. Para quien quiere reservar?" if staff_list else f"{base} Indique el personal deseado."
+            if language == "fr":
+                base = f"{hint} ne travaille pas ici." if hint else "Cette personne ne travaille pas ici."
+                return f"{base} Nous avons: {staff_list}. Pour qui souhaitez-vous reserver?" if staff_list else f"{base} Indiquez le personnel souhaite."
+            base = f"{hint} doesn't work here." if hint else "That person doesn't work here."
+            return f"{base} Available staff: {staff_list}. Who would you like to book with?" if staff_list else f"{base} Please specify which staff member you want."
         if status == "booked":
             return localized_status_response(
                 BOOKING_RESPONSE_TEMPLATES,
@@ -2437,6 +2456,7 @@ def handle_inbound_text(
     external_thread_id="",
     record_messages=True,
     actor=None,
+    is_test=False,
 ):
     incoming_payload = dict(payload or {})
     payload = incoming_payload
@@ -2673,8 +2693,8 @@ def handle_inbound_text(
         status = "success"
     elif intent_name == "book_appointment":
         tool_name = "book_appointment"
-        tool_output = book_appointment_tool(business_client, text, customer=customer, channel=channel, payload=payload)
-        status = "success" if tool_output.get("status") in {"booked", "needs_time", "time_unavailable"} else "failed"
+        tool_output = book_appointment_tool(business_client, text, customer=customer, channel=channel, payload=payload, is_test=is_test)
+        status = "success" if tool_output.get("status") in {"booked", "needs_time", "time_unavailable", "staff_not_found"} else "failed"
     elif intent_name == "cancel_appointment":
         tool_name = "cancel_appointment"
         tool_output = cancel_appointment_tool(business_client, text, customer=customer, payload=payload)

@@ -82,6 +82,7 @@ class Appointment(models.Model):
     notes = models.TextField(blank=True)
     cancelled_reason = models.CharField(max_length=240, blank=True)
     hidden_in_calendar = models.BooleanField(default=False)
+    is_test = models.BooleanField(default=False)
     metadata = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -104,6 +105,10 @@ class Appointment(models.Model):
 
     def clean(self):
         from appointments.services import aware_client_datetime, blocked_times_for_date, effective_working_hours
+
+        # Test bookings skip all validation — they must never block real slots
+        if self.is_test:
+            return
 
         if self.duration_minutes <= 0:
             raise ValidationError({"duration_minutes": "Trajanje termina mora biti vece od 0."})
@@ -136,6 +141,7 @@ class Appointment(models.Model):
             business_client=self.business_client,
             date=self.date,
             status__in=[self.STATUS_CONFIRMED, self.STATUS_MOVED, self.STATUS_PENDING, self.STATUS_BLOCKED],
+            is_test=False,
         )
         if self.staff_member_id:
             appointments = appointments.filter(Q(staff_member_id=self.staff_member_id) | Q(staff_member__isnull=True))

@@ -1063,7 +1063,7 @@ def check_availability_tool(business_client, text="", payload=None):
     return availability
 
 
-def book_appointment_tool(business_client, text="", customer=None, channel="web", payload=None):
+def book_appointment_tool(business_client, text="", customer=None, channel="web", payload=None, is_test=False):
     payload = infer_payload_from_text(business_client, text, payload)
     target_date = parse_requested_date(text, payload.get("date"), reference_date=client_local_today(business_client))
     requested_time = normalize_requested_time_for_work_hours(
@@ -1076,7 +1076,20 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
     )
     target_date = adjust_past_weekday_request(business_client, text, target_date, requested_time)
     service = scoped_service(business_client, payload.get("service_id")) or resolve_service_by_hint(business_client, payload.get("service_hint"))
-    staff_member = scoped_staff_member(business_client, payload.get("staff_member_id")) or resolve_staff_member_by_hint(business_client, payload.get("staff_hint"))
+    staff_hint = (payload.get("staff_hint") or "").strip()
+    staff_member = scoped_staff_member(business_client, payload.get("staff_member_id")) or resolve_staff_member_by_hint(business_client, staff_hint)
+    # If caller named a specific staff member who doesn't work here, tell them
+    if staff_hint and not staff_member and not payload.get("staff_member_id"):
+        available_staff = list(
+            StaffMember.objects.filter(business_client=business_client, is_active=True)
+            .order_by("full_name")
+            .values_list("full_name", flat=True)[:6]
+        )
+        return {
+            "status": "staff_not_found",
+            "staff_hint": staff_hint,
+            "available_staff": available_staff,
+        }
     duration = int(payload.get("duration_minutes") or (service.duration_minutes if service else business_client.slot_interval_minutes))
     aggregate_availability = aggregate_staff_availability(
         business_client,
@@ -1144,6 +1157,7 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
             "status": "time_unavailable",
             "date": target_date.isoformat(),
             "requested_time": requested_time,
+            "suggestion_time": suggestion_time,
             "suggested_slots": suggested_slots,
             "suggested_slots_detail": aggregate_availability["suggested_slots_detail"],
             "free_count": aggregate_availability["free_count"],
@@ -1155,23 +1169,29 @@ def book_appointment_tool(business_client, text="", customer=None, channel="web"
         }
 
     customer = ensure_customer(business_client, customer=customer, payload={**payload, "channel": channel})
+    base_title = payload.get("title") or ("AI booking request" if not customer else "")
     appointment = Appointment(
         business_client=business_client,
         customer=customer,
         staff_member=selected_staff_member,
         service=service,
-        title=payload.get("title") or ("AI booking request" if not customer else ""),
+        title=f"[TEST] {base_title}".strip() if is_test else base_title,
         status=Appointment.STATUS_CONFIRMED,
         date=target_date,
         start_time=as_time(requested_time),
         duration_minutes=duration,
         channel=channel,
-        source="ai_agent",
-        metadata={"created_by": "kaleya_ai", "input_text": text[:500]},
+        source="ai_agent_test" if is_test else "ai_agent",
+        is_test=is_test,
+        metadata={"created_by": "kaleya_ai_test" if is_test else "kaleya_ai", "input_text": text[:500]},
     )
     try:
-        appointment.full_clean()
-        appointment.save()
+        if is_test:
+            # Test bookings skip validation — they must never block real slots
+            appointment.save()
+        else:
+            appointment.full_clean()
+            appointment.save()
     except DjangoValidationError as exc:
         return {
             "status": "failed",
@@ -1376,6 +1396,7 @@ def reschedule_appointment_tool(business_client, text="", customer=None, channel
             "appointment_id": appointment.id,
             "date": target_date.isoformat(),
             "requested_time": requested_time,
+            "suggestion_time": suggestion_time,
             "suggested_slots": suggested_slots,
             "free_count": availability["free_count"],
             "is_closed": availability["is_closed"],
