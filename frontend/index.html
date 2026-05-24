@@ -2429,7 +2429,6 @@
                                     <select id="clientAiTestChannel" class="h-10 px-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[12px]">
                                         <option value="web">Web</option>
                                         <option value="whatsapp">WhatsApp</option>
-                                        <option value="viber">Viber</option>
                                         <option value="telegram">Telegram</option>
                                         <option value="sms">SMS</option>
                                         <option value="phone">Phone</option>
@@ -2497,7 +2496,7 @@
                             <label class="text-[12px] text-slate-500"><span data-i18n="staff_label">Osoblje</span><select id="apptStaff" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option value="" data-i18n="any_staff">Bilo ko</option></select></label>
                         </div>
                         <div class="mt-3 grid grid-cols-2 gap-3">
-                            <label class="text-[12px] text-slate-500"><span data-i18n="channel_label">Kanal</span><select id="apptChannel" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option>WhatsApp</option><option>Viber</option><option>Telegram</option><option>SMS</option><option>Phone</option></select></label>
+                            <label class="text-[12px] text-slate-500"><span data-i18n="channel_label">Kanal</span><select id="apptChannel" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option>WhatsApp</option><option>Telegram</option><option>SMS</option><option>Phone</option></select></label>
                             <label class="text-[12px] text-slate-500"><span data-i18n="status_label">Status</span><select id="apptStatus" class="mt-1 w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[13px]"><option value="confirmed" data-i18n="status_confirmed">Zakazano</option><option value="moved" data-i18n="status_moved">Pomereno</option><option value="cancelled" data-i18n="status_cancelled">Otkazano</option><option value="pending" data-i18n="status_pending">Na čekanju</option></select></label>
                         </div>
                         <label class="mt-3 block text-[12px] text-slate-500"><span data-i18n="duration_label">Trajanje termina</span>
@@ -2903,7 +2902,7 @@ let clientEntitlements = {
     entitlements: {
         max_staff_members: 15,
         allow_whatsapp: true,
-        allow_viber: true,
+        allow_viber: false,
         allow_telegram: true,
         allow_sms: true,
         allow_phone_calls: true,
@@ -2911,7 +2910,7 @@ let clientEntitlements = {
         allow_tiktok_dm: true,
         allow_client_api_override: true,
         includes_elevenlabs_voice: true,
-        allowed_channels: ['web', 'email', 'whatsapp', 'viber', 'telegram', 'sms', 'phone', 'instagram', 'tiktok', 'google_calendar']
+        allowed_channels: ['web', 'email', 'whatsapp', 'telegram', 'sms', 'phone', 'instagram', 'tiktok', 'google_calendar']
     }
 };
 let clientStaffMembers = [];
@@ -2928,7 +2927,7 @@ let deferredPwaInstallPrompt = null;
 let clientCalendarState = { mode: 'month', monthOffset: 0, selectedDate: clientIsoDate(new Date()) };
 let schedule = [
     { id: 'a1', date: clientDateOffset(0), time: '10:00', duration: 60, nameKey: 'client1', phone: '+38160111222', channel: 'WhatsApp', status: 'confirmed', staffMemberName: 'Employee User' },
-    { id: 'a2', date: clientDateOffset(0), time: '14:00', duration: 120, nameKey: 'client2', phone: '+381641234567', channel: 'Viber', status: 'moved', staffMemberName: 'Mark Johnson' },
+    { id: 'a2', date: clientDateOffset(0), time: '14:00', duration: 120, nameKey: 'client2', phone: '+381641234567', channel: 'Telegram', status: 'moved', staffMemberName: 'Mark Johnson' },
     { id: 'a3', date: clientDateOffset(1), time: '11:00', duration: 60, nameKey: 'team', phone: '+381621234444', channel: 'Telegram', status: 'pending', staffMemberName: 'Employee User' },
     { id: 'a4', date: clientDateOffset(2), time: '15:00', duration: 30, nameKey: 'newClient', phone: '+381631119999', channel: 'SMS', status: 'cancelled', staffMemberName: 'Mark Johnson' },
 ];
@@ -5576,7 +5575,6 @@ async function gdprDeleteAccount() {
 
 const FRONTEND_CHANNEL_OPTIONS = [
     { label: 'WhatsApp', backend: 'whatsapp' },
-    { label: 'Viber', backend: 'viber' },
     { label: 'Telegram', backend: 'telegram' },
     { label: 'SMS', backend: 'sms' },
     { label: 'Phone', backend: 'phone' }
@@ -5754,7 +5752,6 @@ function renderClientSubscriptionStatus() {
 function applyClientEntitlementsUI() {
     const ent = clientEntitlements?.entitlements || {};
     setPackageStatusBadge('channelWhatsappStatus', ent.allow_whatsapp !== false);
-    setPackageStatusBadge('channelViberStatus', ent.allow_viber !== false);
     setPackageStatusBadge('channelTelegramStatus', ent.allow_telegram !== false);
     setPackageStatusBadge('channelSmsPhoneStatus', !!ent.allow_sms || !!ent.allow_phone_calls);
     renderClientSubscriptionStatus();
@@ -6398,12 +6395,12 @@ async function saveClientSettingsToBackend(payload) {
 }
 
 function frontendChannelToBackend(channel = 'Phone') {
-    const map = { WhatsApp: 'whatsapp', Viber: 'viber', Telegram: 'telegram', SMS: 'sms', Phone: 'phone', Email: 'email' };
+    const map = { WhatsApp: 'whatsapp', Telegram: 'telegram', SMS: 'sms', Phone: 'phone', Email: 'email' };
     return map[channel] || String(channel).toLowerCase();
 }
 
 function backendChannelToFrontend(channel = 'phone') {
-    const map = { whatsapp: 'WhatsApp', viber: 'Viber', telegram: 'Telegram', sms: 'SMS', phone: 'Phone', email: 'Email', web: 'Phone' };
+    const map = { whatsapp: 'WhatsApp', telegram: 'Telegram', sms: 'SMS', phone: 'Phone', email: 'Email', web: 'Phone' };
     return map[channel] || channel;
 }
 
@@ -8510,7 +8507,7 @@ function normalizePhone(phone = '') {
 }
 
 function channelShort(channel = '') {
-    const map = { WhatsApp: 'WA', Viber: 'VB', Telegram: 'TG', SMS: 'SMS', Phone: 'TEL' };
+    const map = { WhatsApp: 'WA', Telegram: 'TG', SMS: 'SMS', Phone: 'TEL' };
     return map[channel] || channel.slice(0, 3).toUpperCase();
 }
 
@@ -9345,7 +9342,6 @@ function _convChannelMeta(ch) {
         whatsapp: { bg: 'bg-green-500/15',  color: 'text-green-700 dark:text-green-300',   icon: '💬' },
         sms:      { bg: 'bg-blue-500/15',   color: 'text-blue-700 dark:text-blue-300',     icon: '✉' },
         voice:    { bg: 'bg-purple-500/15', color: 'text-purple-700 dark:text-purple-300', icon: '📞' },
-        viber:    { bg: 'bg-violet-500/15', color: 'text-violet-700 dark:text-violet-300', icon: '📱' },
         telegram: { bg: 'bg-sky-500/15',    color: 'text-sky-700 dark:text-sky-300',       icon: '✈' }
     };
     return map[ch] || { bg: 'bg-slate-100 dark:bg-slate-800', color: 'text-slate-600', icon: '💬' };
@@ -9617,8 +9613,8 @@ async function loadClientIntegrationsStatus() {
 }
 
 function renderClientIntegrationsPanel(panel, integrations) {
-    const SHOW = ['telegram', 'whatsapp', 'viber', 'sms', 'phone', 'instagram'];
-    const ICONS = { telegram: '✈', whatsapp: '💬', viber: '📱', sms: '📩', phone: '📞', instagram: '📸' };
+    const SHOW = ['telegram', 'whatsapp', 'sms', 'phone', 'instagram'];
+    const ICONS = { telegram: '✈', whatsapp: '💬', sms: '📩', phone: '📞', instagram: '📸' };
     const visible = integrations.filter(i => SHOW.includes(i.provider));
     if (!visible.length) return;
     const items = visible.map(({ provider, label, allowed_by_package, status, public_number, ready }) => {
@@ -9733,12 +9729,11 @@ async function disconnectIntegration(provider) {
 }
 
 function renderChannelsPanelGrid(container, integrations) {
-    const SHOW = ['telegram', 'whatsapp', 'viber', 'sms', 'phone', 'instagram'];
-    const ICONS = { telegram: '✈', whatsapp: '💬', viber: '📱', sms: '📩', phone: '📞', instagram: '📸' };
+    const SHOW = ['telegram', 'whatsapp', 'sms', 'phone', 'instagram'];
+    const ICONS = { telegram: '✈', whatsapp: '💬', sms: '📩', phone: '📞', instagram: '📸' };
     const DESC = {
         telegram: { sr: 'Prima i šalje poruke za zakazivanje termina.', en: 'Receives and sends messages for booking appointments.' },
         whatsapp: { sr: 'WhatsApp Business API — automatske poruke.', en: 'WhatsApp Business API — automated messaging.' },
-        viber: { sr: 'Lokalna komunikacija i potvrde termina.', en: 'Local messaging and appointment confirmations.' },
         sms: { sr: 'SMS potvrde i podsetnici za termine.', en: 'SMS confirmations and appointment reminders.' },
         phone: { sr: 'Telefonski pozivi za zakazivanje (VoIP).', en: 'Phone calls for booking (VoIP).' },
         instagram: { sr: 'Instagram DM zakazivanje.', en: 'Instagram DM booking.' },
@@ -9802,7 +9797,6 @@ async function loadAdminIntegrationsStatus() {
         const { integrations = [] } = await res.json();
         const DESC = {
             whatsapp: 'WhatsApp Business API — inbound &amp; outbound messages.',
-            viber: 'Viber Bot — local messaging and confirmations.',
             telegram: 'Telegram Bot — fast messages and service channels.',
             sms: 'SMS gateway — confirmations and reminders.',
             phone: 'Phone calls — VoIP/SIP for incoming calls.',
@@ -10259,15 +10253,6 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
                         <div>
                             <p class="font-semibold text-sm text-slate-900 dark:text-white">WhatsApp <span class="ml-1.5 text-[10px] font-bold bg-slate-200 dark:bg-slate-700 rounded-full px-2 py-0.5">Soon</span></p>
                             <p class="text-[11px] text-slate-400">WhatsApp Business API</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 opacity-50 cursor-not-allowed select-none">
-                        <div class="w-10 h-10 rounded-xl bg-[#7360f2] flex items-center justify-center shrink-0">
-                            <svg class="w-[18px] h-[18px] fill-white" viewBox="0 0 32 32"><path d="M16 0C7.163 0 0 7.163 0 16s7.163 16 16 16 16-7.163 16-16S24.837 0 16 0zm7.781 10.857-2.667 12.571c-.2.889-.727 1.111-1.469.69l-4.063-2.993-1.96 1.886c-.218.218-.4.4-.82.4l.292-4.133 7.527-6.8c.327-.29-.073-.452-.505-.162l-9.302 5.857-4.006-1.252c-.87-.275-.889-.87.184-1.29l15.667-6.038c.724-.262 1.364.177 1.122 1.264z"/></svg>
-                        </div>
-                        <div>
-                            <p class="font-semibold text-sm text-slate-900 dark:text-white">Viber <span class="ml-1.5 text-[10px] font-bold bg-slate-200 dark:bg-slate-700 rounded-full px-2 py-0.5">Soon</span></p>
-                            <p class="text-[11px] text-slate-400">Viber Business Messages</p>
                         </div>
                     </div>
                 </div>
