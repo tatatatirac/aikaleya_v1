@@ -1847,19 +1847,19 @@
                             <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3M3 11h18M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                             <span data-i18n="nav_cal">Kalendar</span>
                         </button>
-                        <button data-sidebar-tab="activity" onclick="switchClientTab('activity')" class="client-sidebar-tab w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium transition text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900">
+                        <button data-owner-only data-sidebar-tab="activity" onclick="switchClientTab('activity')" class="client-sidebar-tab w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium transition text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900">
                             <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M8 17V9"/><path d="M12 19V7"/><path d="M16 15V11"/><path d="M20 19V5"/></svg>
                             <span data-i18n="nav_activity">Aktivnosti</span>
                         </button>
-                        <button data-sidebar-tab="support" onclick="switchClientTab('support')" class="client-sidebar-tab w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium transition text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900">
+                        <button data-owner-only data-sidebar-tab="support" onclick="switchClientTab('support')" class="client-sidebar-tab w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium transition text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900">
                             <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z"/></svg>
                             <span data-i18n="nav_support">Support</span>
                         </button>
-                        <button data-sidebar-tab="channels" onclick="switchClientTab('channels')" class="client-sidebar-tab w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium transition text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900">
+                        <button data-owner-only data-sidebar-tab="channels" onclick="switchClientTab('channels')" class="client-sidebar-tab w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium transition text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900">
                             <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                             <span data-i18n="nav_channels">Kanali</span>
                         </button>
-                        <button data-sidebar-tab="settings" onclick="switchClientTab('settings')" class="client-sidebar-tab w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium transition text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900">
+                        <button data-owner-only data-sidebar-tab="settings" onclick="switchClientTab('settings')" class="client-sidebar-tab w-full flex items-center gap-3 px-3 h-10 rounded-xl text-[13px] font-medium transition text-left text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900">
                             <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.573-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             <span data-i18n="nav_set">Podešavanja</span>
                         </button>
@@ -2084,11 +2084,11 @@
                             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3M3 11h18M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                             <span class="text-[10px] font-medium" data-i18n="nav_cal">Kalendar</span>
                         </button>
-                        <button data-client-tab="activity" onclick="switchClientTab('activity')" class="client-tab flex flex-col items-center gap-1 px-2 py-2 rounded-xl text-slate-500">
+                        <button data-owner-only data-client-tab="activity" onclick="switchClientTab('activity')" class="client-tab flex flex-col items-center gap-1 px-2 py-2 rounded-xl text-slate-500">
                             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M8 17V9"/><path d="M12 19V7"/><path d="M16 15V11"/><path d="M20 19V5"/></svg>
                             <span class="text-[10px] font-medium" data-i18n="nav_activity">Aktivnosti</span>
                         </button>
-                        <button data-client-tab="support" onclick="switchClientTab('support')" class="client-tab flex flex-col items-center gap-1 px-2 py-2 rounded-xl text-slate-500">
+                        <button data-owner-only data-client-tab="support" onclick="switchClientTab('support')" class="client-tab flex flex-col items-center gap-1 px-2 py-2 rounded-xl text-slate-500">
                             <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4z"/></svg>
                             <span class="text-[10px] font-medium" data-i18n="nav_support">Support</span>
                         </button>
@@ -4973,6 +4973,12 @@ function showView(view) {
     window.scrollTo(0,0);
     if (view === 'client') {
         applyEmployeeModeUI();
+        // If employee opened the app in a browser (not installed PWA), show install wall
+        // and skip loading data — the wall blocks the UI anyway
+        if (isEmployeeUser() && !isStandaloneMode() && !localStorage.getItem('kaleya_demo_mode')) {
+            updatePwaInstallButtons();
+            return;
+        }
         renderSchedule();
         renderClientCalendar();
         renderClientActivityLog();
@@ -5514,6 +5520,23 @@ function currentUserRole() {
 
 function isEmployeeUser() {
     return currentUserRole() === 'employee';
+}
+function isStandaloneMode() {
+    return window.matchMedia('(display-mode: standalone)').matches
+        || (typeof window.navigator.standalone === 'boolean' && window.navigator.standalone === true);
+}
+function showStaffInstallWall() {
+    const wall = document.getElementById('staff-install-wall');
+    if (!wall) return;
+    wall.classList.remove('hidden');
+    // Show the native install button only if browser has deferred prompt ready
+    const installBtn = document.getElementById('staffInstallBtn');
+    if (installBtn) {
+        installBtn.classList.toggle('hidden', !deferredPwaInstallPrompt);
+    }
+}
+function hideStaffInstallWall() {
+    document.getElementById('staff-install-wall')?.classList.add('hidden');
 }
 
 function currentUserIdentifiers() {
@@ -8638,18 +8661,33 @@ function renderEmployeeDirectory() {
 
 function applyEmployeeModeUI() {
     const employee = isEmployeeUser();
+
+    // Toggle owner-only nav buttons (Activity, Support, Channels, Settings)
+    document.querySelectorAll('[data-owner-only]').forEach(el => {
+        el.classList.toggle('hidden', employee);
+    });
+
+    // 5th bottom-nav button: repurpose for staff → "Profil" (points to team tab)
     const navBtn = document.getElementById('clientSettingsNavBtn');
     const navLabel = document.getElementById('clientSettingsNavLabel');
     if (navBtn) navBtn.dataset.clientTab = employee ? 'team' : 'settings';
     if (navLabel) {
         if (employee) {
             navLabel.removeAttribute('data-i18n');
-            navLabel.textContent = 'Tim';
+            navLabel.textContent = 'Profil';
         } else {
             navLabel.setAttribute('data-i18n', 'nav_set');
             navLabel.textContent = T[currentLang]?.nav_set || 'Podes.';
         }
     }
+
+    // Install wall: block browser access for staff (demo mode bypasses)
+    if (employee && !isStandaloneMode() && !localStorage.getItem('kaleya_demo_mode')) {
+        showStaffInstallWall();
+    } else {
+        hideStaffInstallWall();
+    }
+
     if (employee) closeClientSettings();
 }
 
@@ -9964,6 +10002,11 @@ function updatePwaInstallButtons() {
         button.textContent = pwaInstallLabel();
         button.classList.toggle('hidden', !deferredPwaInstallPrompt || isKaleyaStandalone());
     });
+    // Also refresh the staff install wall button
+    const staffInstallBtn = document.getElementById('staffInstallBtn');
+    if (staffInstallBtn) {
+        staffInstallBtn.classList.toggle('hidden', !deferredPwaInstallPrompt || isKaleyaStandalone());
+    }
 }
 
 async function installKaleyaApp() {
@@ -10371,6 +10414,40 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     <button id="kv-call-endBtn" onclick="closeCallModal()" data-i18n="kv_call_end">End Demo Call</button>
     <div id="kv-call-hint" data-i18n="kv_call_hint">Demo · Max 2 min · No data saved</div>
   </div>
+</div>
+
+<!-- ╔══════════════════════════════════════════════════╗
+     ║  STAFF INSTALL WALL                             ║
+     ║  Shown to employees who open the app in browser ║
+     ╚══════════════════════════════════════════════════╝ -->
+<div id="staff-install-wall" class="hidden fixed inset-0 z-[999] flex flex-col items-center justify-center bg-slate-950 p-8">
+    <div class="w-[72px] h-[72px] rounded-[22px] bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center mb-7 shadow-xl">
+        <svg width="36" height="36" fill="none" stroke="#94a3b8" stroke-width="1.6" viewBox="0 0 24 24">
+            <rect x="5" y="2" width="14" height="20" rx="2"/>
+            <path d="M12 18h.01"/>
+        </svg>
+    </div>
+    <h1 class="text-white text-[22px] font-bold text-center mb-2">Kaleya Staff</h1>
+    <p class="text-slate-400 text-[13px] text-center max-w-[280px] mb-8 leading-relaxed">
+        Aplikacija za osoblje je dostupna samo iz instalirane verzije na tvom telefonu.
+    </p>
+    <!-- Install button — visible only when browser shows install prompt -->
+    <button id="staffInstallBtn" onclick="installKaleyaApp()" class="hidden w-full max-w-[280px] h-12 rounded-2xl bg-white text-slate-900 font-semibold text-[14px] mb-4 shadow-lg">
+        Instaliraj aplikaciju
+    </button>
+    <!-- Manual instructions -->
+    <div class="w-full max-w-[280px] rounded-2xl bg-slate-900 border border-slate-800 p-4 mb-6 space-y-3">
+        <p class="text-slate-300 text-[12px] font-semibold mb-1">Kako instalirati:</p>
+        <div class="flex items-start gap-3">
+            <span class="text-slate-500 text-[11px] font-mono mt-0.5">iOS</span>
+            <p class="text-slate-400 text-[12px] leading-snug">Safari → dugme <strong class="text-slate-300">Podeli</strong> → <strong class="text-slate-300">Dodaj na početni ekran</strong></p>
+        </div>
+        <div class="flex items-start gap-3">
+            <span class="text-slate-500 text-[11px] font-mono mt-0.5">AND</span>
+            <p class="text-slate-400 text-[12px] leading-snug">Chrome → meni (<strong class="text-slate-300">⋮</strong>) → <strong class="text-slate-300">Dodaj na početni ekran</strong></p>
+        </div>
+    </div>
+    <button onclick="logout()" class="text-slate-600 text-[12px] hover:text-slate-400 transition">Odjavi se</button>
 </div>
 </body>
 </html>
