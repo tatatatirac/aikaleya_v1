@@ -1097,9 +1097,9 @@
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                                 </div>
                                 <div>
-                                    <strong>Google Calendar</strong>
+                                    <strong>Kaleya Calendar</strong>
                                     <p>Fade · Tomorrow 3:00 PM · Carlos</p>
-                                    <span class="kv-fc-tag">① Calendar updated</span>
+                                    <span class="kv-fc-tag">① Booking confirmed</span>
                                 </div>
                             </div>
 
@@ -1315,7 +1315,7 @@
                             </div>
                             <div class="kv-step">
                                 <div class="kv-step-num">3</div>
-                                <h3 data-i18n="how_s3_t">Books to Google Calendar + Square</h3>
+                                <h3 data-i18n="how_s3_t">Books instantly — SMS confirmation in seconds</h3>
                                 <p data-i18n="how_s3_d">Real-time availability, automatic SMS confirmations, and deposits for high-value slots. No double-books.</p>
                             </div>
                         </div>
@@ -1393,7 +1393,7 @@
                                 <ul class="kv-price-feats" style="margin-top:18px">
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f1">500 talk minutes — covers all after-hours calls</span></li>
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f2">Books by call, SMS, WhatsApp & Telegram</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f3">Google Calendar sync — every booking appears instantly</span></li>
+                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f3">Kaleya calendar — all bookings in one place</span></li>
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f4">Automated SMS reminders to clients</span></li>
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_basic_f5">Staff alarm — spoken next-client announcement</span></li>
                                 </ul>
@@ -2198,8 +2198,8 @@
                                 </div>
                             </div>
 
-                            <!-- GOOGLE CALENDAR -->
-                            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                            <!-- GOOGLE CALENDAR — hidden until verification complete -->
+                            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800" style="display:none">
                                 <div class="flex items-start justify-between gap-3">
                                     <div class="flex-1">
                                         <p class="text-sm font-semibold flex items-center gap-2" data-i18n="cset_gcal_title">
@@ -2910,7 +2910,7 @@ let clientEntitlements = {
         allow_tiktok_dm: true,
         allow_client_api_override: true,
         includes_elevenlabs_voice: true,
-        allowed_channels: ['web', 'email', 'whatsapp', 'telegram', 'sms', 'phone', 'instagram', 'tiktok', 'google_calendar']
+        allowed_channels: ['web', 'email', 'whatsapp', 'telegram', 'sms', 'phone', 'instagram', 'tiktok']
     }
 };
 let clientStaffMembers = [];
@@ -3058,8 +3058,8 @@ const T = {
         p_basic_desc: 'Prestani da gubiš zakazivanja posle 17h. Kaleya odgovara na svaki večernji poziv da se probudiš sa punim rasporedom.',
         p_pro_tagline: 'Jedan sprečeni no-show plaća ceo mesec.',
         p_pro_desc: 'Dežurstvo 24/7 + depoziti kartom. Računica: 8 no-showova košta $600. Kaleya košta $45.',
-        p_basic_f1: '300 minuta razgovora uključeno', p_basic_f2: 'Večernje dežurstvo — kada konkurencija propušta pozive, ti ne', p_basic_f3: 'Sinhronizacija sa Google Calendar', p_basic_f4: 'SMS potvrde',
-        p_pro_f1: '1.200 minuta uključeno', p_pro_f2: '24/7 javljanje', p_pro_f3: 'Google Calendar sinhronizacija', p_pro_f4: 'Kartica za depozit', p_pro_f5: 'Prioritetna podrška',
+        p_basic_f1: '300 minuta razgovora uključeno', p_basic_f2: 'Večernje dežurstvo — kada konkurencija propušta pozive, ti ne', p_basic_f3: 'Kaleya kalendar — svi termini na jednom mestu', p_basic_f4: 'SMS potvrde',
+        p_pro_f1: '1.200 minuta uključeno', p_pro_f2: '24/7 javljanje', p_pro_f3: 'Kaleya kalendar + SMS podsjetnici', p_pro_f4: 'Kartica za depozit', p_pro_f5: 'Prioritetna podrška',
         hero_badge: 'AI sekretarica · 24/7 aktivna', hero_title_1: 'Kaleya', hero_title_2: 'AI sekretarica 24/7',
         hero_sub: 'Kaleya odgovara, zakazuje, otkazuje i obaveštava osoblje prirodnim glasom. Radi preko poziva, WhatsApp-a, Telegrama, Instagram DM i SMS-a.',
         hero_cta_demo: 'Isprobaj besplatno', hero_cta_how: 'Pogledaj kako radi', hero_social: '500+ zadovoljnih firmi', hero_tap: 'Dodirni logo',
@@ -3126,8 +3126,8 @@ const T = {
         p_basic_desc: 'Stop losing bookings after 5PM. Kaleya handles every evening call so you wake up to a full chair.',
         p_pro_tagline: 'One prevented no-show pays for the whole month.',
         p_pro_desc: '24/7 answering on every channel. The math: 2 prevented no-shows pay for the whole month.',
-        p_basic_f1: '300 talk minutes included', p_basic_f2: 'Evening & weekend coverage — when competitors miss calls, you don\'t', p_basic_f3: 'Google Calendar sync', p_basic_f4: 'SMS confirmations',
-        p_pro_f1: '1,200 minutes included', p_pro_f2: '24/7 answering', p_pro_f3: 'Google Calendar sync', p_pro_f4: 'Card-on-file deposits', p_pro_f5: 'Priority support',
+        p_basic_f1: '300 talk minutes included', p_basic_f2: 'Evening & weekend coverage — when competitors miss calls, you don\'t', p_basic_f3: 'Kaleya calendar — all bookings in one place', p_basic_f4: 'SMS confirmations',
+        p_pro_f1: '1,200 minutes included', p_pro_f2: '24/7 answering', p_pro_f3: 'All channels: call, SMS, WhatsApp, Telegram', p_pro_f4: 'Card-on-file deposits', p_pro_f5: 'Priority support',
         hero_badge: 'AI receptionist · active 24/7', hero_title_1: 'Kaleya', hero_title_2: 'AI receptionist 24/7',
         hero_sub: 'Kaleya answers, schedules, cancels and alerts staff with a natural voice. Works via calls, WhatsApp, Telegram, Instagram DM and SMS.',
         hero_cta_demo: 'Try for free', hero_cta_how: 'See how it works', hero_social: '500+ happy businesses', hero_tap: 'Tap the logo',
@@ -3194,8 +3194,8 @@ const T = {
         p_basic_desc: 'Deja de perder reservas después de las 17h. Kaleya gestiona cada llamada nocturna para que despiertes con agenda llena.',
         p_pro_tagline: 'Una ausencia evitada paga todo el mes.',
         p_pro_desc: 'Atención 24/7 en todos los canales. Las cuentas: 2 ausencias evitadas pagan todo el mes.',
-        p_basic_f1: '300 minutos de llamadas incluidos', p_basic_f2: 'Cobertura nocturna — cuando la competencia falla, tú no', p_basic_f3: 'Sincronización con Google Calendar', p_basic_f4: 'Confirmaciones SMS',
-        p_pro_f1: '1.200 minutos incluidos', p_pro_f2: 'Atención 24/7', p_pro_f3: 'Google Calendar sync', p_pro_f4: 'Depósitos con tarjeta', p_pro_f5: 'Soporte prioritario',
+        p_basic_f1: '300 minutos de llamadas incluidos', p_basic_f2: 'Cobertura nocturna — cuando la competencia falla, tú no', p_basic_f3: 'Kaleya calendar — todas las citas en un lugar', p_basic_f4: 'Confirmaciones SMS',
+        p_pro_f1: '1.200 minutos incluidos', p_pro_f2: 'Atención 24/7', p_pro_f3: 'All channels: call, SMS, WhatsApp, Telegram', p_pro_f4: 'Depósitos con tarjeta', p_pro_f5: 'Soporte prioritario',
         hero_badge: 'Recepcionista IA · activa 24/7', hero_title_1: 'Kaleya', hero_title_2: 'Recepcionista IA 24/7',
         hero_sub: 'Kaleya responde, agenda, cancela y avisa al personal con voz natural. Funciona por llamadas, WhatsApp, Telegram, Instagram DM y SMS.',
         hero_cta_demo: 'Probar gratis', hero_cta_how: 'Ver cómo funciona', hero_social: '500+ empresas satisfechas', hero_tap: 'Toca el logo',
@@ -3262,8 +3262,8 @@ const T = {
         p_basic_desc: 'Pare de perder reservas depois das 17h. A Kaleya atende cada chamada noturna para que acorde com agenda cheia.',
         p_pro_tagline: 'Uma falta evitada paga o mês inteiro.',
         p_pro_desc: 'Atendimento 24/7 em todos os canais. A conta: 2 faltas evitadas pagam o mês inteiro.',
-        p_basic_f1: '300 minutos de chamada incluídos', p_basic_f2: 'Cobertura noturna — quando a concorrência falha, você não', p_basic_f3: 'Sincronização com Google Calendar', p_basic_f4: 'Confirmações por SMS',
-        p_pro_f1: '1.200 minutos incluídos', p_pro_f2: 'Atendimento 24/7', p_pro_f3: 'Google Calendar sync', p_pro_f4: 'Depósitos com cartão', p_pro_f5: 'Suporte prioritário',
+        p_basic_f1: '300 minutos de chamada incluídos', p_basic_f2: 'Cobertura noturna — quando a concorrência falha, você não', p_basic_f3: 'Kaleya calendar — todas as marcações num só lugar', p_basic_f4: 'Confirmações por SMS',
+        p_pro_f1: '1.200 minutos incluídos', p_pro_f2: 'Atendimento 24/7', p_pro_f3: 'All channels: call, SMS, WhatsApp, Telegram', p_pro_f4: 'Depósitos com cartão', p_pro_f5: 'Suporte prioritário',
         hero_badge: 'Recepcionista IA · ativa 24/7', hero_title_1: 'Kaleya', hero_title_2: 'Recepcionista IA 24/7',
         hero_sub: 'Kaleya atende, agenda, cancela e avisa a equipe com voz natural. Funciona por chamadas, WhatsApp, Telegram, Instagram DM e SMS.',
         hero_cta_demo: 'Testar grátis', hero_cta_how: 'Ver como funciona', hero_social: '500+ empresas satisfeitas', hero_tap: 'Toque no logo',
@@ -3324,8 +3324,8 @@ const T = {
         p_basic_desc: 'Перестаньте терять записи после 17:00. Kaleya принимает каждый вечерний звонок, чтобы вы просыпались с полным расписанием.',
         p_pro_tagline: 'Один предотвращённый пропуск оплачивает весь месяц.',
         p_pro_desc: 'Приём 24/7 по всем каналам. Математика: 2 предотвращённых пропуска оплачивают весь месяц.',
-        p_basic_f1: '300 минут звонков включено', p_basic_f2: 'Вечернее дежурство — когда конкуренты не берут трубку, вы берёте', p_basic_f3: 'Синхронизация с Google Calendar', p_basic_f4: 'Подтверждения по SMS',
-        p_pro_f1: '1 200 минут включено', p_pro_f2: 'Круглосуточный приём', p_pro_f3: 'Google Calendar sync', p_pro_f4: 'Депозиты по карте', p_pro_f5: 'Приоритетная поддержка',
+        p_basic_f1: '300 минут звонков включено', p_basic_f2: 'Вечернее дежурство — когда конкуренты не берут трубку, вы берёте', p_basic_f3: 'Kaleya calendar — все записи в одном месте', p_basic_f4: 'Подтверждения по SMS',
+        p_pro_f1: '1 200 минут включено', p_pro_f2: 'Круглосуточный приём', p_pro_f3: 'All channels: call, SMS, WhatsApp, Telegram', p_pro_f4: 'Депозиты по карте', p_pro_f5: 'Приоритетная поддержка',
         hero_badge: 'AI администратор · 24/7', hero_title_1: 'Kaleya', hero_title_2: 'AI администратор 24/7',
         hero_sub: 'Kaleya отвечает, записывает, отменяет встречи и уведомляет персонал естественным голосом. Работает через звонки, WhatsApp, Telegram, Instagram DM и SMS.',
         hero_cta_demo: 'Попробовать бесплатно', hero_cta_how: 'Как это работает', hero_social: '500+ довольных компаний', hero_tap: 'Нажмите логотип',
@@ -3389,8 +3389,8 @@ T.fr = {
     p_basic_desc: 'Arretez de perdre des reservations apres 17h. Kaleya gere chaque appel du soir pour que vous vous reveilliez avec un agenda plein.',
     p_pro_tagline: 'Un no-show evite paie tout le mois.',
     p_pro_desc: 'Disponible 24/7 sur tous les canaux. Le calcul : 2 no-shows evites paient tout le mois.',
-    p_basic_f1: '300 minutes incluses', p_basic_f2: 'Couverture du soir — quand la concurrence rate des appels, pas vous', p_basic_f3: 'Sync Google Calendar', p_basic_f4: 'Confirmations SMS',
-    p_pro_f1: '1 200 minutes incluses', p_pro_f2: 'Accueil 24/7', p_pro_f3: 'Sync Google Calendar', p_pro_f4: 'Acompte par carte', p_pro_f5: 'Support prioritaire',
+    p_basic_f1: '300 minutes incluses', p_basic_f2: 'Couverture du soir — quand la concurrence rate des appels, pas vous', p_basic_f3: 'Kaleya calendar — tous les rendez-vous au même endroit', p_basic_f4: 'Confirmations SMS',
+    p_pro_f1: '1 200 minutes incluses', p_pro_f2: 'Accueil 24/7', p_pro_f3: 'All channels: call, SMS, WhatsApp, Telegram', p_pro_f4: 'Acompte par carte', p_pro_f5: 'Support prioritaire',
     hero_badge: 'Receptionniste IA · active 24/7', hero_sub: 'Kaleya repond, planifie, annule et alerte votre equipe avec une voix naturelle. Fonctionne avec appels, WhatsApp, Telegram, Instagram DM et SMS.',
     hero_cta_demo: 'Essayer gratuitement', hero_cta_how: 'Voir le fonctionnement', hero_social: '500+ entreprises satisfaites', hero_tap: 'Touchez le logo',
     hero_intro_hint: 'Kaleya se presente', hero_demo_msg: '"Bonjour, comment puis-je aider ?"',
@@ -3439,8 +3439,8 @@ T.it = {
     p_basic_desc: 'Smetti di perdere prenotazioni dopo le 17. Kaleya gestisce ogni chiamata serale così ti svegli con l\'agenda piena.',
     p_pro_tagline: 'Un no-show evitato paga tutto il mese.',
     p_pro_desc: 'Risposta 24/7 su tutti i canali. I conti: 2 no-show evitati pagano tutto il mese.',
-    p_basic_f1: '300 minuti di chiamata inclusi', p_basic_f2: 'Copertura serale — quando la concorrenza manca, tu no', p_basic_f3: 'Sync Google Calendar', p_basic_f4: 'Conferme SMS',
-    p_pro_f1: '1.200 minuti inclusi', p_pro_f2: 'Risposta 24/7', p_pro_f3: 'Sync Google Calendar', p_pro_f4: 'Acconto con carta', p_pro_f5: 'Supporto prioritario',
+    p_basic_f1: '300 minuti di chiamata inclusi', p_basic_f2: 'Copertura serale — quando la concorrenza manca, tu no', p_basic_f3: 'Kaleya calendar — tous les rendez-vous au même endroit', p_basic_f4: 'Conferme SMS',
+    p_pro_f1: '1.200 minuti inclusi', p_pro_f2: 'Risposta 24/7', p_pro_f3: 'All channels: call, SMS, WhatsApp, Telegram', p_pro_f4: 'Acconto con carta', p_pro_f5: 'Supporto prioritario',
     hero_badge: 'Receptionist AI · attiva 24/7', hero_sub: 'Kaleya risponde, prenota, annulla e avvisa il team con voce naturale. Funziona con chiamate, WhatsApp, Telegram, Instagram DM e SMS.',
     hero_cta_demo: 'Prova gratis', hero_cta_how: 'Vedi come funziona', hero_social: '500+ aziende soddisfatte', hero_tap: 'Tocca il logo',
     hero_intro_hint: 'Kaleya si presenta', hero_demo_msg: '"Ciao, come posso aiutare?"',
@@ -3475,7 +3475,7 @@ const EXTRA_TRANSLATIONS = {
         f_lang_t: '8 jezika', f_lang_d: 'Srpski, English, španski, portugalski, ruski, francuski, italijanski i nemački sa ručnim izborom.',
         p_basic_tagline: 'Manje od $2 dnevno. Nikad više propušteno zakazivanje posle radnog vremena.',
         p_basic_desc: 'Prestani da gubiš zakazivanja posle 17h. Kaleya odgovara na svaki večernji poziv da se probudiš sa punim rasporedom.',
-        p_basic_d: 'Za vlasnika/firmu', p_basic_f1: '500 minuta razgovora — pokriva sve večernje pozive', p_basic_f2: 'Zakazuje pozivom, SMS, WhatsApp i Telegram', p_basic_f3: 'Google Calendar — svaki termin odmah vidljiv', p_basic_f4: 'Automatski SMS podsetnici klijentima', p_basic_f5: 'Glasovni alarm za osoblje — sledeći klijent',
+        p_basic_d: 'Za vlasnika/firmu', p_basic_f1: '500 minuta razgovora — pokriva sve večernje pozive', p_basic_f2: 'Zakazuje pozivom, SMS, WhatsApp i Telegram', p_basic_f3: 'Kaleya kalendar — svi termini na jednom mestu', p_basic_f4: 'Automatski SMS podsetnici klijentima', p_basic_f5: 'Glasovni alarm za osoblje — sledeći klijent',
         p_pro_tagline: 'Jedan sprečeni no-show plaća ceo mesec.',
         p_pro_desc: 'Dežurstvo 24/7 na svim kanalima. Računica: 2 sprečena no-showa plaćaju ceo mesec.',
         p_pro_d: 'Vlasnik + 1 radnik', p_pro_f1: '1.200 minuta — 24/7 pokrivenost, ni jedan poziv ne propada', p_pro_f2: '24/7 dežurstvo — i u 3 ujutru neko se javlja', p_pro_f3: 'Svi kanali: poziv, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 radnik — poseban raspored i pristup Kaleya APP', p_pro_f5: 'Prioritetna podrška + blokiranje po satu i danu',
@@ -3487,7 +3487,7 @@ const EXTRA_TRANSLATIONS = {
     },
     en: {
         f_lang_t: '8 languages', f_lang_d: 'Serbian, English, Spanish, Portuguese, Russian, French, Italian and German with manual selection.',
-        p_basic_d: 'For owner/company', p_basic_f1: '500 talk minutes — covers all after-hours calls', p_basic_f2: 'Books by call, SMS, WhatsApp & Telegram', p_basic_f3: 'Google Calendar sync — every booking appears instantly', p_basic_f4: 'Automated SMS reminders to clients', p_basic_f5: 'Staff alarm — spoken next-client announcement',
+        p_basic_d: 'For owner/company', p_basic_f1: '500 talk minutes — covers all after-hours calls', p_basic_f2: 'Books by call, SMS, WhatsApp & Telegram', p_basic_f3: 'Kaleya calendar — all bookings in one place', p_basic_f4: 'Automated SMS reminders to clients', p_basic_f5: 'Staff alarm — spoken next-client announcement',
         p_pro_d: 'Owner + 1 employee', p_pro_f1: '1,200 minutes — 24/7 coverage, zero missed calls', p_pro_f2: '24/7 answering — even at 3 AM, someone picks up', p_pro_f3: 'All channels: call, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 staff member — own schedule & Kaleya APP access', p_pro_f5: 'Priority support + time-block scheduling',
         p_business_d: 'Up to 5 employees', p_business_f1: 'Everything in Basic + Pro', p_business_f2: 'Up to 5 employees', p_business_f3: 'Employee Kaleya APP', p_business_f4: 'More languages by agreement', p_business_f5: 'Company-specific API',
         p_business_plus_d: 'Up to 15 employees', p_business_plus_f1: 'Everything in Basic + Pro + Business', p_business_plus_f2: 'Up to 15 employees', p_business_plus_f3: 'Phone calls and SMS', p_business_plus_f4: 'ElevenLabs AI voice',
@@ -3497,7 +3497,7 @@ const EXTRA_TRANSLATIONS = {
     },
     es: {
         f_lang_t: '8 idiomas', f_lang_d: 'Serbio, English, español, portugués, ruso, francés, italiano y alemán con selección manual.',
-        p_basic_d: 'Para propietario/empresa', p_basic_f1: '500 minutos de llamada — cubre todas las llamadas fuera de horario', p_basic_f2: 'Agenda por llamada, SMS, WhatsApp y Telegram', p_basic_f3: 'Google Calendar — cada cita aparece al instante', p_basic_f4: 'Recordatorios SMS automáticos a clientes', p_basic_f5: 'Alarma de voz — anuncio del siguiente cliente',
+        p_basic_d: 'Para propietario/empresa', p_basic_f1: '500 minutos de llamada — cubre todas las llamadas fuera de horario', p_basic_f2: 'Agenda por llamada, SMS, WhatsApp y Telegram', p_basic_f3: 'Kaleya calendar — todas las citas en un lugar', p_basic_f4: 'Recordatorios SMS automáticos a clientes', p_basic_f5: 'Alarma de voz — anuncio del siguiente cliente',
         p_pro_d: 'Propietario + 1 empleado', p_pro_f1: '1.200 minutos — cobertura 24/7, cero llamadas perdidas', p_pro_f2: 'Atención 24/7 — incluso a las 3 AM', p_pro_f3: 'Todos los canales: llamada, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 empleado — agenda propia y acceso a Kaleya APP', p_pro_f5: 'Soporte prioritario + bloqueos por hora y día',
         p_business_d: 'Hasta 5 empleados', p_business_f1: 'Todo de Basic + Pro', p_business_f2: 'Hasta 5 empleados', p_business_f3: 'APP Kaleya del empleado', p_business_f4: 'Más idiomas por acuerdo', p_business_f5: 'API por empresa',
         p_business_plus_d: 'Hasta 15 empleados', p_business_plus_f1: 'Todo de Basic + Pro + Business', p_business_plus_f2: 'Hasta 15 empleados', p_business_plus_f3: 'Llamadas telefónicas y SMS', p_business_plus_f4: 'Voz AI ElevenLabs',
@@ -3507,7 +3507,7 @@ const EXTRA_TRANSLATIONS = {
     },
     pt: {
         f_lang_t: '8 idiomas', f_lang_d: 'Sérvio, English, espanhol, português, russo, francês, italiano e alemão com seleção manual.',
-        p_basic_d: 'Para dono/empresa', p_basic_f1: '500 minutos de chamada — cobre todas as chamadas fora do horário', p_basic_f2: 'Marca por chamada, SMS, WhatsApp e Telegram', p_basic_f3: 'Google Calendar — cada marcação aparece instantaneamente', p_basic_f4: 'Lembretes SMS automáticos para clientes', p_basic_f5: 'Alarme de voz para equipe — próximo cliente',
+        p_basic_d: 'Para dono/empresa', p_basic_f1: '500 minutos de chamada — cobre todas as chamadas fora do horário', p_basic_f2: 'Marca por chamada, SMS, WhatsApp e Telegram', p_basic_f3: 'Kaleya calendar — todas as marcações num só lugar', p_basic_f4: 'Lembretes SMS automáticos para clientes', p_basic_f5: 'Alarme de voz para equipe — próximo cliente',
         p_pro_d: 'Dono + 1 funcionário', p_pro_f1: '1.200 minutos — cobertura 24/7, zero chamadas perdidas', p_pro_f2: 'Atendimento 24/7 — mesmo às 3 da manhã', p_pro_f3: 'Todos os canais: chamada, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 funcionário — agenda própria e acesso à Kaleya APP', p_pro_f5: 'Suporte prioritário + bloqueio por hora e dia',
         p_business_d: 'Até 5 funcionários', p_business_f1: 'Tudo do Basic + Pro', p_business_f2: 'Até 5 funcionários', p_business_f3: 'APP Kaleya do funcionário', p_business_f4: 'Mais idiomas por acordo', p_business_f5: 'API por empresa',
         p_business_plus_d: 'Até 15 funcionários', p_business_plus_f1: 'Tudo do Basic + Pro + Business', p_business_plus_f2: 'Até 15 funcionários', p_business_plus_f3: 'Chamadas telefônicas e SMS', p_business_plus_f4: 'Voz AI ElevenLabs',
@@ -3517,7 +3517,7 @@ const EXTRA_TRANSLATIONS = {
     },
     ru: {
         f_lang_t: '8 языков', f_lang_d: 'Сербский, English, испанский, португальский, русский, французский, итальянский и немецкий с ручным выбором.',
-        p_basic_d: 'Для владельца/компании', p_basic_f1: '500 минут — покрывает все звонки после работы', p_basic_f2: 'Запись по звонку, SMS, WhatsApp и Telegram', p_basic_f3: 'Google Calendar — каждая запись появляется мгновенно', p_basic_f4: 'Автоматические SMS-напоминания клиентам', p_basic_f5: 'Голосовой сигнал персоналу — следующий клиент',
+        p_basic_d: 'Для владельца/компании', p_basic_f1: '500 минут — покрывает все звонки после работы', p_basic_f2: 'Запись по звонку, SMS, WhatsApp и Telegram', p_basic_f3: 'Kaleya calendar — все записи в одном месте', p_basic_f4: 'Автоматические SMS-напоминания клиентам', p_basic_f5: 'Голосовой сигнал персоналу — следующий клиент',
         p_pro_d: 'Владелец + 1 сотрудник', p_pro_f1: '1 200 минут — круглосуточно, ни один звонок не пропущен', p_pro_f2: 'Приём 24/7 — даже в 3 ночи кто-то берёт трубку', p_pro_f3: 'Все каналы: звонок, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 сотрудник — свой график и доступ к Kaleya APP', p_pro_f5: 'Приоритетная поддержка + блокировка по часам и дням',
         p_business_d: 'До 5 сотрудников', p_business_f1: 'Все из Basic + Pro', p_business_f2: 'До 5 сотрудников', p_business_f3: 'Kaleya APP сотрудника', p_business_f4: 'Больше языков по договоренности', p_business_f5: 'API по компании',
         p_business_plus_d: 'До 15 сотрудников', p_business_plus_f1: 'Все из Basic + Pro + Business', p_business_plus_f2: 'До 15 сотрудников', p_business_plus_f3: 'Телефонные звонки и SMS', p_business_plus_f4: 'AI голос ElevenLabs',
@@ -3527,7 +3527,7 @@ const EXTRA_TRANSLATIONS = {
     },
     fr: {
         f_lang_t: '8 langues', f_lang_d: 'Serbe, English, espagnol, portugais, russe, francais, italien et allemand avec choix manuel.',
-        p_basic_d: 'Pour proprietaire/entreprise', p_basic_f1: '500 minutes incluses — toutes les reservations apres-heures', p_basic_f2: 'Prend RDV par appel, SMS, WhatsApp et Telegram', p_basic_f3: 'Google Calendar — chaque creneau synchro en temps reel', p_basic_f4: 'Rappels SMS automatiques aux clients', p_basic_f5: 'Alerte vocale equipe — prochain client annonce',
+        p_basic_d: 'Pour proprietaire/entreprise', p_basic_f1: '500 minutes incluses — toutes les reservations apres-heures', p_basic_f2: 'Prend RDV par appel, SMS, WhatsApp et Telegram', p_basic_f3: 'Kaleya calendar — tous les rendez-vous au même endroit', p_basic_f4: 'Rappels SMS automatiques aux clients', p_basic_f5: 'Alerte vocale equipe — prochain client annonce',
         p_pro_d: 'Proprietaire + 1 employe', p_pro_f1: '1 200 minutes — couverture 24/7, zero appel manque', p_pro_f2: 'Disponible 24/7 — meme a 3h du matin', p_pro_f3: 'Tous les canaux : appel, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 employe — planning dedie et acces Kaleya APP', p_pro_f5: 'Support prioritaire + blocage par heure et jour',
         p_business_d: 'Jusqu a 5 employes', p_business_f1: 'Tout Basic + Pro', p_business_f2: 'Jusqu a 5 employes', p_business_f3: 'APP Kaleya employe', p_business_f4: 'Plus de langues sur accord', p_business_f5: 'API par entreprise',
         p_business_plus_d: 'Jusqu a 15 employes', p_business_plus_f1: 'Tout Basic + Pro + Business', p_business_plus_f2: 'Jusqu a 15 employes', p_business_plus_f3: 'Appels telephoniques et SMS', p_business_plus_f4: 'Voix AI ElevenLabs',
@@ -3537,7 +3537,7 @@ const EXTRA_TRANSLATIONS = {
     },
     it: {
         f_lang_t: '8 lingue', f_lang_d: 'Serbo, English, spagnolo, portoghese, russo, francese, italiano e tedesco con scelta manuale.',
-        p_basic_d: 'Per titolare/azienda', p_basic_f1: '500 minuti inclusi — copre tutte le chiamate fuori orario', p_basic_f2: 'Prenota via chiamata, SMS, WhatsApp e Telegram', p_basic_f3: 'Google Calendar — ogni prenotazione appare subito', p_basic_f4: 'Promemoria SMS automatici ai clienti', p_basic_f5: 'Allarme vocale team — prossimo cliente annunciato',
+        p_basic_d: 'Per titolare/azienda', p_basic_f1: '500 minuti inclusi — copre tutte le chiamate fuori orario', p_basic_f2: 'Prenota via chiamata, SMS, WhatsApp e Telegram', p_basic_f3: 'Kaleya calendar — tutte le prenotazioni in un posto', p_basic_f4: 'Promemoria SMS automatici ai clienti', p_basic_f5: 'Allarme vocale team — prossimo cliente annunciato',
         p_pro_d: 'Titolare + 1 dipendente', p_pro_f1: '1.200 minuti — copertura 24/7, nessuna chiamata persa', p_pro_f2: 'Risposta 24/7 — anche alle 3 di notte', p_pro_f3: 'Tutti i canali: chiamata, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 dipendente — orari dedicati e accesso Kaleya APP', p_pro_f5: 'Supporto prioritario + blocchi per ora e giorno',
         p_business_d: 'Fino a 5 dipendenti', p_business_f1: 'Tutto Basic + Pro', p_business_f2: 'Fino a 5 dipendenti', p_business_f3: 'APP Kaleya dipendente', p_business_f4: 'Piu lingue su accordo', p_business_f5: 'API per azienda',
         p_business_plus_d: 'Fino a 15 dipendenti', p_business_plus_f1: 'Tutto Basic + Pro + Business', p_business_plus_f2: 'Fino a 15 dipendenti', p_business_plus_f3: 'Chiamate telefoniche e SMS', p_business_plus_f4: 'Voce AI ElevenLabs',
@@ -3564,7 +3564,7 @@ const EXTRA_TRANSLATIONS = {
         p_basic_desc: 'Hören Sie auf, Buchungen nach 17 Uhr zu verlieren. Kaleya nimmt jeden Abendanruf entgegen, damit Sie mit vollem Terminplan aufwachen.',
         p_pro_tagline: 'Ein verhinderter No-Show bezahlt den ganzen Monat.',
         p_pro_desc: '24/7 Erreichbarkeit auf allen Kanälen. Die Rechnung: 2 verhinderte No-Shows bezahlen den ganzen Monat.',
-        p_basic_f1: '500 Gesprächsminuten — alle Abendanrufe abgedeckt', p_basic_f2: 'Buchungen per Anruf, SMS, WhatsApp und Telegram', p_basic_f3: 'Google Calendar — jeder Termin erscheint sofort', p_basic_f4: 'Automatische SMS-Erinnerungen an Kunden', p_basic_f5: 'Team-Alarm — nächster Kunde angesagt',
+        p_basic_f1: '500 Gesprächsminuten — alle Abendanrufe abgedeckt', p_basic_f2: 'Buchungen per Anruf, SMS, WhatsApp und Telegram', p_basic_f3: 'Kaleya calendar — alle Termine auf einen Blick', p_basic_f4: 'Automatische SMS-Erinnerungen an Kunden', p_basic_f5: 'Team-Alarm — nächster Kunde angesagt',
         p_pro_f1: '1.200 Minuten — 24/7, kein Anruf geht verloren', p_pro_f2: '24/7 Erreichbarkeit — auch um 3 Uhr nachts', p_pro_f3: 'Alle Kanäle: Anruf, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 Mitarbeiter — eigener Kalender und Kaleya APP', p_pro_f5: 'Vorrangiger Support + Stunden-/Tagesblockierung',
         hero_badge: 'AI Empfang · 24/7 aktiv', hero_title_1: 'Kaleya', hero_title_2: 'AI Empfang 24/7', hero_sub: 'Kaleya beantwortet Anrufe, bucht, storniert und benachrichtigt das Team mit natürlicher Stimme. Funktioniert mit Anrufen, WhatsApp, Telegram, Instagram DM und SMS.',
         hero_cta_demo: 'Kostenlos testen', hero_cta_how: 'So funktioniert es', hero_social: '500+ zufriedene Unternehmen', hero_tap: 'Logo antippen', hero_intro_hint: 'Kaleya stellt sich vor', hero_demo_msg: '"Hallo, wie kann ich helfen?"', integrates_with: 'Integrationen:',
@@ -3572,7 +3572,7 @@ const EXTRA_TRANSLATIONS = {
         f2_t: 'Intelligente Terminplanung', f2_d: 'Prüft den Kalender und schlägt freie Termine vor.', f3_t: 'Natürliche Stimme', f3_d: 'ElevenLabs Stimme für natürlichere Gespräche.', f_alarm_t: 'Team-Alarme', f_alarm_d: 'Ansage des nächsten Kunden und dringende Gesprächsanfrage.', f_msg_t: 'Nachrichtenkanäle', f_msg_d: 'WhatsApp, Telegram, Instagram DM, SMS und Telefonanruf.', f6_t: 'Admin-Kontrolle', f6_d: 'Globale API und separate Einstellungen pro Firma.',
         how_t: 'Kaleya lernt Ihr Geschäft an 1 Tag', how1_t: 'Kanal verbinden', how1_d: 'Telefon, WhatsApp, Telegram, Instagram DM oder SMS.', how2_t: 'Kaleya trainieren', how2_d: 'Arbeitszeiten, Services und Buchungsregeln eintragen.', how3_t: 'Sprache und Stimme wählen', how3_d: 'Kaleya spricht die Sprache, die der Kunde auswählt.',
         price_t: 'Einfache Preise', price_s: '14 Tage kostenlos · jederzeit kündbar · keine Verträge.', popular: 'BELIEBT', trial_btn: 'Kostenlos starten — 14 Tage', price_contact: 'Kontakt',
-        p_basic_d: 'Fuer Inhaber/Firma', p_basic_f1: '500 Gesprächsminuten — alle Abendanrufe abgedeckt', p_basic_f2: 'Buchungen per Anruf, SMS, WhatsApp und Telegram', p_basic_f3: 'Google Calendar — jeder Termin erscheint sofort', p_basic_f4: 'Automatische SMS-Erinnerungen an Kunden', p_basic_f5: 'Team-Alarm — nächster Kunde angesagt',
+        p_basic_d: 'Fuer Inhaber/Firma', p_basic_f1: '500 Gesprächsminuten — alle Abendanrufe abgedeckt', p_basic_f2: 'Buchungen per Anruf, SMS, WhatsApp und Telegram', p_basic_f3: 'Kaleya calendar — alle Termine auf einen Blick', p_basic_f4: 'Automatische SMS-Erinnerungen an Kunden', p_basic_f5: 'Team-Alarm — nächster Kunde angesagt',
         p_pro_d: 'Inhaber + 1 Mitarbeiter', p_pro_f1: '1.200 Minuten — 24/7, kein Anruf geht verloren', p_pro_f2: '24/7 Erreichbarkeit — auch um 3 Uhr nachts', p_pro_f3: 'Alle Kanäle: Anruf, SMS, WhatsApp, Telegram, Instagram DM', p_pro_f4: '1 Mitarbeiter — eigener Kalender und Kaleya APP', p_pro_f5: 'Vorrangiger Support + Stunden-/Tagesblockierung',
         p_business_d: 'Bis zu 5 Mitarbeiter', p_business_f1: 'Alles aus Basic + Pro', p_business_f2: 'Bis zu 5 Mitarbeiter', p_business_f3: 'Mitarbeiter Kaleya APP', p_business_f4: 'Mehr Sprachen nach Vereinbarung', p_business_f5: 'API pro Firma',
         p_business_plus_d: 'Bis zu 15 Mitarbeiter', p_business_plus_f1: 'Alles aus Basic + Pro + Business', p_business_plus_f2: 'Bis zu 15 Mitarbeiter', p_business_plus_f3: 'Telefonanrufe und SMS', p_business_plus_f4: 'ElevenLabs AI voice',
@@ -4363,7 +4363,7 @@ const LANDING_STATIC_TRANSLATIONS = {
         how_s1_d: 'Pozovi *72 sa poslovnog telefona. Traje 10 sekundi. Odmah dobijate broj za preusmerenje.',
         how_s2_t: 'Kaleya uči tvoj cenovnik za 90s',
         how_s2_d: 'Unesi usluge, cene i radno vreme. Razume "šišanje, bojenje, gel nokti, masaža 60 min".',
-        how_s3_t: 'Zakazuje u Google Calendar',
+        how_s3_t: 'Zakazuje odmah — SMS potvrda u sekundi',
         how_s3_d: 'Dostupnost u realnom vremenu, automatski SMS potvrde i depoziti za skuplje termine. Bez duplih rezervacija.',
         noshow_t: 'Eliminišite no-showove — klijenti čuvaju karticu',
         noshow_s: 'Klijenti ostavljaju karticu. Kaleya to čini jednostavnim i bezbednim.',
@@ -4424,7 +4424,7 @@ const LANDING_STATIC_TRANSLATIONS = {
         how_s1_d: 'Dial *72 from your shop phone. Takes 10 seconds. We give you the forwarding number instantly.',
         how_s2_t: 'Kaleya learns your menu in 90s',
         how_s2_d: 'Tell her your services, prices, and hours. She understands "fade, balayage, gel mani, 60-min deep tissue".',
-        how_s3_t: 'Books to Google Calendar + Square',
+        how_s3_t: 'Books instantly — SMS confirmation in seconds',
         how_s3_d: 'Real-time availability, automatic SMS confirmations, and deposits for high-value slots. No double-books.',
         noshow_t: 'Stop No-Shows For Good — This is standard in the US',
         noshow_s: 'US clients expect to leave a card. Kaleya makes it frictionless and compliant.',
@@ -4485,7 +4485,7 @@ const LANDING_STATIC_TRANSLATIONS = {
         how_s1_d: 'Marca *72 desde tu teléfono de trabajo. 10 segundos. Recibes el número de desvío al instante.',
         how_s2_t: 'Kaleya aprende tu menú en 90s',
         how_s2_d: 'Dile tus servicios, precios y horarios. Entiende "fade, balayage, manicura gel, masaje 60 min".',
-        how_s3_t: 'Reserva en Google Calendar',
+        how_s3_t: 'Reserva al instante — confirmación SMS en segundos',
         how_s3_d: 'Disponibilidad en tiempo real, confirmaciones SMS automáticas y depósitos para citas de alto valor. Sin dobles reservas.',
         noshow_t: 'Acaba con las ausencias de una vez',
         noshow_s: 'Los clientes dejan su tarjeta. Kaleya lo hace fácil y seguro.',
@@ -4539,7 +4539,7 @@ const LANDING_STATIC_TRANSLATIONS = {
         how_s1_d: 'Marque *72 no telefone do negócio. 10 segundos. Recebe o número de desvio na hora.',
         how_s2_t: 'Kaleya aprende o seu menu em 90s',
         how_s2_d: 'Indique os seus serviços, preços e horários. Entende "fade, balayage, gel, massagem 60 min".',
-        how_s3_t: 'Agenda no Google Calendar',
+        how_s3_t: 'Agenda na hora — confirmação SMS em segundos',
         how_s3_d: 'Disponibilidade em tempo real, confirmações SMS automáticas e depósitos para marcações de alto valor. Sem marcações duplas.',
         noshow_t: 'Acabe com os no-shows de uma vez',
         noshow_s: 'Os clientes deixam o cartão. Kaleya torna isso fácil e seguro.',
@@ -4593,7 +4593,7 @@ const LANDING_STATIC_TRANSLATIONS = {
         how_s1_d: 'Наберите *72 с рабочего телефона. 10 секунд. Получаете номер переадресации мгновенно.',
         how_s2_t: 'Kaleya учит ваш прайс за 90 сек',
         how_s2_d: 'Укажите услуги, цены и часы работы. Понимает "стрижка, балаяж, гель-лак, массаж 60 мин".',
-        how_s3_t: 'Записывает в Google Calendar',
+        how_s3_t: 'Записывает сразу — SMS-подтверждение за секунды',
         how_s3_d: 'Реальная доступность, автоматические SMS-подтверждения и депозиты для дорогих слотов. Без двойных записей.',
         noshow_t: 'Покончите с no-show раз и навсегда',
         noshow_s: 'Клиенты оставляют карту. Kaleya делает это простым и безопасным.',
@@ -4647,7 +4647,7 @@ const LANDING_STATIC_TRANSLATIONS = {
         how_s1_d: 'Composez *72 depuis votre téléphone pro. 10 secondes. Vous recevez le numéro de renvoi instantanément.',
         how_s2_t: 'Kaleya apprend votre menu en 90s',
         how_s2_d: 'Indiquez vos prestations, tarifs et horaires. Elle comprend "coupe, balayage, gel, massage 60 min".',
-        how_s3_t: 'Réserve dans Google Calendar',
+        how_s3_t: 'Réserve instantanément — confirmation SMS en secondes',
         how_s3_d: 'Disponibilité en temps réel, confirmations SMS automatiques et acomptes pour les créneaux premium. Sans doubles réservations.',
         noshow_t: 'Éliminez les no-shows une bonne fois pour toutes',
         noshow_s: 'Les clients laissent leur carte. Kaleya rend ça simple et sécurisé.',
@@ -4701,7 +4701,7 @@ const LANDING_STATIC_TRANSLATIONS = {
         how_s1_d: 'Componi *72 dal telefono di lavoro. 10 secondi. Ricevi subito il numero di deviazione.',
         how_s2_t: 'Kaleya impara il tuo listino in 90s',
         how_s2_d: 'Indica i tuoi servizi, prezzi e orari. Capisce "taglio, balayage, gel, massaggio 60 min".',
-        how_s3_t: 'Prenota in Google Calendar',
+        how_s3_t: 'Prenota subito — conferma SMS in pochi secondi',
         how_s3_d: 'Disponibilità in tempo reale, conferme SMS automatiche e caparre per slot di alto valore. Senza doppie prenotazioni.',
         noshow_t: 'Metti fine ai no-show una volta per tutte',
         noshow_s: 'I clienti lasciano la carta. Kaleya lo rende semplice e sicuro.',
@@ -4755,7 +4755,7 @@ const LANDING_STATIC_TRANSLATIONS = {
         how_s1_d: 'Wählen Sie *72 von Ihrem Geschäftstelefon. 10 Sekunden. Sie erhalten sofort die Weiterleitungsnummer.',
         how_s2_t: 'Kaleya lernt Ihre Leistungen in 90s',
         how_s2_d: 'Tragen Sie Ihre Dienstleistungen, Preise und Öffnungszeiten ein. Sie versteht "Fade, Balayage, Gel-Maniküre, 60-min Massage".',
-        how_s3_t: 'Bucht in Google Calendar',
+        how_s3_t: 'Bucht sofort — SMS-Bestätigung in Sekunden',
         how_s3_d: 'Echtzeit-Verfügbarkeit, automatische SMS-Bestätigungen und Anzahlungen für hochwertige Slots. Keine Doppelbuchungen.',
         noshow_t: 'Schluss mit No-Shows — ein für alle Mal',
         noshow_s: 'Kunden hinterlegen eine Karte. Kaleya macht es einfach und sicher.',
@@ -9801,7 +9801,7 @@ async function loadAdminIntegrationsStatus() {
             sms: 'SMS gateway — confirmations and reminders.',
             phone: 'Phone calls — VoIP/SIP for incoming calls.',
             email: 'Email — automated appointment emails.',
-            google_calendar: 'Google Calendar — availability sync.',
+            // google_calendar: hidden until verification complete
             instagram: 'Instagram DM — booking via Instagram.',
             tiktok: 'TikTok DM — booking via TikTok.',
         };
