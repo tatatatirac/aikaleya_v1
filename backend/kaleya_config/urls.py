@@ -97,7 +97,7 @@ urlpatterns = [
     path("", FrontendTemplateView.as_view(template_name="index.html"), name="frontend-index"),
     path("index.html", FrontendTemplateView.as_view(template_name="index.html"), name="frontend-index-html"),
     path("demo.html", FrontendTemplateView.as_view(template_name="demo.html"), name="frontend-demo"),
-    path("god-mode.html", FrontendTemplateView.as_view(template_name="god-mode.html"), name="frontend-god-mode"),
+    path("god-mode.html", lambda request: redirect("/"), name="frontend-god-mode"),  # blocked — not public yet
     path("checkout.html", FrontendTemplateView.as_view(template_name="checkout.html"), name="frontend-checkout"),
     path("privacy.html", FrontendTemplateView.as_view(template_name="privacy.html"), name="frontend-privacy"),
     path("terms.html", FrontendTemplateView.as_view(template_name="terms.html"), name="frontend-terms"),
