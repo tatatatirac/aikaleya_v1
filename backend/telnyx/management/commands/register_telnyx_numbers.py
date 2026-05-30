@@ -33,7 +33,7 @@ class Command(BaseCommand):
             ).first()
 
         if not client:
-            client = BusinessClient.objects.filter(is_active=True).first()
+            client = BusinessClient.objects.filter(is_demo=False).first()
 
         if not client:
             self.stderr.write(self.style.ERROR("No active business client found."))
