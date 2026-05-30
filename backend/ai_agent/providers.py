@@ -111,7 +111,7 @@ def get_client_voice_config(business_client, language=None):
         "api_key": getattr(api_settings, "voice_api_key", "") or settings.KALEYA_ELEVENLABS_API_KEY,
         "voice_id": voice_id,
         "model_id": getattr(api_settings, "voice_model", "") or "eleven_multilingual_v2",
-        "stability": float(getattr(voice_settings, "stability", 0.5) or 0.5),
+        "stability": float(getattr(voice_settings, "stability", 0.35) or 0.35),  # 0.35 = natural, expressive
         "similarity_boost": float(getattr(voice_settings, "similarity_boost", 0.75) or 0.75),
         "language": language,
     }

@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "billing",
     "support",
     "audit_log",
+    "telnyx",
 ]
 
 MIDDLEWARE = [
@@ -246,6 +247,15 @@ KALEYA_PAYPAL_PLAN_IDS = {
     "business_plus": os.getenv("PAYPAL_PLAN_BUSINESS_PLUS", ""),
     "business_pro_plus": os.getenv("PAYPAL_PLAN_BUSINESS_PRO_PLUS", ""),
 }
+# ── Telnyx ──────────────────────────────────────────────────────────────────────
+KALEYA_TELNYX_API_KEY = os.getenv("TELNYX_API_KEY", "")
+KALEYA_TELNYX_VOICE_APP_ID = os.getenv("TELNYX_VOICE_APP_ID", "")
+KALEYA_TELNYX_OUTBOUND_VOICE_PROFILE_ID = os.getenv("TELNYX_OUTBOUND_VOICE_PROFILE_ID", "")
+KALEYA_TELNYX_MESSAGING_PROFILE_ID = os.getenv("TELNYX_MESSAGING_PROFILE_ID", "")
+KALEYA_TELNYX_TEST_NUMBER_USA = os.getenv("TELNYX_TEST_NUMBER_USA", "")
+KALEYA_TELNYX_TEST_NUMBER_CA = os.getenv("TELNYX_TEST_NUMBER_CA", "")
+KALEYA_PUBLIC_URL = os.getenv("PUBLIC_URL", "https://aikaleya.com")
+
 KALEYA_STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 KALEYA_STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 KALEYA_STRIPE_PRICE_IDS = {
