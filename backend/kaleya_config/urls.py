@@ -74,6 +74,7 @@ urlpatterns = [
     path("api/billing/", include("billing.urls")),
     path("api/support/", include("support.urls")),
     path("api/audit-log/", include("audit_log.urls")),
+    path("api/telnyx/", include("telnyx.urls", namespace="telnyx")),
 ]
 
 if settings.DEBUG:
