@@ -13,11 +13,11 @@ from urllib import error, request as urllib_request
 from django.conf import settings
 
 
-# ── Business-professional voice settings ───────────────────────────────────────
+# ── Natural receptionist voice settings ─────────────────────────────────────────
 VOICE_SETTINGS = {
-    "stability": 0.55,          # Higher = consistent, professional (was 0.35 — sounded too dramatic)
-    "similarity_boost": 0.80,
-    "style": 0.0,               # 0 = neutral business tone, no acting
+    "stability": 0.50,          # Balanced — not monotone, not dramatic
+    "similarity_boost": 0.78,
+    "style": 0.12,              # Slight warmth/personality — sounds human, not robotic
     "use_speaker_boost": True,
 }
 

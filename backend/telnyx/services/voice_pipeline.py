@@ -54,6 +54,8 @@ def _parse_action(text: str) -> tuple[str, dict, str]:
             params[k.strip()] = v.strip()
 
     clean_text = text[: match.start()].strip()
+    # Safety: strip any remaining [...] tags that might slip through
+    clean_text = re.sub(r"\[(?:BOOK|HANGUP|TRANSFER)[^\]]*\]", "", clean_text, flags=re.IGNORECASE).strip()
     return action, params, clean_text
 
 
