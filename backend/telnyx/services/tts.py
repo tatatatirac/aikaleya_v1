@@ -13,11 +13,11 @@ from urllib import error, request as urllib_request
 from django.conf import settings
 
 
-# ── Streaming-friendly voice settings ──────────────────────────────────────────
+# ── Business-professional voice settings ───────────────────────────────────────
 VOICE_SETTINGS = {
-    "stability": 0.35,          # Lower = more expressive, natural (was 0.5)
-    "similarity_boost": 0.75,
-    "style": 0.15,
+    "stability": 0.55,          # Higher = consistent, professional (was 0.35 — sounded too dramatic)
+    "similarity_boost": 0.80,
+    "style": 0.0,               # 0 = neutral business tone, no acting
     "use_speaker_boost": True,
 }
 
