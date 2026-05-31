@@ -229,6 +229,7 @@ def process_voice_turn(
         language=language,
         customer_name=customer_name,
         slots=slots,
+        caller_phone=from_number,
     )
 
     # ── Load conversation history ───────────────────────────────────────────────
