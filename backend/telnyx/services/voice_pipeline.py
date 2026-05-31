@@ -403,6 +403,10 @@ def get_or_create_greeting_url(business_client, language: str = "en", from_numbe
 def _execute_voice_booking(business_client, params: dict, customer, from_number: str, session: CallSession):
     """
     Executes the actual appointment booking when Claude outputs [BOOK: ...].
+    book_appointment_tool signature is:
+      (business_client, text="", customer=None, channel="web", payload=None, ...)
+    so payload MUST be passed as a keyword arg or it ends up in the text slot
+    and downstream regex chokes on the dict.
     """
     try:
         payload = {
@@ -412,7 +416,17 @@ def _execute_voice_booking(business_client, params: dict, customer, from_number:
             "phone": params.get("phone", "") or from_number,
             "customer_name": customer.full_name if customer else "",
         }
-        result = book_appointment_tool(business_client, payload)
+        result = book_appointment_tool(
+            business_client,
+            text="",
+            customer=customer,
+            channel="phone",
+            payload=payload,
+        )
         session.metadata["last_booking"] = result
+        # Clear any stale booking_error from a previous failed attempt this call
+        session.metadata.pop("booking_error", None)
     except Exception as exc:
         session.metadata["booking_error"] = str(exc)
+        import logging
+        logging.getLogger(__name__).exception("Voice booking failed: %s", exc)
