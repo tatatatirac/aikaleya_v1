@@ -15,6 +15,7 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 
+from billing.services import limits_for_client
 from communications.models import CallSession
 from telnyx.models import business_client_for_number
 from telnyx.services.tts import audio_url as tts_audio_url, generate_response_audio
@@ -92,6 +93,19 @@ def inbound_call(request):
         logger.warning("No salon found for Telnyx number: %s", to_number)
         return _texml("  <Say>This number is not configured. Goodbye.</Say>\n  <Hangup/>")
 
+    # Plan gate — voice is a Pro+ feature. Starter callers get a polite hangup.
+    if not limits_for_client(business_client).allow_phone_calls:
+        logger.info(
+            "Voice gated by plan: client=%s from=%s sid=%s",
+            business_client.id, from_number, call_sid,
+        )
+        return _texml(
+            '  <Say language="en-US">'
+            "AI voice answering is not enabled on this plan. "
+            "Please upgrade to Pro or message us on WhatsApp."
+            "</Say>\n  <Hangup/>"
+        )
+
     # Use voice_language for ASR — this is the language the salon speaks on calls
     language = business_client.voice_language or business_client.interface_language or "en"
     telnyx_lang = LANGUAGE_TO_TELNYX.get(language, "en-US")
@@ -143,6 +157,11 @@ def gather_result(request):
     # Find salon
     business_client = business_client_for_number(to_number)
     if not business_client:
+        return _texml("  <Hangup/>")
+
+    # Plan gate — same as inbound; defence in depth in case a session
+    # was started before the plan was downgraded.
+    if not limits_for_client(business_client).allow_phone_calls:
         return _texml("  <Hangup/>")
 
     # Handle empty speech (silence / unclear)
