@@ -25,8 +25,8 @@ VOICE_SETTINGS = {
 # User can override via ELEVENLABS_VOICE_ID in .env
 DEFAULT_VOICE_ID = "9BWtsMINqrJLrRacOk9x"  # Aria
 
-# Use turbo model for lower latency (good for real-time calls)
-DEFAULT_MODEL = "eleven_turbo_v2_5"
+# Use flash model for lowest latency (~75ms vs turbo's ~300ms)
+DEFAULT_MODEL = "eleven_flash_v2_5"
 
 
 # ── Phone number → natural speech formatter ─────────────────────────────────────

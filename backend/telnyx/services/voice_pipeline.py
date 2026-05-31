@@ -120,7 +120,7 @@ def _call_claude_voice(
 
     payload = json.dumps({
         "model": model,
-        "max_tokens": 300,   # Voice responses must be SHORT
+        "max_tokens": 150,   # Voice responses must be SHORT — shorter = faster TTS
         "temperature": 0.6,  # Slightly more natural than 0.3
         "system": system_prompt,
         "messages": messages,
