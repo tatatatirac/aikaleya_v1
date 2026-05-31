@@ -290,9 +290,9 @@ def process_voice_turn(
         session.ended_at = timezone.now()
     session.save(update_fields=["transcript", "metadata", "status", "ended_at"])
 
-    # ── Cleanup audio files when done ──────────────────────────────────────────
-    if is_done:
-        cleanup_call_audio(call_sid)
+    # NOTE: Do NOT cleanup audio here — Telnyx fetches the file AFTER we return
+    # the TeXML response. Cleaning up now would cause a 404 and robotic error.
+    # Audio files are cleaned up periodically by cron or admin command.
 
     return {
         "audio_url": full_audio_url,
