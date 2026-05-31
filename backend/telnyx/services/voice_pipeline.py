@@ -30,33 +30,44 @@ from telnyx.services.tts import generate_response_audio, generate_greeting, clea
 # ── Action tag parser ───────────────────────────────────────────────────────────
 ACTION_TAG_PATTERN = re.compile(r"\[(?P<action>[A-Z]+)(?::(?P<params>[^\]]*))?\]", re.IGNORECASE)
 
+# Valid workflow states (must match KALEYA_VOICE_SOUL_* state machine)
+VALID_VOICE_STATES = {"greeting", "slot_offer", "confirm", "booked", "done"}
 
-def _parse_action(text: str) -> tuple[str, dict, str]:
+
+def _parse_action_tags(text: str) -> tuple[dict, str]:
     """
-    Extracts the last [ACTION: ...] tag from Claude's response.
-    Returns (action_name, params_dict, clean_text).
-    action_name is one of: "BOOK", "HANGUP", "TRANSFER", or "" (none).
-    clean_text has the action tag stripped out.
+    Extracts ALL [TAG: ...] tags from Claude's response.
+
+    Returns (tags_dict, clean_text) where tags_dict may contain:
+      - "STATE":    str    (next workflow state)
+      - "BOOK":     dict   (booking params: service/date/time/phone)
+      - "HANGUP":   True   (call should end)
+      - "TRANSFER": True   (caller wants a human)
+    clean_text has ALL tags stripped (caller never hears them).
     """
-    match = None
+    tags: dict = {}
     for m in ACTION_TAG_PATTERN.finditer(text):
-        match = m
+        action = m.group("action").upper()
+        params_str = (m.group("params") or "").strip()
+        if action == "STATE":
+            tags["STATE"] = params_str.strip()
+        elif action == "BOOK":
+            params: dict = {}
+            for part in params_str.split():
+                if "=" in part:
+                    k, v = part.split("=", 1)
+                    params[k.strip()] = v.strip()
+            tags["BOOK"] = params
+        elif action == "HANGUP":
+            tags["HANGUP"] = True
+        elif action == "TRANSFER":
+            tags["TRANSFER"] = True
 
-    if not match:
-        return "", {}, text.strip()
-
-    action = match.group("action").upper()
-    params_str = match.group("params") or ""
-    params = {}
-    for part in params_str.split():
-        if "=" in part:
-            k, v = part.split("=", 1)
-            params[k.strip()] = v.strip()
-
-    clean_text = text[: match.start()].strip()
-    # Safety: strip any remaining [...] tags that might slip through
-    clean_text = re.sub(r"\[(?:BOOK|HANGUP|TRANSFER)[^\]]*\]", "", clean_text, flags=re.IGNORECASE).strip()
-    return action, params, clean_text
+    # Strip all tags from the spoken text
+    clean = ACTION_TAG_PATTERN.sub("", text).strip()
+    # Collapse leftover double spaces from tag removal
+    clean = re.sub(r"\s+", " ", clean).strip()
+    return tags, clean
 
 
 # ── Slots formatter (injects available slots into Claude context) ───────────────
@@ -209,6 +220,8 @@ def process_voice_turn(
     # ── Find customer by caller phone ───────────────────────────────────────────
     customer = find_customer_by_payload_identity(business_client, {"phone": from_number})
     customer_name = _real_customer_name(customer)
+    # Pull last service this caller booked (for returning-customer greeting shortcut)
+    last_service_hint = state.get("last_service_hint", "") or _lookup_last_service(customer)
 
     # ── Fetch available slots (cached in session for the call) ─────────────────
     service_hint = state.get("service_hint", "")
@@ -225,6 +238,9 @@ def process_voice_turn(
         slots = cached_slots
         timings["slots"] = 0
 
+    # ── Workflow state (state machine matches KALEYA_VOICE_SOUL_* template) ────
+    voice_state = state.get("voice_state", "greeting")
+
     # ── Build system prompt ─────────────────────────────────────────────────────
     system_prompt = build_voice_prompt(
         business_client,
@@ -232,6 +248,8 @@ def process_voice_turn(
         customer_name=customer_name,
         slots=slots,
         caller_phone=from_number,
+        voice_state=voice_state,
+        last_service_hint=last_service_hint,
     )
 
     # ── Load conversation history ───────────────────────────────────────────────
@@ -242,21 +260,31 @@ def process_voice_turn(
     raw_response = _call_claude_voice(system_prompt, history, speech_text)
     timings["claude"] = round((time.monotonic() - t) * 1000)
 
-    # ── Parse action tag ────────────────────────────────────────────────────────
-    action, params, clean_response = _parse_action(raw_response)
+    # ── Parse ALL tags (STATE / BOOK / HANGUP / TRANSFER may co-exist) ─────────
+    tags, clean_response = _parse_action_tags(raw_response)
+
+    # ── State transition ────────────────────────────────────────────────────────
+    next_state = tags.get("STATE", "").strip().lower()
+    if next_state in VALID_VOICE_STATES:
+        state["voice_state"] = next_state
 
     # ── Execute booking action ──────────────────────────────────────────────────
     is_done = False
     transfer = False
 
-    if action == "BOOK":
-        _execute_voice_booking(business_client, params, customer, from_number, session)
-        is_done = True
+    book_params = tags.get("BOOK")
+    if book_params:
+        _execute_voice_booking(business_client, book_params, customer, from_number, session)
+        state["voice_state"] = "booked"
+        # Remember service for returning-caller shortcut next time
+        if book_params.get("service"):
+            state["last_service_hint"] = book_params["service"]
 
-    elif action == "HANGUP":
+    if tags.get("HANGUP"):
         is_done = True
+        state["voice_state"] = "done"
 
-    elif action == "TRANSFER":
+    if tags.get("TRANSFER"):
         transfer = True
         is_done = True
 
@@ -266,8 +294,8 @@ def process_voice_turn(
     # Keep last 12 turns in history (6 exchanges) to stay within token limits
     state["history"] = history[-12:]
     state["turn"] = turn
-    if params.get("service"):
-        state["service_hint"] = params["service"]
+    if book_params and book_params.get("service"):
+        state["service_hint"] = book_params["service"]
 
     # ── Generate TTS audio ──────────────────────────────────────────────────────
     t = time.monotonic()
@@ -321,6 +349,30 @@ def _real_customer_name(customer) -> str:
     if first in {"phone caller", "phonecaller"}:
         return ""
     return name
+
+
+def _lookup_last_service(customer) -> str:
+    """
+    Returns the service name from this customer's most recent appointment,
+    so Kaleya can offer "same as last time?" to returning callers.
+    Returns "" if customer is unknown or has no appointment history.
+    """
+    if not customer:
+        return ""
+    try:
+        from appointments.models import Appointment
+        last = (
+            Appointment.objects
+            .filter(customer=customer, service__isnull=False)
+            .select_related("service")
+            .order_by("-date", "-start_time")
+            .first()
+        )
+        if last and last.service:
+            return last.service.name
+    except Exception:
+        pass
+    return ""
 
 
 def get_or_create_greeting_url(business_client, language: str = "en", from_number: str = "") -> str:
