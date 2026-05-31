@@ -266,7 +266,7 @@ def process_voice_turn(
     if is_done:
         session.status = "completed"
         session.ended_at = timezone.now()
-    session.save(update_fields=["transcript", "metadata", "status", "ended_at", "updated_at"])
+    session.save(update_fields=["transcript", "metadata", "status", "ended_at"])
 
     # ── Cleanup audio files when done ──────────────────────────────────────────
     if is_done:
