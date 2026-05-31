@@ -174,6 +174,10 @@ def process_voice_turn(
         language:    Detected language code
         turn:        Turn number
     """
+    import time
+    t_start = time.monotonic()
+    timings = {}
+
     # ── Load or create CallSession ──────────────────────────────────────────────
     session = CallSession.objects.filter(
         external_call_id=call_sid,
@@ -204,9 +208,20 @@ def process_voice_turn(
     customer = find_customer_by_payload_identity(business_client, {"phone": from_number})
     customer_name = _real_customer_name(customer)
 
-    # ── Fetch available slots ───────────────────────────────────────────────────
+    # ── Fetch available slots (cached in session for the call) ─────────────────
     service_hint = state.get("service_hint", "")
-    slots = _fetch_slots_context(business_client, service_hint, language)
+    cached_slots = state.get("slots_cache")
+    cached_for_service = state.get("slots_cache_service", "")
+    # Re-fetch only if first turn or service hint changed
+    if not cached_slots or cached_for_service != service_hint:
+        t = time.monotonic()
+        slots = _fetch_slots_context(business_client, service_hint, language)
+        timings["slots"] = round((time.monotonic() - t) * 1000)
+        state["slots_cache"] = slots
+        state["slots_cache_service"] = service_hint
+    else:
+        slots = cached_slots
+        timings["slots"] = 0
 
     # ── Build system prompt ─────────────────────────────────────────────────────
     system_prompt = build_voice_prompt(
@@ -220,7 +235,9 @@ def process_voice_turn(
     history = state.get("history", [])
 
     # ── Call Claude ─────────────────────────────────────────────────────────────
+    t = time.monotonic()
     raw_response = _call_claude_voice(system_prompt, history, speech_text)
+    timings["claude"] = round((time.monotonic() - t) * 1000)
 
     # ── Parse action tag ────────────────────────────────────────────────────────
     action, params, clean_response = _parse_action(raw_response)
@@ -250,6 +267,7 @@ def process_voice_turn(
         state["service_hint"] = params["service"]
 
     # ── Generate TTS audio ──────────────────────────────────────────────────────
+    t = time.monotonic()
     rel_path = generate_response_audio(
         text=clean_response,
         call_sid=call_sid,
@@ -257,7 +275,11 @@ def process_voice_turn(
         language=language,
         business_client=business_client,
     )
+    timings["tts"] = round((time.monotonic() - t) * 1000)
     full_audio_url = audio_url(rel_path) if rel_path else ""
+    timings["total"] = round((time.monotonic() - t_start) * 1000)
+    import logging as _l
+    _l.getLogger(__name__).info("Voice turn timings (ms): %s", timings)
 
     # ── Save transcript snippet ─────────────────────────────────────────────────
     transcript_line = f"[{turn}] Caller: {speech_text}\n    Kaleya: {clean_response}\n"
