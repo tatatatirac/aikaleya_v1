@@ -8859,6 +8859,8 @@ function switchClientTab(tab) {
         Promise.all([loadClientEntitlementsFromBackend(), loadClientSettingsFromBackend(), loadClientOperationalDataFromBackend(), loadClientCustomerMemoriesFromBackend(), loadClientSupportTicketsFromBackend(), loadClientIntegrationsStatus()]).catch(() => {});
         try { refreshGcalStatus(); } catch (e) {}
     }
+    // Spoken staff alarm — start polling as soon as ANY logged-in tab opens
+    try { startAlarmPolling(); } catch (e) {}
 }
 
 function moveClientCalendar(delta) {
@@ -9643,6 +9645,81 @@ function dismissNotif(id) {
 function answerEmergency() {
     dismissNotif('notifEmergency');
     showToast(tr('emergency_answered'));
+    // Best-effort: mark the most recent urgent alarm as dismissed so it
+    // does not re-pop after dashboard reload.
+    const last = KV_LAST_URGENT_ALARM_ID;
+    if (last) {
+        kaleyaApi(`/api/ai/alarm-queue/${last}/dismiss/`, { method: 'POST' }).catch(() => {});
+    }
+}
+
+// ===== ALARM QUEUE POLLER (Korak 2B) =====
+// Polls /api/ai/alarm-queue/ every 30s. Each new alarm fires the existing
+// sound + speak() pipeline exactly once, then is marked delivered server-side
+// so the poll stops returning it.
+
+const KV_ALARM_SEEN = new Set();
+let KV_ALARM_POLL_TIMER = null;
+let KV_LAST_URGENT_ALARM_ID = null;
+const KV_ALARM_POLL_MS = 30000;
+
+async function pollAlarmQueue() {
+    if (!getAuthToken() || location.protocol === 'file:') return;
+    let alarms = [];
+    try {
+        const res = await kaleyaApi('/api/ai/alarm-queue/');
+        if (!res.ok) return;
+        const data = await res.json();
+        alarms = Array.isArray(data) ? data : (data.results || []);
+    } catch (e) {
+        return; // network blip — retry next tick
+    }
+    // Server returns newest first; play oldest first so order is natural
+    alarms.reverse();
+    for (const alarm of alarms) {
+        if (!alarm || !alarm.id || KV_ALARM_SEEN.has(alarm.id)) continue;
+        KV_ALARM_SEEN.add(alarm.id);
+        try { await handleIncomingAlarm(alarm); } catch (e) { console.warn('alarm playback failed', e); }
+        kaleyaApi(`/api/ai/alarm-queue/${alarm.id}/delivered/`, { method: 'POST' }).catch(() => {});
+    }
+}
+
+async function handleIncomingAlarm(alarm) {
+    const lang = alarm.speak_lang || currentVoiceLang || currentLang || 'en';
+    const speakText = (alarm.speak_text || alarm.body || alarm.title || '').trim();
+    const titleText = alarm.title || speakText;
+
+    if (alarm.kind === 'urgent') {
+        KV_LAST_URGENT_ALARM_ID = alarm.id;
+        const el = document.getElementById('notifEmergText');
+        if (el) el.textContent = titleText;
+        document.getElementById('notifEmergency')?.classList.remove('hidden');
+        playAlarmSound('emergency');
+        addAlarmLog('emergency', titleText);
+    } else {
+        const el = document.getElementById('notifQueueText');
+        if (el) el.textContent = titleText;
+        document.getElementById('notifQueue')?.classList.remove('hidden');
+        playAlarmSound('queue');
+        addAlarmLog('queue', titleText);
+    }
+    if (speakText) {
+        await speak(speakText, lang, { allowBrowserFallback: true });
+    }
+}
+
+function startAlarmPolling() {
+    if (KV_ALARM_POLL_TIMER) return;
+    if (!getAuthToken() || location.protocol === 'file:') return;
+    pollAlarmQueue();
+    KV_ALARM_POLL_TIMER = setInterval(pollAlarmQueue, KV_ALARM_POLL_MS);
+}
+
+function stopAlarmPolling() {
+    if (KV_ALARM_POLL_TIMER) {
+        clearInterval(KV_ALARM_POLL_TIMER);
+        KV_ALARM_POLL_TIMER = null;
+    }
 }
 
 function configureIntegration(name) {
