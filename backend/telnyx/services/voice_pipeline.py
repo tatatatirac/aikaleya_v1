@@ -287,6 +287,7 @@ def process_voice_turn(
     if tags.get("TRANSFER"):
         transfer = True
         is_done = True
+        _enqueue_urgent_alarm(business_client, customer, from_number, language)
 
     # ── Update conversation history ─────────────────────────────────────────────
     history.append({"role": "user", "content": speech_text})
@@ -415,6 +416,56 @@ def _normalize_book_date(raw_date: str, business_client) -> str:
     if norm in {"tomorrow", "sutra"}:
         return (today + timedelta(days=1)).isoformat()
     return raw_date
+
+
+def _enqueue_urgent_alarm(business_client, customer, from_number: str, language: str):
+    """
+    When Claude emits [TRANSFER], create an urgent AlarmEvent so the
+    dashboard plays "{caller} wants to speak with you directly" and
+    (optionally) sends WhatsApp/SMS to staff per plan.
+    """
+    try:
+        from ai_core.models import AlarmEvent
+    except Exception:
+        return
+
+    name = ""
+    if customer:
+        name = (getattr(customer, "full_name", "") or getattr(customer, "first_name", "") or "").strip()
+    if not name:
+        name = from_number or "A caller"
+
+    templates = {
+        "en": f"{name} wants to speak with you directly. Caller: {from_number}",
+        "es": f"{name} quiere hablar directamente contigo. Llamada: {from_number}",
+        "fr": f"{name} veut vous parler directement. Appel : {from_number}",
+        "it": f"{name} vuole parlare direttamente con te. Chiamata: {from_number}",
+        "de": f"{name} möchte direkt mit Ihnen sprechen. Anruf: {from_number}",
+        "pt": f"{name} quer falar diretamente com você. Chamada: {from_number}",
+        "ru": f"{name} хочет поговорить с вами лично. Звонок: {from_number}",
+        "sr": f"{name} traži direktan razgovor sa vama. Poziv: {from_number}",
+        "hr": f"{name} traži izravan razgovor s vama. Poziv: {from_number}",
+        "bs": f"{name} traži direktan razgovor s vama. Poziv: {from_number}",
+    }
+    speak = templates.get(language, templates["en"])
+    title_en = f"{name} — urgent: wants to speak with you"
+    title_sr = f"{name} — hitno: traži razgovor"
+    title = title_sr if language in ("sr", "hr", "bs") else title_en
+
+    try:
+        AlarmEvent.objects.create(
+            business_client=business_client,
+            kind=AlarmEvent.KIND_URGENT,
+            title=title,
+            body=speak,
+            speak_text=speak,
+            speak_lang=language,
+            channels=[],
+            metadata={"source": "voice_transfer", "caller_phone": from_number},
+        )
+    except Exception as exc:
+        import logging
+        logging.getLogger(__name__).exception("Failed to enqueue urgent alarm: %s", exc)
 
 
 def _execute_voice_booking(business_client, params: dict, customer, from_number: str, session: CallSession):

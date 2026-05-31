@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from ai_core.models import AlarmSettings, GlobalAISettings, KaleyaCommandLog, VoiceSettings
+from ai_core.models import AlarmEvent, AlarmSettings, GlobalAISettings, KaleyaCommandLog, VoiceSettings
 
 
 class GlobalAISettingsSerializer(serializers.ModelSerializer):
@@ -70,4 +70,17 @@ class KaleyaCommandSerializer(serializers.Serializer):
     command = serializers.CharField(max_length=120)
     input_text = serializers.CharField(required=False, allow_blank=True)
     channel = serializers.CharField(required=False, default="web", max_length=30)
+
+
+class AlarmEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AlarmEvent
+        fields = (
+            "id", "kind", "title", "body",
+            "speak_text", "speak_lang",
+            "appointment", "target_staff",
+            "created_at", "delivered_at", "dismissed_at",
+            "channels", "metadata",
+        )
+        read_only_fields = fields
 

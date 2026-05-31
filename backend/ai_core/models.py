@@ -66,3 +66,65 @@ class KaleyaCommandLog(models.Model):
     def __str__(self):
         return f"{self.business_client} - {self.command}"
 
+
+class AlarmEvent(models.Model):
+    """
+    A queued alarm/announcement that the dashboard (and optionally
+    WhatsApp/SMS) will play for staff. Created either by the appointment
+    scheduler (5-min "next in line") or by the voice pipeline ([TRANSFER]).
+    """
+
+    KIND_NEXT_IN_LINE = "next_in_line"   # "Ana is next in line at 10:30"
+    KIND_URGENT = "urgent"               # "Ana wants to speak with you" (transfer)
+    KIND_NOTIFICATION = "notification"   # generic info bell
+
+    KIND_CHOICES = (
+        (KIND_NEXT_IN_LINE, "Next in line"),
+        (KIND_URGENT, "Urgent — direct conversation requested"),
+        (KIND_NOTIFICATION, "Notification"),
+    )
+
+    business_client = models.ForeignKey(
+        BusinessClient, on_delete=models.CASCADE, related_name="alarm_events"
+    )
+    kind = models.CharField(max_length=30, choices=KIND_CHOICES, default=KIND_NOTIFICATION)
+    title = models.CharField(max_length=200)
+    body = models.TextField(blank=True)
+
+    # TTS line the dashboard speaks aloud (already localized)
+    speak_text = models.TextField(blank=True)
+    speak_lang = models.CharField(max_length=10, default="en")
+
+    # Optional links
+    appointment = models.ForeignKey(
+        "appointments.Appointment",
+        on_delete=models.SET_NULL,
+        related_name="alarm_events",
+        null=True, blank=True,
+    )
+    target_staff = models.ForeignKey(
+        "staff_services.StaffMember",
+        on_delete=models.SET_NULL,
+        related_name="alarm_events",
+        null=True, blank=True,
+    )
+
+    # Lifecycle
+    created_at = models.DateTimeField(auto_now_add=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    dismissed_at = models.DateTimeField(null=True, blank=True)
+
+    # Which channels we already dispatched to (e.g. ["dashboard", "whatsapp"])
+    channels = models.JSONField(default=list, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+        indexes = [
+            models.Index(fields=("business_client", "dismissed_at", "-created_at")),
+            models.Index(fields=("appointment", "kind")),
+        ]
+
+    def __str__(self):
+        return f"{self.get_kind_display()} — {self.title}"
+

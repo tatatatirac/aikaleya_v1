@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib import admin
 
-from ai_core.models import AlarmSettings, GlobalAISettings, KaleyaCommandLog, VoiceSettings
+from ai_core.models import AlarmEvent, AlarmSettings, GlobalAISettings, KaleyaCommandLog, VoiceSettings
 
 
 class GlobalAISettingsAdminForm(forms.ModelForm):
@@ -104,6 +104,14 @@ class AlarmSettingsAdmin(admin.ModelAdmin):
         ("Sounds", {"fields": ("notification_sound", "urgent_sound", "announcement_sound")}),
         ("Volume", {"fields": ("notification_volume", "urgent_volume", "announcement_volume")}),
     )
+
+
+@admin.register(AlarmEvent)
+class AlarmEventAdmin(admin.ModelAdmin):
+    list_display = ("business_client", "kind", "title", "delivered_at", "dismissed_at", "created_at")
+    list_filter = ("kind", "speak_lang")
+    search_fields = ("business_client__name", "title", "body")
+    readonly_fields = ("created_at", "delivered_at", "dismissed_at", "channels", "metadata")
 
 
 @admin.register(KaleyaCommandLog)

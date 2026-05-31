@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from ai_core.views import (
+    AlarmEventViewSet,
     AlarmSettingsViewSet,
     GlobalAISettingsViewSet,
     KaleyaCommandAPIView,
@@ -14,6 +15,7 @@ router = DefaultRouter()
 router.register("global-settings", GlobalAISettingsViewSet, basename="global-ai-settings")
 router.register("voice-settings", VoiceSettingsViewSet, basename="voice-settings")
 router.register("alarm-settings", AlarmSettingsViewSet, basename="alarm-settings")
+router.register("alarm-queue", AlarmEventViewSet, basename="alarm-queue")
 router.register("command-logs", KaleyaCommandLogViewSet, basename="kaleya-command-log")
 
 urlpatterns = [
