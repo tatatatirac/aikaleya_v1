@@ -14,7 +14,6 @@ import logging
 from django.conf import settings
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
 
 from communications.models import CallSession
 from telnyx.models import business_client_for_number
@@ -72,15 +71,16 @@ def _hangup_response(thank_you_audio_url: str = "") -> str:
 
 # ── View 1: Inbound call ─────────────────────────────────────────────────────────
 @csrf_exempt
-@require_POST
 def inbound_call(request):
     """
     Telnyx calls this when a new inbound call arrives.
     We respond with TeXML to play the greeting and start listening.
+    Telnyx may use GET or POST depending on app config — handle both.
     """
-    from_number = request.POST.get("From", "").strip()
-    to_number = request.POST.get("To", "").strip()
-    call_sid = request.POST.get("CallSid") or request.POST.get("CallControlId", "")
+    params = request.POST if request.method == "POST" else request.GET
+    from_number = params.get("From", "").strip()
+    to_number = params.get("To", "").strip()
+    call_sid = params.get("CallSid") or params.get("CallControlId", "")
 
     logger.info("Inbound call: from=%s to=%s sid=%s", from_number, to_number, call_sid)
 
@@ -123,17 +123,18 @@ def inbound_call(request):
 
 # ── View 2: Speech gather result ────────────────────────────────────────────────
 @csrf_exempt
-@require_POST
 def gather_result(request):
     """
     Telnyx calls this after caller finishes speaking.
     SpeechResult contains the transcribed text.
     We process it through Claude + ElevenLabs and return TeXML.
+    Handles both GET and POST from Telnyx.
     """
-    speech_text = request.POST.get("SpeechResult", "").strip()
-    from_number = request.POST.get("From", "").strip()
-    to_number = request.POST.get("To", "").strip()
-    call_sid = request.POST.get("CallSid") or request.POST.get("CallControlId", "")
+    params = request.POST if request.method == "POST" else request.GET
+    speech_text = params.get("SpeechResult", "").strip()
+    from_number = params.get("From", "").strip()
+    to_number = params.get("To", "").strip()
+    call_sid = params.get("CallSid") or params.get("CallControlId", "")
 
     logger.info("Gather result: from=%s speech=%r sid=%s", from_number, speech_text[:80], call_sid)
 
@@ -144,7 +145,7 @@ def gather_result(request):
 
     # Handle empty speech (silence / unclear)
     if not speech_text:
-        language = business_client.interface_language or "en"
+        language = getattr(business_client, "interface_language", None) or getattr(business_client, "language", None) or "en"
         telnyx_lang = LANGUAGE_TO_TELNYX.get(language, "en-US")
         silence_text = "Sorry, I didn't catch that. Could you repeat?" if language == "en" else "Nisam čula, možete li ponoviti?"
         gather_url = f"{BASE_URL}/api/telnyx/voice/gather/"
