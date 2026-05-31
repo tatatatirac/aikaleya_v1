@@ -400,6 +400,23 @@ def get_or_create_greeting_url(business_client, language: str = "en", from_numbe
     return audio_url(rel_path) if rel_path else ""
 
 
+def _normalize_book_date(raw_date: str, business_client) -> str:
+    """
+    Defence in depth: if Claude emits date=today/tomorrow/now instead of
+    ISO YYYY-MM-DD, resolve it locally so book_appointment_tool's strptime
+    doesn't choke. Pass-through for anything else.
+    """
+    if not raw_date:
+        return ""
+    norm = raw_date.strip().lower()
+    today = client_local_today(business_client)
+    if norm in {"today", "now", "danas"}:
+        return today.isoformat()
+    if norm in {"tomorrow", "sutra"}:
+        return (today + timedelta(days=1)).isoformat()
+    return raw_date
+
+
 def _execute_voice_booking(business_client, params: dict, customer, from_number: str, session: CallSession):
     """
     Executes the actual appointment booking when Claude outputs [BOOK: ...].
@@ -411,7 +428,7 @@ def _execute_voice_booking(business_client, params: dict, customer, from_number:
     try:
         payload = {
             "service_hint": params.get("service", ""),
-            "date": params.get("date", ""),
+            "date": _normalize_book_date(params.get("date", ""), business_client),
             "time": params.get("time", ""),
             "phone": params.get("phone", "") or from_number,
             "customer_name": customer.full_name if customer else "",

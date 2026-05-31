@@ -1,4 +1,5 @@
 import json
+from datetime import timedelta
 
 from clients.models import BusinessKnowledgeEntry
 from staff_services.models import Service, StaffMember
@@ -65,11 +66,16 @@ You are currently in state: **{voice_state}**
 
 ━━ SILENT TAGS (caller never hears these) ━━
 [STATE: <next>]      — mark transition (greeting / slot_offer / confirm / booked)
-[BOOK: service=X date=Y time=Z phone=W]  — on YES at confirm
+[BOOK: service=<name> date=<YYYY-MM-DD> time=<HH:MM> phone=<+E.164>]
+       — date MUST be ISO (YYYY-MM-DD). NEVER write "today"/"tomorrow".
+         Today = {today_iso} • Tomorrow = {tomorrow_iso}
+       — time MUST be 24h HH:MM (e.g. 09:30, 15:00).
 [HANGUP]             — call done
 [TRANSFER]           — caller wants a human
 
-━━ SCHEDULE ━━
+━━ DATES & SCHEDULE ━━
+Today's date:    {today_iso} ({today_weekday})
+Tomorrow's date: {tomorrow_iso} ({tomorrow_weekday})
 Services: {services}
 Hours: {work_start}–{work_end}{master_prompt_section}
 """
@@ -129,11 +135,16 @@ Trenutno stanje: **{voice_state}**
 
 ━━ TIHE OZNAKE (klijent ne čuje) ━━
 [STATE: <next>]      — označi prelaz (greeting / slot_offer / confirm / booked)
-[BOOK: service=X date=Y time=Z phone=W]  — kad je DA na potvrdi
+[BOOK: service=<naziv> date=<YYYY-MM-DD> time=<HH:MM> phone=<+E.164>]
+       — date MORA biti ISO (YYYY-MM-DD). NIKAD ne piši "danas"/"sutra".
+         Danas = {today_iso} • Sutra = {tomorrow_iso}
+       — time MORA biti 24h HH:MM (npr. 09:30, 15:00).
 [HANGUP]             — kraj poziva
 [TRANSFER]           — traži čoveka
 
-━━ RASPORED ━━
+━━ DATUMI I RASPORED ━━
+Današnji datum: {today_iso} ({today_weekday})
+Sutrašnji datum: {tomorrow_iso} ({tomorrow_weekday})
 Usluge: {services}
 Radno vreme: {work_start}–{work_end}{master_prompt_section}
 """
@@ -211,6 +222,15 @@ def build_voice_prompt(
     work_end = business_client.work_end.strftime("%H:%M")
     services = _services_markdown(business_client, limit=8)
 
+    # Today/tomorrow in the salon's timezone — Claude needs this for [BOOK: date=...]
+    from ai_agent.tools import client_local_today  # local import to avoid cycle
+    today = client_local_today(business_client)
+    tomorrow = today + timedelta(days=1)
+    today_iso = today.isoformat()
+    tomorrow_iso = tomorrow.isoformat()
+    today_weekday = today.strftime("%A")
+    tomorrow_weekday = tomorrow.strftime("%A")
+
     slots_today = ", ".join(slots.get("today", [])) or "fully booked"
     slots_tomorrow = ", ".join(slots.get("tomorrow", [])) or "fully booked"
     time_morning = slots.get("time_morning", "")
@@ -250,6 +270,10 @@ def build_voice_prompt(
         next_slot=next_slot,
         voice_state=voice_state,
         master_prompt_section=master_prompt_section,
+        today_iso=today_iso,
+        tomorrow_iso=tomorrow_iso,
+        today_weekday=today_weekday,
+        tomorrow_weekday=tomorrow_weekday,
         # Booking action placeholders — Claude fills these in [BOOK: ...] tag
         service_hint="{service_hint}",
         date="{date}",
