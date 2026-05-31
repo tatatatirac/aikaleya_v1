@@ -468,6 +468,53 @@ def _enqueue_urgent_alarm(business_client, customer, from_number: str, language:
         logging.getLogger(__name__).exception("Failed to enqueue urgent alarm: %s", exc)
 
 
+def _upsert_caller_name(business_client, customer, from_number: str, new_name: str):
+    """
+    When Claude collects a new caller's name during booking, persist it on
+    the Customer record (replacing the "Phone Caller" placeholder). Returns
+    the (possibly newly created) customer.
+    """
+    new_name = (new_name or "").strip()
+    if not new_name:
+        return customer
+
+    parts = new_name.split(" ", 1)
+    first = parts[0]
+    last = parts[1] if len(parts) > 1 else ""
+
+    try:
+        from appointments.models import Customer
+    except Exception:
+        return customer
+
+    if customer:
+        current_first = (getattr(customer, "first_name", "") or "").strip().lower()
+        # Only overwrite the placeholder — never clobber a real name the
+        # owner may have edited in the dashboard.
+        if current_first in {"phone caller", "phonecaller", ""}:
+            customer.first_name = first
+            if last and not (customer.last_name or "").strip():
+                customer.last_name = last
+            try:
+                customer.save(update_fields=["first_name", "last_name"])
+            except Exception:
+                pass
+        return customer
+
+    if not from_number:
+        return None
+
+    try:
+        customer, _ = Customer.objects.get_or_create(
+            business_client=business_client,
+            phone=from_number,
+            defaults={"first_name": first, "last_name": last},
+        )
+    except Exception:
+        return None
+    return customer
+
+
 def _execute_voice_booking(business_client, params: dict, customer, from_number: str, session: CallSession):
     """
     Executes the actual appointment booking when Claude outputs [BOOK: ...].
@@ -477,12 +524,28 @@ def _execute_voice_booking(business_client, params: dict, customer, from_number:
     and downstream regex chokes on the dict.
     """
     try:
+        # If Claude included customer_name=... (new caller introduced themselves),
+        # persist it on the Customer so future calls recognize them.
+        caller_name = (params.get("customer_name") or "").strip()
+        if caller_name:
+            customer = _upsert_caller_name(business_client, customer, from_number, caller_name)
+            # Remember in session so the next prompt uses the real name, not the placeholder
+            state = session.metadata or {}
+            state["customer_name_override"] = caller_name
+            session.metadata = state
+
+        effective_name = (
+            caller_name
+            or (customer.full_name if customer else "")
+            or ""
+        ).strip()
+
         payload = {
             "service_hint": params.get("service", ""),
             "date": _normalize_book_date(params.get("date", ""), business_client),
             "time": params.get("time", ""),
             "phone": params.get("phone", "") or from_number,
-            "customer_name": customer.full_name if customer else "",
+            "customer_name": effective_name,
         }
         result = book_appointment_tool(
             business_client,
