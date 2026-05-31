@@ -172,7 +172,7 @@ def generate_greeting(
     Re-generates only if text changes (hash-based cache).
     """
     api_key = settings.KALEYA_ELEVENLABS_API_KEY
-    voice_id = _get_voice_id(business_client)
+    voice_id = _get_voice_id(business_client, language)
 
     # Cache key based on text content
     text_hash = hashlib.md5(text.encode()).hexdigest()[:8]
@@ -203,7 +203,7 @@ def generate_response_audio(
     Returns relative media path like 'voice/responses/{call_sid}/turn_3.mp3'.
     """
     api_key = settings.KALEYA_ELEVENLABS_API_KEY
-    voice_id = _get_voice_id(business_client)
+    voice_id = _get_voice_id(business_client, language)
 
     if not api_key:
         return ""
@@ -231,10 +231,10 @@ def cleanup_call_audio(call_sid: str):
         shutil.rmtree(call_dir, ignore_errors=True)
 
 
-def _get_voice_id(business_client=None) -> str:
+def _get_voice_id(business_client=None, language: str = "en") -> str:
     """
-    Returns the ElevenLabs voice ID for a business client.
-    Falls back to platform default (Aria).
+    Returns the ElevenLabs voice ID for a business client + language.
+    Priority: salon custom voice → per-language env var → platform default.
     """
     if business_client:
         api_settings = getattr(business_client, "api_settings", None)
@@ -245,4 +245,9 @@ def _get_voice_id(business_client=None) -> str:
         )
         if custom_voice:
             return custom_voice
+    # Try per-language voice from settings (ELEVENLABS_VOICE_ID_EN, _SR, etc.)
+    by_lang = getattr(settings, "KALEYA_ELEVENLABS_VOICE_BY_LANG", {})
+    lang_voice = by_lang.get(language, "") or by_lang.get(language.split("-")[0], "")
+    if lang_voice:
+        return lang_voice
     return settings.KALEYA_ELEVENLABS_VOICE_ID or DEFAULT_VOICE_ID

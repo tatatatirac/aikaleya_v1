@@ -17,6 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from communications.models import CallSession
 from telnyx.models import business_client_for_number
+from telnyx.services.tts import audio_url as tts_audio_url, generate_response_audio
 from telnyx.services.voice_pipeline import get_or_create_greeting_url, process_voice_turn
 
 logger = logging.getLogger(__name__)
@@ -90,8 +91,8 @@ def inbound_call(request):
         logger.warning("No salon found for Telnyx number: %s", to_number)
         return _texml("  <Say>This number is not configured. Goodbye.</Say>\n  <Hangup/>")
 
-    # Detect language from business_client default (US number → English)
-    language = business_client.interface_language or business_client.language or "en"
+    # Use voice_language for ASR — this is the language the salon speaks on calls
+    language = business_client.voice_language or business_client.interface_language or "en"
     telnyx_lang = LANGUAGE_TO_TELNYX.get(language, "en-US")
 
     # Generate (cached) greeting audio
@@ -145,14 +146,22 @@ def gather_result(request):
 
     # Handle empty speech (silence / unclear)
     if not speech_text:
-        language = getattr(business_client, "interface_language", None) or getattr(business_client, "language", None) or "en"
+        language = business_client.voice_language or business_client.interface_language or "en"
         telnyx_lang = LANGUAGE_TO_TELNYX.get(language, "en-US")
         silence_text = "Sorry, I didn't catch that. Could you repeat?" if language == "en" else "Nisam čula, možete li ponoviti?"
         gather_url = f"{BASE_URL}/api/telnyx/voice/gather/"
-        return _texml(
-            f'  <Say language="{telnyx_lang}">{silence_text}</Say>\n'
-            + _gather_xml(gather_url, telnyx_lang)
-        )
+        # Use ElevenLabs for silence response (fall back to Telnyx Say)
+        silence_audio = ""
+        try:
+            silence_rel = generate_response_audio(silence_text, call_sid or "silence", 900, language, business_client)
+            silence_audio = tts_audio_url(silence_rel) if silence_rel else ""
+        except Exception:
+            pass
+        if silence_audio:
+            xml_body = f'  <Play>{silence_audio}</Play>\n' + _gather_xml(gather_url, telnyx_lang)
+        else:
+            xml_body = f'  <Say language="{telnyx_lang}">{silence_text}</Say>\n' + _gather_xml(gather_url, telnyx_lang)
+        return _texml(xml_body)
 
     # Run voice pipeline
     try:
@@ -165,7 +174,7 @@ def gather_result(request):
         )
     except Exception as exc:
         logger.exception("Voice pipeline error: %s", exc)
-        language = business_client.interface_language or "en"
+        language = business_client.voice_language or business_client.interface_language or "en"
         telnyx_lang = LANGUAGE_TO_TELNYX.get(language, "en-US")
         err_text = "I'm having a technical issue. Please call back in a moment." if language == "en" else "Imam tehničku grešku. Molim pozovite malo kasnije."
         return _texml(f'  <Say language="{telnyx_lang}">{err_text}</Say>\n  <Hangup/>')
