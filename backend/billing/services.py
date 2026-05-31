@@ -35,8 +35,10 @@ class PlanLimits:
 
 FALLBACK_LIMITS = {
     # max_staff, whatsapp, viber, telegram, sms, phone_calls, instagram, tiktok, api_override, more_langs, elevenlabs
-    Plan.CODE_BASIC: PlanLimits(3, False, True, True, False, True, False, False, False, False, False),
-    Plan.CODE_PRO: PlanLimits(5, True, True, True, True, True, True, True, False, False, False),
+    # Starter ($39): 1 staff, WhatsApp + Telegram only. NO voice/SMS.
+    Plan.CODE_BASIC: PlanLimits(1, True, False, True, False, False, False, False, False, False, False),
+    # Pro ($89): 5 staff, all channels incl. voice (US/CA only via Telnyx number registration).
+    Plan.CODE_PRO: PlanLimits(5, True, False, True, True, True, True, True, False, False, True),
     Plan.CODE_BUSINESS: PlanLimits(5, True, True, True, False, False, True, True, True, True, False),
     Plan.CODE_BUSINESS_PLUS: PlanLimits(15, True, True, True, True, True, True, True, True, True, True),
     Plan.CODE_BUSINESS_PRO_PLUS: PlanLimits(None, True, True, True, True, True, True, True, True, True, True),

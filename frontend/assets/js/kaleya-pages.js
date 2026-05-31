@@ -1028,10 +1028,10 @@ function renderLegalPage() {
 }
 
 const CHECKOUT_PLAN_DETAILS = {
-    basic:               { name: 'Starter',          price: '$59 / month',   trial: '14 days' },
-    basic_yearly:        { name: 'Starter — Yearly', price: '$580 / year',   trial: '14 days' },
-    pro:                 { name: 'Pro',               price: '$119 / month',  trial: '14 days' },
-    pro_yearly:          { name: 'Pro — Yearly',      price: '$1,160 / year', trial: '14 days' },
+    basic:               { name: 'Starter',          price: '$39 / month',   trial: '14 days' },
+    basic_yearly:        { name: 'Starter — Yearly', price: '$390 / year',   trial: '14 days' },
+    pro:                 { name: 'Pro',               price: '$89 / month',   trial: '14 days' },
+    pro_yearly:          { name: 'Pro — Yearly',      price: '$890 / year',   trial: '14 days' },
     business:            { name: 'Business',          price: '$349 / month', trial: '14 days' },
     business_yearly:     { name: 'Business — Yearly', price: '$3,490 / year', trial: '14 days' },
     business_plus:       { name: 'Business+',         price: '$579 / month', trial: '14 days' },
