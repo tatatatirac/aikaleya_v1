@@ -197,10 +197,12 @@ def generate_response_audio(
     turn: int,
     language: str,
     business_client=None,
+    add_filler: bool = True,
 ) -> str:
     """
     Generates MP3 for a single conversation turn.
     Returns relative media path like 'voice/responses/{call_sid}/turn_3.mp3'.
+    Set add_filler=False for silence/error responses (no "Of course!" prefix).
     """
     api_key = settings.KALEYA_ELEVENLABS_API_KEY
     voice_id = _get_voice_id(business_client, language)
@@ -208,8 +210,8 @@ def generate_response_audio(
     if not api_key:
         return ""
 
-    # Add humanizer filler
-    final_text = add_humanizer_filler(text, language)
+    # Add humanizer filler (skip for silence/error responses)
+    final_text = add_humanizer_filler(text, language) if add_filler else text
 
     filename = f"turn_{turn}_{int(time.time())}.mp3"
     rel_path = f"voice/responses/{call_sid}/{filename}"

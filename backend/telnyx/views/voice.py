@@ -47,10 +47,10 @@ def _texml(body: str) -> HttpResponse:
     return HttpResponse(xml, content_type=TEXML_CONTENT_TYPE)
 
 
-def _gather_xml(action_url: str, language: str = "en-US", timeout: int = 5) -> str:
+def _gather_xml(action_url: str, language: str = "en-US", timeout: int = 8) -> str:
     return (
         f'  <Gather input="speech" action="{action_url}" '
-        f'timeout="{timeout}" speechTimeout="2" '
+        f'timeout="{timeout}" speechTimeout="auto" '
         f'language="{language}" actionOnEmptyResult="true">\n'
         f'  </Gather>\n'
         f'  <Redirect>{BASE_URL}/api/telnyx/voice/inbound/</Redirect>'
@@ -153,7 +153,7 @@ def gather_result(request):
         # Use ElevenLabs for silence response (fall back to Telnyx Say)
         silence_audio = ""
         try:
-            silence_rel = generate_response_audio(silence_text, call_sid or "silence", 900, language, business_client)
+            silence_rel = generate_response_audio(silence_text, call_sid or "silence", 900, language, business_client, add_filler=False)
             silence_audio = tts_audio_url(silence_rel) if silence_rel else ""
         except Exception:
             pass

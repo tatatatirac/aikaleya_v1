@@ -202,7 +202,7 @@ def process_voice_turn(
 
     # ── Find customer by caller phone ───────────────────────────────────────────
     customer = find_customer_by_payload_identity(business_client, {"phone": from_number})
-    customer_name = customer.full_name if customer else ""
+    customer_name = _real_customer_name(customer)
 
     # ── Fetch available slots ───────────────────────────────────────────────────
     service_hint = state.get("service_hint", "")
@@ -281,6 +281,23 @@ def process_voice_turn(
     }
 
 
+PLACEHOLDER_NAMES = {"phone caller", "phonecaller", "unknown", "anonymous", ""}
+
+
+def _real_customer_name(customer) -> str:
+    """Return the customer's name only if it's not a placeholder (e.g. 'Phone Caller')."""
+    if not customer:
+        return ""
+    name = (customer.full_name or "").strip()
+    if name.lower() in PLACEHOLDER_NAMES:
+        return ""
+    # Also skip if first_name is the placeholder
+    first = (getattr(customer, "first_name", "") or "").strip().lower()
+    if first in {"phone caller", "phonecaller"}:
+        return ""
+    return name
+
+
 def get_or_create_greeting_url(business_client, language: str = "en", from_number: str = "") -> str:
     """
     Returns URL for the salon's greeting audio.
@@ -289,7 +306,7 @@ def get_or_create_greeting_url(business_client, language: str = "en", from_numbe
     from ai_agent.prompts import build_voice_greeting
 
     customer = find_customer_by_payload_identity(business_client, {"phone": from_number}) if from_number else None
-    customer_name = customer.full_name if customer else ""
+    customer_name = _real_customer_name(customer)
 
     greeting_text = build_voice_greeting(
         business_client=business_client,
