@@ -47,11 +47,13 @@ def _texml(body: str) -> HttpResponse:
     return HttpResponse(xml, content_type=TEXML_CONTENT_TYPE)
 
 
-def _gather_xml(action_url: str, language: str = "en-US", timeout: int = 8) -> str:
+def _gather_xml(action_url: str, language: str = "en-US", timeout: int = 10) -> str:
     return (
         f'  <Gather input="speech" action="{action_url}" '
-        f'timeout="{timeout}" speechTimeout="auto" '
-        f'language="{language}" actionOnEmptyResult="true">\n'
+        f'timeout="{timeout}" speechTimeout="2" '
+        f'language="{language}" '
+        f'speechModel="phone_call" enhanced="true" '
+        f'actionOnEmptyResult="true">\n'
         f'  </Gather>\n'
         f'  <Redirect>{BASE_URL}/api/telnyx/voice/inbound/</Redirect>'
     )

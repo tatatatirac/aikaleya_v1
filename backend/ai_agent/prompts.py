@@ -272,8 +272,8 @@ def build_voice_greeting(
 
     # Default: English
     if customer_name:
-        return f"{salon_name}, hi {customer_name}!"
-    return f"{salon_name}!"
+        return f"{salon_name}, hi {customer_name}! How can I help?"
+    return f"{salon_name}, how can I help you?"
 
 
 KALEYA_SALON_SOUL = """\
