@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Sentry browser error tracking -->
+    <script>
+      window.sentryOnLoad = function () {
+        Sentry.init({ environment: "production", tracesSampleRate: 0.1 });
+      };
+    </script>
+    <script src="https://js.sentry-cdn.com/aea6b61d500b0542d77599c65621f5f3.min.js" crossorigin="anonymous"></script>
     <meta name="theme-color" content="#020617">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
