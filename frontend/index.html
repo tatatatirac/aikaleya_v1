@@ -822,6 +822,9 @@
         .kv-price-feats { list-style: none; padding: 0; margin: 0 0 28px; display: flex; flex-direction: column; gap: 12px; flex: 1; }
         .kv-price-feats li { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #A1A1AA; }
         .kv-price-feats svg { width: 18px; height: 18px; color: #10B981; flex-shrink: 0; }
+        .kv-feat-balkan-note { color: #FBBF24 !important; }
+        html.region-balkan .kv-feat-voice { display: none !important; }
+        html.region-balkan .kv-feat-balkan-note { display: flex !important; }
         .kv-price-btn {
             width: 100%; padding: 14px 0; border-radius: 12px; font-size: 16px; font-weight: 600;
             text-align: center; border: 1px solid #27272A; color: #FFF; background: rgba(255,255,255,0.06);
@@ -1408,8 +1411,9 @@
                                 <ul class="kv-price-feats" style="margin-top:18px">
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f1">Everything in Starter</span></li>
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f2">Up to 5 staff — own schedule &amp; Kaleya app per member</span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f3">AI voice calls — Kaleya answers your phone <span style="opacity:.7">(US/CA only)</span></span></li>
-                                    <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f4">SMS + Instagram DM + TikTok DM</span></li>
+                                    <li class="kv-feat-voice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f3">AI voice calls — Kaleya answers your phone <span style="opacity:.7">(US/CA only)</span></span></li>
+                                    <li class="kv-feat-sms"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f4">SMS + Instagram DM + TikTok DM</span></li>
+                                    <li class="kv-feat-balkan-note" data-i18n-html="balkan_no_voice_sms" style="display:none"><span style="opacity:.9;font-style:italic">Voice calls &amp; SMS — not yet available in your region</span></li>
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f5">Automated reminders + spoken staff alarm</span></li>
                                     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span data-i18n="p_pro_f6">Time-block scheduling per staff member</span></li>
                                 </ul>
@@ -1656,7 +1660,13 @@
                     fetch('/api/demo-number/', { cache: 'no-store' })
                         .then(function(r){ return r.ok ? r.json() : null; })
                         .then(function(data) {
-                            if (!data || !data.number) return;
+                            if (!data) return;
+                            if (data.region === 'RS') {
+                                document.documentElement.classList.add('region-balkan');
+                                var f4el = document.querySelector('.kv-price-feats [data-i18n="p_pro_f4"]');
+                                if (f4el) { f4el.setAttribute('data-i18n', 'p_pro_f4_balkan'); if (typeof tr === 'function') f4el.textContent = tr('p_pro_f4_balkan'); }
+                            }
+                            if (!data.number) return;
                             var bar = document.getElementById('kvDemoNumberBar');
                             var link = document.getElementById('kvDemoNumberLink');
                             var txt = document.getElementById('kvDemoNumberText');
@@ -3074,7 +3084,7 @@ const T = {
         p_pro_tagline: 'Jedan sprečeni no-show plaća ceo mesec.',
         p_pro_desc: 'Dežurstvo 24/7 na svim kanalima + AI glas koji ti javlja telefon. Računica: 2 sprečena no-showa plaćaju ceo mesec.',
         p_basic_f1: '1 zaposleni', p_basic_f2: 'WhatsApp rezervacije — neograničeni odgovori', p_basic_f3: 'Telegram rezervacije — besplatan kanal', p_basic_f4: 'Kaleya kalendar + Google Calendar sync', p_basic_f5: 'Automatski podsetnici',
-        p_pro_f1: 'Sve iz Starter paketa', p_pro_f2: 'Do 5 zaposlenih — svoj raspored i Kaleya app', p_pro_f3: 'AI glasovni pozivi — Kaleya javlja telefon (samo SAD/Kanada)', p_pro_f4: 'SMS + Instagram DM + TikTok DM', p_pro_f5: 'Automatski podsetnici + zvučno upozorenje za osoblje', p_pro_f6: 'Vremenske blokade po zaposlenom',
+        p_pro_f1: 'Sve iz Starter paketa', p_pro_f2: 'Do 5 zaposlenih — svoj raspored i Kaleya app', p_pro_f3: 'AI glasovni pozivi — Kaleya javlja telefon (samo SAD/Kanada)', p_pro_f4: 'SMS + Instagram DM + TikTok DM', p_pro_f4_balkan: 'Instagram DM + TikTok DM', balkan_no_voice_sms: '<span style="opacity:.9;font-style:italic">Glasovni pozivi i SMS — još nisu dostupni u vašem regionu</span>', p_pro_f5: 'Automatski podsetnici + zvučno upozorenje za osoblje', p_pro_f6: 'Vremenske blokade po zaposlenom',
         hero_badge: 'AI sekretarica · 24/7 aktivna', hero_title_1: 'Kaleya', hero_title_2: 'AI sekretarica 24/7',
         hero_sub: 'Kaleya odgovara, zakazuje, otkazuje i obaveštava osoblje prirodnim glasom. Radi preko poziva, WhatsApp-a, Telegrama, Instagram DM i SMS-a.',
         hero_cta_demo: 'Isprobaj besplatno', hero_cta_how: 'Pogledaj kako radi', hero_social: '500+ zadovoljnih firmi', hero_tap: 'Dodirni logo',
@@ -3142,7 +3152,7 @@ const T = {
         p_pro_tagline: 'One prevented no-show pays for the whole month.',
         p_pro_desc: '24/7 answering on every channel + AI voice that picks up your phone. The math: 2 prevented no-shows pay for the month.',
         p_basic_f1: '1 staff member', p_basic_f2: 'WhatsApp booking — unlimited replies', p_basic_f3: 'Telegram booking — free channel, no fees', p_basic_f4: 'Kaleya calendar + Google Calendar sync', p_basic_f5: 'Automated booking reminders',
-        p_pro_f1: 'Everything in Starter', p_pro_f2: 'Up to 5 staff — own schedule & Kaleya app per member', p_pro_f3: 'AI voice calls — Kaleya answers your phone (US/CA only)', p_pro_f4: 'SMS + Instagram DM + TikTok DM', p_pro_f5: 'Automated reminders + spoken staff alarm', p_pro_f6: 'Time-block scheduling per staff member',
+        p_pro_f1: 'Everything in Starter', p_pro_f2: 'Up to 5 staff — own schedule & Kaleya app per member', p_pro_f3: 'AI voice calls — Kaleya answers your phone (US/CA only)', p_pro_f4: 'SMS + Instagram DM + TikTok DM', p_pro_f4_balkan: 'Instagram DM + TikTok DM', balkan_no_voice_sms: '<span style="opacity:.9;font-style:italic">Voice calls &amp; SMS — not yet available in your region</span>', p_pro_f5: 'Automated reminders + spoken staff alarm', p_pro_f6: 'Time-block scheduling per staff member',
         hero_badge: 'AI receptionist · active 24/7', hero_title_1: 'Kaleya', hero_title_2: 'AI receptionist 24/7',
         hero_sub: 'Kaleya answers, schedules, cancels and alerts staff with a natural voice. Works via calls, WhatsApp, Telegram, Instagram DM and SMS.',
         hero_cta_demo: 'Try for free', hero_cta_how: 'See how it works', hero_social: '500+ happy businesses', hero_tap: 'Tap the logo',
