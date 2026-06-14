@@ -10127,7 +10127,12 @@ window.addEventListener('appinstalled', () => {
 // ===== ONBOARDING WIZARD =====
 let obCurrentStep = 1;
 let obServices = [{ name: '', duration: 30 }];
+let obStaff = [{ name: '', role: '' }];
 let obSelectedSlot = 30;
+let obSelectedChannels = ['telegram'];
+let obDetectedCountry = '';
+const OB_TOTAL_STEPS = 6;
+const OB_BALKAN = ['RS', 'HR', 'BA', 'ME', 'SI', 'MK'];
 
 function showOnboarding() {
     const overlay = document.getElementById('onboarding-overlay');
@@ -10139,9 +10144,13 @@ function showOnboarding() {
     obCurrentStep = 1;
     obSelectedSlot = 30;
     obServices = [{ name: '', duration: 30 }];
+    obStaff = [{ name: '', role: '' }];
+    obSelectedChannels = ['telegram'];
     obInitHours();
     obInitSlotBtns();
     obRenderServices();
+    obRenderStaff();
+    obInitCountry();
     obGoToStep(1);
     overlay.classList.remove('hidden');
 }
@@ -10208,9 +10217,87 @@ function obRemoveService(idx) {
     obRenderServices();
 }
 
+function obStaffLimit() {
+    // Starter = 1 staff member, Pro and above = up to 5
+    const pkg = (typeof currentClientInfo !== 'undefined' && currentClientInfo && currentClientInfo.package) || 'basic';
+    return pkg === 'basic' ? 1 : 5;
+}
+
+function obRenderStaff() {
+    const list = document.getElementById('ob-staff-list');
+    if (!list) return;
+    list.innerHTML = obStaff.map((m, i) => `
+        <div class="flex gap-2 items-center">
+            <input type="text" value="${escapeHtml(m.name)}" placeholder="Name (e.g. Ana)"
+                oninput="obStaff[${i}].name=this.value"
+                class="flex-1 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm bg-white dark:bg-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition">
+            <input type="text" value="${escapeHtml(m.role || '')}" placeholder="Role (optional)"
+                oninput="obStaff[${i}].role=this.value"
+                class="w-[40%] border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm bg-white dark:bg-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition">
+            ${obStaff.length > 1 ? `<button type="button" onclick="obRemoveStaff(${i})" class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition text-lg leading-none">×</button>` : '<div class="w-8"></div>'}
+        </div>
+    `).join('');
+}
+
+function obUpdateStaffAddBtn() {
+    const full = obStaff.length >= obStaffLimit();
+    document.getElementById('ob-add-staff-btn')?.classList.toggle('hidden', full);
+    document.getElementById('ob-staff-limit-note')?.classList.toggle('hidden', !full);
+}
+
+function obAddStaff() {
+    if (obStaff.length >= obStaffLimit()) return;
+    obStaff.push({ name: '', role: '' });
+    obRenderStaff();
+    obUpdateStaffAddBtn();
+    const inputs = document.querySelectorAll('#ob-staff-list input[type="text"]');
+    if (inputs.length >= 2) inputs[inputs.length - 2].focus();
+}
+
+function obRemoveStaff(idx) {
+    obStaff.splice(idx, 1);
+    if (!obStaff.length) obStaff = [{ name: '', role: '' }];
+    obRenderStaff();
+    obUpdateStaffAddBtn();
+}
+
+function obInitCountry() {
+    const sel = document.getElementById('ob-country');
+    if (!sel) return;
+    const countries = [
+        ['US', 'United States'], ['CA', 'Canada'], ['GB', 'United Kingdom'], ['AU', 'Australia'],
+        ['RS', 'Serbia'], ['HR', 'Croatia'], ['BA', 'Bosnia & Herzegovina'], ['ME', 'Montenegro'],
+        ['SI', 'Slovenia'], ['MK', 'North Macedonia'], ['DE', 'Germany'], ['AT', 'Austria'],
+        ['CH', 'Switzerland'], ['FR', 'France'], ['IT', 'Italy'], ['ES', 'Spain'], ['XX', 'Other']
+    ];
+    sel.innerHTML = countries.map(([code, name]) => `<option value="${code}">${escapeHtml(name)}</option>`).join('');
+    sel.onchange = obApplyChannelGating;
+    fetch('/api/demo-number/', { cache: 'no-store' })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => {
+            if (d && d.country) {
+                obDetectedCountry = String(d.country).toUpperCase();
+                if (countries.some(([c]) => c === obDetectedCountry)) sel.value = obDetectedCountry;
+            }
+        })
+        .catch(() => {});
+}
+
+function obApplyChannelGating() {
+    const sel = document.getElementById('ob-country');
+    const cc = ((sel && sel.value) || obDetectedCountry || '').toUpperCase();
+    const balkan = OB_BALKAN.indexOf(cc) !== -1;
+    document.querySelectorAll('.ob-chan-voice, .ob-chan-sms').forEach(el => {
+        el.classList.toggle('hidden', balkan);
+        const cb = el.querySelector('input[type="checkbox"]');
+        if (cb && balkan) cb.checked = false;
+    });
+    document.getElementById('ob-balkan-note')?.classList.toggle('hidden', !balkan);
+}
+
 function obGoToStep(step) {
     obCurrentStep = step;
-    const total = 5;
+    const total = OB_TOTAL_STEPS;
     const bar = document.getElementById('ob-progress-bar');
     if (bar) bar.style.width = Math.round((step / total) * 100) + '%';
     const label = document.getElementById('ob-step-label');
@@ -10218,25 +10305,27 @@ function obGoToStep(step) {
     for (let i = 1; i <= total; i++) {
         document.getElementById(`ob-s${i}`)?.classList.toggle('hidden', i !== step);
     }
+    if (step === 4) obUpdateStaffAddBtn();
+    if (step === 5) obApplyChannelGating();
     const backBtn = document.getElementById('ob-back-btn');
     const backPh = document.getElementById('ob-back-ph');
     const skipLink = document.getElementById('ob-skip-link');
     const nextBtn = document.getElementById('ob-next-btn');
     if (step === 1) { backBtn?.classList.add('hidden'); backPh?.classList.remove('hidden'); }
     else { backBtn?.classList.remove('hidden'); backPh?.classList.add('hidden'); }
-    if (step === 5) {
+    if (step === total) {
         skipLink?.classList.add('hidden');
         if (nextBtn) { nextBtn.textContent = 'Open dashboard'; nextBtn.disabled = false; }
     } else {
         skipLink?.classList.remove('hidden');
-        if (nextBtn) { nextBtn.textContent = step === 4 ? 'Finish setup' : 'Continue'; nextBtn.disabled = false; }
+        if (nextBtn) { nextBtn.textContent = step === total - 1 ? 'Finish setup' : 'Continue'; nextBtn.disabled = false; }
     }
 }
 
 function obBack() { if (obCurrentStep > 1) obGoToStep(obCurrentStep - 1); }
 
 async function obNext() {
-    if (obCurrentStep === 5) { hideOnboarding(); return; }
+    if (obCurrentStep === OB_TOTAL_STEPS) { hideOnboarding(); return; }
     if (obCurrentStep === 1) {
         const nameEl = document.getElementById('ob-biz-name');
         if (!nameEl || !nameEl.value.trim()) { nameEl?.focus(); return; }
@@ -10245,7 +10334,16 @@ async function obNext() {
         obServices = obServices.filter(s => s.name.trim());
         if (!obServices.length) { obServices = [{ name: '', duration: 30 }]; obRenderServices(); return; }
     }
-    if (obCurrentStep === 4) { await obComplete(false); return; }
+    if (obCurrentStep === 4) {
+        obStaff = obStaff.filter(s => s.name.trim());
+        if (!obStaff.length) obStaff = [{ name: '', role: '' }];
+    }
+    if (obCurrentStep === 5) {
+        obSelectedChannels = Array.from(document.querySelectorAll('input[name="ob-channel-check"]:checked')).map(i => i.value);
+        if (!obSelectedChannels.length) obSelectedChannels = ['telegram'];
+        await obComplete(false);
+        return;
+    }
     obGoToStep(obCurrentStep + 1);
 }
 
@@ -10256,15 +10354,22 @@ async function obComplete(skipData) {
     const skipLink = document.getElementById('ob-skip-link');
     if (nextBtn) { nextBtn.disabled = true; nextBtn.textContent = 'Saving…'; }
     if (skipLink) skipLink.classList.add('invisible');
+    let hasWebsite = false;
     try {
         if (getAuthToken() && isBackendServed()) {
             const payload = {};
             if (!skipData) {
                 payload.business_name = document.getElementById('ob-biz-name')?.value?.trim() || '';
+                payload.business_type = document.getElementById('ob-biz-type')?.value?.trim() || '';
+                payload.website = document.getElementById('ob-website')?.value?.trim() || '';
+                payload.country = document.getElementById('ob-country')?.value || obDetectedCountry || '';
                 payload.work_start = document.getElementById('ob-work-start')?.value || '09:00';
                 payload.work_end = document.getElementById('ob-work-end')?.value || '18:00';
                 payload.slot_interval = obSelectedSlot;
                 payload.services = obServices.filter(s => s.name.trim()).map(s => ({ name: s.name.trim(), duration: s.duration }));
+                payload.staff = obStaff.filter(s => s.name.trim()).map(s => ({ name: s.name.trim(), role: (s.role || '').trim() }));
+                payload.channels = (obSelectedChannels && obSelectedChannels.length) ? obSelectedChannels : ['telegram'];
+                hasWebsite = !!payload.website;
             }
             const res = await kaleyaApi('/api/auth/onboarding/complete/', { method: 'POST', body: JSON.stringify(payload) });
             if (res.ok) {
@@ -10278,7 +10383,8 @@ async function obComplete(skipData) {
     } catch (e) { console.warn('Onboarding API failed (non-fatal):', e); }
     localStorage.setItem('kaleya_onboarded', '1');
     if (skipLink) skipLink.classList.remove('invisible');
-    obGoToStep(5);
+    document.getElementById('ob-website-note')?.classList.toggle('hidden', !hasWebsite);
+    obGoToStep(OB_TOTAL_STEPS);
 }
 
 // ===== INIT =====
@@ -10340,7 +10446,7 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             <div id="ob-progress-bar" class="h-full bg-violet-500 transition-all duration-500 ease-out" style="width:20%"></div>
         </div>
         <div class="px-7 pt-7 pb-5">
-            <p id="ob-step-label" class="text-[11px] font-bold tracking-widest text-violet-500 uppercase mb-1.5">Step 1 of 5</p>
+            <p id="ob-step-label" class="text-[11px] font-bold tracking-widest text-violet-500 uppercase mb-1.5">Step 1 of 6</p>
             <!-- Step 1: Business info -->
             <div id="ob-s1">
                 <h2 class="text-[22px] font-bold text-slate-900 dark:text-white mb-1">Welcome to Kaleya 👋</h2>
@@ -10350,7 +10456,13 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
                     class="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition mb-4">
                 <label class="block text-[13px] font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Business type <span class="font-normal text-slate-400">(optional)</span></label>
                 <input id="ob-biz-type" type="text" placeholder="e.g. Hair salon, Dental clinic, Spa"
-                    class="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition">
+                    class="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition mb-4">
+                <label class="block text-[13px] font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Website <span class="font-normal text-violet-500">(recommended — Kaleya learns your brand from it)</span></label>
+                <input id="ob-website" type="url" inputmode="url" placeholder="e.g. lunabeauty.com"
+                    class="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm bg-white dark:bg-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-violet-400 focus:border-transparent transition mb-4">
+                <label class="block text-[13px] font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Country</label>
+                <select id="ob-country"
+                    class="w-full border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-3 text-sm bg-white dark:bg-slate-800 dark:text-white outline-none focus:ring-2 focus:ring-violet-400 transition"></select>
             </div>
             <!-- Step 2: Work hours -->
             <div id="ob-s2" class="hidden">
@@ -10376,19 +10488,43 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
                 <div id="ob-services-list" class="space-y-2 mb-3"></div>
                 <button type="button" onclick="obAddService()" class="w-full border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl py-2.5 text-sm text-slate-400 hover:border-violet-400 hover:text-violet-500 dark:hover:border-violet-500 dark:hover:text-violet-400 transition">+ Add service</button>
             </div>
-            <!-- Step 4: Channel -->
+            <!-- Step 4: Staff -->
             <div id="ob-s4" class="hidden">
-                <h2 class="text-[22px] font-bold text-slate-900 dark:text-white mb-1">Connect a channel 💬</h2>
-                <p class="text-slate-500 dark:text-slate-400 text-sm mb-5">Choose how customers will message Kaleya. You can connect more channels later.</p>
+                <h2 class="text-[22px] font-bold text-slate-900 dark:text-white mb-1">Your team 👥</h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mb-4">Add the people who take appointments. Optional — you can edit this anytime.</p>
+                <div id="ob-staff-list" class="space-y-2 mb-3"></div>
+                <button type="button" id="ob-add-staff-btn" onclick="obAddStaff()" class="w-full border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl py-2.5 text-sm text-slate-400 hover:border-violet-400 hover:text-violet-500 dark:hover:border-violet-500 dark:hover:text-violet-400 transition">+ Add team member</button>
+                <p id="ob-staff-limit-note" class="hidden text-[11px] text-slate-400 mt-2">Your plan's staff limit reached — upgrade to add more.</p>
+            </div>
+            <!-- Step 5: Channels -->
+            <div id="ob-s5" class="hidden">
+                <h2 class="text-[22px] font-bold text-slate-900 dark:text-white mb-1">Connect channels 💬</h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mb-5">Pick where customers reach Kaleya. You can change this anytime in Settings → Integrations.</p>
                 <div class="space-y-3">
                     <label class="flex items-center gap-4 p-4 rounded-2xl border-2 border-violet-400 bg-violet-50 dark:bg-violet-950/30 cursor-pointer">
-                        <input type="radio" name="ob-channel" value="telegram" class="accent-violet-500" checked>
+                        <input type="checkbox" name="ob-channel-check" value="telegram" class="accent-violet-500" checked>
                         <div class="w-10 h-10 rounded-xl bg-[#2aabee] flex items-center justify-center shrink-0">
                             <svg class="w-[18px] h-[18px] fill-white" viewBox="0 0 24 24"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.869 4.326-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.833.941z"/></svg>
                         </div>
                         <div class="min-w-0">
                             <p class="font-semibold text-sm text-slate-900 dark:text-white">Telegram</p>
-                            <p class="text-[11px] text-slate-400">Connect your Telegram bot token in Settings → Integrations</p>
+                            <p class="text-[11px] text-slate-400">Free channel — connect your bot token in Settings</p>
+                        </div>
+                    </label>
+                    <label class="ob-chan-voice flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 cursor-pointer">
+                        <input type="checkbox" name="ob-channel-check" value="voice" class="accent-violet-500">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center shrink-0 text-lg">📞</div>
+                        <div class="min-w-0">
+                            <p class="font-semibold text-sm text-slate-900 dark:text-white">AI voice calls <span class="text-[10px] text-slate-400">(US/CA · Pro)</span></p>
+                            <p class="text-[11px] text-slate-400">Kaleya answers your phone</p>
+                        </div>
+                    </label>
+                    <label class="ob-chan-sms flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 cursor-pointer">
+                        <input type="checkbox" name="ob-channel-check" value="sms" class="accent-violet-500">
+                        <div class="w-10 h-10 rounded-xl bg-sky-500 flex items-center justify-center shrink-0 text-lg">💬</div>
+                        <div class="min-w-0">
+                            <p class="font-semibold text-sm text-slate-900 dark:text-white">SMS <span class="text-[10px] text-slate-400">(US/CA · Pro)</span></p>
+                            <p class="text-[11px] text-slate-400">Text-message booking</p>
                         </div>
                     </label>
                     <div class="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 opacity-50 cursor-not-allowed select-none">
@@ -10400,13 +10536,22 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
                             <p class="text-[11px] text-slate-400">WhatsApp Business API</p>
                         </div>
                     </div>
+                    <div class="flex items-center gap-4 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 opacity-50 cursor-not-allowed select-none">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#feda75] via-[#d62976] to-[#4f5bd5] flex items-center justify-center shrink-0 text-lg">📷</div>
+                        <div>
+                            <p class="font-semibold text-sm text-slate-900 dark:text-white">Instagram &amp; TikTok DM <span class="ml-1.5 text-[10px] font-bold bg-slate-200 dark:bg-slate-700 rounded-full px-2 py-0.5">Soon</span></p>
+                            <p class="text-[11px] text-slate-400">Auto-reply to direct messages</p>
+                        </div>
+                    </div>
                 </div>
+                <p id="ob-balkan-note" class="hidden mt-3 text-[12px] text-amber-500 bg-amber-50 dark:bg-amber-950/30 rounded-xl px-3 py-2">Voice &amp; SMS aren't available in your region yet — Telegram works now, with more channels coming soon.</p>
             </div>
-            <!-- Step 5: Done -->
-            <div id="ob-s5" class="hidden text-center py-6">
+            <!-- Step 6: Done -->
+            <div id="ob-s6" class="hidden text-center py-6">
                 <div class="text-5xl mb-4">🎉</div>
                 <h2 class="text-[22px] font-bold text-slate-900 dark:text-white mb-2">You're all set!</h2>
                 <p class="text-slate-500 dark:text-slate-400 text-sm mb-1">Your AI receptionist is configured and ready.</p>
+                <p id="ob-website-note" class="hidden text-violet-500 text-sm mb-1">🧠 Kaleya is reading your website to learn your brand — give it a minute.</p>
                 <p class="text-slate-500 dark:text-slate-400 text-sm">Go to <strong class="text-slate-700 dark:text-slate-200">Settings → Integrations</strong> to connect your first channel.</p>
             </div>
         </div>

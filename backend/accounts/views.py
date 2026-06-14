@@ -1,3 +1,4 @@
+import logging
 import os
 
 from django.contrib.auth import login as django_login, logout as django_logout
@@ -15,6 +16,30 @@ from accounts.serializers import ClientRegistrationSerializer, LoginSerializer, 
 from accounts.throttles import AuthRateThrottle
 from clients.serializers import BusinessClientSerializer
 from clients.utils import client_for_request
+
+logger = logging.getLogger(__name__)
+
+# Markets where Kaleya does not yet offer voice/SMS (no local number provisioning).
+BALKAN_COUNTRIES = {"RS", "HR", "BA", "ME", "SI", "MK"}
+
+
+def _spawn_master_prompt_generation(client_id, website):
+    """Generate the per-tenant master_prompt from their website off the request
+    thread so onboarding 'Finish' returns immediately (the website fetch +
+    Claude call can take many seconds)."""
+    import threading
+
+    def _run():
+        try:
+            from clients.models import BusinessClient
+            from ai_agent.auto_master_prompt import generate_master_prompt_from_website
+            client = BusinessClient.objects.filter(id=client_id).first()
+            if client:
+                generate_master_prompt_from_website(client, website)
+        except Exception:
+            logger.exception("Background master_prompt generation failed for client %s", client_id)
+
+    threading.Thread(target=_run, daemon=True).start()
 
 
 class LoginAPIView(APIView):
@@ -87,16 +112,28 @@ class OnboardingCompleteAPIView(APIView):
         if not client:
             return Response({"detail": "Business client not found."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Update business name / work hours / slot interval
+        # ── Business basics ──────────────────────────────────────────────
         business_name = (request.data.get("business_name") or "").strip()
+        business_type = (request.data.get("business_type") or "").strip()
+        website = (request.data.get("website") or "").strip()
+        country = (request.data.get("country") or "").strip().upper()[:2]
         work_start = (request.data.get("work_start") or "").strip()
         work_end = (request.data.get("work_end") or "").strip()
         slot_interval = request.data.get("slot_interval")
         services_data = request.data.get("services") or []
+        staff_data = request.data.get("staff") or []
+        channels = request.data.get("channels") or []
+        if isinstance(channels, str):
+            channels = [channels]
+        channels = {str(c).strip().lower() for c in channels}
 
         if business_name:
             client.name = business_name
             client.public_name = business_name
+        client.business_type = business_type
+        client.website = website
+        if country:
+            client.country = country
 
         if work_start:
             client.work_start = work_start
@@ -105,9 +142,27 @@ class OnboardingCompleteAPIView(APIView):
         if slot_interval and int(slot_interval) in (15, 20, 30, 45, 60):
             client.slot_interval_minutes = int(slot_interval)
 
-        client.save(update_fields=["name", "public_name", "work_start", "work_end", "slot_interval_minutes", "updated_at"])
+        # ── Channels (+ Balkan gating) ───────────────────────────────────
+        # Voice + SMS are not offered to Balkan-based tenants yet (no local
+        # number provisioning) — force them off no matter what was sent.
+        is_balkan = client.country in BALKAN_COUNTRIES
+        if channels:
+            client.allow_telegram = "telegram" in channels
+            client.allow_whatsapp = "whatsapp" in channels
+            client.allow_phone_calls = "voice" in channels
+            client.allow_sms = "sms" in channels
+        if is_balkan:
+            client.allow_phone_calls = False
+            client.allow_sms = False
 
-        # Create services (skip duplicates)
+        client.save(update_fields=[
+            "name", "public_name", "business_type", "website", "country",
+            "work_start", "work_end", "slot_interval_minutes",
+            "allow_telegram", "allow_whatsapp", "allow_phone_calls", "allow_sms",
+            "updated_at",
+        ])
+
+        # ── Services (skip duplicates) ───────────────────────────────────
         if services_data:
             from staff_services.models import Service
             for svc in services_data:
@@ -119,6 +174,23 @@ class OnboardingCompleteAPIView(APIView):
                         name=svc_name,
                         defaults={"duration_minutes": int(svc_duration), "is_active": True},
                     )
+
+        # ── Staff (skip duplicates by name) ──────────────────────────────
+        if staff_data:
+            from staff_services.models import StaffMember
+            for member in staff_data:
+                member_name = (member.get("name") or "").strip()
+                member_role = (member.get("role") or "").strip()
+                if member_name:
+                    StaffMember.objects.get_or_create(
+                        business_client=client,
+                        full_name=member_name,
+                        defaults={"role_title": member_role, "is_active": True},
+                    )
+
+        # ── Auto-generate Kaleya persona from the website (background) ────
+        if website:
+            _spawn_master_prompt_generation(client.id, website)
 
         # Mark profile as onboarded
         profile.is_onboarded = True

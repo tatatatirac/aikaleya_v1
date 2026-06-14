@@ -78,6 +78,9 @@ class BusinessClient(models.Model):
     allow_telegram = models.BooleanField(default=True)
     business_phone = models.CharField(max_length=40, blank=True, default="")
     business_email = models.EmailField(blank=True, default="")
+    website = models.URLField(blank=True, default="")
+    business_type = models.CharField(max_length=120, blank=True, default="")
+    country = models.CharField(max_length=2, blank=True, default="")  # ISO-3166 alpha-2, e.g. "US", "RS"
     logo_image = models.FileField(upload_to=client_logo_upload_path, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
