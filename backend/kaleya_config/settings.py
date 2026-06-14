@@ -290,12 +290,25 @@ if SENTRY_DSN and not DEBUG:
         import sentry_sdk
         from sentry_sdk.integrations.django import DjangoIntegration
 
+        def _sentry_before_send(event, hint):
+            # Drop internet background-noise exceptions: bot scanners send bogus
+            # Host headers and probe paths, which would otherwise flood Sentry's
+            # quota and bury real errors. DisallowedHost is a SuspiciousOperation.
+            exc_info = hint.get("exc_info")
+            if exc_info:
+                from django.core.exceptions import SuspiciousOperation
+                from django.http import Http404
+                if isinstance(exc_info[1], (SuspiciousOperation, Http404)):
+                    return None
+            return event
+
         sentry_sdk.init(
             dsn=SENTRY_DSN,
             integrations=[DjangoIntegration()],
             traces_sample_rate=0.1,
             send_default_pii=False,
             environment=DJANGO_ENV,
+            before_send=_sentry_before_send,
         )
     except ImportError:
         pass
