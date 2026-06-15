@@ -288,7 +288,15 @@ def agent_conversation_reply(
         )
 
     caller_name = (payload.get("customer_name") or "").strip()
-    msg_language = detect_message_language(text, language_fallback)
+    # Detect language from THIS message; if it's too short/ambiguous to tell,
+    # keep the language we were already speaking (so 'yes'/'ok' stay in English
+    # after an English sentence) and only fall back to the salon default at the start.
+    prev_language = (conversation.metadata or {}).get("reply_language") if conversation else ""
+    detected_language = detect_message_language(text, "")
+    msg_language = detected_language or prev_language or language_fallback
+    if conversation and msg_language and msg_language != prev_language:
+        conversation.metadata = {**(conversation.metadata or {}), "reply_language": msg_language}
+        conversation.save(update_fields=["metadata", "updated_at"])
     system_prompt = _build_system_prompt(
         business_client, channel, customer, caller_name, reply_language=msg_language
     )
