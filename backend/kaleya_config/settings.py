@@ -171,6 +171,10 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = [origin.strip() for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if origin.strip()]
 CORS_ALLOW_ALL_ORIGINS = DEBUG and not CORS_ALLOWED_ORIGINS
 
+# Conversation engine: "off" = legacy state machine, "on"/"all" = Claude agent for
+# everyone, "client:<id>" = Claude agent only for that tenant (used for safe rollout).
+KALEYA_AGENT_MODE = os.getenv("KALEYA_AGENT_MODE", "off")
+
 KALEYA_AI_PROVIDER = os.getenv("AI_PROVIDER", "anthropic")
 KALEYA_ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 KALEYA_ANTHROPIC_MODEL = os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5-20251001")

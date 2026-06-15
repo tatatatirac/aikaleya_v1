@@ -2577,6 +2577,20 @@ def _legacy_build_system_prompt_unused(business_client, channel="web", caller_ph
     return prompt
 
 
+def _agent_mode_enabled(business_client):
+    from django.conf import settings as dj_settings
+
+    mode = (getattr(dj_settings, "KALEYA_AGENT_MODE", "off") or "off").strip().lower()
+    if mode in {"on", "all", "true", "1", "yes"}:
+        return True
+    if mode.startswith("client:"):
+        try:
+            return business_client and business_client.id == int(mode.split(":", 1)[1])
+        except (ValueError, AttributeError):
+            return False
+    return False
+
+
 def handle_inbound_text(
     business_client,
     text,
@@ -2591,6 +2605,21 @@ def handle_inbound_text(
     actor=None,
     is_test=False,
 ):
+    if use_ai and not is_test and not getattr(business_client, "is_demo", False) and _agent_mode_enabled(business_client):
+        try:
+            from ai_agent.agent import agent_conversation_reply
+            return agent_conversation_reply(
+                business_client,
+                text,
+                channel=channel,
+                payload=payload,
+                external_thread_id=external_thread_id,
+                record_messages=record_messages,
+                customer=customer,
+            )
+        except Exception:
+            # Any agent failure falls through to the legacy engine below.
+            pass
     incoming_payload = dict(payload or {})
     payload = incoming_payload
     if not customer:
