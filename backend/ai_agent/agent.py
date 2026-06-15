@@ -181,7 +181,14 @@ def _customer_context(business_client, customer):
     return " ".join(bits)
 
 
-def _build_system_prompt(business_client, channel, customer, caller_name):
+_LANGUAGE_NAMES = {
+    "en": "English", "en-gb": "English", "sr": "Serbian (Latin script)",
+    "es": "Spanish", "pt": "Portuguese", "ru": "Russian", "fr": "French",
+    "it": "Italian", "de": "German",
+}
+
+
+def _build_system_prompt(business_client, channel, customer, caller_name, reply_language="en"):
     base = build_real_master_prompt(
         business_client, channel=channel, caller_phone="", caller_name=caller_name or ""
     )
@@ -212,7 +219,13 @@ def _build_system_prompt(business_client, channel, customer, caller_name):
         "- Vary your wording every turn; never repeat the same sentence twice in a row. Sound like a real person, not a script.\n"
         f"\n# This customer\n- {_customer_context(business_client, customer)}\n"
     )
-    return base + tool_rules
+    lang_name = _LANGUAGE_NAMES.get((reply_language or "en").lower(), "the customer's language")
+    final_authority = (
+        "\n# LANGUAGE — FINAL AUTHORITY (overrides every line above, including the salon default)\n"
+        f"- The customer's current message is in {lang_name}. Reply ONLY in {lang_name}.\n"
+        "- If the customer switches language at any point, switch with them immediately.\n"
+    )
+    return base + tool_rules + final_authority
 
 
 def _history_messages(conversation):
@@ -275,7 +288,10 @@ def agent_conversation_reply(
         )
 
     caller_name = (payload.get("customer_name") or "").strip()
-    system_prompt = _build_system_prompt(business_client, channel, customer, caller_name)
+    msg_language = detect_message_language(text, language_fallback)
+    system_prompt = _build_system_prompt(
+        business_client, channel, customer, caller_name, reply_language=msg_language
+    )
     config = get_client_ai_config(business_client)
     if config["provider"] != "anthropic" or not config["api_key"]:
         raise ProviderError("Kaleya agent requires an Anthropic API key.")
