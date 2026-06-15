@@ -169,6 +169,15 @@ def _build_system_prompt(business_client, channel, customer, caller_name):
     base = build_real_master_prompt(
         business_client, channel=channel, caller_phone="", caller_name=caller_name or ""
     )
+    salon_name = (business_client.public_name or business_client.name or "the salon").strip()
+    known_name = (caller_name or "").strip()
+    if known_name.lower() in {"", "phone caller", "unknown", "customer", "musterija"}:
+        known_name = ""
+    name_rule = (
+        f"- You ALREADY know this customer's name: {known_name}. Use it naturally and NEVER ask for their name; book directly.\n"
+        if known_name
+        else "- If you need a name to book and don't have one, ask once for just the first name.\n"
+    )
     tool_rules = (
         "\n# Tool use (how you act)\n"
         "- You drive the whole conversation. Decide the next step yourself; never read from a fixed script.\n"
@@ -178,8 +187,12 @@ def _build_system_prompt(business_client, channel, customer, caller_name):
         "- Understand misspellings, slang, and Latin written without diacritics (z=ž, c=č/ć, s=š, dj=đ). Do not ask the customer to repeat.\n"
         "- Detect the language the customer writes in and reply in that same language.\n"
         "- When a slot is free and the customer agrees ('da', 'moze', 'ok', 'yes', 'moze moze'), call book_appointment right away — do not ask again.\n"
-        "- After booking, confirm naturally and tell them you'll send a reminder one hour before. Do not use words like 'odlicno', 'super', 'perfektno'.\n"
-        "- Vary your wording every turn; never send the same sentence twice in a row. Sound like a real receptionist having a normal day.\n"
+        f"{name_rule}"
+        "\n# Style (MUST follow — these override anything above)\n"
+        f"- Serbian: ALWAYS use formal address (persiranje / 'Vi'), never 'ti'. First greeting form: \"Dobar dan, {salon_name}, izvolite.\" (vary the time-of-day word). NEVER add 'kako mogu da pomognem' / 'how can I help'.\n"
+        "- BANNED words (never use): odlično, odličan, super, perfektno, sjajno, bravo, excellent, perfect, great, awesome. Acknowledge only with 'U redu' / 'Ok' / 'Važi'.\n"
+        "- After a successful booking: confirm the day, date and natural hour, then say you'll send a reminder one hour before. Example: \"U redu, zakazala sam Vas za ponedeljak 16. u 3. Poslaću podsetnik sat ranije.\"\n"
+        "- Vary your wording every turn; never repeat the same sentence twice in a row. Sound like a real person, not a script.\n"
         f"\n# This customer\n- {_customer_context(business_client, customer)}\n"
     )
     return base + tool_rules
@@ -264,7 +277,7 @@ def agent_conversation_reply(
         body = {
             "model": config["model"],
             "max_tokens": 600,
-            "temperature": 0.7,
+            "temperature": 0.5,
             "system": system_prompt,
             "tools": TOOL_SCHEMAS,
             "messages": messages,
