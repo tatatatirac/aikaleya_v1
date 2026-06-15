@@ -115,6 +115,17 @@ def _strip_banned_lead(text):
     return cleaned or original
 
 
+def _clean_customer_name(raw):
+    """Telegram sends names like 'Bane Kostic (@user)'. Strip the @handle and
+    drop username-only / placeholder values so we only treat a real name as known."""
+    name = (raw or "").strip()
+    name = re.sub(r"\s*\(@[^)]+\)\s*$", "", name).strip()
+    low = name.lower()
+    if not name or name.startswith("@") or low in {"telegram korisnik", "telegram user", "telegram"}:
+        return ""
+    return name
+
+
 def _post_json(url, payload, headers, timeout=45):
     data = json.dumps(payload).encode("utf-8")
     req = request.Request(url, data=data, headers=headers, method="POST")
@@ -315,7 +326,11 @@ def agent_conversation_reply(
             raw_payload={"channel": channel, "external_thread_id": external_thread_id},
         )
 
-    caller_name = (payload.get("customer_name") or "").strip()
+    caller_name = _clean_customer_name(payload.get("customer_name"))
+    if caller_name:
+        payload["customer_name"] = caller_name  # so booking attaches the clean name
+    else:
+        payload.pop("customer_name", None)
     # Detect language from THIS message; if it's too short/ambiguous to tell,
     # keep the language we were already speaking (so 'yes'/'ok' stay in English
     # after an English sentence) and only fall back to the salon default at the start.
