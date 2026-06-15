@@ -263,7 +263,7 @@ def _build_system_prompt(business_client, channel, customer, caller_name, reply_
     )
     lang_name = _LANGUAGE_NAMES.get((reply_language or "en").lower(), "the customer's language")
     name_line = (
-        f"- You ALREADY know the customer's name: {known_name}. NEVER ask for their name. As soon as a time is agreed, call book_appointment immediately.\n"
+        f"- The customer's name is {known_name} — you ALREADY have it. Asking 'kako se zovete' / 'your name' is STRICTLY FORBIDDEN. The moment a free time is on the table and the customer wants it, call book_appointment with name='{known_name}' immediately and confirm — never send a message asking for the name.\n"
         if known_name
         else ""
     )
