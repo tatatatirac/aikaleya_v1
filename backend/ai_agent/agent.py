@@ -230,10 +230,17 @@ def _build_system_prompt(business_client, channel, customer, caller_name, reply_
         f"\n# This customer\n- {_customer_context(business_client, customer)}\n"
     )
     lang_name = _LANGUAGE_NAMES.get((reply_language or "en").lower(), "the customer's language")
+    name_line = (
+        f"- You ALREADY know the customer's name: {known_name}. NEVER ask for their name. As soon as a time is agreed, call book_appointment immediately.\n"
+        if known_name
+        else ""
+    )
     final_authority = (
-        "\n# LANGUAGE — FINAL AUTHORITY (overrides every line above, including the salon default)\n"
-        f"- The customer's current message is in {lang_name}. Reply ONLY in {lang_name}.\n"
-        "- If the customer switches language at any point, switch with them immediately.\n"
+        "\n# FINAL AUTHORITY (overrides every line above, including the salon default)\n"
+        f"- The customer's current message is in {lang_name}. Reply ONLY in {lang_name}. If they switch language, switch with them.\n"
+        "- Serbian: ALWAYS address the customer formally — Vi, Vam, Vas, 'kako se zovete', 'izvolite' — and NEVER informally (no 'ti', 'zoveš', 'čekaj', 'dođi').\n"
+        f"{name_line}"
+        "- If the customer says bye / see you / ćao / vidimo se / hvala, reply with a short goodbye and stop pushing for a booking.\n"
     )
     return base + tool_rules + final_authority
 
