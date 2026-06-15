@@ -236,6 +236,7 @@ def _build_system_prompt(business_client, channel, customer, caller_name, reply_
         "- Resolve dates and times yourself before calling tools: pass date as YYYY-MM-DD and time as 24h HH:MM.\n"
         "  '3pm' = '3:00pm' = '15h' = '15:00' = 'tri popodne' → 15:00. 'popodne' alone = afternoon; offer an afternoon slot.\n"
         "  A BARE NUMBER is a time: '4' / '4h' / 'u 4' → that hour. Infer am/pm from context and working hours — if they were talking about the afternoon, '4' = 16:00; a number that only fits the afternoon within work hours is pm. Never re-ask 'what time' when they already gave a number.\n"
+        "  Serbian colloquial times: 'pola 5' / 'pola pet' / 'u pola 5' = 16:30 (HALF BEFORE five) — i.e. 'pola X' = (X-1):30, so 'pola 4' = 15:30, 'pola 10' = 09:30. '4 i po' = 16:30. 'petnaest do 5' = 16:45; 'petnaest po 5' / 'pet i petnaest' = 17:15; 'i po' = :30. '5 popodne' = 17:00, '5 ujutru' = 05:00. Convert these to 24h HH:MM yourself before calling tools; never tell the customer you don't understand a time.\n"
         "- Understand misspellings, slang, and Latin written without diacritics (z=ž, c=č/ć, s=š, dj=đ). Do not ask the customer to repeat.\n"
         "- Detect the language the customer writes in and reply in that same language.\n"
         "- Treat ALL of these (and the like) as YES/confirmation: da, da da, da moze, moze, moze moze, ok, vazi, aha, naravno, bilo koje, yes, sure. When the customer confirms a free time, call book_appointment immediately — never ask again, and NEVER reply 'možete li ponoviti' / 'can you repeat'. If something is unclear, make the most reasonable assumption and move on.\n"
@@ -445,10 +446,11 @@ def agent_conversation_reply(
             reply_text = reply2
 
     if not reply_text:
+        fallback_lang = msg_language or language_fallback
         reply_text = (
-            "tu sam, recite mi dan i vreme pa da zakažem"
-            if (msg_language or "").startswith("sr")
-            else "i'm here — just tell me a day and time and i'll book it"
+            "i'm here — just tell me a day and time and i'll book it"
+            if (fallback_lang or "").startswith("en")
+            else "tu sam, recite mi dan i vreme pa da zakažem"
         )
     reply_text = _strip_banned_lead(reply_text)
 
