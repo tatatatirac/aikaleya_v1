@@ -101,12 +101,14 @@ _BANNED_LEAD = re.compile(
 
 
 def _strip_banned_lead(text):
-    """Safety net: drop a leading filler-praise word if the model slips one in."""
-    cleaned = _BANNED_LEAD.sub("", text or "", count=1)
-    cleaned = cleaned.strip()
-    if cleaned and cleaned[0].islower() and (text or "")[:1].isupper():
+    """Safety net: drop a leading filler-praise word and any dangling leading
+    punctuation if the model slips one in."""
+    original = text or ""
+    cleaned = _BANNED_LEAD.sub("", original, count=1).strip()
+    cleaned = re.sub(r"^[—–\-•·,;:\s]+", "", cleaned).strip()
+    if cleaned and cleaned[0].islower() and original[:1].isupper():
         cleaned = cleaned[0].upper() + cleaned[1:]
-    return cleaned or text
+    return cleaned or original
 
 
 def _post_json(url, payload, headers, timeout=45):
