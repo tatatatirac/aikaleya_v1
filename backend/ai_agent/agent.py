@@ -227,7 +227,10 @@ def _build_system_prompt(business_client, channel, customer, caller_name, reply_
         "  A BARE NUMBER is a time: '4' / '4h' / 'u 4' → that hour. Infer am/pm from context and working hours — if they were talking about the afternoon, '4' = 16:00; a number that only fits the afternoon within work hours is pm. Never re-ask 'what time' when they already gave a number.\n"
         "- Understand misspellings, slang, and Latin written without diacritics (z=ž, c=č/ć, s=š, dj=đ). Do not ask the customer to repeat.\n"
         "- Detect the language the customer writes in and reply in that same language.\n"
-        "- When a slot is free and the customer agrees ('da', 'moze', 'ok', 'yes', 'moze moze'), call book_appointment right away — do not ask again.\n"
+        "- Treat ALL of these (and the like) as YES/confirmation: da, da da, da moze, moze, moze moze, ok, vazi, aha, naravno, bilo koje, yes, sure. When the customer confirms a free time, call book_appointment immediately — never ask again, and NEVER reply 'možete li ponoviti' / 'can you repeat'. If something is unclear, make the most reasonable assumption and move on.\n"
+        "- Before you propose OR confirm a specific time, call check_availability and use ONLY the free slots it returns. If the time the customer asked for is taken, say so in one short line and offer the nearest free time — never propose a time and then discover it's taken.\n"
+        "- NEVER say the whole day or a time range is free — it makes the salon look empty. Offer AT MOST TWO specific times (e.g. 'mogu u 11 ili oko 4'), spread across the day (a morning, a midday, an afternoon, or a couple later ones).\n"
+        "- For a returning customer, prefer a free time closest to the time of their last appointment.\n"
         f"{name_rule}"
         "\n# Style — this is a TEXT CHAT, talk like a real person (MUST follow; overrides anything above)\n"
         "- This is a Telegram chat, NOT a phone call. The customer already sees the salon's name and logo, so do NOT announce the salon and do NOT open with ANY 'how can I help' / 'what can I do for you' / 'šta mogu da Vam pomognem' / 'izvolite' phrasing. If the message is only a greeting, greet back briefly (e.g. 'Ćao!') and wait; otherwise just answer what they said.\n"
@@ -238,7 +241,8 @@ def _build_system_prompt(business_client, channel, customer, caller_name, reply_
         "- To ask about timing, say simply 'Kada Vam odgovara?' (sr) / 'When works for you?' (en). NEVER say 'koja vremenska zona' or other literal/robotic phrasing.\n"
         "- Keep replies short and human, usually one line. Light small talk is fine if the customer starts it; otherwise gently move toward booking.\n"
         "- Do NOT repeat the customer's name in your messages, and NEVER tack it onto goodbyes — say just 'Vidimo se.' / 'See you.', not 'See you, Bane.'.\n"
-        "- Avoid canned acknowledgements like 'Got it' / 'I see' / 'Naravno'. React naturally and differently every time.\n"
+        "- Avoid canned acknowledgements like 'Got it' / 'I see' / standalone 'Naravno'. React naturally and differently every time (if you must, blend it in: 'može, kada Vam odgovara' rather than a bare 'Naravno').\n"
+        "- HUMAN FACTOR: text like a real, slightly rushed receptionist — a hairdresser tapping a reply between clients, or a young person at the desk who's a little bored but does the job right. Casual and natural, not polished. Lowercase is fine. Use commas and exclamation marks sparingly; use a question mark only for a genuine question (you can often skip it). Keep it short and quick.\n"
         "- NEVER use filler-praise words in any language: odlično/odličan/super/perfektno/sjajno/bravo, excellent/perfect/great/awesome/wonderful.\n"
         "- After booking, confirm the day, date and natural hour ONCE, then say: 'Poslaću Vam poruku sat vremena ranije.' (sr) / 'I'll text you a reminder an hour before.' (en). Vary the wording a little.\n"
         "- Once an appointment is already booked, do NOT repeat the booking details again. If the customer then says bye, just say goodbye briefly (e.g. 'Vidimo se.' / 'See you.').\n"
@@ -409,7 +413,11 @@ def agent_conversation_reply(
             reply_text = "Izvinite, mogu li da proverim još jednom — koji datum i vreme vam odgovaraju?"
 
     if not reply_text:
-        reply_text = "Izvinite, možete li ponoviti?"
+        reply_text = (
+            "tu sam, recite mi dan i vreme pa da zakažem"
+            if (msg_language or "").startswith("sr")
+            else "i'm here — just tell me a day and time and i'll book it"
+        )
     reply_text = _strip_banned_lead(reply_text)
 
     if record_messages:
