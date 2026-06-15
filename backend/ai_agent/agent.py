@@ -15,6 +15,7 @@ global flag so the legacy engine stays available as a fallback.
 """
 
 import json
+import re
 from urllib import error, request
 
 from django.conf import settings
@@ -91,6 +92,21 @@ TOOL_SCHEMAS = [
         },
     },
 ]
+
+
+_BANNED_LEAD = re.compile(
+    r"^\s*(odli[cč]no|odli[cč]an|super|perfektno|sjajno|bravo|excellent|perfect|great|awesome|wonderful|fantastic)\b[\s,!.:-]*",
+    re.IGNORECASE,
+)
+
+
+def _strip_banned_lead(text):
+    """Safety net: drop a leading filler-praise word if the model slips one in."""
+    cleaned = _BANNED_LEAD.sub("", text or "", count=1)
+    cleaned = cleaned.strip()
+    if cleaned and cleaned[0].islower() and (text or "")[:1].isupper():
+        cleaned = cleaned[0].upper() + cleaned[1:]
+    return cleaned or text
 
 
 def _post_json(url, payload, headers, timeout=45):
@@ -188,9 +204,10 @@ def _build_system_prompt(business_client, channel, customer, caller_name):
         "- Detect the language the customer writes in and reply in that same language.\n"
         "- When a slot is free and the customer agrees ('da', 'moze', 'ok', 'yes', 'moze moze'), call book_appointment right away — do not ask again.\n"
         f"{name_rule}"
-        "\n# Style (MUST follow — these override anything above)\n"
-        f"- Serbian: ALWAYS use formal address (persiranje / 'Vi'), never 'ti'. First greeting form: \"Dobar dan, {salon_name}, izvolite.\" (vary the time-of-day word). NEVER add 'kako mogu da pomognem' / 'how can I help'.\n"
-        "- BANNED words (never use): odlično, odličan, super, perfektno, sjajno, bravo, excellent, perfect, great, awesome. Acknowledge only with 'U redu' / 'Ok' / 'Važi'.\n"
+        "\n# Style (MUST follow — these override anything above, including the salon's default language)\n"
+        "- LANGUAGE: reply in the SAME language as the customer's LATEST message. English in → English out; srpski in → srpski out; etc. The salon default language does NOT decide this — the customer's words do.\n"
+        f"- Serbian only: ALWAYS use formal address (persiranje / 'Vi'), never 'ti'. First greeting form: \"Dobar dan, {salon_name}, izvolite.\" (vary the time-of-day word; 'Dobro jutro' / 'Dobar dan' / 'Dobro veče'). NEVER add 'kako mogu da pomognem'.\n"
+        "- NEVER use filler-praise words in ANY language: odlično/odličan/super/perfektno/sjajno/bravo, excellent/perfect/great/awesome/wonderful. Acknowledge ONLY with 'U redu'/'Ok'/'Važi' (sr) or 'Alright'/'Okay'/'Got it' (en).\n"
         "- After a successful booking: confirm the day, date and natural hour, then say you'll send a reminder one hour before. Example: \"U redu, zakazala sam Vas za ponedeljak 16. u 3. Poslaću podsetnik sat ranije.\"\n"
         "- Vary your wording every turn; never repeat the same sentence twice in a row. Sound like a real person, not a script.\n"
         f"\n# This customer\n- {_customer_context(business_client, customer)}\n"
@@ -324,6 +341,7 @@ def agent_conversation_reply(
 
     if not reply_text:
         reply_text = "Izvinite, možete li ponoviti?"
+    reply_text = _strip_banned_lead(reply_text)
 
     if record_messages:
         write_workflow_message(
