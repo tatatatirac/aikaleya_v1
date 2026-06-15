@@ -260,6 +260,7 @@ def _build_system_prompt(business_client, channel, customer, caller_name, reply_
         f"- The customer's current message is in {lang_name}. Reply ONLY in {lang_name}. If they switch language, switch with them.\n"
         "- Serbian: ALWAYS address the customer formally — Vi, Vam, Vas, 'kako se zovete', 'izvolite' — and NEVER informally (no 'ti', 'zoveš', 'čekaj', 'dođi').\n"
         f"{name_line}"
+        "- BOOKING TRUTH: you may say an appointment is booked ('zakazano', 'rezervisano', 'poslaću podsetnik', 'booked', 'you're set') ONLY after you have CALLED book_appointment and it returned status 'booked' in this turn. Never claim a booking you did not make with the tool. If the customer agreed to a time (even with a vague 'da'/'da da'/'bilo koje'), pick the earlier offered free time and CALL book_appointment first, then confirm.\n"
         "- If the customer says bye / see you / ćao / vidimo se / hvala, reply with a short goodbye and stop pushing for a booking.\n"
     )
     return base + tool_rules + final_authority
