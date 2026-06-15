@@ -204,6 +204,54 @@ def _build_salon_facts(business_client) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _today_block(business_client, language="en") -> str:
+    """Tell Kaleya the current date, weekday, and the salon's closed days so she
+    can resolve 'today'/'tomorrow', know if today is e.g. Sunday, and refuse
+    closed days gracefully."""
+    from datetime import timedelta
+    from django.utils import timezone as dj_tz
+
+    try:
+        from appointments.services import client_timezone
+        now = dj_tz.localtime(dj_tz.now(), client_timezone(business_client))
+    except Exception:
+        now = dj_tz.localtime(dj_tz.now())
+
+    today = now.date()
+    tomorrow = today + timedelta(days=1)
+    weekdays = {
+        "sr": ["ponedeljak", "utorak", "sreda", "četvrtak", "petak", "subota", "nedelja"],
+        "en": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    }
+    names = weekdays.get((language or "en").lower(), weekdays["en"])
+    weekday_name = names[today.weekday()]
+
+    closed_text = ""
+    try:
+        from staff_services.models import WorkingHours
+        closed_idx = sorted(set(
+            WorkingHours.objects.filter(
+                business_client=business_client, staff_member__isnull=True, is_closed=True
+            ).values_list("weekday", flat=True)
+        ))
+        if closed_idx:
+            closed_text = ", ".join(names[i] for i in closed_idx if 0 <= i < 7)
+    except Exception:
+        pass
+
+    lines = [
+        "# Today (use this for every date or day question)",
+        f"- Today is {weekday_name}, {today.isoformat()}. Local time {now.strftime('%H:%M')}.",
+        f"- 'today'/'danas' = {today.isoformat()}; 'tomorrow'/'sutra' = {tomorrow.isoformat()}.",
+    ]
+    if closed_text:
+        lines.append(
+            f"- Closed days: {closed_text}. If the customer asks for a closed day, "
+            "say you're closed that day and offer the first open slot instead."
+        )
+    return "\n".join(lines) + "\n"
+
+
 # ──────────────────────────────────────────────────────────────────────────
 #  PUBLIC ENTRY POINTS
 # ──────────────────────────────────────────────────────────────────────────
@@ -220,6 +268,7 @@ def build_real_master_prompt(business_client, channel="web", caller_phone="", ca
         _channel_block(channel),
         _language_block(language),
         _caller_block(caller_phone, caller_name),
+        _today_block(business_client, language),
         _build_salon_facts(business_client),
         "# Final reminders\n"
         "- One short sentence per thought.\n"
