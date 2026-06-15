@@ -95,6 +95,14 @@ TOOL_SCHEMAS = [
             "required": ["date", "time"],
         },
     },
+    {
+        "name": "list_my_appointments",
+        "description": (
+            "List THIS customer's own upcoming (not cancelled) appointments. Use it to answer "
+            "'what do I have booked', 'imam li termin', and before making a new booking to avoid duplicates."
+        ),
+        "input_schema": {"type": "object", "properties": {}},
+    },
 ]
 
 
@@ -183,6 +191,28 @@ def _run_tool(business_client, name, tool_input, customer, channel, base_payload
         return agent_tools.reschedule_appointment_tool(
             business_client, text="", customer=customer, channel=channel, payload=payload
         )
+    if name == "list_my_appointments":
+        if not customer:
+            return {"appointments": [], "note": "Customer not identified yet."}
+        from appointments.models import Appointment
+        today = agent_tools.client_local_today(business_client)
+        rows = (
+            Appointment.objects.filter(business_client=business_client, customer=customer, date__gte=today)
+            .exclude(status="cancelled")
+            .select_related("service")
+            .order_by("date", "start_time")[:20]
+        )
+        return {
+            "appointments": [
+                {
+                    "date": a.date.isoformat(),
+                    "time": a.start_time.strftime("%H:%M"),
+                    "service": a.service.name if a.service else "",
+                    "status": a.status,
+                }
+                for a in rows
+            ]
+        }
     return {"status": "unknown_tool", "tool": name}
 
 
@@ -243,7 +273,8 @@ def _build_system_prompt(business_client, channel, customer, caller_name, reply_
         "- Before you propose OR confirm a specific time, call check_availability and use ONLY the free slots it returns. If the time the customer asked for is taken, say so in one short line and offer the nearest free time — never propose a time and then discover it's taken.\n"
         "- NEVER say the whole day or a time range is free — it makes the salon look empty. Offer AT MOST TWO specific times (e.g. 'mogu u 11 ili oko 4'), spread across the day (a morning, a midday, an afternoon, or a couple later ones).\n"
         "- For a returning customer, prefer a free time closest to the time of their last appointment.\n"
-        "- 'ćao' is BOTH hello and bye in Serbian — decide by position: at the START of the chat (no earlier turns) it means HELLO, so greet back; at the END (after you've helped) it means goodbye. If the customer OPENS the chat with 'doviđenja' / 'vidimo se' / 'prijatno', treat it as a slip or small talk — answer lightly like 'Dobar dan! Jeste li hteli da zakažete termin?', do NOT say goodbye.\n"
+        "- 'ćao' is BOTH hello and bye in Serbian. DEFAULT to HELLO — greet back ('Ćao!'). Treat it as goodbye ONLY when the customer is clearly leaving (right after a booking/confirmation, or with 'hvala'/'doviđenja'). If you have ALREADY said goodbye and they send 'ćao' again, just mirror 'Ćao.' — never repeat 'Vidimo se' or get confused. If they OPEN with 'doviđenja'/'vidimo se'/'prijatno', treat it as a slip — answer lightly ('Dobar dan! Jeste li hteli da zakažete termin?'), not a goodbye.\n"
+        "- To answer 'šta imam zakazano' / 'imam li termin' / 'do I have a booking', call list_my_appointments and tell them plainly. Before booking a NEW appointment, if list_my_appointments shows they already have one, ask whether to MOVE it instead of creating a second — never silently double-book.\n"
         "- A reminder request ('podsetnik pola sata ranije', 'podseti me X pre', 'može drugi podsetnik') is about the REMINDER lead time, NOT a booking time — never check availability and never read 'pola sata' as a slot. Just acknowledge naturally, e.g. 'može, podsetiću Vas pola sata ranije'.\n"
         f"{name_rule}"
         "\n# Style — this is a TEXT CHAT, talk like a real person (MUST follow; overrides anything above)\n"
