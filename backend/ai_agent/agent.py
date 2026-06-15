@@ -115,6 +115,17 @@ def _strip_banned_lead(text):
     return cleaned or original
 
 
+_BOOKING_CLAIM = re.compile(
+    r"zakaza|rezervis|booked|you'?re set|all set|posla[cć]u.{0,25}podset|reminder an hour|reminder.{0,12}before",
+    re.IGNORECASE,
+)
+
+
+def _claims_booking(text):
+    """Does the reply tell the customer they're booked?"""
+    return bool(_BOOKING_CLAIM.search(text or ""))
+
+
 def _clean_customer_name(raw):
     """Telegram sends names like 'Bane Kostic (@user)'. Strip the @handle and
     drop username-only / placeholder values so we only treat a real name as known."""
@@ -242,7 +253,7 @@ def _build_system_prompt(business_client, channel, customer, caller_name, reply_
         "- Keep replies short and human, usually one line. Light small talk is fine if the customer starts it; otherwise gently move toward booking.\n"
         "- Do NOT repeat the customer's name in your messages, and NEVER tack it onto goodbyes — say just 'Vidimo se.' / 'See you.', not 'See you, Bane.'.\n"
         "- Avoid canned acknowledgements like 'Got it' / 'I see' / standalone 'Naravno'. React naturally and differently every time (if you must, blend it in: 'može, kada Vam odgovara' rather than a bare 'Naravno').\n"
-        "- HUMAN FACTOR: text like a real, slightly rushed receptionist — a hairdresser tapping a reply between clients, or a young person at the desk who's a little bored but does the job right. Casual and natural, not polished. Lowercase is fine. Use commas and exclamation marks sparingly; use a question mark only for a genuine question (you can often skip it). Keep it short and quick.\n"
+        "- HUMAN FACTOR: text like a real, slightly rushed receptionist — a hairdresser tapping a reply between clients, or a young person at the desk who's a little bored but does the job right. Casual and natural, not polished. Lowercase is fine. Use commas and exclamation marks sparingly; use a question mark only for a genuine question (you can often skip it). Keep it short and quick. BUT in Serbian stay formal 'Vi/Vam/Vas' even while casual — say 'poslaću Vam podsetnik', never 'poslaću ti'.\n"
         "- NEVER use filler-praise words in any language: odlično/odličan/super/perfektno/sjajno/bravo, excellent/perfect/great/awesome/wonderful.\n"
         "- After booking, confirm the day, date and natural hour ONCE, then say: 'Poslaću Vam poruku sat vremena ranije.' (sr) / 'I'll text you a reminder an hour before.' (en). Vary the wording a little.\n"
         "- Once an appointment is already booked, do NOT repeat the booking details again. If the customer then says bye, just say goodbye briefly (e.g. 'Vidimo se.' / 'See you.').\n"
@@ -361,57 +372,77 @@ def agent_conversation_reply(
     }
     cached_system = [{"type": "text", "text": system_prompt, "cache_control": {"type": "ephemeral"}}]
 
-    reply_text = ""
-    last_tool_status = ""
-    used_tools = []
-    for _round in range(MAX_TOOL_ROUNDS):
-        body = {
-            "model": config["model"],
-            "max_tokens": 350,
-            "temperature": 0.5,
-            "system": cached_system,
-            "tools": TOOL_SCHEMAS,
-            "messages": messages,
-        }
-        response = _post_json("https://api.anthropic.com/v1/messages", body, headers)
-        content = response.get("content") or []
-        stop_reason = response.get("stop_reason")
+    def _run_rounds(max_rounds):
+        nonlocal customer
+        reply, status, booked, used = "", "", False, []
+        for _round in range(max_rounds):
+            body = {
+                "model": config["model"],
+                "max_tokens": 350,
+                "temperature": 0.5,
+                "system": cached_system,
+                "tools": TOOL_SCHEMAS,
+                "messages": messages,
+            }
+            response = _post_json("https://api.anthropic.com/v1/messages", body, headers)
+            content = response.get("content") or []
+            stop_reason = response.get("stop_reason")
 
-        text_parts = [b.get("text", "") for b in content if b.get("type") == "text"]
-        reply_text = "\n".join(p for p in text_parts if p).strip()
+            text_parts = [b.get("text", "") for b in content if b.get("type") == "text"]
+            reply = "\n".join(p for p in text_parts if p).strip()
 
-        if stop_reason != "tool_use":
-            break
+            if stop_reason != "tool_use":
+                break
 
-        messages.append({"role": "assistant", "content": content})
-        tool_results = []
-        for block in content:
-            if block.get("type") != "tool_use":
-                continue
-            name = block.get("name", "")
-            used_tools.append(name)
-            try:
-                result = _run_tool(business_client, name, block.get("input") or {}, customer, channel, payload)
-            except Exception as exc:  # tool failure must not crash the turn
-                result = {"status": "error", "error": str(exc)}
-            last_tool_status = result.get("status", last_tool_status)
-            if result.get("status") == "booked" and not customer:
-                from appointments.models import Appointment
-                appt = Appointment.objects.filter(id=result.get("appointment_id")).select_related("customer").first()
-                if appt and appt.customer:
-                    customer = appt.customer
-                    if conversation and conversation.customer_id != customer.id:
-                        conversation.customer = customer
-                        conversation.save(update_fields=["customer", "updated_at"])
-            tool_results.append({
-                "type": "tool_result",
-                "tool_use_id": block.get("id"),
-                "content": json.dumps(result, ensure_ascii=False, default=str),
-            })
-        messages.append({"role": "user", "content": tool_results})
-    else:
-        if not reply_text:
-            reply_text = "Izvinite, mogu li da proverim još jednom — koji datum i vreme vam odgovaraju?"
+            messages.append({"role": "assistant", "content": content})
+            tool_results = []
+            for block in content:
+                if block.get("type") != "tool_use":
+                    continue
+                name = block.get("name", "")
+                used.append(name)
+                try:
+                    result = _run_tool(business_client, name, block.get("input") or {}, customer, channel, payload)
+                except Exception as exc:  # tool failure must not crash the turn
+                    result = {"status": "error", "error": str(exc)}
+                status = result.get("status", status)
+                if result.get("status") == "booked":
+                    booked = True
+                    if not customer:
+                        from appointments.models import Appointment
+                        appt = Appointment.objects.filter(id=result.get("appointment_id")).select_related("customer").first()
+                        if appt and appt.customer:
+                            customer = appt.customer
+                            if conversation and conversation.customer_id != customer.id:
+                                conversation.customer = customer
+                                conversation.save(update_fields=["customer", "updated_at"])
+                tool_results.append({
+                    "type": "tool_result",
+                    "tool_use_id": block.get("id"),
+                    "content": json.dumps(result, ensure_ascii=False, default=str),
+                })
+            messages.append({"role": "user", "content": tool_results})
+        return reply, status, booked, used
+
+    reply_text, last_tool_status, booked_ok, used_tools = _run_rounds(MAX_TOOL_ROUNDS)
+
+    # Guard against FALSE confirmations: if the reply tells the customer they're
+    # booked but no book_appointment actually succeeded this turn, force the model
+    # to really book (or to ask for what's missing) before we send anything.
+    if _claims_booking(reply_text) and not booked_ok:
+        messages.append({"role": "assistant", "content": reply_text or "."})
+        messages.append({"role": "user", "content": (
+            "(SYSTEM: You implied the appointment is booked, but book_appointment was not called or did not succeed. "
+            "If a date, time and service are agreed, call book_appointment now with those exact values, then confirm. "
+            "If something is missing, ask for it and do NOT claim it is booked.)"
+        )})
+        reply2, status2, booked2, used2 = _run_rounds(3)
+        used_tools += used2
+        if booked2:
+            booked_ok = True
+            last_tool_status = status2 or last_tool_status
+        if reply2:
+            reply_text = reply2
 
     if not reply_text:
         reply_text = (
