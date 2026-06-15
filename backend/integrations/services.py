@@ -614,6 +614,11 @@ def process_telegram_webhook(connection, update, provided_secret):
     if not chat_id:
         raise serializers.ValidationError({"chat_id": "Telegram chat id nije pronadjen."})
 
+    try:
+        telegram_api_post(connection, "sendChatAction", {"chat_id": chat_id, "action": "typing"})
+    except Exception:
+        pass
+
     sender = message.get("from") or {}
     business_client = connection.business_client
     external_thread_id = f"telegram:{chat_id}"
