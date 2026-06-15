@@ -28,6 +28,10 @@ from ai_agent.providers import ProviderError, get_client_ai_config
 
 MAX_TOOL_ROUNDS = 6
 HISTORY_TURNS = 12
+# If the customer was silent longer than this, treat the next message as a fresh
+# session (greet anew, ignore the old goodbye) — but keep the customer link so
+# they can still reschedule/cancel their existing appointment on the same thread.
+SESSION_GAP_SECONDS = 3 * 3600
 
 
 # ── Tool schemas exposed to Claude ───────────────────────────────────────────
@@ -297,7 +301,13 @@ def agent_conversation_reply(
     if not customer and conversation and conversation.customer:
         customer = conversation.customer
 
-    history = _history_messages(conversation)
+    # Fresh session if the customer was silent for a long time: drop the old
+    # chat history (so a stale "goodbye" isn't carried over) but keep the customer.
+    stale_session = False
+    if conversation and conversation.last_message_at:
+        gap = (timezone.now() - conversation.last_message_at).total_seconds()
+        stale_session = gap > SESSION_GAP_SECONDS
+    history = [] if stale_session else _history_messages(conversation)
 
     if record_messages:
         write_workflow_message(
@@ -327,7 +337,9 @@ def agent_conversation_reply(
         "Content-Type": "application/json",
         "x-api-key": config["api_key"],
         "anthropic-version": "2023-06-01",
+        "anthropic-beta": "prompt-caching-2024-07-31",
     }
+    cached_system = [{"type": "text", "text": system_prompt, "cache_control": {"type": "ephemeral"}}]
 
     reply_text = ""
     last_tool_status = ""
@@ -335,9 +347,9 @@ def agent_conversation_reply(
     for _round in range(MAX_TOOL_ROUNDS):
         body = {
             "model": config["model"],
-            "max_tokens": 600,
+            "max_tokens": 350,
             "temperature": 0.5,
-            "system": system_prompt,
+            "system": cached_system,
             "tools": TOOL_SCHEMAS,
             "messages": messages,
         }
