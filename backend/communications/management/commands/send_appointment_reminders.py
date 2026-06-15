@@ -1,65 +1,54 @@
-"""Send 24h and 2h reminder SMS for upcoming appointments.
+"""Send appointment reminders through the same channel the customer used
+(Telegram for bot bookings, SMS when we have a phone), at each appointment's
+own reminder offset (what Kaleya promised — default 60 min, or e.g. 30).
 
 Usage: python manage.py send_appointment_reminders
-
-Recommended cron schedule: every 15 minutes.
-  */15 * * * * cd /var/www/aikaleya && .venv/bin/python backend/manage.py send_appointment_reminders >> /var/log/kaleya_reminders.log 2>&1
+Recommended cron (every ~5–10 min so the offset window is always caught):
+  */5 * * * * cd /var/www/aikaleya && .venv/bin/python backend/manage.py send_appointment_reminders >> /var/log/kaleya_reminders.log 2>&1
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from appointments.models import Appointment
+from appointments.services import client_timezone
 from communications.twilio_service import send_sms
+from integrations.models import IntegrationConnection
+from integrations.services import send_telegram_message
 
 
-REMINDER_24H_KEY = "sms_reminder_24h_sent"
-REMINDER_2H_KEY = "sms_reminder_2h_sent"
+REMINDER_SENT_KEY = "reminder_sent"
+DEFAULT_OFFSET_MINUTES = 60
+# Half-window around the target offset; with a 5–10 min cron this always fires once.
+WINDOW_MINUTES = 8
 
-# Half-window around the target offset so cron firing every 15 min always catches it
-WINDOW_MINUTES = 15
 
-
-def reminder_text(business_client, appointment, *, hours_ahead: int) -> str:
+def reminder_text(business_client, appointment) -> str:
     lang = business_client.interface_language or business_client.language or "en"
     shop = (business_client.public_name or business_client.name or "").strip() or "the shop"
-    service = appointment.service.name if appointment.service else "your appointment"
-    time_str = appointment.start_time.strftime("%I:%M %p")
-    date_str = appointment.date.strftime("%a %b %d")
-
-    if hours_ahead == 2:
-        templates = {
-            "en":    f"Heads up — your {service} at {shop} is in 2 hours ({time_str}). See you soon!",
-            "es":    f"Recordatorio — tu {service} en {shop} es en 2 horas ({time_str}). ¡Nos vemos pronto!",
-            "pt":    f"Lembrete — o teu {service} no {shop} é em 2 horas ({time_str}). Até já!",
-            "fr":    f"Rappel — votre {service} chez {shop} est dans 2 heures ({time_str}). À tout à l'heure !",
-            "it":    f"Promemoria — il tuo {service} da {shop} è tra 2 ore ({time_str}). A presto!",
-            "de":    f"Erinnerung — dein {service} bei {shop} ist in 2 Stunden ({time_str}). Bis gleich!",
-            "ru":    f"Напоминание — ваша запись «{service}» в {shop} через 2 часа ({time_str}).",
-            "sr":    f"Podsetnik — vaš {service} u {shop} je za 2 sata ({time_str}). Vidimo se uskoro!",
-        }
-    else:
-        templates = {
-            "en":    f"Reminder: {service} at {shop} tomorrow {date_str} at {time_str}. Reply C to confirm or R to reschedule.",
-            "es":    f"Recordatorio: {service} en {shop} mañana {date_str} a las {time_str}. C para confirmar o R para cambiar.",
-            "pt":    f"Lembrete: {service} no {shop} amanhã {date_str} às {time_str}. C para confirmar ou R para remarcar.",
-            "fr":    f"Rappel : {service} chez {shop} demain {date_str} à {time_str}. C pour confirmer, R pour reporter.",
-            "it":    f"Promemoria: {service} da {shop} domani {date_str} alle {time_str}. C per confermare, R per spostare.",
-            "de":    f"Erinnerung: {service} bei {shop} morgen {date_str} um {time_str}. C bestätigen, R verschieben.",
-            "ru":    f"Напоминание: {service} в {shop} завтра {date_str} в {time_str}. C — подтвердить, R — перенести.",
-            "sr":    f"Podsetnik: {service} u {shop} sutra {date_str} u {time_str}. C za potvrdu ili R za promenu.",
-        }
+    service = appointment.service.name if appointment.service else ("termin" if lang == "sr" else "your appointment")
+    time_str = appointment.start_time.strftime("%H:%M")
+    templates = {
+        "en": f"Reminder: {service} at {shop} today at {time_str}. See you soon!",
+        "es": f"Recordatorio: {service} en {shop} hoy a las {time_str}. ¡Nos vemos!",
+        "pt": f"Lembrete: {service} no {shop} hoje às {time_str}. Até já!",
+        "fr": f"Rappel : {service} chez {shop} aujourd'hui à {time_str}. À tout à l'heure !",
+        "it": f"Promemoria: {service} da {shop} oggi alle {time_str}. A presto!",
+        "de": f"Erinnerung: {service} bei {shop} heute um {time_str}. Bis gleich!",
+        "ru": f"Напоминание: {service} в {shop} сегодня в {time_str}.",
+        "sr": f"Podsetnik: {service} u {shop} danas u {time_str}. Vidimo se!",
+    }
     return templates.get(lang) or templates["en"]
 
 
 class Command(BaseCommand):
-    help = "Send 24h and 2h SMS reminders for upcoming appointments."
+    help = "Send appointment reminders via Telegram or SMS at each appointment's reminder offset."
 
     def handle(self, *args, **opts):
         now = timezone.now()
-        sent_24, sent_2 = 0, 0
+        sent = 0
         skipped = 0
 
         upcoming = Appointment.objects.filter(
@@ -68,48 +57,57 @@ class Command(BaseCommand):
         ).select_related("business_client", "customer", "service")
 
         for appt in upcoming:
-            if not appt.customer or not appt.customer.phone:
-                skipped += 1
+            metadata = dict(appt.metadata or {})
+            if metadata.get(REMINDER_SENT_KEY):
                 continue
 
-            # Build a naive datetime for the appointment start; assume the
-            # business_client.timezone matches server timezone for simplicity.
+            business_client = appt.business_client
             try:
-                appt_dt = datetime.combine(appt.date, appt.start_time)
+                appt_dt = timezone.make_aware(
+                    datetime.combine(appt.date, appt.start_time), client_timezone(business_client)
+                )
             except Exception:
                 skipped += 1
                 continue
-            appt_dt = timezone.make_aware(appt_dt, timezone.get_current_timezone()) if timezone.is_naive(appt_dt) else appt_dt
+
+            try:
+                offset = int(metadata.get("reminder_minutes_before", DEFAULT_OFFSET_MINUTES) or DEFAULT_OFFSET_MINUTES)
+            except (TypeError, ValueError):
+                offset = DEFAULT_OFFSET_MINUTES
 
             minutes_to_go = (appt_dt - now).total_seconds() / 60.0
-            metadata = dict(appt.metadata or {})
+            if not ((offset - WINDOW_MINUTES) <= minutes_to_go <= (offset + WINDOW_MINUTES)):
+                continue
 
-            # 24-hour reminder: between 24h-WINDOW and 24h+WINDOW
-            if (24 * 60 - WINDOW_MINUTES) <= minutes_to_go <= (24 * 60 + WINDOW_MINUTES):
-                if not metadata.get(REMINDER_24H_KEY):
-                    text = reminder_text(appt.business_client, appt, hours_ahead=24)
-                    result = send_sms(appt.business_client, appt.customer.phone, text)
-                    if not result.get("error"):
-                        metadata[REMINDER_24H_KEY] = now.isoformat()
-                        Appointment.objects.filter(pk=appt.pk).update(metadata=metadata)
-                        sent_24 += 1
-                        self.stdout.write(f"24h reminder → {appt.customer.phone} (appt {appt.pk})")
-                    else:
-                        self.stderr.write(f"24h reminder FAILED for appt {appt.pk}: {result['error']}")
+            text = reminder_text(business_client, appt)
+            delivered = False
 
-            # 2-hour reminder
-            elif (2 * 60 - WINDOW_MINUTES) <= minutes_to_go <= (2 * 60 + WINDOW_MINUTES):
-                if not metadata.get(REMINDER_2H_KEY):
-                    text = reminder_text(appt.business_client, appt, hours_ahead=2)
-                    result = send_sms(appt.business_client, appt.customer.phone, text)
-                    if not result.get("error"):
-                        metadata[REMINDER_2H_KEY] = now.isoformat()
-                        Appointment.objects.filter(pk=appt.pk).update(metadata=metadata)
-                        sent_2 += 1
-                        self.stdout.write(f"2h reminder → {appt.customer.phone} (appt {appt.pk})")
-                    else:
-                        self.stderr.write(f"2h reminder FAILED for appt {appt.pk}: {result['error']}")
+            # 1) Same channel the booking came through (Telegram for bot bookings).
+            chat_id = metadata.get("telegram_chat_id")
+            if chat_id:
+                connection = IntegrationConnection.objects.filter(
+                    business_client=business_client, provider="telegram", enabled=True
+                ).first()
+                if connection:
+                    try:
+                        send_telegram_message(connection, chat_id, text)
+                        delivered = True
+                    except Exception as exc:
+                        self.stderr.write(f"Telegram reminder FAILED for appt {appt.pk}: {exc}")
 
-        self.stdout.write(self.style.SUCCESS(
-            f"Done. 24h: {sent_24}, 2h: {sent_2}, skipped: {skipped}"
-        ))
+            # 2) Fallback to SMS if we have a phone.
+            if not delivered and appt.customer and appt.customer.phone:
+                result = send_sms(business_client, appt.customer.phone, text)
+                delivered = not result.get("error")
+                if not delivered:
+                    self.stderr.write(f"SMS reminder FAILED for appt {appt.pk}: {result.get('error')}")
+
+            if delivered:
+                metadata[REMINDER_SENT_KEY] = now.isoformat()
+                Appointment.objects.filter(pk=appt.pk).update(metadata=metadata)
+                sent += 1
+                self.stdout.write(f"Reminder → appt {appt.pk} ({offset} min before)")
+            else:
+                skipped += 1
+
+        self.stdout.write(self.style.SUCCESS(f"Done. Sent: {sent}, skipped: {skipped}"))

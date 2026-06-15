@@ -67,6 +67,7 @@ TOOL_SCHEMAS = [
                 "time": {"type": "string", "description": "24h HH:MM"},
                 "customer_name": {"type": "string", "description": "Customer's first name if known."},
                 "staff_hint": {"type": "string"},
+                "reminder_minutes_before": {"type": "integer", "description": "How many minutes before the appointment to send the reminder. Default 60. Use 30 if the customer asked for 'pola sata ranije', etc."},
             },
             "required": ["date", "time"],
         },
@@ -180,9 +181,25 @@ def _run_tool(business_client, name, tool_input, customer, channel, base_payload
     if name == "check_availability":
         return agent_tools.check_availability_tool(business_client, text="", payload=payload)
     if name == "book_appointment":
-        return agent_tools.book_appointment_tool(
+        result = agent_tools.book_appointment_tool(
             business_client, text="", customer=customer, channel=channel, payload=payload
         )
+        if result.get("status") == "booked" and result.get("appointment_id"):
+            from appointments.models import Appointment
+            appt = Appointment.objects.filter(id=result["appointment_id"]).first()
+            if appt:
+                md = dict(appt.metadata or {})
+                md["reminder_channel"] = channel
+                chat_id = base_payload.get("telegram_chat_id")
+                if chat_id:
+                    md["telegram_chat_id"] = str(chat_id)
+                try:
+                    md["reminder_minutes_before"] = int(tool_input.get("reminder_minutes_before") or 60)
+                except (TypeError, ValueError):
+                    md["reminder_minutes_before"] = 60
+                appt.metadata = md
+                appt.save(update_fields=["metadata"])
+        return result
     if name == "cancel_appointment":
         return agent_tools.cancel_appointment_tool(
             business_client, text="", customer=customer, payload=payload
