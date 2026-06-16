@@ -2947,10 +2947,10 @@ let openStatusMenuId = '';
 let deferredPwaInstallPrompt = null;
 let clientCalendarState = { mode: 'month', monthOffset: 0, selectedDate: clientIsoDate(new Date()) };
 let schedule = [
-    { id: 'a1', date: clientDateOffset(0), time: '10:00', duration: 60, nameKey: 'client1', phone: '+38160111222', channel: 'WhatsApp', status: 'confirmed', staffMemberName: 'Employee User' },
-    { id: 'a2', date: clientDateOffset(0), time: '14:00', duration: 120, nameKey: 'client2', phone: '+381641234567', channel: 'Telegram', status: 'moved', staffMemberName: 'Mark Johnson' },
-    { id: 'a3', date: clientDateOffset(1), time: '11:00', duration: 60, nameKey: 'team', phone: '+381621234444', channel: 'Telegram', status: 'pending', staffMemberName: 'Employee User' },
-    { id: 'a4', date: clientDateOffset(2), time: '15:00', duration: 30, nameKey: 'newClient', phone: '+381631119999', channel: 'SMS', status: 'cancelled', staffMemberName: 'Mark Johnson' },
+    { id: 'a1', date: clientDateOffset(0), time: '10:00', duration: 60, nameKey: 'client1', phone: '+1 (415) 555-0142', channel: 'WhatsApp', status: 'confirmed', staffMemberName: 'Employee User' },
+    { id: 'a2', date: clientDateOffset(0), time: '14:00', duration: 120, nameKey: 'client2', phone: '+1 (415) 555-0188', channel: 'Telegram', status: 'moved', staffMemberName: 'Mark Johnson' },
+    { id: 'a3', date: clientDateOffset(1), time: '11:00', duration: 60, nameKey: 'team', phone: '+1 (415) 555-0117', channel: 'Telegram', status: 'pending', staffMemberName: 'Employee User' },
+    { id: 'a4', date: clientDateOffset(2), time: '15:00', duration: 30, nameKey: 'newClient', phone: '+1 (415) 555-0163', channel: 'SMS', status: 'cancelled', staffMemberName: 'Mark Johnson' },
 ];
 
 const CLIENT_SCHEDULE_NAMES = {
@@ -8138,7 +8138,7 @@ function getClientCalendarSettings() {
             end: clientSettingsCache.end || '16:00',
             interval: Number(clientSettingsCache.interval || 30),
             format: clientSettingsCache.format || '24',
-            dateFormat: clientSettingsCache.dateFormat || 'dd-mm-yyyy',
+            dateFormat: clientSettingsCache.dateFormat || (currentLang === 'en' ? 'mm-dd-yyyy' : 'dd-mm-yyyy'),
             weekStart: clientSettingsCache.weekStart || defaultWeekStart()
         };
     }
@@ -8147,7 +8147,7 @@ function getClientCalendarSettings() {
         end: localStorage.getItem('client_work_end') || '16:00',
         interval: Number(localStorage.getItem('client_slot_interval') || 30),
         format: localStorage.getItem('client_time_format') || '24',
-        dateFormat: localStorage.getItem('client_date_format') || 'dd-mm-yyyy',
+        dateFormat: localStorage.getItem('client_date_format') || (currentLang === 'en' ? 'mm-dd-yyyy' : 'dd-mm-yyyy'),
         weekStart: localStorage.getItem('client_week_start') || defaultWeekStart()
     };
 }
@@ -8203,7 +8203,7 @@ function formatClientDate(value) {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
-    return getClientCalendarSettings().dateFormat === 'mm-dd-yyyy' ? `${month}-${day}-${year}` : `${day}-${month}-${year}`;
+    return getClientCalendarSettings().dateFormat === 'mm-dd-yyyy' ? `${month}/${day}/${year}` : `${day}-${month}-${year}`;
 }
 
 function parseClientDateInput(value, fallbackIso = clientIsoDate(new Date())) {
