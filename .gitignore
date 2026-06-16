@@ -1,6 +1,7 @@
 # Environment & secrets
 .env
 .env.*
+env.txt
 !.env.example
 !.env.production.example
 
