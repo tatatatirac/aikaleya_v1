@@ -74,13 +74,21 @@ def google_calendar_callback(request):
     if not business_client:
         return _redirect_to_dashboard(error="unknown_tenant")
 
-    # Verify state matches what we stored
+    # Verify state matches what we stored. A missing stored state means WE never
+    # started this flow for the tenant — reject, otherwise a forged callback could
+    # attach an attacker's Google account to a victim tenant.
     integration = IntegrationConnection.objects.filter(
         business_client=business_client, provider="google_calendar"
     ).first()
     expected_state = (integration.config or {}).get("oauth_state") if integration else None
-    if expected_state and expected_state != state:
+    if not expected_state or expected_state != state:
         return _redirect_to_dashboard(error="invalid_state")
+
+    # One-time use: clear the stored state immediately so the callback can't be replayed.
+    config = dict(integration.config or {})
+    config.pop("oauth_state", None)
+    integration.config = config
+    integration.save(update_fields=["config", "updated_at"])
 
     try:
         tokens = exchange_code_for_tokens(code)
