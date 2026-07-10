@@ -10,6 +10,7 @@
       };
     </script>
     <script src="https://js.sentry-cdn.com/aea6b61d500b0542d77599c65621f5f3.min.js" crossorigin="anonymous"></script>
+    <script src="/assets/js/qrcode-generator.js" defer></script>
     <meta name="theme-color" content="#020617">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -2131,6 +2132,7 @@
                         <div class="mt-3 flex gap-2">
                             <input id="bookingLinkInput" readonly onclick="this.select()" class="flex-1 h-10 px-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[13px] text-slate-700 dark:text-slate-200 outline-none">
                             <button onclick="copyBookingLink()" id="bookingLinkCopyBtn" class="h-10 px-4 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-[13px] font-semibold shrink-0" data-i18n="booking_link_copy">Kopiraj</button>
+                            <button onclick="showBookingQr()" class="h-10 px-4 rounded-xl border border-teal-500/40 text-teal-600 dark:text-teal-400 text-[13px] font-semibold shrink-0" data-i18n="qr_btn">QR kod</button>
                         </div>
                     </div>
                     <div id="channelsPanelGrid" class="grid gap-4 sm:grid-cols-2">
@@ -3162,6 +3164,7 @@ const T = {
         popular: 'NAJPOPULARNIJE', price_btn: 'Započni', price_btn2: 'Isprobaj besplatno — 14 dana', trial_btn: 'Isprobaj besplatno — 14 dana', price_contact: 'Kontakt',
         footer_privacy: 'Privatnost', footer_terms: 'Uslovi',
         booking_link_title: '🔗 Vaš javni link za zakazivanje', booking_link_desc: 'Podelite ga bilo gde (Google Maps, Instagram bio, QR kod) — mušterije razgovaraju sa Kaleyom i termin se sam upisuje u vaš kalendar.', booking_link_copy: 'Kopiraj', booking_link_copied: 'Kopirano ✓',
+        qr_btn: 'QR kod', qr_title: 'QR za zakazivanje', qr_download: 'Preuzmi', qr_close: 'Zatvori', qr_hint: 'Odštampajte i zalepite na vrata, ogledalo ili pult.',
         addons_eyebrow: 'Opcioni dodaci', addons_title: 'Razvij svoj salon', addons_sub: 'Dodaj usluge za rast uz bilo koji paket.', addon_website: 'Sajt salona', addon_website_d: 'Custom sajt sa ugrađenim Kaleya zakazivanjem.', addon_maps: 'Google Maps Boost', addon_maps_d: 'Bolje rangiranje na Google Mapama — Kaleya pravi recenzije.', addon_marketing: 'Marketing kampanje', addon_marketing_d: 'Promocije, rođendani i povratak mušterija preko SMS-a — odrađeno za vas.', addon_setup: 'Setup „uradimo umesto vas“', addon_setup_d: 'Sve podesimo umesto vas, bez muke.', addon_once: ' jednokratno', addon_best: 'Najbolja vrednost', addon_bundle: 'Growth paket — sajt + Maps Boost + marketing', addon_bundle_d: 'Sve da napunite stolice, jedna cena.', addons_note: 'Dodaci se aktiviraju kad krenete — samo pitajte.',
         back_home: 'Nazad', login_title: 'Dobrodošli nazad', login_sub: 'Prijavite se na Kaleya',
         email: 'Email', password: 'Lozinka', login_btn: 'Prijavi se', login_err: 'Pogrešan email ili lozinka',
@@ -3232,6 +3235,7 @@ const T = {
         popular: 'MOST POPULAR', price_btn: 'Start', price_btn2: 'Start Free 14-Day Trial', trial_btn: 'Start Free 14-Day Trial', price_contact: 'Contact',
         footer_privacy: 'Privacy', footer_terms: 'Terms',
         booking_link_title: '🔗 Your public booking link', booking_link_desc: 'Share it anywhere (Google Maps, Instagram bio, QR code) — customers chat with Kaleya and the appointment lands in your calendar.', booking_link_copy: 'Copy', booking_link_copied: 'Copied ✓',
+        qr_btn: 'QR code', qr_title: 'Booking QR', qr_download: 'Download', qr_close: 'Close', qr_hint: 'Print it and stick it on the door, mirror or front desk.',
         addons_eyebrow: 'Optional add-ons', addons_title: 'Grow your salon', addons_sub: 'Bolt extra growth services onto any plan.', addon_website: 'Salon website', addon_website_d: 'Custom site with Kaleya booking built in.', addon_maps: 'Google Maps Boost', addon_maps_d: 'Rank higher on Google Maps — Kaleya builds your reviews.', addon_marketing: 'Marketing campaigns', addon_marketing_d: 'Promos, birthdays & win-backs by SMS — done for you.', addon_setup: 'Done-for-you setup', addon_setup_d: 'We set everything up for you, hands off.', addon_once: ' one-time', addon_best: 'Best value', addon_bundle: 'Growth bundle — website + Maps Boost + marketing', addon_bundle_d: 'Everything to fill your chairs, one price.', addons_note: 'Add-ons activate after you start — just ask anytime.',
         back_home: 'Back', login_title: 'Welcome back', login_sub: 'Sign in to Kaleya',
         email: 'Email', password: 'Password', login_btn: 'Sign in', login_err: 'Wrong email or password',
@@ -4913,6 +4917,28 @@ function copyBookingLink() {
     } else {
         input.select(); document.execCommand('copy'); done();
     }
+}
+
+function showQrForLink(url, title) {
+    if (typeof qrcode !== 'function' || !url) return;
+    const qr = qrcode(0, 'M');
+    qr.addData(url);
+    qr.make();
+    const dataUrl = qr.createDataURL(10, 20);
+    document.getElementById('qrModalImg').src = dataUrl;
+    document.getElementById('qrModalTitle').textContent = title || '';
+    document.getElementById('qrModalHint').textContent = url;
+    document.getElementById('qrModalDownload').href = dataUrl;
+    document.getElementById('qrModal').classList.remove('hidden');
+}
+
+function closeQrModal() {
+    document.getElementById('qrModal')?.classList.add('hidden');
+}
+
+function showBookingQr() {
+    const input = document.getElementById('bookingLinkInput');
+    showQrForLink(input?.value || '', tr('qr_title'));
 }
 
 function updateClientGreeting() {
@@ -9988,7 +10014,8 @@ function renderChannelsPanelGrid(container, integrations) {
                     </div>
                     <span class="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300">${tr('active')}</span>
                 </div>
-                <div class="mt-4">
+                <div class="mt-4 flex gap-2">
+                    ${provider === 'telegram' && public_number && public_number.startsWith('@') ? `<button onclick="showQrForLink('https://t.me/${public_number.slice(1)}', 'Telegram')" class="h-9 px-4 rounded-xl border border-teal-500/40 text-teal-600 dark:text-teal-400 text-[12px] font-semibold transition">${tr('qr_btn')}</button>` : ''}
                     <button onclick="if(window.confirm(tr('disconnect_confirm_msg').replace('%s','${label}')))disconnectIntegration('${provider}')" class="h-9 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:border-red-300 hover:text-red-500 text-[12px] transition">${tr('disconnect')}</button>
                 </div></div>`;
         }
@@ -10649,6 +10676,20 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             <div id="ob-back-ph" class="w-16 shrink-0"></div>
             <button id="ob-skip-link" type="button" onclick="obSkip()" class="text-[12px] text-slate-400 hover:text-slate-500 transition shrink-0">Skip setup</button>
             <button id="ob-next-btn" type="button" onclick="obNext()" class="bg-violet-600 hover:bg-violet-700 active:scale-95 text-white rounded-xl px-6 py-2.5 text-sm font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed shrink-0">Continue</button>
+        </div>
+    </div>
+</div>
+
+<!-- QR MODAL (booking link / channel links) -->
+<div id="qrModal" class="hidden fixed inset-0 z-[600] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this)closeQrModal()">
+    <div class="bg-white rounded-3xl p-6 w-full max-w-[340px] text-center shadow-2xl">
+        <p id="qrModalTitle" class="text-slate-900 font-bold text-[15px]"></p>
+        <img id="qrModalImg" alt="QR" class="w-56 h-56 mx-auto mt-3" style="image-rendering:pixelated">
+        <p id="qrModalHint" class="text-[11px] text-slate-500 mt-1 break-all"></p>
+        <p class="text-[12px] text-slate-400 mt-2" data-i18n="qr_hint">Odštampajte i zalepite na vrata, ogledalo ili pult.</p>
+        <div class="mt-4 flex gap-2 justify-center">
+            <a id="qrModalDownload" download="kaleya-qr.gif" class="h-10 px-5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-[13px] font-semibold inline-flex items-center cursor-pointer" data-i18n="qr_download">Preuzmi</a>
+            <button onclick="closeQrModal()" class="h-10 px-5 rounded-xl border border-slate-300 text-slate-600 text-[13px]" data-i18n="qr_close">Zatvori</button>
         </div>
     </div>
 </div>
