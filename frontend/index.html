@@ -1083,16 +1083,16 @@
                                             <div class="kv-chat-avatar">K</div>
                                             <div>
                                                 <div class="kv-chat-hname">Kaleya AI</div>
-                                                <div class="kv-chat-hsub">Active · Mike's Barbershop</div>
+                                                <div class="kv-chat-hsub" data-mock="chat_sub">Active · Mike's Barbershop</div>
                                             </div>
                                             <div class="kv-chat-htimer">2:14</div>
                                         </div>
                                         <div class="kv-chat">
                                             <div class="kv-chat-msg kv-chat-customer">
-                                                <p>Need a fade tomorrow,<br>around 3 PM?</p>
+                                                <p data-mock-html="chat_q">Need a fade tomorrow,<br>around 3 PM?</p>
                                             </div>
                                             <div class="kv-chat-msg kv-chat-kaleya">
-                                                <p>Done! Fade with Carlos,<br>tomorrow 3:00 PM ✓</p>
+                                                <p data-mock-html="chat_a">Done! Fade with Carlos,<br>tomorrow 3:00 PM ✓</p>
                                             </div>
                                         </div>
                                         <div class="kv-voice-bars"><span></span><span></span><span></span><span></span><span></span></div>
@@ -1105,9 +1105,9 @@
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                                 </div>
                                 <div>
-                                    <strong>Kaleya Calendar</strong>
-                                    <p>Fade · Tomorrow 3:00 PM · Carlos</p>
-                                    <span class="kv-fc-tag">① Booking confirmed</span>
+                                    <strong data-mock="cal_t">Kaleya Calendar</strong>
+                                    <p data-mock="cal_p">Fade · Tomorrow 3:00 PM · Carlos</p>
+                                    <span class="kv-fc-tag" data-mock="cal_tag">① Booking confirmed</span>
                                 </div>
                             </div>
 
@@ -1116,9 +1116,9 @@
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H7l-3 3V4Z"/></svg>
                                 </div>
                                 <div>
-                                    <strong>SMS Sent</strong>
-                                    <p>"Your cut is confirmed for tomorrow at 3pm. Reply YES to confirm."</p>
-                                    <span class="kv-fc-tag kv-fc-tag-green">② Sent instantly</span>
+                                    <strong data-mock="sms_t">SMS Sent</strong>
+                                    <p data-mock="sms_p">"Your cut is confirmed for tomorrow at 3pm. Reply YES to confirm."</p>
+                                    <span class="kv-fc-tag kv-fc-tag-green" data-mock="sms_tag">② Sent instantly</span>
                                 </div>
                             </div>
                         </div>
@@ -1201,99 +1201,99 @@
                                         <img id="kv-dash-logo" src="" alt="Kaleya">
                                         <span>Kaleya</span>
                                     </div>
-                                    <div class="kv-dash-side-section">Main</div>
+                                    <div class="kv-dash-side-section" data-mock="side_main">Main</div>
                                     <ul>
                                         <li class="kv-active">
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-                                            Calendar
+                                            <span data-mock="side_cal">Calendar</span>
                                         </li>
                                         <li>
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                                            Clients
+                                            <span data-mock="side_cli">Clients</span>
                                         </li>
                                         <li>
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v4H3z"/><path d="M5 7v12h14V7"/></svg>
-                                            Services
+                                            <span data-mock="side_srv">Services</span>
                                         </li>
                                         <li>
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                                            Call log
+                                            <span data-mock="side_log">Call log</span>
                                         </li>
                                     </ul>
-                                    <div class="kv-dash-side-section">Settings</div>
+                                    <div class="kv-dash-side-section" data-mock="side_set">Settings</div>
                                     <ul>
                                         <li>
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4"/></svg>
-                                            Preferences
+                                            <span data-mock="side_pref">Preferences</span>
                                         </li>
                                         <li>
                                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-                                            Messages
+                                            <span data-mock="side_msg">Messages</span>
                                         </li>
                                     </ul>
                                 </aside>
                                 <div class="kv-dash-main">
                                     <div class="kv-dash-h">
-                                        <h3>Today · Tuesday, May 19</h3>
+                                        <h3 data-mock="dash_date">Today · Tuesday, May 19</h3>
                                         <div class="kv-dash-h-actions">
-                                            <span class="kv-dash-pill">Filter</span>
-                                            <span class="kv-dash-pill kv-dash-pill-blue">+ Block time</span>
+                                            <span class="kv-dash-pill" data-mock="dash_filter">Filter</span>
+                                            <span class="kv-dash-pill kv-dash-pill-blue" data-mock="dash_block">+ Block time</span>
                                         </div>
                                     </div>
                                     <div class="kv-dash-stats">
                                         <div class="kv-dash-stat">
-                                            <div class="kv-dash-stat-label">Today's bookings</div>
+                                            <div class="kv-dash-stat-label" data-mock="stat1">Today's bookings</div>
                                             <div class="kv-dash-stat-val">14 <span class="kv-up">↑ 22%</span></div>
                                         </div>
                                         <div class="kv-dash-stat">
-                                            <div class="kv-dash-stat-label">Calls answered</div>
+                                            <div class="kv-dash-stat-label" data-mock="stat2">Calls answered</div>
                                             <div class="kv-dash-stat-val">37 <span class="kv-up">↑ 100%</span></div>
                                         </div>
                                         <div class="kv-dash-stat">
-                                            <div class="kv-dash-stat-label">Revenue today</div>
+                                            <div class="kv-dash-stat-label" data-mock="stat3">Revenue today</div>
                                             <div class="kv-dash-stat-val" data-lv="dash_rev">$1,290</div>
                                         </div>
                                         <div class="kv-dash-stat">
-                                            <div class="kv-dash-stat-label">No-shows saved</div>
+                                            <div class="kv-dash-stat-label" data-mock="stat4">No-shows saved</div>
                                             <div class="kv-dash-stat-val">3 <span class="kv-up" data-lv="dash_saved">$225</span></div>
                                         </div>
                                     </div>
                                     <div class="kv-dash-list">
                                         <div class="kv-dash-row">
                                             <div class="kv-dash-row-name">
-                                                <div class="kv-dash-avatar kv-dash-av-1">MJ</div>
-                                                Maya Johnson
+                                                <div class="kv-dash-avatar kv-dash-av-1" data-mock="r1_init">MJ</div>
+                                                <span data-mock="r1_name">Maya Johnson</span>
                                             </div>
-                                            <div class="kv-dash-row-service">Gel Manicure</div>
-                                            <div class="kv-dash-row-time">3:00 PM · Lena</div>
-                                            <div class="kv-dash-row-status kv-status-confirmed">Confirmed</div>
+                                            <div class="kv-dash-row-service" data-mock="r1_svc">Gel Manicure</div>
+                                            <div class="kv-dash-row-time" data-mock="r1_time">3:00 PM · Lena</div>
+                                            <div class="kv-dash-row-status kv-status-confirmed" data-mock="r1_st">Confirmed</div>
                                         </div>
                                         <div class="kv-dash-row">
                                             <div class="kv-dash-row-name">
-                                                <div class="kv-dash-avatar kv-dash-av-2">DR</div>
-                                                David Rodriguez
+                                                <div class="kv-dash-avatar kv-dash-av-2" data-mock="r2_init">DR</div>
+                                                <span data-mock="r2_name">David Rodriguez</span>
                                             </div>
-                                            <div class="kv-dash-row-service">Fade + Beard</div>
-                                            <div class="kv-dash-row-time">3:30 PM · Carlos</div>
-                                            <div class="kv-dash-row-status kv-status-booked">Booked by AI</div>
+                                            <div class="kv-dash-row-service" data-mock="r2_svc">Fade + Beard</div>
+                                            <div class="kv-dash-row-time" data-mock="r2_time">3:30 PM · Carlos</div>
+                                            <div class="kv-dash-row-status kv-status-booked" data-mock="r2_st">Booked by AI</div>
                                         </div>
                                         <div class="kv-dash-row">
                                             <div class="kv-dash-row-name">
-                                                <div class="kv-dash-avatar kv-dash-av-3">SL</div>
-                                                Sarah Lee
+                                                <div class="kv-dash-avatar kv-dash-av-3" data-mock="r3_init">SL</div>
+                                                <span data-mock="r3_name">Sarah Lee</span>
                                             </div>
-                                            <div class="kv-dash-row-service">Balayage · 3h</div>
-                                            <div class="kv-dash-row-time">4:00 PM · Anna</div>
-                                            <div class="kv-dash-row-status kv-status-pending">Pending card</div>
+                                            <div class="kv-dash-row-service" data-mock="r3_svc">Balayage · 3h</div>
+                                            <div class="kv-dash-row-time" data-mock="r3_time">4:00 PM · Anna</div>
+                                            <div class="kv-dash-row-status kv-status-pending" data-mock="r3_st">Pending card</div>
                                         </div>
                                         <div class="kv-dash-row">
                                             <div class="kv-dash-row-name">
-                                                <div class="kv-dash-avatar kv-dash-av-4">JM</div>
-                                                James Miller
+                                                <div class="kv-dash-avatar kv-dash-av-4" data-mock="r4_init">JM</div>
+                                                <span data-mock="r4_name">James Miller</span>
                                             </div>
-                                            <div class="kv-dash-row-service">60-min Deep Tissue</div>
-                                            <div class="kv-dash-row-time">5:30 PM · Sofia</div>
-                                            <div class="kv-dash-row-status kv-status-confirmed">Confirmed</div>
+                                            <div class="kv-dash-row-service" data-mock="r4_svc">60-min Deep Tissue</div>
+                                            <div class="kv-dash-row-time" data-mock="r4_time">5:30 PM · Sofia</div>
+                                            <div class="kv-dash-row-status kv-status-confirmed" data-mock="r4_st">Confirmed</div>
                                         </div>
                                     </div>
                                 </div>
@@ -4974,6 +4974,9 @@ function applyLang() {
     if (typeof window.kvRefreshLocalizedStats === 'function') {
         try { window.kvRefreshLocalizedStats(); } catch (e) {}
     }
+    // Localize the landing mockups (hero chat + fake dashboard) — names,
+    // services and statuses follow the visitor's language.
+    try { applyLandingMockupLocale(); } catch (e) {}
     updateClientLangButtons();
     renderClientOperationalSettings();
     populateAppointmentStaffServiceFields();
@@ -5055,6 +5058,121 @@ function howToggle(mode) {
         if (btnM) btnM.className = inact;
     }
 }
+// Landing mockup content (hero phone chat + fake dashboard) localized per
+// language — names, services, staff and statuses all match the visitor's
+// language so the demo feels native (Bane: "srpska imena za Srbe").
+const KV_MOCKUP_I18N = {
+    en: {
+        chat_sub: "Active · Mike's Barbershop", chat_q: 'Need a fade tomorrow,<br>around 3 PM?', chat_a: 'Done! Fade with Carlos,<br>tomorrow 3:00 PM ✓',
+        cal_t: 'Kaleya Calendar', cal_p: 'Fade · Tomorrow 3:00 PM · Carlos', cal_tag: '① Booking confirmed',
+        sms_t: 'SMS Sent', sms_p: '"Your cut is confirmed for tomorrow at 3pm. Reply YES to confirm."', sms_tag: '② Sent instantly',
+        side_main: 'Main', side_set: 'Settings', side_cal: 'Calendar', side_cli: 'Clients', side_srv: 'Services', side_log: 'Call log', side_pref: 'Preferences', side_msg: 'Messages',
+        dash_date: 'Today · Tuesday, May 19', dash_filter: 'Filter', dash_block: '+ Block time',
+        stat1: "Today's bookings", stat2: 'Calls answered', stat3: 'Revenue today', stat4: 'No-shows saved',
+        r1_init: 'MJ', r1_name: 'Maya Johnson', r1_svc: 'Gel Manicure', r1_time: '3:00 PM · Lena', r1_st: 'Confirmed',
+        r2_init: 'DR', r2_name: 'David Rodriguez', r2_svc: 'Fade + Beard', r2_time: '3:30 PM · Carlos', r2_st: 'Booked by AI',
+        r3_init: 'SL', r3_name: 'Sarah Lee', r3_svc: 'Balayage · 3h', r3_time: '4:00 PM · Anna', r3_st: 'Pending card',
+        r4_init: 'JM', r4_name: 'James Miller', r4_svc: '60-min Deep Tissue', r4_time: '5:30 PM · Sofia', r4_st: 'Confirmed',
+    },
+    sr: {
+        chat_sub: 'Aktivna · Frizerski salon Marko', chat_q: 'Treba mi fejd sutra,<br>oko 3 popodne?', chat_a: 'Može! Fejd kod Miloša,<br>sutra u 15:00 ✓',
+        cal_t: 'Kaleya kalendar', cal_p: 'Fejd · Sutra 15:00 · Miloš', cal_tag: '① Termin potvrđen',
+        sms_t: 'SMS poslat', sms_p: '„Vaš termin je potvrđen za sutra u 15h. Odgovorite DA za potvrdu.“', sms_tag: '② Poslato odmah',
+        side_main: 'Glavno', side_set: 'Podešavanja', side_cal: 'Kalendar', side_cli: 'Klijenti', side_srv: 'Usluge', side_log: 'Dnevnik poziva', side_pref: 'Postavke', side_msg: 'Poruke',
+        dash_date: 'Danas · utorak, 19. maj', dash_filter: 'Filter', dash_block: '+ Blokiraj vreme',
+        stat1: 'Današnji termini', stat2: 'Odgovoreni pozivi', stat3: 'Današnji prihod', stat4: 'Sprečeni nedolasci',
+        r1_init: 'MJ', r1_name: 'Milica Jovanović', r1_svc: 'Gel manikir', r1_time: '15:00 · Lena', r1_st: 'Potvrđeno',
+        r2_init: 'MP', r2_name: 'Marko Petrović', r2_svc: 'Fejd + brada', r2_time: '15:30 · Miloš', r2_st: 'Zakazala Kaleya',
+        r3_init: 'SI', r3_name: 'Sara Ilić', r3_svc: 'Balajaž · 3h', r3_time: '16:00 · Ana', r3_st: 'Čeka karticu',
+        r4_init: 'JM', r4_name: 'Jovan Milić', r4_svc: 'Masaža 60 min', r4_time: '17:30 · Sofija', r4_st: 'Potvrđeno',
+    },
+    es: {
+        chat_sub: 'Activa · Barbería de Diego', chat_q: '¿Un degradado mañana,<br>sobre las 3?', chat_a: '¡Listo! Degradado con Carlos,<br>mañana 15:00 ✓',
+        cal_t: 'Calendario Kaleya', cal_p: 'Degradado · Mañana 15:00 · Carlos', cal_tag: '① Cita confirmada',
+        sms_t: 'SMS enviado', sms_p: '"Tu corte está confirmado para mañana a las 15h. Responde SÍ para confirmar."', sms_tag: '② Enviado al instante',
+        side_main: 'Principal', side_set: 'Ajustes', side_cal: 'Calendario', side_cli: 'Clientes', side_srv: 'Servicios', side_log: 'Registro de llamadas', side_pref: 'Preferencias', side_msg: 'Mensajes',
+        dash_date: 'Hoy · martes 19 de mayo', dash_filter: 'Filtrar', dash_block: '+ Bloquear hora',
+        stat1: 'Citas de hoy', stat2: 'Llamadas atendidas', stat3: 'Ingresos de hoy', stat4: 'Ausencias evitadas',
+        r1_init: 'MG', r1_name: 'María García', r1_svc: 'Manicura de gel', r1_time: '15:00 · Lena', r1_st: 'Confirmada',
+        r2_init: 'DR', r2_name: 'Diego Ramírez', r2_svc: 'Degradado + barba', r2_time: '15:30 · Carlos', r2_st: 'Reservada por IA',
+        r3_init: 'SL', r3_name: 'Sofía López', r3_svc: 'Balayage · 3h', r3_time: '16:00 · Ana', r3_st: 'Pendiente tarjeta',
+        r4_init: 'JM', r4_name: 'Javier Moreno', r4_svc: 'Masaje 60 min', r4_time: '17:30 · Lucía', r4_st: 'Confirmada',
+    },
+    pt: {
+        chat_sub: 'Ativa · Barbearia do João', chat_q: 'Um degradê amanhã,<br>por volta das 15h?', chat_a: 'Feito! Degradê com o Carlos,<br>amanhã às 15:00 ✓',
+        cal_t: 'Calendário Kaleya', cal_p: 'Degradê · Amanhã 15:00 · Carlos', cal_tag: '① Marcação confirmada',
+        sms_t: 'SMS enviado', sms_p: '"O teu corte está confirmado para amanhã às 15h. Responde SIM para confirmar."', sms_tag: '② Enviado na hora',
+        side_main: 'Principal', side_set: 'Definições', side_cal: 'Calendário', side_cli: 'Clientes', side_srv: 'Serviços', side_log: 'Registo de chamadas', side_pref: 'Preferências', side_msg: 'Mensagens',
+        dash_date: 'Hoje · terça, 19 de maio', dash_filter: 'Filtrar', dash_block: '+ Bloquear horário',
+        stat1: 'Marcações de hoje', stat2: 'Chamadas atendidas', stat3: 'Receita de hoje', stat4: 'Faltas evitadas',
+        r1_init: 'MS', r1_name: 'Maria Santos', r1_svc: 'Manicure de gel', r1_time: '15:00 · Lena', r1_st: 'Confirmada',
+        r2_init: 'JP', r2_name: 'João Pereira', r2_svc: 'Degradê + barba', r2_time: '15:30 · Carlos', r2_st: 'Marcada pela IA',
+        r3_init: 'AS', r3_name: 'Ana Silva', r3_svc: 'Balayage · 3h', r3_time: '16:00 · Rita', r3_st: 'Cartão pendente',
+        r4_init: 'PC', r4_name: 'Pedro Costa', r4_svc: 'Massagem 60 min', r4_time: '17:30 · Sofia', r4_st: 'Confirmada',
+    },
+    ru: {
+        chat_sub: 'Активна · Барбершоп у Максима', chat_q: 'Нужен фейд завтра,<br>около 15:00?', chat_a: 'Готово! Фейд у Карлоса,<br>завтра в 15:00 ✓',
+        cal_t: 'Календарь Kaleya', cal_p: 'Фейд · Завтра 15:00 · Карлос', cal_tag: '① Запись подтверждена',
+        sms_t: 'SMS отправлено', sms_p: '«Ваша стрижка подтверждена на завтра в 15:00. Ответьте ДА для подтверждения.»', sms_tag: '② Отправлено мгновенно',
+        side_main: 'Главное', side_set: 'Настройки', side_cal: 'Календарь', side_cli: 'Клиенты', side_srv: 'Услуги', side_log: 'Журнал звонков', side_pref: 'Параметры', side_msg: 'Сообщения',
+        dash_date: 'Сегодня · вторник, 19 мая', dash_filter: 'Фильтр', dash_block: '+ Блокировать время',
+        stat1: 'Записей сегодня', stat2: 'Отвечено звонков', stat3: 'Выручка сегодня', stat4: 'Предотвращено неявок',
+        r1_init: 'АИ', r1_name: 'Анна Иванова', r1_svc: 'Гель-маникюр', r1_time: '15:00 · Лена', r1_st: 'Подтверждено',
+        r2_init: 'МП', r2_name: 'Максим Петров', r2_svc: 'Фейд + борода', r2_time: '15:30 · Карлос', r2_st: 'Записала ИИ',
+        r3_init: 'СЛ', r3_name: 'Светлана Лебедева', r3_svc: 'Балаяж · 3ч', r3_time: '16:00 · Аня', r3_st: 'Ожидает карту',
+        r4_init: 'ДМ', r4_name: 'Дмитрий Морозов', r4_svc: 'Массаж 60 мин', r4_time: '17:30 · София', r4_st: 'Подтверждено',
+    },
+    fr: {
+        chat_sub: 'Active · Barbier chez Hugo', chat_q: 'Un dégradé demain,<br>vers 15 h ?', chat_a: "C'est fait ! Dégradé avec Carlos,<br>demain 15h00 ✓",
+        cal_t: 'Calendrier Kaleya', cal_p: 'Dégradé · Demain 15h00 · Carlos', cal_tag: '① Rendez-vous confirmé',
+        sms_t: 'SMS envoyé', sms_p: '« Votre coupe est confirmée pour demain à 15 h. Répondez OUI pour confirmer. »', sms_tag: '② Envoyé instantanément',
+        side_main: 'Principal', side_set: 'Réglages', side_cal: 'Calendrier', side_cli: 'Clients', side_srv: 'Services', side_log: "Journal d'appels", side_pref: 'Préférences', side_msg: 'Messages',
+        dash_date: "Aujourd'hui · mardi 19 mai", dash_filter: 'Filtrer', dash_block: '+ Bloquer un créneau',
+        stat1: 'RDV du jour', stat2: 'Appels répondus', stat3: 'Revenu du jour', stat4: 'No-shows évités',
+        r1_init: 'MD', r1_name: 'Marie Dupont', r1_svc: 'Manucure gel', r1_time: '15h00 · Léna', r1_st: 'Confirmé',
+        r2_init: 'HL', r2_name: 'Hugo Laurent', r2_svc: 'Dégradé + barbe', r2_time: '15h30 · Carlos', r2_st: "Réservé par l'IA",
+        r3_init: 'CB', r3_name: 'Camille Bernard', r3_svc: 'Balayage · 3h', r3_time: '16h00 · Anna', r3_st: 'Carte en attente',
+        r4_init: 'LM', r4_name: 'Louis Martin', r4_svc: 'Massage 60 min', r4_time: '17h30 · Sofia', r4_st: 'Confirmé',
+    },
+    it: {
+        chat_sub: 'Attiva · Barberia da Luca', chat_q: 'Un fade domani,<br>verso le 15?', chat_a: 'Fatto! Fade con Carlos,<br>domani alle 15:00 ✓',
+        cal_t: 'Calendario Kaleya', cal_p: 'Fade · Domani 15:00 · Carlos', cal_tag: '① Prenotazione confermata',
+        sms_t: 'SMS inviato', sms_p: '"Il tuo taglio è confermato per domani alle 15. Rispondi SÌ per confermare."', sms_tag: "② Inviato all'istante",
+        side_main: 'Principale', side_set: 'Impostazioni', side_cal: 'Calendario', side_cli: 'Clienti', side_srv: 'Servizi', side_log: 'Registro chiamate', side_pref: 'Preferenze', side_msg: 'Messaggi',
+        dash_date: 'Oggi · martedì 19 maggio', dash_filter: 'Filtra', dash_block: '+ Blocca orario',
+        stat1: 'Prenotazioni di oggi', stat2: 'Chiamate risposte', stat3: 'Incasso di oggi', stat4: 'No-show evitati',
+        r1_init: 'GR', r1_name: 'Giulia Rossi', r1_svc: 'Manicure gel', r1_time: '15:00 · Lena', r1_st: 'Confermato',
+        r2_init: 'LB', r2_name: 'Luca Bianchi', r2_svc: 'Fade + barba', r2_time: '15:30 · Carlos', r2_st: "Prenotato dall'IA",
+        r3_init: 'SF', r3_name: 'Sara Ferrari', r3_svc: 'Balayage · 3h', r3_time: '16:00 · Anna', r3_st: 'Carta in attesa',
+        r4_init: 'MR', r4_name: 'Marco Romano', r4_svc: 'Massaggio 60 min', r4_time: '17:30 · Sofia', r4_st: 'Confermato',
+    },
+    de: {
+        chat_sub: 'Aktiv · Barbershop bei Lukas', chat_q: 'Brauche morgen einen Fade,<br>gegen 15 Uhr?', chat_a: 'Erledigt! Fade bei Carlos,<br>morgen 15:00 ✓',
+        cal_t: 'Kaleya Kalender', cal_p: 'Fade · Morgen 15:00 · Carlos', cal_tag: '① Termin bestätigt',
+        sms_t: 'SMS gesendet', sms_p: '„Dein Haarschnitt ist für morgen 15 Uhr bestätigt. Antworte mit JA zur Bestätigung.“', sms_tag: '② Sofort gesendet',
+        side_main: 'Haupt', side_set: 'Einstellungen', side_cal: 'Kalender', side_cli: 'Kunden', side_srv: 'Services', side_log: 'Anrufliste', side_pref: 'Präferenzen', side_msg: 'Nachrichten',
+        dash_date: 'Heute · Dienstag, 19. Mai', dash_filter: 'Filter', dash_block: '+ Zeit blockieren',
+        stat1: 'Heutige Termine', stat2: 'Beantwortete Anrufe', stat3: 'Umsatz heute', stat4: 'Verhinderte No-Shows',
+        r1_init: 'AS', r1_name: 'Anna Schneider', r1_svc: 'Gel-Maniküre', r1_time: '15:00 · Lena', r1_st: 'Bestätigt',
+        r2_init: 'LW', r2_name: 'Lukas Weber', r2_svc: 'Fade + Bart', r2_time: '15:30 · Carlos', r2_st: 'Von KI gebucht',
+        r3_init: 'SF', r3_name: 'Sophie Fischer', r3_svc: 'Balayage · 3 Std', r3_time: '16:00 · Anna', r3_st: 'Karte ausstehend',
+        r4_init: 'MM', r4_name: 'Max Müller', r4_svc: 'Massage 60 Min', r4_time: '17:30 · Sofia', r4_st: 'Bestätigt',
+    },
+};
+
+function applyLandingMockupLocale() {
+    const base = (currentLang || 'en').toLowerCase();
+    const d = KV_MOCKUP_I18N[base] || KV_MOCKUP_I18N[base.split('-')[0]] || KV_MOCKUP_I18N.en;
+    document.querySelectorAll('[data-mock]').forEach(el => {
+        const v = d[el.getAttribute('data-mock')];
+        if (v != null) el.textContent = v;
+    });
+    document.querySelectorAll('[data-mock-html]').forEach(el => {
+        const v = d[el.getAttribute('data-mock-html')];
+        if (v != null) el.innerHTML = v;
+    });
+}
+
 function howViewLocaleData() {
     const d = {
         sr: { names: ['Ana Jovanović','Marko Petrović','Nikola Ilić'], statuses: ['Zakazano','Potvrđeno','Na čekanju'] },
