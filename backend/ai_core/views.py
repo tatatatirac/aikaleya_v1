@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.utils import timezone
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
@@ -82,7 +84,13 @@ class AlarmEventViewSet(viewsets.ReadOnlyModelViewSet):
             return AlarmEvent.objects.none()
         qs = AlarmEvent.objects.filter(business_client=client)
         if self.request.query_params.get("include_dismissed") != "1":
-            qs = qs.filter(dismissed_at__isnull=True)
+            # Pending only: exclude already-played (delivered) and stale alarms,
+            # otherwise every page reload replays the whole history in a loop.
+            qs = qs.filter(
+                dismissed_at__isnull=True,
+                delivered_at__isnull=True,
+                created_at__gte=timezone.now() - timedelta(hours=2),
+            )
         return qs
 
     @action(detail=True, methods=["post"])
