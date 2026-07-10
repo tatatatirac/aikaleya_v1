@@ -66,6 +66,7 @@ TOOL_SCHEMAS = [
                 "date": {"type": "string", "description": "YYYY-MM-DD"},
                 "time": {"type": "string", "description": "24h HH:MM"},
                 "customer_name": {"type": "string", "description": "Customer's first name if known."},
+                "phone": {"type": "string", "description": "Customer's phone number (required on the web booking page — needed for the SMS reminder)."},
                 "staff_hint": {"type": "string"},
                 "reminder_minutes_before": {"type": "integer", "description": "How many minutes before the appointment to send the reminder. Default 60. Use 30 if the customer asked for 'pola sata ranije', etc."},
             },
@@ -161,7 +162,7 @@ def _post_json(url, payload, headers, timeout=45):
 
 def _payload_from_tool_input(tool_input, base_payload):
     payload = dict(base_payload or {})
-    for key in ("service_hint", "staff_hint", "customer_name"):
+    for key in ("service_hint", "staff_hint", "customer_name", "phone"):
         value = (tool_input.get(key) or "").strip()
         if value:
             payload[key] = value
@@ -319,6 +320,10 @@ def _build_system_prompt(business_client, channel, customer, caller_name, reply_
         if known_name
         else ""
     )
+    if channel == "web" and not known_name:
+        name_line += (
+            "- WEB BOOKING PAGE: this visitor is anonymous. Before calling book_appointment you MUST have their FIRST NAME and PHONE NUMBER — when a time is agreed, ask for both in ONE short question (e.g. 'Vaše ime i broj telefona za potvrdu?'), then call book_appointment with customer_name and phone. The phone is required for the SMS reminder — never book without it. Ask only once; accept any plausible phone format.\n"
+        )
     final_authority = (
         "\n# FINAL AUTHORITY (overrides every line above, including the salon default)\n"
         f"- The customer's current message is in {lang_name}. Reply ONLY in {lang_name}. If they switch language, switch with them.\n"

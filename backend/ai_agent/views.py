@@ -352,6 +352,53 @@ class PublicBrowserChatAPIView(APIView):
         return Response(result)
 
 
+class PublicBookingThrottle(PublicChatThrottle):
+    scope = "public_booking"
+
+
+class PublicBookingChatAPIView(APIView):
+    """Public per-salon booking chat — the real Kaleya agent scoped to one salon.
+
+    Powers the /book/<id>/ page: anonymous visitors talk to the salon's Kaleya,
+    which collects name + phone and books real appointments into its calendar.
+    """
+
+    permission_classes = (permissions.AllowAny,)
+    throttle_classes = (PublicBookingThrottle,)
+
+    def post(self, request, client_id):
+        from clients.models import BusinessClient
+
+        business_client = BusinessClient.objects.filter(id=client_id, kaleya_enabled=True).first()
+        if not business_client:
+            return Response({"detail": "Salon nije pronadjen."}, status=404)
+
+        text = (request.data.get("text") or "").strip()[:500]
+        thread = (request.data.get("thread") or "").strip()[:64]
+        if not text:
+            return Response({"detail": "Text is required."}, status=400)
+        if not thread or not thread.replace("-", "").isalnum():
+            return Response({"detail": "Thread id is required."}, status=400)
+
+        from ai_agent.services import handle_inbound_text
+
+        result = handle_inbound_text(
+            business_client,
+            text,
+            channel="web",
+            payload={"channel": "web"},
+            use_ai=True,
+            external_thread_id=f"webbook:{thread}",
+            record_messages=True,
+        )
+        return Response(
+            {
+                "reply": result.get("response_text", ""),
+                "booked": result.get("last_tool_status") == "booked",
+            }
+        )
+
+
 class ProviderStatusAPIView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 

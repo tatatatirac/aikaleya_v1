@@ -7,6 +7,7 @@ from ai_agent.views import (
     CustomerMemoryViewSet,
     InboundTextAPIView,
     ProviderStatusAPIView,
+    PublicBookingChatAPIView,
     PublicBrowserChatAPIView,
     PublicIntroSpeechAPIView,
     TextToSpeechAPIView,
@@ -26,4 +27,5 @@ urlpatterns = [
     path("voice-status/", VoiceStatusAPIView.as_view(), name="ai-agent-voice-status"),
     path("provider-status/", ProviderStatusAPIView.as_view(), name="ai-agent-provider-status"),
     path("public-browser-chat/", PublicBrowserChatAPIView.as_view(), name="ai-agent-public-browser-chat"),
+    path("public-booking/<int:client_id>/", PublicBookingChatAPIView.as_view(), name="ai-agent-public-booking"),
 ] + router.urls

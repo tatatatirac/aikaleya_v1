@@ -75,6 +75,27 @@ def demo_phone_number(request):
     return response
 
 
+def public_booking_page(request, client_id):
+    """Public per-salon booking page — a full-page Kaleya chat that really books."""
+    from django.shortcuts import render
+    from clients.models import BusinessClient
+
+    business_client = BusinessClient.objects.filter(id=client_id, kaleya_enabled=True).first()
+    if not business_client:
+        return redirect("/")
+    return no_cache_response(
+        render(
+            request,
+            "book.html",
+            {
+                "salon_name": business_client.public_name or business_client.name,
+                "client_id": business_client.id,
+                "salon_language": business_client.interface_language or business_client.language or "en",
+            },
+        )
+    )
+
+
 def no_cache_response(response):
     response["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     response["Pragma"] = "no-cache"
@@ -112,6 +133,7 @@ urlpatterns = [
     path("sw.js", no_cache_static_serve, {"path": "sw.js", "document_root": settings.PROJECT_ROOT / "frontend"}),
     path("robots.txt", no_cache_static_serve, {"path": "robots.txt", "document_root": settings.PROJECT_ROOT / "frontend"}),
     path("sitemap.xml", no_cache_static_serve, {"path": "sitemap.xml", "document_root": settings.PROJECT_ROOT / "frontend"}),
+    path("book/<int:client_id>/", public_booking_page, name="public-booking-page"),
     path("setup/", setup_account, name="account-setup"),
     path("forgot-password/", forgot_password, name="forgot-password"),
     path("dashboard/conversation/<int:conv_id>/messages/", dashboard_conversation_messages, name="dashboard-conv-messages"),

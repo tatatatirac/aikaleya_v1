@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="{{ salon_language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>{{ salon_name }} — Book with Kaleya</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #020617; color: #E2E8F0;
+            display: flex; flex-direction: column;
+        }
+        .hdr {
+            padding: 16px 20px; border-bottom: 1px solid #1E293B;
+            display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+        }
+        .hdr .dot { width: 10px; height: 10px; border-radius: 50%; background: #34D399; box-shadow: 0 0 0 4px rgba(52,211,153,.15); }
+        .hdr h1 { font-size: 17px; font-weight: 800; letter-spacing: -.01em; }
+        .hdr p { font-size: 12px; color: #64748B; }
+        .chat {
+            flex: 1; overflow-y: auto; padding: 20px 16px 8px;
+            display: flex; flex-direction: column; gap: 10px;
+            max-width: 680px; width: 100%; margin: 0 auto;
+        }
+        .msg { max-width: 82%; padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.45; white-space: pre-wrap; word-wrap: break-word; }
+        .msg.k { align-self: flex-start; background: #0F172A; border: 1px solid #1E293B; border-bottom-left-radius: 4px; }
+        .msg.u { align-self: flex-end; background: #0D9488; color: #fff; border-bottom-right-radius: 4px; }
+        .msg.ok {
+            align-self: center; background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.35);
+            color: #6EE7B7; font-weight: 600; text-align: center; border-radius: 14px; font-size: 14px;
+        }
+        .typing { align-self: flex-start; padding: 12px 16px; display: none; }
+        .typing.on { display: block; }
+        .typing span { display: inline-block; width: 7px; height: 7px; margin-right: 4px; border-radius: 50%; background: #475569; animation: tb 1.2s infinite; }
+        .typing span:nth-child(2) { animation-delay: .18s; } .typing span:nth-child(3) { animation-delay: .36s; }
+        @keyframes tb { 0%, 60%, 100% { transform: translateY(0); opacity: .4; } 30% { transform: translateY(-5px); opacity: 1; } }
+        .bar {
+            flex-shrink: 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+            border-top: 1px solid #1E293B; background: #020617;
+        }
+        .bar .in { display: flex; gap: 10px; max-width: 680px; margin: 0 auto; }
+        .bar input {
+            flex: 1; height: 48px; padding: 0 16px; border-radius: 14px;
+            background: #0F172A; border: 1px solid #1E293B; color: #E2E8F0; font-size: 15px; outline: none;
+        }
+        .bar input:focus { border-color: #0D9488; }
+        .bar button {
+            height: 48px; padding: 0 20px; border: none; border-radius: 14px; cursor: pointer;
+            background: #0D9488; color: #fff; font-size: 15px; font-weight: 700;
+        }
+        .bar button:disabled { opacity: .5; cursor: default; }
+        .powered { text-align: center; font-size: 11px; color: #334155; padding: 6px 0 10px; }
+        .powered a { color: #475569; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <header class="hdr">
+        <span class="dot"></span>
+        <div>
+            <h1>{{ salon_name }}</h1>
+            <p data-sr="Kaleya · odgovaram odmah" data-en="Kaleya · I reply instantly">Kaleya</p>
+        </div>
+    </header>
+
+    <main class="chat" id="chat">
+        <div class="msg k" id="hello"></div>
+        <div class="typing" id="typing"><span></span><span></span><span></span></div>
+    </main>
+
+    <div class="bar">
+        <div class="in">
+            <input id="txt" type="text" maxlength="500" autocomplete="off"
+                   data-sr="Napišite poruku — npr. „šišanje sutra u 3“" data-en='Type a message — e.g. "haircut tomorrow at 3"'>
+            <button id="send" data-sr="Pošalji" data-en="Send">Send</button>
+        </div>
+        <p class="powered"><a href="https://aikaleya.com" target="_blank" rel="noopener">powered by Kaleya AI</a></p>
+    </div>
+
+    <script>
+    (function () {
+        const CLIENT_ID = {{ client_id }};
+        const LANG = "{{ salon_language }}".toLowerCase().startsWith("sr") ? "sr" : "en";
+        const T = {
+            sr: {
+                hello: "Ćao! Ovde Kaleya iz salona {{ salon_name }}. Recite mi kad Vam odgovara pa da zakažemo termin.",
+                booked: "✓ Termin je zakazan — stiže Vam SMS podsetnik pre termina.",
+                err: "Ups, nešto je zapelo. Probajte ponovo za koji sekund.",
+            },
+            en: {
+                hello: "Hi! This is Kaleya at {{ salon_name }}. Tell me when works for you and I'll book you in.",
+                booked: "✓ Appointment booked — you'll get an SMS reminder before it.",
+                err: "Oops, something hiccuped. Please try again in a moment.",
+            },
+        };
+        document.querySelectorAll("[data-sr]").forEach(el => {
+            const v = LANG === "sr" ? el.getAttribute("data-sr") : el.getAttribute("data-en");
+            if (el.tagName === "INPUT") el.placeholder = v; else el.textContent = v;
+        });
+        document.getElementById("hello").textContent = T[LANG].hello;
+
+        let thread = localStorage.getItem("kaleya_book_thread_" + CLIENT_ID);
+        if (!thread) {
+            thread = Array.from(crypto.getRandomValues(new Uint8Array(12)), b => "abcdefghijklmnopqrstuvwxyz0123456789"[b % 36]).join("");
+            localStorage.setItem("kaleya_book_thread_" + CLIENT_ID, thread);
+        }
+
+        const chat = document.getElementById("chat");
+        const typing = document.getElementById("typing");
+        const input = document.getElementById("txt");
+        const send = document.getElementById("send");
+
+        function add(cls, text) {
+            const div = document.createElement("div");
+            div.className = "msg " + cls;
+            div.textContent = text;
+            chat.insertBefore(div, typing);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        async function submit() {
+            const text = input.value.trim();
+            if (!text || send.disabled) return;
+            input.value = "";
+            add("u", text);
+            send.disabled = true;
+            typing.classList.add("on");
+            chat.scrollTop = chat.scrollHeight;
+            try {
+                const res = await fetch("/api/ai-agent/public-booking/" + CLIENT_ID + "/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text: text, thread: thread }),
+                });
+                const data = await res.json();
+                typing.classList.remove("on");
+                if (!res.ok) { add("k", data.detail || T[LANG].err); return; }
+                if (data.reply) add("k", data.reply);
+                if (data.booked) add("ok", T[LANG].booked);
+            } catch (e) {
+                typing.classList.remove("on");
+                add("k", T[LANG].err);
+            } finally {
+                send.disabled = false;
+                input.focus();
+            }
+        }
+
+        send.addEventListener("click", submit);
+        input.addEventListener("keydown", e => { if (e.key === "Enter") submit(); });
+        input.focus();
+    })();
+    </script>
+</body>
+</html>
