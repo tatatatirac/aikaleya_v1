@@ -887,6 +887,20 @@
         .kv-footer-right a { color: #71717A; font-size: 13px; transition: color .2s; }
         .kv-footer-right a:hover { color: #A1A1AA; }
 
+        /* Floating back-to-top button */
+        #backToTop {
+            position: fixed; right: 22px; bottom: 24px; z-index: 40;
+            width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer;
+            background: #0D9488; color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 8px 24px rgba(13,148,136,.35);
+            opacity: 0; transform: translateY(14px); pointer-events: none;
+            transition: opacity .25s, transform .25s, background .2s;
+        }
+        #backToTop.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        #backToTop:hover { background: #0F766E; }
+        #backToTop svg { width: 20px; height: 20px; }
+
         /* Responsive */
         @media (max-width: 980px) {
             .kv-hero-split { grid-template-columns: 1fr; gap: 44px; }
@@ -10798,6 +10812,11 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     </div>
 </div>
 
+<!-- BACK TO TOP -->
+<button id="backToTop" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
 <!-- QR MODAL (booking link / channel links) -->
 <div id="qrModal" class="hidden fixed inset-0 z-[600] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this)closeQrModal()">
     <div class="bg-white rounded-3xl p-6 w-full max-w-[340px] text-center shadow-2xl">
@@ -10834,6 +10853,14 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     window.cookieConsent = cookieConsent;
     if (!localStorage.getItem('kaleya_cookie_consent')) {
         document.getElementById('cookieBanner').style.display = 'block';
+    }
+
+    // Back-to-top: show after scrolling down a bit
+    const backToTop = document.getElementById('backToTop');
+    if (backToTop) {
+        window.addEventListener('scroll', () => {
+            backToTop.classList.toggle('show', window.scrollY > 600);
+        }, { passive: true });
     }
 })();
 </script>
