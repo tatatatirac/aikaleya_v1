@@ -1035,7 +1035,7 @@
                             <svg class="sun w-4 h-4 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                             <svg class="moon w-4 h-4 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
                         </button>
-                        <button onclick="showView('login')" class="kv-login-link">Login</button>
+                        <button onclick="showView('login')" class="kv-login-link" data-i18n="nav_login">Login / Sign up</button>
                         <a href="#kv-pricing" class="kv-btn kv-btn-primary">Start Free 14-Day Trial</a>
                     </div>
                 </div>
@@ -1789,6 +1789,7 @@
                         <span class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></span>
                     </div>
                     <div id="googleSignInBtn" class="mt-4 flex justify-center"></div>
+                    <p class="mt-3 text-center text-[12px] text-slate-400" data-i18n="login_google_hint">Novi ste? Google dugme odmah pravi besplatan nalog.</p>
                     <p class="mt-6 text-center text-sm text-slate-500 dark:text-slate-500">
                         Forgot your password? <a href="/forgot-password/" class="text-teal-500 hover:text-teal-400 font-medium">Resend setup link →</a>
                     </p>
@@ -3145,7 +3146,7 @@ const BROWSER_LANG_MAP = { sr: 'sr-RS', en: 'en-US', es: 'es-ES', pt: 'pt-PT', r
 
 const T = {
     sr: {
-        nav_features: 'Funkcije', nav_how: 'Kako radi', nav_pricing: 'Cene', nav_login: 'Prijava',
+        nav_features: 'Funkcije', nav_how: 'Kako radi', nav_pricing: 'Cene', nav_login: 'Prijava / Registracija',
         trust_line1: 'Pravljeno za salone · Otkaži kad god želiš',
         trust_line2: 'Zakazuje preko Telegrama · WhatsApp, SMS i Instagram uskoro',
         banner_early1: 'Rani pristup', banner_early2: 'prvih', banner_early3: 'salona dobija', banner_early4: 'DOŽIVOTNIH 50% popusta', banner_early_cta: 'Rezerviši svoje mesto',
@@ -3185,7 +3186,7 @@ const T = {
         popular: 'NAJPOPULARNIJE', price_btn: 'Započni', price_btn2: 'Isprobaj besplatno — 14 dana', trial_btn: 'Isprobaj besplatno — 14 dana', price_contact: 'Kontakt',
         footer_privacy: 'Privatnost', footer_terms: 'Uslovi',
         booking_link_title: '🔗 Vaš javni link za zakazivanje', booking_link_desc: 'Podelite ga bilo gde (Google Maps, Instagram bio, QR kod) — mušterije razgovaraju sa Kaleyom i termin se sam upisuje u vaš kalendar.', booking_link_copy: 'Kopiraj', booking_link_copied: 'Kopirano ✓',
-        qr_btn: 'QR kod', qr_title: 'QR za zakazivanje', qr_download: 'Preuzmi', qr_close: 'Zatvori', qr_hint: 'Odštampajte i zalepite na vrata, ogledalo ili pult.', login_or: 'ili',
+        qr_btn: 'QR kod', qr_title: 'QR za zakazivanje', qr_download: 'Preuzmi', qr_close: 'Zatvori', qr_hint: 'Odštampajte i zalepite na vrata, ogledalo ili pult.', login_or: 'ili', login_google_hint: 'Novi ste? Google dugme odmah pravi besplatan nalog.',
         addons_eyebrow: 'Opcioni dodaci', addons_title: 'Razvij svoj salon', addons_sub: 'Dodaj usluge za rast uz bilo koji paket.', addon_website: 'Sajt salona', addon_website_d: 'Custom sajt sa ugrađenim Kaleya zakazivanjem.', addon_maps: 'Google Maps Boost', addon_maps_d: 'Bolje rangiranje na Google Mapama — Kaleya pravi recenzije.', addon_marketing: 'Marketing kampanje', addon_marketing_d: 'Promocije, rođendani i povratak mušterija preko SMS-a — odrađeno za vas.', addon_setup: 'Setup „uradimo umesto vas“', addon_setup_d: 'Sve podesimo umesto vas, bez muke.', addon_once: ' jednokratno', addon_best: 'Najbolja vrednost', addon_bundle: 'Growth paket — sajt + Maps Boost + marketing', addon_bundle_d: 'Sve da napunite stolice, jedna cena.', addons_note: 'Dodaci se aktiviraju kad krenete — samo pitajte.',
         back_home: 'Nazad', login_title: 'Dobrodošli nazad', login_sub: 'Prijavite se na Kaleya',
         email: 'Email', password: 'Lozinka', login_btn: 'Prijavi se', login_err: 'Pogrešan email ili lozinka',
@@ -3216,7 +3217,7 @@ const T = {
         alarm_log_title: 'Dnevnik alarma', alarm_log_empty: 'Još nema aktiviranih alarma.', hero_wake: 'hej Kaleya', sms_call: 'SMS/Poziv'
     },
     en: {
-        nav_features: 'Features', nav_how: 'How it works', nav_pricing: 'Pricing', nav_login: 'Login',
+        nav_features: 'Features', nav_how: 'How it works', nav_pricing: 'Pricing', nav_login: 'Login / Sign up',
         trust_line1: 'Built for salons · Cancel anytime',
         trust_line2: 'Books via Telegram · WhatsApp, SMS & Instagram coming soon',
         banner_early1: 'Early access', banner_early2: 'first', banner_early3: 'salons get', banner_early4: 'LIFETIME 50% off', banner_early_cta: 'Claim your spot',
@@ -3256,7 +3257,7 @@ const T = {
         popular: 'MOST POPULAR', price_btn: 'Start', price_btn2: 'Start Free 14-Day Trial', trial_btn: 'Start Free 14-Day Trial', price_contact: 'Contact',
         footer_privacy: 'Privacy', footer_terms: 'Terms',
         booking_link_title: '🔗 Your public booking link', booking_link_desc: 'Share it anywhere (Google Maps, Instagram bio, QR code) — customers chat with Kaleya and the appointment lands in your calendar.', booking_link_copy: 'Copy', booking_link_copied: 'Copied ✓',
-        qr_btn: 'QR code', qr_title: 'Booking QR', qr_download: 'Download', qr_close: 'Close', qr_hint: 'Print it and stick it on the door, mirror or front desk.', login_or: 'or',
+        qr_btn: 'QR code', qr_title: 'Booking QR', qr_download: 'Download', qr_close: 'Close', qr_hint: 'Print it and stick it on the door, mirror or front desk.', login_or: 'or', login_google_hint: 'New here? The Google button creates a free account instantly.',
         addons_eyebrow: 'Optional add-ons', addons_title: 'Grow your salon', addons_sub: 'Bolt extra growth services onto any plan.', addon_website: 'Salon website', addon_website_d: 'Custom site with Kaleya booking built in.', addon_maps: 'Google Maps Boost', addon_maps_d: 'Rank higher on Google Maps — Kaleya builds your reviews.', addon_marketing: 'Marketing campaigns', addon_marketing_d: 'Promos, birthdays & win-backs by SMS — done for you.', addon_setup: 'Done-for-you setup', addon_setup_d: 'We set everything up for you, hands off.', addon_once: ' one-time', addon_best: 'Best value', addon_bundle: 'Growth bundle — website + Maps Boost + marketing', addon_bundle_d: 'Everything to fill your chairs, one price.', addons_note: 'Add-ons activate after you start — just ask anytime.',
         back_home: 'Back', login_title: 'Welcome back', login_sub: 'Sign in to Kaleya',
         email: 'Email', password: 'Password', login_btn: 'Sign in', login_err: 'Wrong email or password',
@@ -3287,7 +3288,7 @@ const T = {
         alarm_log_title: 'Alarm log', alarm_log_empty: 'No alarms have been triggered yet.', hero_wake: 'hey Kaleya', sms_call: 'SMS/Call'
     },
     es: {
-        nav_features: 'Funciones', nav_how: 'Cómo funciona', nav_pricing: 'Precios', nav_login: 'Acceso',
+        nav_features: 'Funciones', nav_how: 'Cómo funciona', nav_pricing: 'Precios', nav_login: 'Acceso / Registro',
         trust_line1: 'Hecho para salones · Cancela cuando quieras',
         trust_line2: 'Reserva por Telegram · WhatsApp, SMS e Instagram muy pronto',
         banner_early1: 'Acceso anticipado', banner_early2: 'los primeros', banner_early3: 'salones obtienen', banner_early4: '50% DE POR VIDA', banner_early_cta: 'Reserva tu lugar',
@@ -3355,7 +3356,7 @@ const T = {
         alarm_log_title: 'Registro de alarmas', alarm_log_empty: 'Aún no hay alarmas activadas.', hero_wake: 'oye Kaleya', sms_call: 'SMS/Llamada'
     },
     pt: {
-        nav_features: 'Funcionalidades', nav_how: 'Como funciona', nav_pricing: 'Preços', nav_login: 'Entrar',
+        nav_features: 'Funcionalidades', nav_how: 'Como funciona', nav_pricing: 'Preços', nav_login: 'Entrar / Registar',
         trust_line1: 'Feito para salões · Cancela quando quiseres',
         trust_line2: 'Marca pelo Telegram · WhatsApp, SMS e Instagram em breve',
         banner_early1: 'Acesso antecipado', banner_early2: 'primeiros', banner_early3: 'salões recebem', banner_early4: '50% VITALÍCIO', banner_early_cta: 'Reserva o teu lugar',
@@ -3417,7 +3418,7 @@ const T = {
         alarm_log_title: 'Registro de alarmes', alarm_log_empty: 'Nenhum alarme foi ativado ainda.', hero_wake: 'ei Kaleya', sms_call: 'SMS/Ligação'
     },
     ru: {
-        nav_features: 'Функции', nav_how: 'Как работает', nav_pricing: 'Тарифы', nav_login: 'Вход',
+        nav_features: 'Функции', nav_how: 'Как работает', nav_pricing: 'Тарифы', nav_login: 'Вход / Регистрация',
         trust_line1: 'Создано для салонов · Отмена в любой момент',
         trust_line2: 'Запись через Telegram · WhatsApp, SMS и Instagram скоро',
         banner_early1: 'Ранний доступ', banner_early2: 'первые', banner_early3: 'салонов получают', banner_early4: 'СКИДКУ 50% НАВСЕГДА', banner_early_cta: 'Забронировать место',
@@ -3482,7 +3483,7 @@ const T = {
 
 T.fr = {
     ...T.en,
-    nav_features: 'Fonctionnalites', nav_how: 'Comment ca marche', nav_pricing: 'Tarifs', nav_login: 'Connexion',
+    nav_features: 'Fonctionnalites', nav_how: 'Comment ca marche', nav_pricing: 'Tarifs', nav_login: 'Connexion / Inscription',
     trust_line1: 'Conçu pour les salons · Annulez quand vous voulez',
     trust_line2: 'Prend RDV via Telegram · WhatsApp, SMS et Instagram bientôt',
     banner_early1: 'Accès anticipé', banner_early2: 'les premiers', banner_early3: 'salons obtiennent', banner_early4: '50% À VIE', banner_early_cta: 'Réservez votre place',
@@ -3532,7 +3533,7 @@ T.fr = {
 
 T.it = {
     ...T.en,
-    nav_features: 'Funzioni', nav_how: 'Come funziona', nav_pricing: 'Prezzi', nav_login: 'Login',
+    nav_features: 'Funzioni', nav_how: 'Come funziona', nav_pricing: 'Prezzi', nav_login: 'Accedi / Registrati',
     trust_line1: 'Pensato per i saloni · Cancella quando vuoi',
     trust_line2: 'Prenota via Telegram · WhatsApp, SMS e Instagram in arrivo',
     banner_early1: 'Accesso anticipato', banner_early2: 'primi', banner_early3: 'saloni ricevono', banner_early4: '50% A VITA', banner_early_cta: 'Prenota il tuo posto',
@@ -3657,7 +3658,7 @@ const EXTRA_TRANSLATIONS = {
     },
     de: {
         ...T.en,
-        nav_features: 'Funktionen', nav_how: 'So funktioniert es', nav_pricing: 'Preise', nav_login: 'Login',
+        nav_features: 'Funktionen', nav_how: 'So funktioniert es', nav_pricing: 'Preise', nav_login: 'Login / Registrierung',
         trust_line1: 'Gemacht für Salons · Jederzeit kündbar',
         trust_line2: 'Bucht über Telegram · WhatsApp, SMS & Instagram bald',
         banner_early1: 'Early Access', banner_early2: 'die ersten', banner_early3: 'Salons erhalten', banner_early4: '50% AUF LEBENSZEIT', banner_early_cta: 'Platz sichern',
@@ -5234,6 +5235,9 @@ function showView(view) {
         document.getElementById(v+'-view').classList.toggle('hidden', v !== view);
     });
     window.scrollTo(0,0);
+    // GIS button must be (re)rendered while the login view is VISIBLE —
+    // rendering into a hidden container leaves an invisible 0-size iframe.
+    if (view === 'login') { try { initGoogleSignIn(); } catch (e) {} }
     if (view === 'client') {
         applyEmployeeModeUI();
         // If employee opened the app in a browser (not installed PWA), show install wall
@@ -5644,15 +5648,15 @@ function initGoogleSignIn(attempt = 0) {
     const holder = document.getElementById('googleSignInBtn');
     if (!holder || !isBackendServed()) return;
     if (!(window.google && window.google.accounts && window.google.accounts.id)) {
-        if (attempt < 20) setTimeout(() => initGoogleSignIn(attempt + 1), 500);
+        if (attempt < 40) setTimeout(() => initGoogleSignIn(attempt + 1), 500);
         return;
     }
     try {
         google.accounts.id.initialize({ client_id: KALEYA_GOOGLE_CLIENT_ID, callback: onGoogleCredential });
+        holder.innerHTML = '';  // re-render fresh each time the login view opens
         google.accounts.id.renderButton(holder, { theme: 'outline', size: 'large', shape: 'pill', width: 320 });
     } catch (e) { console.warn('Google Sign-In init failed', e); }
 }
-initGoogleSignIn();
 
 async function backendLogin(email, password) {
     let response;
