@@ -99,6 +99,97 @@ class LogoutAPIView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class GoogleAuthAPIView(APIView):
+    """Sign in / sign up with a Google ID token (GIS button on the landing).
+
+    Existing account → logs in. Unknown email → creates a BROWSE-ONLY client
+    account (kaleya_enabled=False, no subscription): the owner can explore the
+    dashboard freely, but Kaleya activates only after checkout — the payment
+    webhook attaches the existing account and flips kaleya_enabled on.
+    """
+
+    permission_classes = (permissions.AllowAny,)
+    throttle_classes = (AuthRateThrottle,)
+
+    def post(self, request):
+        import json as _json
+        from urllib import error as urlerror, parse as urlparse, request as urlrequest
+
+        from django.conf import settings as dj_settings
+        from django.contrib.auth.models import User
+
+        credential = (request.data.get("credential") or "").strip()
+        if not credential:
+            return Response({"detail": "Google credential je obavezan."}, status=status.HTTP_400_BAD_REQUEST)
+        expected_client_id = dj_settings.KALEYA_GOOGLE_OAUTH_CLIENT_ID
+        if not expected_client_id:
+            return Response({"detail": "Google prijava nije konfigurisana."}, status=500)
+
+        # Google's tokeninfo endpoint validates the signature and expiry for us.
+        url = "https://oauth2.googleapis.com/tokeninfo?" + urlparse.urlencode({"id_token": credential})
+        try:
+            with urlrequest.urlopen(url, timeout=15) as resp:
+                info = _json.loads(resp.read().decode("utf-8"))
+        except urlerror.HTTPError:
+            return Response({"detail": "Google token nije validan."}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception:
+            return Response({"detail": "Google verifikacija trenutno nije dostupna."}, status=503)
+
+        if info.get("aud") != expected_client_id:
+            return Response({"detail": "Google token nije izdat za Kaleyu."}, status=status.HTTP_400_BAD_REQUEST)
+        if info.get("iss") not in ("accounts.google.com", "https://accounts.google.com"):
+            return Response({"detail": "Google token nije validan."}, status=status.HTTP_400_BAD_REQUEST)
+        email = (info.get("email") or "").strip().lower()
+        if not email or info.get("email_verified") not in (True, "true"):
+            return Response({"detail": "Google email nije verifikovan."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = (
+            User.objects.filter(email__iexact=email).first()
+            or User.objects.filter(username__iexact=email).first()
+        )
+        created = False
+        if not user:
+            from django.contrib.auth.hashers import make_password
+            from django.db import transaction
+
+            from clients.models import BusinessClient, ClientApiSettings
+
+            with transaction.atomic():
+                user = User.objects.create(
+                    username=email,
+                    email=email,
+                    first_name=(info.get("given_name") or "")[:30],
+                    last_name=(info.get("family_name") or "")[:150],
+                    # No password — they authenticate via Google (or set one later
+                    # through the forgot-password flow).
+                    password=make_password(None),
+                )
+                user.profile.role = "client"
+                user.profile.save(update_fields=["role", "updated_at"])
+                business_client = BusinessClient.objects.create(
+                    owner=user,
+                    name=(info.get("name") or email)[:160],
+                    public_name=(info.get("name") or email)[:160],
+                    package="basic",
+                    language="en",
+                    interface_language="en",
+                    voice_language="en",
+                    timezone="Europe/Belgrade",
+                    kaleya_enabled=False,  # browse-only until they pay
+                )
+                user.profile.business_client = business_client
+                user.profile.save(update_fields=["business_client", "updated_at"])
+                ClientApiSettings.objects.get_or_create(business_client=business_client)
+            created = True
+
+        if not user.is_active:
+            return Response({"detail": "Nalog je deaktiviran."}, status=403)
+
+        django_login(request._request, user)
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({"token": token.key, "user": UserSerializer(user).data, "created": created})
+
+
 class OnboardingCompleteAPIView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 

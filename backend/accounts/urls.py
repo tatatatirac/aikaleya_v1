@@ -4,6 +4,7 @@ from accounts.views import (
     GdprCancelDeleteAPIView,
     GdprDeleteAccountAPIView,
     GdprExportAPIView,
+    GoogleAuthAPIView,
     LoginAPIView,
     LogoutAPIView,
     MeAPIView,
@@ -14,6 +15,7 @@ from accounts.views import (
 
 urlpatterns = [
     path("login/", LoginAPIView.as_view(), name="login"),
+    path("google/", GoogleAuthAPIView.as_view(), name="google-auth"),
     path("register-client/", RegisterClientAPIView.as_view(), name="register-client"),
     path("me/", MeAPIView.as_view(), name="me"),
     path("logout/", LogoutAPIView.as_view(), name="logout"),

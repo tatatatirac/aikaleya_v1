@@ -182,11 +182,21 @@ class CheckoutSessionViewSet(viewsets.ModelViewSet):
         plan = Plan.objects.filter(code=db_plan_code, active=True).first()
         if not plan:
             return Response({"detail": "Paket nije pronadjen."}, status=status.HTTP_400_BAD_REQUEST)
-        if payload.get("email") and (
-            User.objects.filter(email__iexact=payload.get("email", "")).exists()
-            or User.objects.filter(username__iexact=payload.get("email", "")).exists()
-        ):
-            return Response({"email": ["Nalog sa ovim emailom vec postoji."]}, status=status.HTTP_400_BAD_REQUEST)
+        if payload.get("email"):
+            existing_user = (
+                User.objects.filter(email__iexact=payload.get("email", "")).first()
+                or User.objects.filter(username__iexact=payload.get("email", "")).first()
+            )
+            # Browse-only accounts (e.g. Google sign-up, no subscription yet) MAY
+            # check out — the webhook attaches and activates their existing client.
+            # Only block emails that already have an active subscription.
+            if existing_user and Subscription.objects.filter(
+                business_client__owner=existing_user, status=Subscription.STATUS_ACTIVE
+            ).exists():
+                return Response(
+                    {"email": ["Nalog sa ovim emailom vec ima aktivnu pretplatu."]},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         metadata = {
             "plan_code": db_plan_code,
